@@ -1,0 +1,33 @@
+# KOBIS 실호출 점검 — 수동 실행 전용 (기본 CI 게이트 아님).
+# 저장소 Secrets에 KOBIS_API_KEY가 설정된 경우에만 의미 있게 동작한다.
+name: KOBIS sync check (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: '박스오피스 대상 날짜 (YYYYMMDD, 기본: 이틀 전)'
+        required: false
+
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run db:seed
+      - name: KOBIS dry-run
+        env:
+          KOBIS_API_KEY: ${{ secrets.KOBIS_API_KEY }}
+        run: |
+          if [ -z "$KOBIS_API_KEY" ]; then
+            echo "::warning::KOBIS_API_KEY secret 미설정 — 실호출 점검을 건너뜁니다."
+            exit 0
+          fi
+          TARGET="${{ inputs.date }}"
+          if [ -z "$TARGET" ]; then TARGET=$(date -d '2 days ago' +%Y%m%d); fi
+          npm run sync:kobis -- --date="$TARGET" --dry-run

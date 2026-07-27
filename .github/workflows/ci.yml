@@ -5,9 +5,22 @@ on:
     branches: [main]
   pull_request:
 
+# 실제 KOBIS 키 없이 통과해야 한다 — 외부 API 실호출은 기본 게이트에 포함하지 않는다.
+# (실호출 점검은 수동 실행 워크플로 kobis-sync-check.yml 참고)
 jobs:
+  secret-scan:
+    name: secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 전체 이력 검사
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   quality:
-    name: lint · typecheck · unit test · build
+    name: lint · typecheck · migration · unit test · build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,12 +31,13 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
-      - run: npm run db:seed
-      - run: npm test
+      - run: npm run db:seed # 시드 + 마이그레이션
+      - run: npm run db:migrate # 재실행 멱등성 검증
+      - run: npm test # KOBIS fixture·통합·관리자 API 포함 (외부 호출 없음)
       - run: npm run build
 
   e2e:
-    name: Playwright E2E
+    name: Playwright E2E (admin + user flow)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -33,9 +47,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: npm run db:seed
       - run: npm run build
-      - run: npx playwright test
+      - run: npx playwright test # DB는 global-setup이 test-results/e2e.db로 격리 생성
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

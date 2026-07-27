@@ -24,6 +24,9 @@ interface CandidateRow {
   lng: number;
   loc_status: string;
   transit_note: string | null;
+  is_synthetic: number;
+  booking_url: string | null;
+  verified_at: string | null;
   projector: string | null;
   screen: string | null;
   sound: string | null;
@@ -97,6 +100,9 @@ function toCandidate(r: CandidateRow): CandidateShowtime {
     entryMethod: r.entry_method,
     dataCheckedAt: r.data_checked_at,
     showtimeInfoStatus: r.st_status,
+    isSynthetic: Boolean(r.is_synthetic),
+    bookingUrl: r.booking_url,
+    verifiedAt: r.verified_at,
     auditorium: {
       id: r.aud_id,
       no: r.auditorium_no,
@@ -123,6 +129,7 @@ export const showtimeRepository = {
       .prepare(
         `SELECT st.id, st.movie_id, st.starts_at, st.ends_at_est, st.format, st.language,
                 st.price_adult, st.entry_method, st.data_checked_at, st.info_status AS st_status,
+                st.is_synthetic, st.booking_url, st.verified_at,
                 a.id AS aud_id, a.auditorium_no, a.brand, a.seat_count, a.status AS aud_status,
                 l.id AS loc_id, l.chain, l.name AS loc_name, l.lat, l.lng,
                 l.status AS loc_status, l.transit_note,
@@ -135,10 +142,21 @@ export const showtimeRepository = {
          JOIN cinema_locations l ON l.id = a.location_id
          LEFT JOIN auditorium_specs sp ON sp.auditorium_id = a.id AND sp.valid_to IS NULL
          LEFT JOIN sources ssrc ON ssrc.id = sp.source_id
-         WHERE st.movie_id = ? AND date(st.starts_at) = ?
+         WHERE st.movie_id = ? AND date(st.starts_at, '+9 hours') = ? AND st.status = 'active'
          ORDER BY st.starts_at`,
       )
       .all(movieId, date) as unknown as CandidateRow[];
     return rows.map(toCandidate);
+  },
+
+  /** 활성 회차가 있는 날짜 목록 (Asia/Seoul 기준, 오름차순) */
+  listActiveDates(movieId: number): string[] {
+    const rows = getDb()
+      .prepare(
+        `SELECT DISTINCT date(starts_at, '+9 hours') AS d FROM showtimes
+         WHERE movie_id = ? AND status = 'active' ORDER BY d`,
+      )
+      .all(movieId) as unknown as { d: string }[];
+    return rows.map((r) => r.d);
   },
 };

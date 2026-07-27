@@ -66,6 +66,9 @@ export function makeCandidate(overrides: {
     entryMethod: 'manual',
     dataCheckedAt: '2026-07-27T12:00:00+09:00',
     showtimeInfoStatus: 'estimated',
+    isSynthetic: true,
+    bookingUrl: null,
+    verifiedAt: null,
     auditorium: {
       id,
       no: `${id}관`,

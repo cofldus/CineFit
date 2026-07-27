@@ -75,8 +75,26 @@ export function RecommendCard({
       <p className="sub" style={{ margin: '4px 0 0' }}>
         관 사양 확인일 {spec ? spec.observedAt.slice(0, 10) : '정보 없음'}
         {spec ? <TrustBadge status={spec.infoStatus} /> : null} · 회차 확인일{' '}
-        {c.dataCheckedAt.slice(0, 10)} <span className="badge badge-mid">≈ 검증용 합성 회차</span>
+        {(c.verifiedAt ?? c.dataCheckedAt).slice(0, 10)}{' '}
+        {c.isSynthetic ? (
+          <span className="badge badge-mid">≈ 검증용 합성 회차</span>
+        ) : (
+          <span className="badge badge-high">✔ 관리자 확인 회차</span>
+        )}
       </p>
+
+      {c.bookingUrl && !c.isSynthetic ? (
+        <p style={{ margin: '10px 0 0' }}>
+          <a
+            className="btn btn-primary btn-block"
+            href={c.bookingUrl}
+            target="_blank"
+            rel="noopener noreferrer nofollow"
+          >
+            공식 예매 페이지로 이동 ↗
+          </a>
+        </p>
+      ) : null}
 
       <details className="expand">
         <summary>점수 상세·근거 출처 보기</summary>

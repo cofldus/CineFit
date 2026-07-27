@@ -34,10 +34,20 @@ export function getRecommendations(input: RecommendationInput): RecommendationSe
   if (!movie) return { ok: false, error: 'movie_not_found' };
 
   const request = toDomainRequest(input);
-  const candidates = showtimeRepository.listCandidates(movie.id, request.date);
+  const all = showtimeRepository.listCandidates(movie.id, request.date);
+
+  // 관리자 확인(비합성) 회차가 있으면 기본 추천에서 합성 회차 제외.
+  // CINEFIT_ALLOW_SYNTHETIC=true(개발·데모)일 때만 함께 노출.
+  const verified = all.filter((c) => !c.isSynthetic);
+  const allowSynthetic = process.env.CINEFIT_ALLOW_SYNTHETIC === 'true';
+  const candidates = verified.length > 0 && !allowSynthetic ? verified : all;
 
   const started = performance.now();
   const result = recommend({ movie, candidates, request, now: DEMO_NOW });
+  result.dataMode = {
+    usedSynthetic: candidates.some((c) => c.isSynthetic),
+    syntheticSuppressed: all.length - candidates.length,
+  };
   recommendationRepository.saveRun(result, Math.round(performance.now() - started));
 
   return { ok: true, result };

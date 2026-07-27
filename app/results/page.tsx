@@ -50,9 +50,19 @@ export default async function ResultsPage({
         {result.request.maxPrice.toLocaleString('ko-KR')}원 — 후보 {result.totalCandidates}회차 중
         하드 필터 통과 {result.scored.length}
       </p>
-      <p className="notice" role="note">
-        ⚠️ 회차·가격은 검증용 합성 데이터입니다. 각 카드의 출처·확인일·상태 배지를 확인하세요.
-      </p>
+      {result.dataMode?.usedSynthetic ? (
+        <p className="notice" role="note">
+          ⚠️ 이 결과의 회차·가격은 <strong>검증용 합성 데이터</strong>입니다(실제 예매 불가). 각
+          카드의 출처·확인일·상태 배지를 확인하세요.
+        </p>
+      ) : (
+        <p className="notice" role="note" style={{ borderColor: 'var(--trust-high)' }}>
+          ✔ 관리자가 공식 예매 페이지에서 확인한 회차 기준입니다.
+          {result.dataMode && result.dataMode.syntheticSuppressed > 0
+            ? ` (검증용 합성 회차 ${result.dataMode.syntheticSuppressed}건은 제외됨)`
+            : ''}
+        </p>
+      )}
 
       {result.picks.length === 0 ? (
         <div className="card" role="alert" data-testid="empty-state">

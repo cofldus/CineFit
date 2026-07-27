@@ -2,10 +2,10 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { DEMO_DATE, ORIGIN_PRESETS } from '../src/data/constants';
+import { ORIGIN_PRESETS } from '../src/data/constants';
 
 // 기본값이 채워져 있어 그대로 제출해도 추천을 받을 수 있다 (요구사항: 전부 입력 불필요)
-export function RecommendForm({ movieId }: { movieId: number }) {
+export function RecommendForm({ movieId, defaultDate }: { movieId: number; defaultDate: string }) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
 
@@ -15,7 +15,7 @@ export function RecommendForm({ movieId }: { movieId: number }) {
     const fd = new FormData(e.currentTarget);
     const qs = new URLSearchParams({
       movieId: String(movieId),
-      date: DEMO_DATE,
+      date: String(fd.get('date')),
       originId: String(fd.get('originId')),
       maxTravelMinutes: String(fd.get('maxTravelMinutes')),
       maxPrice: String(fd.get('maxPrice')),
@@ -34,6 +34,11 @@ export function RecommendForm({ movieId }: { movieId: number }) {
 
   return (
     <form onSubmit={onSubmit} aria-label="추천 조건 입력">
+      <label className="field">
+        <span>관람 날짜</span>
+        <input type="date" name="date" defaultValue={defaultDate} required />
+      </label>
+
       <label className="field">
         <span>출발 위치</span>
         <select name="originId" defaultValue="cityhall">

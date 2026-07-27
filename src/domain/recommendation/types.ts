@@ -72,6 +72,9 @@ export interface CandidateShowtime {
   entryMethod: string;
   dataCheckedAt: string;
   showtimeInfoStatus: InfoStatus;
+  isSynthetic: boolean; // 검증용 합성 회차 여부 — 화면에서 관리자 확인 회차와 구분 표기
+  bookingUrl: string | null; // 공식 예매 딥링크
+  verifiedAt: string | null; // 관리자 확인 시각
   auditorium: {
     id: number;
     no: string;
@@ -158,4 +161,9 @@ export interface RecommendationResult {
   excluded: ExcludedCandidate[];
   picks: { label: PickLabel; scored: ScoredCandidate }[];
   scored: ScoredCandidate[];
+  /** 데이터 구분: 관리자 확인 회차가 있으면 합성 회차는 기본 제외된다 (서비스 계층에서 설정) */
+  dataMode?: {
+    usedSynthetic: boolean;
+    syntheticSuppressed: number; // 검증 회차 우선으로 제외된 합성 회차 수
+  };
 }

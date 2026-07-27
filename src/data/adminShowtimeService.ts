@@ -3,6 +3,7 @@
 import { getDb } from './db';
 import { cinemaRepository } from './cinemaRepository';
 import { movieRepository } from './movieRepository';
+import { getAppClock } from '../lib/clock';
 import type { AdminShowtimeInput } from '../lib/adminValidation';
 
 export interface AdminServiceOptions {
@@ -89,7 +90,7 @@ export function validateShowtime(
   opts: AdminServiceOptions & { excludeShowtimeId?: number } = {},
 ): { errors: string[]; warnings: string[]; needsMismatchNote: boolean; starts?: Date; ends?: Date } {
   const db = getDb();
-  const now = opts.now?.() ?? new Date();
+  const now = opts.now?.() ?? getAppClock().now();
   const errors: string[] = [];
   const warnings: string[] = [];
   let needsMismatchNote = false;
@@ -152,7 +153,7 @@ export function createShowtime(
   if (v.errors.length) return { ok: false, errors: v.errors, needsMismatchNote: v.needsMismatchNote };
 
   const db = getDb();
-  const now = (opts.now?.() ?? new Date()).toISOString();
+  const now = (opts.now?.() ?? getAppClock().now()).toISOString();
   const id = Number(
     db
       .prepare(
@@ -201,7 +202,7 @@ export function updateShowtime(
   const v = validateShowtime(input, { ...opts, excludeShowtimeId: id });
   if (v.errors.length) return { ok: false, errors: v.errors, needsMismatchNote: v.needsMismatchNote };
 
-  const now = (opts.now?.() ?? new Date()).toISOString();
+  const now = (opts.now?.() ?? getAppClock().now()).toISOString();
   db.prepare(
     `UPDATE showtimes SET movie_id=?, auditorium_id=?, starts_at=?, ends_at_est=?, format=?, is_3d=?,
        language=?, price_adult=?, booking_url=?, data_checked_at=?, info_status=?, status=?,

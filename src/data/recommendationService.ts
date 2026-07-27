@@ -1,7 +1,8 @@
 import { recommend } from '../domain/recommendation/engine';
 import type { RecommendationRequest, RecommendationResult } from '../domain/recommendation/types';
+import { getAppClock } from '../lib/clock';
 import type { RecommendationInput } from '../lib/validation';
-import { DEMO_NOW, ORIGIN_PRESETS } from './constants';
+import { ORIGIN_PRESETS } from './constants';
 import { movieRepository } from './movieRepository';
 import { recommendationRepository } from './recommendationRepository';
 import { showtimeRepository } from './showtimeRepository';
@@ -43,7 +44,7 @@ export function getRecommendations(input: RecommendationInput): RecommendationSe
   const candidates = verified.length > 0 && !allowSynthetic ? verified : all;
 
   const started = performance.now();
-  const result = recommend({ movie, candidates, request, now: DEMO_NOW });
+  const result = recommend({ movie, candidates, request, now: getAppClock().now() });
   result.dataMode = {
     usedSynthetic: candidates.some((c) => c.isSynthetic),
     syntheticSuppressed: all.length - candidates.length,

@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { RecommendForm } from '../../../components/RecommendForm';
 import { TrustBadge } from '../../../components/TrustBadge';
 import { DEMO_DATE } from '../../../src/data/constants';
+import { getAppClock, seoulDateString } from '../../../src/lib/clock';
 import { movieRepository } from '../../../src/data/movieRepository';
 import { showtimeRepository } from '../../../src/data/showtimeRepository';
 import { formatSpecValue, keySpecEntries, SPEC_KEY_LABELS } from '../../../src/lib/display';
@@ -17,7 +18,7 @@ export default async function RecommendPage({ params }: { params: Promise<{ movi
   if (!movie) notFound();
 
   // 기본 관람 날짜: 오늘(Asia/Seoul) 이후 활성 회차가 있는 가장 가까운 날짜, 없으면 데모 날짜
-  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(new Date());
+  const today = seoulDateString(getAppClock().now());
   const dates = showtimeRepository.listActiveDates(movie.id);
   const defaultDate = dates.find((d) => d >= today) ?? dates.at(-1) ?? DEMO_DATE;
 

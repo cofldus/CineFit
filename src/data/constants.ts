@@ -1,9 +1,6 @@
 // 합성 시드가 회차를 갖는 날짜 (spikes/minimal-db/seed.mjs 와 동기)
+// 기준 시각은 src/lib/clock.ts(getAppClock)가 담당한다 — DEMO_NOW 고정값은 제거됨.
 export const DEMO_DATE = '2026-07-28';
-
-// 최신성 계산 기준 시각 — 합성 시드의 확인일과 정합되도록 고정.
-// 실데이터 연동 시 new Date()로 교체한다.
-export const DEMO_NOW = new Date('2026-07-27T12:00:00+09:00');
 
 // 출발 위치 프리셋 (정확 좌표 수집 대신 지역 프리셋 — 문서 05 §2 위치 축소 원칙)
 export const ORIGIN_PRESETS = [

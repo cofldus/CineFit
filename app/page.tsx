@@ -1,6 +1,20 @@
 import Link from 'next/link';
+import { DbNotSeededError } from '../src/data/db';
+import { movieRepository } from '../src/data/movieRepository';
+import type { MovieWithSpecs } from '../src/domain/recommendation/types';
+
+export const dynamic = 'force-dynamic';
 
 export default function HomePage() {
+  let movies: MovieWithSpecs[] = [];
+  let dbMissing = false;
+  try {
+    movies = movieRepository.list();
+  } catch (e) {
+    if (e instanceof DbNotSeededError) dbMissing = true;
+    else throw e;
+  }
+
   return (
     <main>
       <h1>
@@ -15,9 +29,33 @@ export default function HomePage() {
         이며 실제 상영 정보가 아닙니다. 상영관 사양은 조사 자료 기반이며 항목별 출처·확인일을 함께
         표시합니다.
       </p>
-      <Link href="/movies" className="btn btn-primary btn-block">
-        추천 시작하기
-      </Link>
+
+      {dbMissing ? (
+        <div className="card">
+          <h3 style={{ marginTop: 0 }}>데이터베이스가 아직 없습니다</h3>
+          <p className="sub">
+            터미널에서 <code>npm run db:seed</code>를 실행한 뒤 새로고침해 주세요.
+          </p>
+        </div>
+      ) : (
+        <>
+          <section className="card" aria-label="추천 가능한 영화">
+            <h3 style={{ marginTop: 0 }}>지금 추천받을 수 있는 영화</h3>
+            <ul className="plain">
+              {movies.map((m) => (
+                <li key={m.id}>
+                  <Link href={`/recommend/${m.id}`}>
+                    {m.title} <span className="sub">({m.releaseYear})</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+          <Link href="/movies" className="btn btn-primary btn-block">
+            추천 시작하기
+          </Link>
+        </>
+      )}
     </main>
   );
 }

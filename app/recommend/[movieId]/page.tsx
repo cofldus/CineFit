@@ -23,23 +23,28 @@ export default async function RecommendPage({ params }: { params: Promise<{ movi
   const defaultDate = dates.find((d) => d >= today) ?? dates.at(-1) ?? DEMO_DATE;
 
   return (
-    <main>
-      <h1>추천 조건</h1>
-      <section className="card" aria-label="선택한 영화">
-        <h3 style={{ marginTop: 0 }}>
-          {movie.title} <span className="sub">({movie.releaseYear})</span>
+    <main className="mx-auto max-w-xl px-4 pb-24 pt-6">
+      <h1 className="text-2xl font-extrabold text-text">어떤 조건을 원하세요?</h1>
+      <p className="mt-1 text-sm text-text-sub">아래 조건에 맞는 상영관을 찾아드릴게요.</p>
+
+      <section className="mt-4 rounded-card-lg border border-border bg-surface p-4" aria-label="선택한 영화">
+        <h3 className="m-0 text-lg font-bold text-text">
+          {movie.title} <span className="font-normal text-text-sub">({movie.releaseYear})</span>
         </h3>
-        <ul className="plain" style={{ fontSize: 14 }}>
+        <ul className="m-0 mt-2 flex list-none flex-col gap-1.5 p-0">
           {keySpecEntries(movie).map(({ key, spec }) => (
-            <li key={key} className="row">
-              <span className="sub">{SPEC_KEY_LABELS[key]}</span>
-              <strong>{formatSpecValue(key, spec)}</strong>
+            <li key={key} className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+              <span className="text-text-sub">{SPEC_KEY_LABELS[key]}</span>
+              <strong className="font-semibold text-text">{formatSpecValue(key, spec)}</strong>
               <TrustBadge status={spec.infoStatus} observedAt={spec.observedAt} />
             </li>
           ))}
         </ul>
       </section>
-      <RecommendForm movieId={movie.id} defaultDate={defaultDate} />
+
+      <div className="mt-5">
+        <RecommendForm movieId={movie.id} defaultDate={defaultDate} />
+      </div>
     </main>
   );
 }

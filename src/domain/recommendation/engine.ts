@@ -1,7 +1,7 @@
 // 추천 엔진 — 문서 05 파이프라인의 순수 함수 구현 (DB·UI 비의존, now 주입으로 결정적)
 // 하드 필터 → 축 점수 → 신뢰도·최신성 보정 → 브랜드 가산 차단 → 다양성 선택 → 설명 생성
 import { estimateTravelMinutes } from '../../lib/geo';
-import { FORMAT_LABELS, VERIFIED_STATUSES, WEIGHT_PRESETS } from './presets';
+import { FORMAT_LABELS, INFO_STATUS_LABELS, VERIFIED_STATUSES, WEIGHT_PRESETS } from './presets';
 import { suggestSeatZone } from './seatZone';
 import type {
   CandidateShowtime,
@@ -104,7 +104,9 @@ export function scoreCandidate(
       pros.push(`${ar.value}:1 확장 화면비 확인 (${ar.sourceName ?? '출처 없음'})`);
     } else if (ar) {
       ffm += 0.1;
-      uncertainties.push(`IMAX 확장 화면비 미검증(${ar.infoStatus}) — 확인되면 순위가 바뀔 수 있음`);
+      uncertainties.push(
+        `IMAX 확장 화면비 미검증(${INFO_STATUS_LABELS[ar.infoStatus] ?? ar.infoStatus}) — 확인되면 순위가 바뀔 수 있음`,
+      );
     } else {
       uncertainties.push('IMAX 확장 화면비 정보 없음');
     }
@@ -127,7 +129,7 @@ export function scoreCandidate(
       pros.push('IMAX 사운드 믹스 확인');
     } else if (im?.value) {
       ffm += 0.05;
-      uncertainties.push(`IMAX 사운드 믹스 미검증(${im.infoStatus})`);
+      uncertainties.push(`IMAX 사운드 믹스 미검증(${INFO_STATUS_LABELS[im.infoStatus] ?? im.infoStatus})`);
     }
     if (spec.genre_spectacle?.value) {
       cite('시각 스펙터클 장르 가중', spec.genre_spectacle);

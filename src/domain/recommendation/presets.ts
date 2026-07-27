@@ -21,15 +21,16 @@ export const FORMAT_LABELS: Record<string, string> = {
   standard: '일반',
 };
 
+// 사용자에게는 쉬운 말로 노출 — 원래 상태 값(official 등)은 내부 로직에서만 사용 (docs/09 §1.3)
 export const INFO_STATUS_LABELS: Record<string, string> = {
   official: '공식 확인',
-  multi_source: '복수 출처',
+  multi_source: '여러 출처 확인',
   user_report: '사용자 제보',
-  single_unverified: '단일 출처 미확인',
-  estimated: '추정',
-  rumor: '소문',
+  single_unverified: '출처 1곳(미확인)',
+  estimated: '추정치',
+  rumor: '확인 안 됨',
   outdated: '오래된 정보',
-  conflict: '출처 충돌',
+  conflict: '정보 엇갈림',
 };
 
 // 검증된 사양으로 인정하는 등급 (문서 05 §4.1)

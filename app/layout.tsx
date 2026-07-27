@@ -20,14 +20,29 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko">
       <body>
-        <header className="site-header">
-          <div className="inner">
-            <Link href="/" className="brand" aria-label="CineFit 홈">
-              Cine<em>Fit</em> <span className="sub">시네핏</span>
+        <header className="sticky top-0 z-40 border-b border-border bg-surface/85 backdrop-blur-md">
+          <div className="mx-auto flex max-w-xl items-center justify-between px-4 py-3">
+            <Link
+              href="/"
+              className="inline-flex min-h-11 items-center gap-1.5 text-lg font-extrabold tracking-tight text-text"
+              aria-label="CineFit 홈"
+            >
+              <span className="inline-block h-2 w-2 rounded-full bg-primary" aria-hidden />
+              Cine<span className="text-primary">Fit</span>
             </Link>
-            <nav className="site-nav" aria-label="주요 메뉴">
-              <Link href="/movies">영화</Link>
-              <Link href="/sources">데이터 출처</Link>
+            <nav className="flex items-center gap-1" aria-label="주요 메뉴">
+              <Link
+                href="/movies"
+                className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-text-sub transition-colors hover:bg-bg hover:text-text"
+              >
+                영화 찾기
+              </Link>
+              <Link
+                href="/sources"
+                className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-text-sub transition-colors hover:bg-bg hover:text-text"
+              >
+                출처 안내
+              </Link>
             </nav>
           </div>
         </header>

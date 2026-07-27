@@ -4,6 +4,13 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ORIGIN_PRESETS } from '../src/data/constants';
 
+const inputCls =
+  'min-h-11 w-full rounded-card border border-border bg-bg px-3 text-base text-text outline-none focus-visible:ring-[3px] focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface';
+const labelCls = 'block text-sm font-semibold text-text';
+const sectionCls = 'rounded-card-lg border border-border bg-surface p-4';
+const checkRowCls = 'flex min-h-11 items-center gap-2.5 text-[15px] text-text';
+const checkboxCls = 'h-5 w-5 accent-primary';
+
 // 기본값이 채워져 있어 그대로 제출해도 추천을 받을 수 있다 (요구사항: 전부 입력 불필요)
 export function RecommendForm({ movieId, defaultDate }: { movieId: number; defaultDate: string }) {
   const router = useRouter();
@@ -33,78 +40,114 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
   }
 
   return (
-    <form onSubmit={onSubmit} aria-label="추천 조건 입력">
-      <label className="field">
-        <span>관람 날짜</span>
-        <input type="date" name="date" defaultValue={defaultDate} required />
-      </label>
+    <form onSubmit={onSubmit} aria-label="추천 조건 입력" className="flex flex-col gap-4">
+      <div className={sectionCls}>
+        <h2 className="m-0 mb-3 text-sm font-bold text-text-sub">언제, 어디서 출발하세요?</h2>
+        <div className="flex flex-col gap-3.5">
+          <label className="block">
+            <span className={labelCls}>관람 날짜</span>
+            <input className={`${inputCls} mt-1.5`} type="date" name="date" defaultValue={defaultDate} required />
+          </label>
+          <label className="block">
+            <span className={labelCls}>출발 위치</span>
+            <select className={`${inputCls} mt-1.5`} name="originId" defaultValue="cityhall">
+              {ORIGIN_PRESETS.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      </div>
 
-      <label className="field">
-        <span>출발 위치</span>
-        <select name="originId" defaultValue="cityhall">
-          {ORIGIN_PRESETS.map((o) => (
-            <option key={o.id} value={o.id}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-      </label>
+      <div className={sectionCls}>
+        <h2 className="m-0 mb-3 text-sm font-bold text-text-sub">이동·가격 조건</h2>
+        <div className="flex flex-col gap-3.5">
+          <label className="block">
+            <span className={labelCls}>최대 이동 시간 (분)</span>
+            <input
+              className={`${inputCls} mt-1.5`}
+              type="number"
+              name="maxTravelMinutes"
+              defaultValue={60}
+              min={5}
+              max={240}
+              step={5}
+            />
+          </label>
+          <label className="block">
+            <span className={labelCls}>최대 가격 (원)</span>
+            <input
+              className={`${inputCls} mt-1.5`}
+              type="number"
+              name="maxPrice"
+              defaultValue={40000}
+              min={1000}
+              max={200000}
+              step={1000}
+            />
+          </label>
+          <label className="block">
+            <span className={labelCls}>가장 중요한 것</span>
+            <select className={`${inputCls} mt-1.5`} name="priority" defaultValue="balance">
+              <option value="balance">균형 있게</option>
+              <option value="quality">영상·음향 품질</option>
+              <option value="logistics">가까운 곳·가성비</option>
+            </select>
+          </label>
+        </div>
+      </div>
 
-      <label className="field">
-        <span>최대 이동 시간 (분)</span>
-        <input type="number" name="maxTravelMinutes" defaultValue={60} min={5} max={240} step={5} />
-      </label>
-
-      <label className="field">
-        <span>최대 가격 (원)</span>
-        <input type="number" name="maxPrice" defaultValue={40000} min={1000} max={200000} step={1000} />
-      </label>
-
-      <label className="field">
-        <span>가장 중요한 것</span>
-        <select name="priority" defaultValue="balance">
-          <option value="balance">균형 있게</option>
-          <option value="quality">영상·음향 품질</option>
-          <option value="logistics">가까운 곳·가성비</option>
-        </select>
-      </label>
-
-      <fieldset style={{ border: '1px solid var(--border)', borderRadius: 12, marginBottom: 14 }}>
-        <legend className="sub">허용할 상영 방식</legend>
-        <label className="checkline">
-          <input type="checkbox" name="allowImax" defaultChecked /> IMAX 허용
-        </label>
-        <label className="checkline">
-          <input type="checkbox" name="allowDolby" defaultChecked /> Dolby Cinema 허용
-        </label>
-        <label className="checkline">
-          <input type="checkbox" name="allowStandard" defaultChecked /> 일반관(대형관 포함) 허용
-        </label>
+      <fieldset className={`${sectionCls} m-0 border`}>
+        <legend className="mb-2 px-0.5 text-sm font-bold text-text-sub">허용할 상영 방식</legend>
+        <div className="flex flex-col gap-1">
+          <label className={checkRowCls}>
+            <input className={checkboxCls} type="checkbox" name="allowImax" defaultChecked /> IMAX 허용
+          </label>
+          <label className={checkRowCls}>
+            <input className={checkboxCls} type="checkbox" name="allowDolby" defaultChecked /> Dolby Cinema 허용
+          </label>
+          <label className={checkRowCls}>
+            <input className={checkboxCls} type="checkbox" name="allowStandard" defaultChecked /> 일반관(대형관 포함)
+            허용
+          </label>
+        </div>
       </fieldset>
 
-      <label className="field">
-        <span>4DX 멀미 민감도</span>
-        <select name="motionSickness" defaultValue="0">
-          <option value="0">민감하지 않음 — 4DX 후보 유지</option>
-          <option value="1">약간 민감 — 4DX 후보 유지</option>
-          <option value="2">많이 민감 — 4DX 제외</option>
-        </select>
-      </label>
+      <div className={sectionCls}>
+        <label className="block">
+          <span className={labelCls}>4DX 멀미, 얼마나 신경 쓰이세요?</span>
+          <select className={`${inputCls} mt-1.5`} name="motionSickness" defaultValue="0">
+            <option value="0">괜찮아요 — 4DX도 추천에 포함</option>
+            <option value="1">조금 신경 쓰여요 — 4DX도 추천에 포함</option>
+            <option value="2">많이 힘들어요 — 4DX는 제외해 주세요</option>
+          </select>
+        </label>
+      </div>
 
-      <fieldset style={{ border: '1px solid var(--border)', borderRadius: 12, marginBottom: 14 }}>
-        <legend className="sub">좌석·편의 선호</legend>
-        <label className="checkline">
-          <input type="checkbox" name="subtitleReadability" /> 자막 가독성 우선 (좌석 구역 추천에 반영)
-        </label>
-        <label className="checkline">
-          <input type="checkbox" name="neckComfort" /> 목 부담 적은 좌석 선호
-        </label>
-        <label className="checkline">
-          <input type="checkbox" name="wheelchair" /> 휠체어 접근 필수 (미확인 상영관은 제외됩니다)
-        </label>
+      <fieldset className={`${sectionCls} m-0 border`}>
+        <legend className="mb-2 px-0.5 text-sm font-bold text-text-sub">좌석·편의 선호</legend>
+        <div className="flex flex-col gap-1">
+          <label className={checkRowCls}>
+            <input className={checkboxCls} type="checkbox" name="subtitleReadability" /> 자막이 잘 보이는 좌석
+            우선
+          </label>
+          <label className={checkRowCls}>
+            <input className={checkboxCls} type="checkbox" name="neckComfort" /> 목 덜 아픈 좌석 우선
+          </label>
+          <label className={checkRowCls}>
+            <input className={checkboxCls} type="checkbox" name="wheelchair" /> 휠체어 접근 필수 (확인 안 된 상영관은
+            제외돼요)
+          </label>
+        </div>
       </fieldset>
 
-      <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
+      <button
+        type="submit"
+        className="flex min-h-12 w-full items-center justify-center rounded-card bg-primary text-base font-semibold text-white transition-colors hover:bg-primary-hover disabled:opacity-60"
+        disabled={submitting}
+      >
         {submitting ? '추천 계산 중…' : '추천 받기'}
       </button>
     </form>

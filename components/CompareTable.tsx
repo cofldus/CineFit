@@ -8,6 +8,8 @@ const timeFmt = new Intl.DateTimeFormat('ko-KR', {
   timeZone: 'Asia/Seoul',
 });
 
+const pct = (x: number) => `${Math.round(Math.min(1, Math.max(0, x)) * 100)}%`;
+
 // 최대 3회차 × 축 비교 — 가로 스크롤 컨테이너 (docs/09 §3 CompareTable)
 export function CompareTable({ picks }: { picks: { label: PickLabel; scored: ScoredCandidate }[] }) {
   if (picks.length < 2) return null;
@@ -16,25 +18,30 @@ export function CompareTable({ picks }: { picks: { label: PickLabel; scored: Sco
     { name: '포맷', render: (s) => FORMAT_LABELS[s.candidate.format] ?? s.candidate.format },
     { name: '시작', render: (s) => timeFmt.format(new Date(s.candidate.startsAt)) },
     { name: '종료 예정', render: (s) => timeFmt.format(new Date(s.candidate.endsAtEst)) },
-    { name: '종합 점수', render: (s) => s.final.toFixed(3) },
-    { name: '포맷 적합', render: (s) => s.axes.ffm.toFixed(2) },
-    { name: '관 품질', render: (s) => s.axes.audQ.toFixed(2) },
+    { name: '종합 점수', render: (s) => pct(s.final) },
+    { name: '포맷 만족도', render: (s) => pct(s.axes.ffm) },
+    { name: '상영관 품질', render: (s) => pct(s.axes.audQ) },
     { name: '이동(추정)', render: (s) => `${s.travelMinutes}분` },
     { name: '가격', render: (s) => `${s.candidate.priceAdult.toLocaleString('ko-KR')}원` },
-    { name: '데이터 신뢰도', render: (s) => s.axes.dc.toFixed(2) },
+    { name: '정보 신뢰도', render: (s) => pct(s.axes.dc) },
     { name: '확신도', render: (s) => s.confidenceLabel },
   ];
 
   return (
     <section aria-label="추천 상영관 비교">
-      <h2>한눈에 비교</h2>
-      <div className="table-scroll" tabIndex={0} role="region" aria-label="비교 표 (가로 스크롤)">
-        <table className="compare">
+      <h2 className="text-lg font-bold text-text">한눈에 비교</h2>
+      <div
+        className="mt-2 overflow-x-auto rounded-card-lg border border-border"
+        tabIndex={0}
+        role="region"
+        aria-label="비교 표 (가로 스크롤)"
+      >
+        <table className="w-full min-w-[520px] border-collapse text-sm">
           <thead>
             <tr>
-              <td />
+              <td className="border-b border-border p-0" />
               {picks.map((p) => (
-                <th key={p.label} scope="col">
+                <th key={p.label} scope="col" className="border-b border-border p-3 text-left font-bold text-text">
                   {p.label}
                 </th>
               ))}
@@ -43,9 +50,13 @@ export function CompareTable({ picks }: { picks: { label: PickLabel; scored: Sco
           <tbody>
             {rows.map((row) => (
               <tr key={row.name}>
-                <th scope="row">{row.name}</th>
+                <th scope="row" className="whitespace-nowrap border-b border-border p-3 text-left font-medium text-text-sub">
+                  {row.name}
+                </th>
                 {picks.map((p) => (
-                  <td key={p.label}>{row.render(p.scored)}</td>
+                  <td key={p.label} className="border-b border-border p-3 align-top text-text">
+                    {row.render(p.scored)}
+                  </td>
                 ))}
               </tr>
             ))}

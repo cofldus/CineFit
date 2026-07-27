@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { CompareTable } from '../../components/CompareTable';
+import { Notice } from '../../components/Notice';
 import { RecommendCard } from '../../components/RecommendCard';
 import { getRecommendations } from '../../src/data/recommendationService';
 import { parseRecommendationInput } from '../../src/lib/validation';
@@ -19,16 +20,19 @@ export default async function ResultsPage({
 
   if (!parsed.ok) {
     return (
-      <main>
-        <h1>추천 결과</h1>
-        <div className="card" role="alert">
-          <h3 style={{ marginTop: 0 }}>입력값을 확인해 주세요</h3>
-          <ul className="plain sub">
+      <main className="mx-auto max-w-xl px-4 pb-24 pt-6">
+        <h1 className="text-2xl font-extrabold text-text">추천 결과</h1>
+        <div className="mt-4 rounded-card-lg border border-trust-low/40 bg-trust-low/5 p-5" role="alert">
+          <h3 className="m-0 text-lg font-bold text-text">입력값을 확인해 주세요</h3>
+          <ul className="m-0 mt-2 flex list-none flex-col gap-1 p-0 text-sm text-text-sub">
             {parsed.errors.map((e) => (
               <li key={e}>· {e}</li>
             ))}
           </ul>
-          <Link href="/movies" className="btn btn-primary">
+          <Link
+            href="/movies"
+            className="mt-4 inline-flex min-h-11 items-center rounded-card bg-primary px-5 text-[15px] font-semibold text-white hover:bg-primary-hover"
+          >
             영화 선택으로 돌아가기
           </Link>
         </div>
@@ -42,64 +46,75 @@ export default async function ResultsPage({
   const origin = result.request.origin;
 
   return (
-    <main>
-      <h1>추천 결과</h1>
-      <p className="sub">
+    <main className="mx-auto max-w-xl px-4 pb-24 pt-6">
+      <h1 className="text-2xl font-extrabold text-text">추천 결과</h1>
+      <p className="mt-1 text-sm text-text-sub">
         🎬 {result.movie.title} ({result.movie.runtimeMin}분) · {result.request.date} ·{' '}
         {origin.label ?? '지정 위치'} 출발 · 이동 ≤ {result.request.maxTravelMinutes}분 · 가격 ≤{' '}
-        {result.request.maxPrice.toLocaleString('ko-KR')}원 — 후보 {result.totalCandidates}회차 중
-        하드 필터 통과 {result.scored.length}
+        {result.request.maxPrice.toLocaleString('ko-KR')}원 — 조건에 맞는 회차 {result.scored.length}개
+        (전체 {result.totalCandidates}개 중)
       </p>
-      {result.dataMode?.usedSynthetic ? (
-        <p className="notice" role="note">
-          ⚠️ 이 결과의 회차·가격은 <strong>검증용 합성 데이터</strong>입니다(실제 예매 불가). 각
-          카드의 출처·확인일·상태 배지를 확인하세요.
-        </p>
-      ) : (
-        <p className="notice" role="note" style={{ borderColor: 'var(--trust-high)' }}>
-          ✔ 관리자가 공식 예매 페이지에서 확인한 회차 기준입니다.
-          {result.dataMode && result.dataMode.syntheticSuppressed > 0
-            ? ` (검증용 합성 회차 ${result.dataMode.syntheticSuppressed}건은 제외됨)`
-            : ''}
-        </p>
-      )}
+      <div className="mt-3">
+        {result.dataMode?.usedSynthetic ? (
+          <Notice>
+            이 결과의 회차·가격은 <strong className="font-semibold">검증용 합성 데이터</strong>예요(실제
+            예매는 안 돼요). 각 카드의 출처·확인일·상태 배지를 확인해 주세요.
+          </Notice>
+        ) : (
+          <Notice tone="success">
+            관리자가 공식 예매 페이지에서 확인한 회차 기준입니다.
+            {result.dataMode && result.dataMode.syntheticSuppressed > 0
+              ? ` (검증용 합성 회차 ${result.dataMode.syntheticSuppressed}건은 제외됨)`
+              : ''}
+          </Notice>
+        )}
+      </div>
 
       {result.picks.length === 0 ? (
-        <div className="card" role="alert" data-testid="empty-state">
-          <h3 style={{ marginTop: 0 }}>조건에 맞는 상영 회차가 없습니다</h3>
+        <div className="mt-5 rounded-card-lg border border-border bg-surface p-5" role="alert" data-testid="empty-state">
+          <h3 className="m-0 text-lg font-bold text-text">조건에 맞는 상영 회차가 없어요</h3>
           {result.excluded.length > 0 ? (
             <>
-              <p className="sub">모든 후보가 다음 이유로 제외되었습니다:</p>
-              <ul className="plain sub">
+              <p className="mt-2 text-sm text-text-sub">모든 후보가 다음 이유로 제외됐어요:</p>
+              <ul className="m-0 mt-1 flex list-none flex-col gap-1 p-0 text-sm text-text-sub">
                 {result.excluded.map((e) => (
                   <li key={e.candidate.showtimeId}>
                     · {e.candidate.location.name} {e.candidate.auditorium.no} — {e.reason}
                   </li>
                 ))}
               </ul>
-              <p className="sub">
+              <p className="mt-2 text-sm text-text-sub">
                 💡 최대 이동 시간을 늘리거나, 허용 포맷·가격 상한을 넓혀서 다시 시도해 보세요.
               </p>
             </>
           ) : (
-            <p className="sub">해당 날짜에 등록된 회차 자체가 없습니다.</p>
+            <p className="mt-2 text-sm text-text-sub">해당 날짜에 등록된 회차 자체가 없어요.</p>
           )}
-          <Link href={`/recommend/${result.movie.id}`} className="btn btn-primary">
+          <Link
+            href={`/recommend/${result.movie.id}`}
+            className="mt-4 inline-flex min-h-11 items-center rounded-card bg-primary px-5 text-[15px] font-semibold text-white hover:bg-primary-hover"
+          >
             조건 다시 입력
           </Link>
         </div>
       ) : (
         <>
-          {result.picks.map((p, i) => (
-            <RecommendCard key={p.scored.candidate.showtimeId} rank={i + 1} label={p.label} scored={p.scored} />
-          ))}
+          <div className="mt-5 flex flex-col gap-3">
+            {result.picks.map((p, i) => (
+              <RecommendCard key={p.scored.candidate.showtimeId} rank={i + 1} label={p.label} scored={p.scored} />
+            ))}
+          </div>
 
-          <CompareTable picks={result.picks} />
+          <div className="mt-6">
+            <CompareTable picks={result.picks} />
+          </div>
 
           {result.excluded.length > 0 ? (
-            <details className="expand">
-              <summary>하드 필터에서 제외된 회차 {result.excluded.length}건 보기</summary>
-              <ul className="plain sub">
+            <details className="mt-5 rounded-card-lg border border-border bg-surface p-4">
+              <summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium text-primary">
+                조건에 안 맞아 제외된 회차 {result.excluded.length}건 보기
+              </summary>
+              <ul className="m-0 mt-2 flex list-none flex-col gap-1 p-0 text-sm text-text-sub">
                 {result.excluded.map((e) => (
                   <li key={e.candidate.showtimeId}>
                     · {e.candidate.location.name} {e.candidate.auditorium.no} — {e.reason}
@@ -111,8 +126,10 @@ export default async function ResultsPage({
         </>
       )}
 
-      <p style={{ marginTop: 16 }}>
-        <Link href="/sources">이 추천에 쓰인 데이터 출처·신뢰도 기준 →</Link>
+      <p className="mt-5">
+        <Link href="/sources" className="text-sm font-medium text-primary">
+          이 추천에 쓰인 정보 출처·신뢰도 기준 보기 →
+        </Link>
       </p>
     </main>
   );

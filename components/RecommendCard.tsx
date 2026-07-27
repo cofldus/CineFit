@@ -15,6 +15,23 @@ const PICK_DESC: Record<PickLabel, string> = {
   '근접·가성비': '이동·편의 우선',
 };
 
+const CONFIDENCE_CLS: Record<string, string> = {
+  높음: 'border-trust-high/40 text-trust-high',
+  보통: 'border-trust-mid/40 text-trust-mid',
+  낮음: 'border-trust-low/40 text-trust-low',
+};
+
+const pct = (x: number) => `${Math.round(Math.min(1, Math.max(0, x)) * 100)}%`;
+
+function StatRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-text-sub">{label}</span>
+      <span className="font-semibold text-text">{value}</span>
+    </div>
+  );
+}
+
 export function RecommendCard({
   rank,
   label,
@@ -26,67 +43,76 @@ export function RecommendCard({
 }) {
   const { candidate: c } = scored;
   const spec = c.auditorium.spec;
-  const confCls =
-    scored.confidenceLabel === '높음' ? 'badge-high' : scored.confidenceLabel === '보통' ? 'badge-mid' : 'badge-low';
+  const confCls = CONFIDENCE_CLS[scored.confidenceLabel] ?? CONFIDENCE_CLS['낮음'];
 
   return (
-    <article className="card" aria-labelledby={`pick-${rank}-title`} data-testid={`pick-${label}`}>
-      <p className="sub" style={{ margin: 0 }}>
+    <article
+      className="rounded-card-lg border border-border bg-surface p-4"
+      aria-labelledby={`pick-${rank}-title`}
+      data-testid={`pick-${label}`}
+    >
+      <p className="m-0 text-sm text-text-sub">
         {rank}순위 · {PICK_DESC[label]}
       </p>
-      <h3 id={`pick-${rank}-title`} style={{ margin: '4px 0 8px' }}>
+      <h3 id={`pick-${rank}-title`} className="m-0 mb-2 mt-1 text-lg font-bold text-text">
         {c.location.name} {c.auditorium.no} · {timeFmt.format(new Date(c.startsAt))}
       </h3>
 
-      <div className="row" style={{ marginBottom: 8 }}>
+      <div className="mb-2.5 flex flex-wrap items-center gap-1.5">
         <FormatTag format={c.format} />
-        <span className="badge">
-          종합 {scored.final.toFixed(3)}
+        <span className="inline-flex items-center rounded-full border border-border px-2.5 py-0.5 text-xs font-medium text-text-sub">
+          종합 {pct(scored.final)}
         </span>
-        <span className={`badge ${confCls}`}>확신도 {scored.confidenceLabel}</span>
+        <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${confCls}`}>
+          확신도 {scored.confidenceLabel}
+        </span>
       </div>
 
-      <div className="row sub" style={{ marginBottom: 8 }}>
+      <div className="mb-2.5 flex flex-wrap gap-x-3 gap-y-1 text-sm text-text-sub">
         <span>🚇 이동 약 {scored.travelMinutes}분(추정)</span>
         <span>💰 {c.priceAdult.toLocaleString('ko-KR')}원</span>
         <span>
-          🪑 {scored.seatZone.zone} <em>({scored.seatZone.label})</em>
+          🪑 {scored.seatZone.zone} <span>({scored.seatZone.label})</span>
         </span>
       </div>
 
-      <ul className="plain" style={{ fontSize: 15 }}>
+      <ul className="m-0 flex list-none flex-col gap-1 p-0 text-[15px] text-text">
         {scored.pros.slice(0, 3).map((p) => (
-          <li key={p} className="pro">
+          <li key={p} className="before:mr-1.5 before:content-['👍']">
             {p}
           </li>
         ))}
         {scored.cons.slice(0, 2).map((n) => (
-          <li key={n} className="con">
+          <li key={n} className="before:mr-1.5 before:content-['👎']">
             {n}
           </li>
         ))}
         {scored.uncertainties.slice(0, 2).map((u) => (
-          <li key={u} className="unc">
+          <li key={u} className="before:mr-1.5 before:content-['❓']">
             {u}
           </li>
         ))}
       </ul>
 
-      <p className="sub" style={{ margin: '4px 0 0' }}>
-        관 사양 확인일 {spec ? spec.observedAt.slice(0, 10) : '정보 없음'}
-        {spec ? <TrustBadge status={spec.infoStatus} /> : null} · 회차 확인일{' '}
-        {(c.verifiedAt ?? c.dataCheckedAt).slice(0, 10)}{' '}
+      <p className="mt-2.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm text-text-sub">
+        <span>상영관 정보 확인일 {spec ? spec.observedAt.slice(0, 10) : '정보 없음'}</span>
+        {spec ? <TrustBadge status={spec.infoStatus} /> : null}
+        <span>· 회차 확인일 {(c.verifiedAt ?? c.dataCheckedAt).slice(0, 10)}</span>
         {c.isSynthetic ? (
-          <span className="badge badge-mid">≈ 검증용 합성 회차</span>
+          <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-trust-mid/40 px-2.5 py-0.5 text-xs font-medium text-trust-mid">
+            ≈ 검증용 합성 회차
+          </span>
         ) : (
-          <span className="badge badge-high">✔ 관리자 확인 회차</span>
+          <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-trust-high/40 px-2.5 py-0.5 text-xs font-medium text-trust-high">
+            ✔ 관리자 확인 회차
+          </span>
         )}
       </p>
 
       {c.bookingUrl && !c.isSynthetic ? (
-        <p style={{ margin: '10px 0 0' }}>
+        <p className="mt-2.5">
           <a
-            className="btn btn-primary btn-block"
+            className="flex min-h-11 w-full items-center justify-center rounded-card bg-primary px-5 text-[15px] font-semibold text-white transition-colors hover:bg-primary-hover"
             href={c.bookingUrl}
             target="_blank"
             rel="noopener noreferrer nofollow"
@@ -96,29 +122,32 @@ export function RecommendCard({
         </p>
       ) : null}
 
-      <details className="expand">
-        <summary>점수 상세·근거 출처 보기</summary>
-        <p className="sub" style={{ marginBottom: 4 }}>
-          종합 {scored.final.toFixed(3)} = 기본 {scored.base.toFixed(3)} × 신뢰 보정{' '}
-          {scored.trust.toFixed(2)} × 예매 게이트 0.90
-        </p>
-        <p className="sub">
-          포맷 적합 {scored.axes.ffm.toFixed(2)} · 관 품질 {scored.axes.audQ.toFixed(2)} · 회차 적합{' '}
-          {scored.axes.pm.toFixed(2)} · 데이터 신뢰도 {scored.axes.dc.toFixed(2)} · 최신성{' '}
-          {scored.axes.fr.toFixed(2)}
-        </p>
-        {spec?.renewalEvent ? <p className="sub">🛠 {spec.renewalEvent}</p> : null}
-        {spec?.notes ? <p className="sub">📋 {spec.notes}</p> : null}
-        <p className="sub" style={{ marginBottom: 4 }}>
+      <details className="mt-3 border-t border-border pt-3">
+        <summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium text-primary">
+          점수는 어떻게 계산되나요?
+        </summary>
+        <p className="mb-2 text-sm text-text-sub">아래 항목들을 종합해서 계산한 점수예요.</p>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
+          <StatRow label="종합 점수" value={pct(scored.final)} />
+          <StatRow label="신뢰 보정" value={pct(scored.trust)} />
+          <StatRow label="포맷 만족도" value={pct(scored.axes.ffm)} />
+          <StatRow label="상영관 품질" value={pct(scored.axes.audQ)} />
+          <StatRow label="시간대 적합도" value={pct(scored.axes.pm)} />
+          <StatRow label="정보 신뢰도" value={pct(scored.axes.dc)} />
+          <StatRow label="최신성" value={pct(scored.axes.fr)} />
+        </div>
+        {spec?.renewalEvent ? <p className="mt-2 text-sm text-text-sub">🛠 {spec.renewalEvent}</p> : null}
+        {spec?.notes ? <p className="mt-1 text-sm text-text-sub">📋 {spec.notes}</p> : null}
+        <p className="mt-2 text-sm text-text-sub">
           좌석 구역 추천 근거({scored.seatZone.label}): {scored.seatZone.rationale.join(' / ')}
         </p>
-        <h4 style={{ margin: '8px 0 4px', fontSize: 14 }}>이 추천에 사용된 출처</h4>
-        <ul className="plain" style={{ fontSize: 13 }}>
+        <h4 className="mb-1 mt-3 text-sm font-bold text-text">이 추천에 사용된 출처</h4>
+        <ul className="m-0 flex list-none flex-col gap-1.5 p-0 text-[13px]">
           {scored.citations.map((cit, i) => (
-            <li key={`${cit.what}-${i}`} className="row">
-              <span className="sub">{cit.what}</span>
+            <li key={`${cit.what}-${i}`} className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <span className="text-text-sub">{cit.what}</span>
               {cit.sourceUrl ? (
-                <a href={cit.sourceUrl} rel="noopener noreferrer" target="_blank">
+                <a className="text-primary" href={cit.sourceUrl} rel="noopener noreferrer" target="_blank">
                   {cit.sourceName}
                 </a>
               ) : (

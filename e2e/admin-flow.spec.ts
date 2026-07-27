@@ -1,0 +1,49 @@
+import { expect, test } from '@playwright/test';
+
+test('관리자 로그인 → 실제형 회차 등록 → 사용자 추천에 반영 → 예매 딥링크 표시', async ({ page }) => {
+  // 1. 관리자 로그인 (미인증 접근은 로그인으로 리다이렉트)
+  await page.goto('/admin');
+  await expect(page).toHaveURL(/\/admin\/login/);
+  await page.getByLabel('관리자 비밀번호').fill('e2e-admin-pw');
+  await page.getByRole('button', { name: '로그인' }).click();
+  await expect(page.getByRole('heading', { name: '관리자 대시보드' })).toBeVisible();
+
+  // 2. 실제형 회차 등록 (합성 아님, 공식 예매 딥링크 포함)
+  await page.goto('/admin/showtimes/new');
+  await page.getByLabel('영화').selectOption({ index: 1 });
+  await page.getByLabel('극장·상영관').selectOption({ label: 'CGV 용산아이파크몰 IMAX관 [imax]' });
+  await page.getByLabel('상영 날짜').fill('2026-08-02');
+  await page.getByLabel('시작 시각').fill('19:00');
+  await page.getByLabel('상영 포맷').selectOption('imax');
+  await page.getByLabel('성인 1인 가격 (원)').fill('28000');
+  await page.getByLabel('공식 예매 URL').fill('https://ticket.cgv.co.kr/e2e-demo');
+  await page.getByLabel('정보 출처 (어디서 확인했나)').fill('CGV 공식 예매 페이지에서 확인 (E2E)');
+  await page.getByRole('button', { name: '회차 등록' }).click();
+
+  // 3. 목록에서 관리자 확인 배지로 표시됨
+  await expect(page).toHaveURL(/\/admin\/showtimes/);
+  await expect(page.getByText('✔ 관리자 확인').first()).toBeVisible();
+
+  // 4~6. 사용자 흐름: 영화 선택 → 등록한 날짜로 조건 입력 → 추천 결과에 포함 확인
+  await page.goto('/movies');
+  await page.getByRole('link', { name: '이 영화로 추천받기' }).first().click();
+  await page.getByLabel('관람 날짜').fill('2026-08-02');
+  await page.getByRole('button', { name: '추천 받기' }).click();
+  await expect(page).toHaveURL(/\/results\?/);
+
+  // 관리자 확인 회차 기준 배너 + 카드 배지
+  await expect(page.getByText('관리자가 공식 예매 페이지에서 확인한 회차 기준')).toBeVisible();
+  await expect(page.getByTestId('pick-균형')).toBeVisible();
+  await expect(page.getByTestId('pick-균형').getByText('✔ 관리자 확인 회차')).toBeVisible();
+
+  // 7. 공식 예매 딥링크 표시
+  const booking = page.getByTestId('pick-균형').getByRole('link', { name: /공식 예매 페이지로 이동/ });
+  await expect(booking).toBeVisible();
+  await expect(booking).toHaveAttribute('href', 'https://ticket.cgv.co.kr/e2e-demo');
+});
+
+test('합성 회차만 있는 날짜는 합성 데이터임을 명시한다', async ({ page }) => {
+  await page.goto('/results?movieId=1&date=2026-07-28');
+  await expect(page.getByText('검증용 합성 데이터')).toBeVisible();
+  await expect(page.getByTestId('pick-균형').getByText('≈ 검증용 합성 회차')).toBeVisible();
+});

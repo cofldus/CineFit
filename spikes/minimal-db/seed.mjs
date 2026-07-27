@@ -7,7 +7,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const DB_PATH = join(here, 'cinefit-spike.db');
+const DB_PATH = process.env.CINEFIT_DB_PATH ?? join(here, 'cinefit-spike.db');
 rmSync(DB_PATH, { force: true });
 
 const db = new DatabaseSync(DB_PATH);

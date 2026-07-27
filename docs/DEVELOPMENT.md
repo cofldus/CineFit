@@ -16,14 +16,19 @@ npm run dev         # http://localhost:3000
 
 ## 환경변수
 
-앱 자체는 환경변수 없이 동작한다. 선택 사항:
+앱 자체는 환경변수 없이 동작한다(관리자·동기화 기능 제외). 루트 `.env.example` 참고 —
+키 이름만 커밋하고 실제 값은 `.env`(gitignore)에만 둔다.
 
 | 변수 | 기본값 | 용도 |
 |---|---|---|
-| `CINEFIT_DB_PATH` | `spikes/minimal-db/cinefit-spike.db` | SQLite 파일 경로 재지정 |
-
-KOBIS·KMDb API 키는 **앱이 아니라** `spikes/api-feasibility/.env`에서만 사용한다
-(`.env.example` 참고 — 키 이름만 커밋, 실제 키는 절대 커밋 금지).
+| `CINEFIT_DB_PATH` | `spikes/minimal-db/cinefit-spike.db` | SQLite 파일 경로 재지정 (seed·migrate·앱·CLI 공통) |
+| `KOBIS_API_KEY` | 없음 | `npm run sync:kobis` (앱 런타임 불필요) |
+| `KMDB_API_KEY` | 없음 | KMDb 어댑터(승인 대기) |
+| `ADMIN_PASSWORD` | 없음 | 관리자 화면·API — **미설정 시 /admin 전체 비활성** |
+| `CINEFIT_CLOCK_MODE` | `system` | `demo`면 고정 시각 사용 |
+| `CINEFIT_DEMO_NOW` | 2026-07-27T12:00+09:00 | demo 모드 기준 시각 |
+| `CINEFIT_ALLOW_SYNTHETIC` | 미설정 | `true`면 검증 회차가 있어도 합성 회차 노출(개발·데모) |
+| `CINEFIT_INSECURE_COOKIE` | 미설정 | `true`면 프로덕션 빌드에서도 Secure 쿠키 해제(로컬 E2E용) |
 
 ## DB 초기화·시드
 
@@ -82,21 +87,60 @@ spikes/             # Phase 4 기술 검증 (스키마·시드·API 스파이크
   미검증 항목(예: 천호 CoLa=사용자 제보)은 신뢰 보정으로 자동 감점된다.
 - 검증 대기 항목 관리: `docs/90-verification-register.md`
 
-## KOBIS·KMDb 어댑터 연결 지점 (다음 마일스톤)
+## KOBIS 동기화 운영 (구현 완료)
 
-외부 API와 앱 DB는 분리되어 있다. 연결 시 만들 것:
+```powershell
+npm run sync:kobis -- --date=20260726                 # 일별 박스오피스 상위작 상세 동기화
+npm run sync:kobis -- --movie-code=20236295,20226431  # 특정 영화
+npm run sync:kobis -- --date=20260726 --dry-run       # 변경 예측만 (쓰기 없음)
+```
 
-1. `src/data/adapters/kobisAdapter.ts` — 영화 목록·상세 동기화.
-   `movies`(kobis_code 채움)·`movie_releases`·`movie_technical_specs`의 `format_versions`를
-   KOBIS `showTypes`(IMAX/4D/ScreenX/DOLBYCINEMA 구조화 확인, 2026-07-27 실호출 검증)로 대체.
-   호출 코드는 `spikes/api-feasibility/kobis-*.mjs` 참조.
-2. `src/data/adapters/kmdbAdapter.ts` — 한국영화 메타·기술 필드 보강.
-   식별자 연결 전략은 `spikes/api-feasibility/link-identifiers.mjs`(제목+감독+연도) 참조,
-   결과는 `movies.kmdb_docid`에 저장.
-3. 동기화는 `observations` 불변 로그를 거쳐 대표값 승격(문서 06 §1) — 리포지토리 직접 UPDATE 금지.
+- 흐름: KOBIS 응답 → 정규화(`kobisMapper`) → `external_observations` 불변 기록(해시·diff·최소
+  원문 발췌) → `movies`/`movie_releases`/`movie_format_versions` 승격. 동일 해시 재수신은
+  `unchanged`로 기록만 하고 승격을 건너뛴다. 동명 복수 후보는 `error`(수동 검수)로 보류.
+- **showTypes 해석 원칙**: "KOBIS 등록 상영 형태" 사실만 저장한다. 화면비·Atmos·Vision 등
+  기술 사양을 여기서 만들지 않는다 (docs/90 §3-1).
+- `npm run db:seed`는 DB를 재생성하므로 이후 동기화를 다시 실행해야 한다.
 
-키는 앱 루트 `.env`(신설 시 `.env.example`에 키 이름만)로 주입하고, 어댑터가 없어도
-앱은 시드 DB만으로 동작해야 한다(현재 상태 유지).
+## 관리자 회차 운영 절차
+
+1. `/admin/login` → `ADMIN_PASSWORD`로 로그인 (8시간 세션).
+2. 공식 예매 페이지에서 회차를 확인하고 `/admin/showtimes/new`에 등록 — 예매 딥링크·정보
+   출처는 필수, "검증용 합성" 체크는 실제 회차가 아닐 때만.
+3. 배급 버전에 없는 포맷은 근거(mismatchNote) 입력 시에만 저장된다(경고 유지).
+   관 브랜드와 불가능한 포맷(일반관에 IMAX 등)은 저장 자체가 거부된다.
+4. 수정·비활성화는 `/admin/showtimes/[id]` — **삭제는 없다.** 모든 변경은 이력에 남는다.
+5. 관리자 확인(비합성) 회차가 있는 날짜는 사용자 추천에서 합성 회차가 자동 제외된다.
+
+## 시계(Clock) 규칙
+
+`new Date()` 직접 호출 대신 `src/lib/clock.ts`의 `getAppClock()`을 사용한다.
+운영은 `system`, 데모·E2E는 `CINEFIT_CLOCK_MODE=demo`(+`CINEFIT_DEMO_NOW`), 테스트는
+`fixedClock`/`now` 주입. 날짜 계산은 `seoulDateString()`으로 Asia/Seoul을 명시한다
+(자정 경계·심야 회차 테스트: `tests/unit/clock.test.ts`).
+
+## 배포 준비 메모 (자격증명 없이 준비된 범위)
+
+- **SQLite의 서버리스 제약**: Vercel 등 서버리스 환경은 파일시스템이 임시적이라
+  `node:sqlite` 파일 DB를 **영속 쓰기 저장소로 쓸 수 없다**(요청 간 유실). 현 구조 권장:
+  개발·로컬·셀프호스트(단일 노드, 영속 볼륨)는 SQLite 유지, 운영 배포는 PostgreSQL
+  (문서 08 ADR-3의 원안)로 이전. 리포지토리 계층(`src/data/*Repository.ts`)이 SQL 접점을
+  모으고 있어 다음 마일스톤에서 드라이버 교체로 이전한다 — 지금 전체 마이그레이션은 하지 않음.
+- 프로덕션 환경변수: `ADMIN_PASSWORD`(필수), `CINEFIT_DB_PATH`(영속 볼륨 경로),
+  `KOBIS_API_KEY`(동기화 작업에만). `CINEFIT_ALLOW_SYNTHETIC`·`CINEFIT_INSECURE_COOKIE`는
+  운영에서 설정 금지.
+- 관리자 인증: 단일 비밀번호+HMAC 쿠키는 1인 운영 전제 — 다중 운영자·감사 추적이 필요해지면
+  검증된 인증 라이브러리로 교체.
+- PWA 캐시 갱신: `public/sw.js`의 `CACHE` 버전 문자열을 배포 시 변경하면 구 캐시가 정리된다.
+- 외부 예매 링크: `target="_blank" rel="noopener noreferrer nofollow"` 적용됨.
+
+## KMDb 어댑터 연결 지점 (키 승인 대기)
+
+`src/data/adapters/kmdb/`를 KOBIS 어댑터와 같은 구조(client/schemas/mapper/syncService)로
+추가한다. 식별자 연결은 `spikes/api-feasibility/link-identifiers.mjs`(제목+감독+연도) 전략을
+`kobisSyncService.findExistingMovie`처럼 서비스로 승격하고, 결과는 `movies.kmdb_docid`에
+저장, 관찰은 동일하게 `external_observations`(provider='kmdb')를 거친다.
+키 발급 시 약관을 docs/90 항목 4에 인용할 것.
 
 ## 서비스워커 최소화 이유
 

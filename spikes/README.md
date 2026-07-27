@@ -13,13 +13,12 @@
 ## 실행 순서
 
 ```powershell
-# 1. API 검증 (키 발급 후)
+# 1. API 검증 (키 발급 후 — 키는 이제 저장소 루트 .env에 둔다)
 cd spikes/api-feasibility
-copy .env.example .env   # 키 입력
-node --env-file=.env kobis-boxoffice.mjs
-node --env-file=.env kobis-movie.mjs "듄"
-node --env-file=.env kmdb-movie.mjs "듄"
-node --env-file=.env link-identifiers.mjs "듄"
+node --env-file=../../.env kobis-boxoffice.mjs
+node --env-file=../../.env kobis-movie.mjs "듄"
+node --env-file=../../.env kmdb-movie.mjs "듄"
+node --env-file=../../.env link-identifiers.mjs "듄"
 
 # 2. 최소 DB 생성·시드
 cd ../minimal-db

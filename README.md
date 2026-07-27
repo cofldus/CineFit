@@ -12,6 +12,22 @@
 - 클릭 가능한 Figma 프로토타입(14화면): https://www.figma.com/design/s2ZRp40FUb9tp0yTC3Wraf
 - 저장소: https://github.com/cofldus/CineFit
 
+## 첫 마일스톤 PWA (실행 가능)
+
+영화 선택 → 조건 입력 → **실제 추천 엔진 실행** → 균형/품질/근접 3종 결과와
+이유·단점·확인 필요 정보·신뢰도·확인일·출처를 보여주는 PWA가 구현되어 있습니다.
+
+```powershell
+npm ci
+npm run db:seed   # SQLite 시드 (API 키 불필요, Node 24+)
+npm run dev       # http://localhost:3000
+```
+
+자세한 실행·테스트·구조 설명: [`docs/DEVELOPMENT.md`](./docs/DEVELOPMENT.md)
+
+> ⚠️ 회차·가격은 검증용 합성 데이터입니다. 상영관 사양은 조사 자료 기반이며
+> 항목별 출처·확인일·정보 상태 배지가 함께 표시됩니다.
+
 ## 패키지 구조 (계획)
 
 | 패키지 | 역할 |

@@ -7,7 +7,8 @@
 좌석, 사용자 취향, 거리·시간·가격을 결합해 **이유가 설명되는 추천**을 제공합니다.
 
 - 조사 기준일: 2026-07-27
-- 설계 문서: [`docs/`](./docs) — 조사 보고서부터 출시 계획까지 13종
+- 설계 문서: [`docs/`](./docs) — 요약 문서 1종 + 상세 설계 문서 12종 (총 13종)
+- 검증 레지스터: [`docs/90-verification-register.md`](./docs/90-verification-register.md) — 확정 사실 vs 검증 대기 사실 관리 (robots.txt 실측 2026-07-27 포함)
 - 클릭 가능한 Figma 프로토타입(14화면): https://www.figma.com/design/s2ZRp40FUb9tp0yTC3Wraf
 - 저장소: https://github.com/cofldus/CineFit
 

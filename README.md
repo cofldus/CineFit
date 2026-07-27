@@ -8,6 +8,7 @@
 
 - 조사 기준일: 2026-07-27
 - 설계 문서: [`docs/`](./docs) — 조사 보고서부터 출시 계획까지 13종
+- 클릭 가능한 Figma 프로토타입(14화면): https://www.figma.com/design/s2ZRp40FUb9tp0yTC3Wraf
 - 저장소: https://github.com/cofldus/CineFit
 
 ## 패키지 구조 (계획)

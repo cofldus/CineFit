@@ -281,10 +281,12 @@ export function recommend(input: EngineInput): RecommendationResult {
   const { movie, candidates, request, now } = input;
 
   // 배급 버전에 없는 포맷 회차 제거 (문서 05 §4.1 — 4DX 버전 미확인이면 후보 아님)
+  // 수퍼플렉스 등 대형 일반관 상영은 표준(2D) 배급 버전을 사용한다.
   const versions = (movie.specs.format_versions?.value as string[] | undefined) ?? [];
+  const requiredVersion = (format: string) => (format === 'superplex' ? 'standard' : format);
   const versionExcluded: ExcludedCandidate[] = [];
   const inVersion = candidates.filter((c) => {
-    if (versions.includes(c.format)) return true;
+    if (versions.includes(requiredVersion(c.format))) return true;
     versionExcluded.push({ candidate: c, reason: `${FORMAT_LABELS[c.format]} 버전 배급 미확인` });
     return false;
   });

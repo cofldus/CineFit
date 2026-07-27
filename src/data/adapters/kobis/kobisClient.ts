@@ -6,13 +6,15 @@ import type { BoxOfficeResponse, MovieInfoResponse } from './kobisSchemas.ts';
 const BASE = 'https://www.kobis.or.kr/kobisopenapi/webservice/rest';
 const UA = 'CineFit/0.2 (registered KOBIS open API user)';
 
+export type KobisErrorKind = 'auth' | 'http' | 'fault' | 'timeout' | 'parse' | 'network';
+
 export class KobisError extends Error {
-  constructor(
-    message: string,
-    readonly kind: 'auth' | 'http' | 'fault' | 'timeout' | 'parse' | 'network',
-  ) {
+  readonly kind: KobisErrorKind;
+
+  constructor(message: string, kind: KobisErrorKind) {
     super(message);
     this.name = 'KobisError';
+    this.kind = kind;
   }
 }
 

@@ -1,7 +1,8 @@
 {
   "name": "cinefit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
+  "type": "module",
   "description": "영화에 딱 맞는 상영관을 찾아주는 맞춤형 영화 관람 추천 서비스 — 첫 마일스톤 PWA",
   "scripts": {
     "dev": "next dev",

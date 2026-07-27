@@ -34,8 +34,8 @@ node recommend.mjs --movie "존 오브" --priority balance
 
 ## API 키 발급처
 
-- **KOBIS 오픈API**: https://www.kobis.or.kr/kobisopenapi — 회원가입 → 키 발급 메뉴. 발급 시 **약관의 상업적 사용 조항·일일 쿼터를 `docs/90-verification-register.md` 항목 3에 인용할 것**.
-- **KMDb API**: https://www.kmdb.or.kr/info/api/apiInfo — 한국영상자료원 오픈API 신청. 동일하게 약관을 레지스터 항목 4에 인용.
+- **KOBIS 오픈API**: https://www.kobis.or.kr/kobisopenapi/homepg/main/main.do — 회원가입 → "키 발급/관리" 메뉴. 발급 시 **약관의 상업적 사용 조항·일일 쿼터를 `docs/90-verification-register.md` 항목 3에 인용할 것**.
+- **KMDb API**: https://www.kmdb.or.kr/info/api/apiList — 한국영상자료원 회원가입 후 "영화상세정보" API 인증키 신청(승인 1~2일). 동일하게 약관을 레지스터 항목 4에 인용.
 
 ## 시드 데이터 주의
 

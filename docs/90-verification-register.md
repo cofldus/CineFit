@@ -26,7 +26,7 @@
 
 - 참고용 확인 창구(약관 원문은 반드시 사이트에서 재확인):
   - KOBIS 오픈API 포털: https://www.kobis.or.kr/kobisopenapi/homepg/main/main.do
-  - KMDb 오픈API 안내: https://www.kmdb.or.kr/info/api/apiInfo
+  - KMDb 오픈API 목록·인증키 신청: https://www.kmdb.or.kr/info/api/apiList (영화상세정보 API 상세: https://www.kmdb.or.kr/info/api/apiDetail/6) — 링크 유효 확인 2026-07-27
   - KOFIC 개방 문의: openapimaster@kofic.or.kr (문서 07 §1)
 
 ## 3. 처리 원칙

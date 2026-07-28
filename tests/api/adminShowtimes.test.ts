@@ -1,5 +1,7 @@
-// 관리자 API 회귀 테스트 — 임시 DB 사본 사용 (원본 시드 DB 오염 방지)
-import { copyFileSync, mkdtempSync } from 'node:fs';
+// 관리자 API 회귀 테스트 — 임시 DB에 직접 시드 (원본 파일 복사는 다른 워커의 쓰기와
+// 경쟁해 malformed 사본이 생길 수 있어 금지)
+import { execSync } from 'node:child_process';
+import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -39,8 +41,11 @@ const patch = (id: number, body: unknown) =>
   });
 
 beforeAll(() => {
-  // 시드된 원본 DB(스키마+마이그레이션 적용 상태)를 임시 경로로 복사
-  copyFileSync(join(process.cwd(), 'spikes', 'minimal-db', 'cinefit-spike.db'), process.env.CINEFIT_DB_PATH!);
+  // 임시 경로에 격리 시드 (CINEFIT_DB_PATH는 파일 상단에서 설정됨)
+  const env = { ...process.env };
+  execSync('node spikes/minimal-db/seed.mjs', { env });
+  execSync('node db/migrate.mjs', { env });
+  execSync('node db/seed-seat-zones.mjs', { env });
 });
 
 describe('관리자 인증', () => {

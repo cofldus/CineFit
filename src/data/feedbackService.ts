@@ -1,7 +1,12 @@
 // 추천 즉시 피드백 + 실제 선택 기록 — 둘 다 recommendation_runs를 참조하는 불변 로그(INSERT만).
 import { getAppDbClient } from './client/index';
 import type { DbClient } from './client/types';
-import type { FeedbackInput, SelectionInput } from '../lib/feedbackValidation';
+import {
+  classifyFeedbackReasons,
+  FAILURE_CATEGORIES,
+  type FailureCategory,
+} from '../domain/recommendation/failureClassification';
+import type { FEEDBACK_REASONS, FeedbackInput, SelectionInput } from '../lib/feedbackValidation';
 
 export function createFeedbackService(getDb: () => DbClient) {
   async function runExists(db: DbClient, runId: number): Promise<boolean> {
@@ -54,6 +59,19 @@ export function createFeedbackService(getDb: () => DbClient) {
         ],
       );
       return { ok: true, id: rows[0].id };
+    },
+
+    /** 관리자 품질 대시보드용 — 최근 피드백의 이유를 실패 분류로 집계한다(복수 원인 허용). */
+    async countFailureCategories(): Promise<Record<FailureCategory, number>> {
+      const rows = await getDb().query<{ reasons: string | null }>(
+        `SELECT reasons FROM recommendation_feedback WHERE reasons IS NOT NULL`,
+      );
+      const counts = Object.fromEntries(FAILURE_CATEGORIES.map((c) => [c, 0])) as Record<FailureCategory, number>;
+      for (const row of rows) {
+        const reasons = JSON.parse(row.reasons!) as (typeof FEEDBACK_REASONS)[number][];
+        for (const category of classifyFeedbackReasons(reasons)) counts[category] += 1;
+      }
+      return counts;
     },
   };
 }

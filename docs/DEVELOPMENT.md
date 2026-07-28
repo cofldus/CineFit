@@ -173,3 +173,17 @@ npm run sync:kobis -- --date=20260726 --dry-run       # 변경 예측만 (쓰기
 오프라인에서는 앱 셸(`/offline` 안내)만 제공한다. 추천 결과·사양 데이터는 확인일·신선도가
 핵심 가치라 오래된 캐시를 보여주는 것이 서비스 원칙(문서 09 §1 "신뢰가 보이는 UI")과
 충돌하기 때문에 데이터 캐싱을 의도적으로 하지 않는다.
+
+## UI 리디자인(5차 마일스톤) 관련 문서
+
+디자인 토큰·컴포넌트·색 대비 정책·테스트 절차는 별도 문서로 분리했다 — 이 파일이
+아니라 아래를 참고할 것:
+
+- [`docs/DESIGN-SYSTEM.md`](./DESIGN-SYSTEM.md) — 토큰(색·그림자·컨테이너 폭), 아이콘 세트,
+  공용 컴포넌트, 색 대비 정책
+- [`docs/UX-GUIDELINES.md`](./UX-GUIDELINES.md) — 문구 원칙, 화면별 결정 사항, 모바일 내비 규칙
+- [`docs/ACCESSIBILITY.md`](./ACCESSIBILITY.md) — axe-core 자동 검사, 키보드·스크린리더 수동 확인 항목
+- [`docs/TESTING.md`](./TESTING.md) — 시각 회귀 베이스라인은 **반드시 리눅스 컨테이너에서** 생성
+  해야 하는 이유와 정확한 명령, `playwright.config.ts`의 `workers: 1` 이유, SQLite 셀프호스트
+  알려진 이슈
+- [`docs/BETA-LIMITATIONS.md`](./BETA-LIMITATIONS.md) — 사용자·운영자에게 공개해야 할 현재 한계 요약

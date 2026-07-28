@@ -25,6 +25,13 @@ npm run dev       # http://localhost:3000
 
 자세한 실행·테스트·구조 설명: [`docs/DEVELOPMENT.md`](./docs/DEVELOPMENT.md)
 
+UI/UX 관련 문서(5차 마일스톤 — 구현 기준):
+[디자인 시스템](./docs/DESIGN-SYSTEM.md) ·
+[UX 가이드라인](./docs/UX-GUIDELINES.md) ·
+[접근성](./docs/ACCESSIBILITY.md) ·
+[테스트 가이드](./docs/TESTING.md) ·
+[베타 한계](./docs/BETA-LIMITATIONS.md)
+
 > ⚠️ 회차·가격은 검증용 합성 데이터입니다. 상영관 사양은 조사 자료 기반이며
 > 항목별 출처·확인일·정보 상태 배지가 함께 표시됩니다.
 

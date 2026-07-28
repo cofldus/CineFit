@@ -14,10 +14,16 @@
     "test:e2e": "playwright test",
     "db:seed": "node spikes/minimal-db/seed.mjs && node db/migrate.mjs && node db/seed-seat-zones.mjs",
     "db:migrate": "node db/migrate.mjs",
+    "pg:up": "docker compose up -d --wait postgres",
+    "pg:down": "docker compose down",
+    "pg:logs": "docker compose logs -f postgres",
+    "pg:status": "docker compose ps postgres",
+    "pg:reset": "node scripts/pg-reset.mjs",
     "sync:kobis": "node --env-file-if-exists=.env scripts/sync-kobis.ts"
   },
   "dependencies": {
     "next": "^16.2.12",
+    "pg": "^8.22.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "zod": "^4.4.3"
@@ -26,6 +32,7 @@
     "@playwright/test": "^1.62.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^26.1.1",
+    "@types/pg": "^8.20.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "eslint": "^10.8.0",

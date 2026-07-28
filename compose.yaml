@@ -1,0 +1,24 @@
+# CineFit 로컬·CI용 PostgreSQL — 운영(Supabase)과 동일 major 버전 고정.
+# 기본 비밀번호는 개발 전용이다. 운영에 절대 재사용하지 말 것 (docs/DATABASE.md).
+name: cinefit
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: cinefit
+      POSTGRES_PASSWORD: ${CINEFIT_PG_PASSWORD:-cinefit-dev-only}
+      POSTGRES_DB: cinefit_dev
+    ports:
+      - '127.0.0.1:55432:5432' # 로컬 5432 점유 회피 + localhost 전용 바인딩
+    volumes:
+      - cinefit-pgdata:/var/lib/postgresql/data
+      - ./db/pg-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U cinefit -d cinefit_dev']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  cinefit-pgdata:

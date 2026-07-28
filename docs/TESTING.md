@@ -9,7 +9,7 @@
 | 단위 | `npm test` | `tests/unit/*.test.ts` (엔진·클록·검증·좌석존·KOBIS 매퍼) |
 | API | `npm test` | `tests/api/*.test.ts` (임시 DB 직접 시드 — 라이브 DB 파일 복사 금지) |
 | 리포지토리 계약 | `npm test` (+ `CINEFIT_TEST_PG_URL` 설정 시 PostgreSQL도) | `tests/contracts/repositoryContracts.test.ts` |
-| E2E 기능 | `npx playwright test e2e/{flow,admin-flow,report-flow}.spec.ts` | 사용자 흐름·관리자 회차 운영·제보 승격 파이프라인 |
+| E2E 기능 | `npx playwright test e2e/{flow,admin-flow,report-flow,admin-evaluation-flow}.spec.ts` | 사용자 흐름·관리자 회차 운영·제보 승격 파이프라인·피드백→품질 대시보드 반영 |
 | 시각 회귀 | `npx playwright test e2e/visual.spec.ts` | 핵심 화면 10개 스크린샷 |
 | 접근성 | `npx playwright test e2e/accessibility.spec.ts` | axe-core, 라이트·다크 × 9화면 |
 

@@ -32,6 +32,16 @@ UI/UX 관련 문서(5차 마일스톤 — 구현 기준):
 [테스트 가이드](./docs/TESTING.md) ·
 [베타 한계](./docs/BETA-LIMITATIONS.md)
 
+알파 테스트 인프라 문서(7차 마일스톤 — 실제 배포 전 코드 인프라만 준비, [알파 계획](./docs/ALPHA-PLAN.md) 참고):
+[분석 이벤트](./docs/ANALYTICS.md) ·
+[추천 품질 평가](./docs/RECOMMENDATION-EVALUATION.md) ·
+[골든 데이터셋](./docs/GOLDEN-DATASET.md) ·
+[데이터 품질](./docs/DATA-QUALITY.md) ·
+[데이터 보존](./docs/DATA-RETENTION.md) ·
+[운영 가이드](./docs/OPERATIONS.md) ·
+[관리자 가이드](./docs/ADMIN-GUIDE.md) ·
+[개인정보 처리(초안)](./docs/PRIVACY-BETA.md)
+
 > ⚠️ 회차·가격은 검증용 합성 데이터입니다. 상영관 사양은 조사 자료 기반이며
 > 항목별 출처·확인일·정보 상태 배지가 함께 표시됩니다.
 

@@ -71,6 +71,14 @@ test.describe('시각 회귀', () => {
     await expect(page).toHaveScreenshot('cinema-detail.png', { fullPage: true, ...SCREENSHOT_OPTS });
   });
 
+  test('관람 후 평가', async ({ page }) => {
+    await page.setViewportSize(VIEWPORTS.mobile);
+    await page.goto('/results?movieId=1&date=2026-07-28');
+    await page.getByRole('link', { name: /관람하고 오셨다면/ }).click();
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page).toHaveScreenshot('post-watch.png', { fullPage: true, ...SCREENSHOT_OPTS });
+  });
+
   test('출처·신뢰도 안내', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
     await page.goto('/sources');

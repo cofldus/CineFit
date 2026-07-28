@@ -161,6 +161,14 @@ export default async function ResultsPage({
             />
           ) : null}
 
+          {result.runId ? (
+            <p className="mt-4 max-w-content text-sm">
+              <Link href={`/feedback/${result.runId}/post-watch`} className="font-medium text-primary">
+                관람하고 오셨다면 여기서 만족도를 남겨주세요 →
+              </Link>
+            </p>
+          ) : null}
+
           {result.excluded.length > 0 ? (
             <details className="mt-5 max-w-content rounded-card-lg border border-border bg-surface p-4">
               <summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium text-primary">

@@ -40,6 +40,18 @@ export function createRecommendationRepository(getDb: () => DbClient) {
       );
       return rows[0].id;
     },
+
+    /** 관람후 평가 등 후속 기능이 실행 기록을 참조할 때 쓰는 최소 요약 — 저장된 스냅샷을 그대로 읽는다. */
+    async getRunSummary(id: number): Promise<{ id: number; movieId: number; showtimeIds: number[] } | null> {
+      const rows = await getDb().query<{ id: number; request: string; results: string }>(
+        `SELECT id, request, results FROM recommendation_runs WHERE id = ?`,
+        [id],
+      );
+      if (!rows.length) return null;
+      const request = JSON.parse(rows[0].request) as { movieId: number };
+      const results = JSON.parse(rows[0].results) as { showtimeId: number }[];
+      return { id: rows[0].id, movieId: request.movieId, showtimeIds: results.map((r) => r.showtimeId) };
+    },
   };
 }
 

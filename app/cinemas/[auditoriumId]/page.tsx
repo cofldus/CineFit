@@ -86,6 +86,14 @@ export default async function AuditoriumDetailPage({
       {detail.location.transitNote ? (
         <p className="mt-2 text-sm text-text-sub">🚇 {detail.location.transitNote}</p>
       ) : null}
+      <p className="mt-3">
+        <Link
+          href={`/cinemas/${detail.id}/report`}
+          className="inline-flex min-h-11 items-center rounded-card border border-border bg-surface px-4 text-sm font-medium text-text hover:border-primary/60"
+        >
+          ✏️ 정보 수정 제보
+        </Link>
+      </p>
 
       {/* 현재 사양 */}
       <section aria-label="현재 사양" className="mt-6">

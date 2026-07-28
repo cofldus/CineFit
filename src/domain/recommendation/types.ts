@@ -61,6 +61,18 @@ export interface AuditoriumSpec {
   sourceUrl: string | null;
 }
 
+// 목적별 좌석 구역 — 단일 "명당" 없음 (docs/06 §3.2). official 불가, 제보·추정 위주.
+export interface SeatZone {
+  purposes: string[]; // immersive/overview/subtitle/sound/low_motion/neck_easy/exit_easy/pair/wheelchair
+  rowRange: string | null;
+  colRange: string | null;
+  rationale: string | null;
+  infoStatus: InfoStatus;
+  observedAt: string;
+  confidence: number;
+  sourceName: string | null;
+}
+
 export interface CandidateShowtime {
   showtimeId: number;
   movieId: number;
@@ -82,6 +94,7 @@ export interface CandidateShowtime {
     seatCount: number | null;
     status: string;
     spec: AuditoriumSpec | null;
+    seatZones: SeatZone[];
   };
   location: {
     id: number;

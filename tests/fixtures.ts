@@ -53,6 +53,7 @@ export function makeCandidate(overrides: {
   screenWidthM?: number;
   soundFormat?: string;
   locStatus?: string;
+  seatZones?: CandidateShowtime['auditorium']['seatZones'];
 } = {}): CandidateShowtime {
   const id = seq++;
   return {
@@ -89,6 +90,7 @@ export function makeCandidate(overrides: {
         sourceName: '테스트 출처',
         sourceUrl: null,
       },
+      seatZones: overrides.seatZones ?? [],
     },
     location: {
       id,

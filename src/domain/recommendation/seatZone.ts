@@ -1,12 +1,59 @@
-import type { AuditoriumSpec, FormatId, RecommendationRequest, SeatZoneSuggestion } from './types';
+import type { AuditoriumSpec, FormatId, RecommendationRequest, SeatZone, SeatZoneSuggestion } from './types';
 
-// 좌석 존 데이터 미수집 → 포맷·설비·선호 기반 추정만 제공 (문서 05 §4.4 — '추정' 라벨 필수)
+// 사용자 조건 → 원하는 좌석 존 목적 (docs/06 §3.2 purpose 어휘)
+export function desiredPurposes(
+  format: FormatId,
+  request: Pick<RecommendationRequest, 'subtitleReadability' | 'neckComfort' | 'motionSickness'>,
+): string[] {
+  const purposes: string[] = [];
+  if (format === 'superplex') purposes.push('overview');
+  else if (format === '4dx' && request.motionSickness >= 1) purposes.push('low_motion');
+  else purposes.push('immersive');
+  if (request.subtitleReadability) purposes.push('subtitle');
+  if (request.neckComfort) purposes.push('neck_easy');
+  return purposes;
+}
+
+/** 원하는 목적과 겹치는 존을 신뢰도 가중으로 선택 */
+export function matchZones(zones: SeatZone[], desired: string[]): SeatZone[] {
+  return zones
+    .filter((z) => z.purposes.some((p) => desired.includes(p)))
+    .sort((a, b) => {
+      const cover = (z: SeatZone) => z.purposes.filter((p) => desired.includes(p)).length;
+      return cover(b) * b.confidence - cover(a) * a.confidence;
+    });
+}
+
+// 좌석 존 추천 — DB 존(제보·추정)이 있으면 사용, 없으면 포맷 휴리스틱 폴백.
+// 잔여석 미수집 전제라 항상 '추정' 라벨 (docs/05 §4.4)
 export function suggestSeatZone(
   format: FormatId,
   spec: AuditoriumSpec | null,
-  request: Pick<RecommendationRequest, 'subtitleReadability' | 'neckComfort'>,
+  request: Pick<RecommendationRequest, 'subtitleReadability' | 'neckComfort' | 'motionSickness'>,
+  zones: SeatZone[] = [],
 ): SeatZoneSuggestion {
-  const rationale: string[] = [];
+  const desired = desiredPurposes(format, request);
+  const matched = matchZones(zones, desired);
+  if (matched.length) {
+    const best = matched[0];
+    const zone = [best.rowRange, best.colRange].filter(Boolean).join(' ') || '중앙';
+    const rationale = [
+      best.rationale ?? '목적별 구역 제보',
+      `출처: ${best.sourceName ?? '출처 없음'} (${best.observedAt.slice(0, 10)})`,
+    ];
+    const uncovered = desired.filter((p) => !matched.some((z) => z.purposes.includes(p)));
+    if (uncovered.length) rationale.push(`미확인 목적: ${uncovered.join(', ')}`);
+    return { zone, rationale, label: '추정' };
+  }
+  return heuristicSuggestion(format, spec, request);
+}
+
+function heuristicSuggestion(
+  format: FormatId,
+  spec: AuditoriumSpec | null,
+  request: Pick<RecommendationRequest, 'subtitleReadability' | 'neckComfort' | 'motionSickness'>,
+): SeatZoneSuggestion {
+  const rationale: string[] = ['이 관의 좌석 존 제보 없음 — 포맷 기준 일반 권장'];
   let zone: string;
 
   switch (format) {

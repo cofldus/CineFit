@@ -1,5 +1,6 @@
-import type { AuditoriumSpec, CandidateShowtime, FormatId, InfoStatus } from '../domain/recommendation/types';
+import type { AuditoriumSpec, CandidateShowtime, FormatId, InfoStatus, SeatZone } from '../domain/recommendation/types';
 import { getDb } from './db';
+import { seatZoneRepository } from './seatZoneRepository';
 
 interface CandidateRow {
   id: number;
@@ -71,7 +72,7 @@ function parseSound(json: string | null): AuditoriumSpec['sound'] {
   return { format: s.format as string | undefined, ceiling: s.ceiling as boolean | undefined };
 }
 
-function toCandidate(r: CandidateRow): CandidateShowtime {
+function toCandidate(r: CandidateRow, seatZones: SeatZone[]): CandidateShowtime {
   const spec: AuditoriumSpec | null = r.spec_status
     ? {
         projector: parseProjector(r.projector),
@@ -110,6 +111,7 @@ function toCandidate(r: CandidateRow): CandidateShowtime {
       seatCount: r.seat_count,
       status: r.aud_status,
       spec,
+      seatZones,
     },
     location: {
       id: r.loc_id,
@@ -146,7 +148,8 @@ export const showtimeRepository = {
          ORDER BY st.starts_at`,
       )
       .all(movieId, date) as unknown as CandidateRow[];
-    return rows.map(toCandidate);
+    const zoneMap = seatZoneRepository.listByAuditoriums([...new Set(rows.map((r) => r.aud_id))]);
+    return rows.map((r) => toCandidate(r, zoneMap.get(r.aud_id) ?? []));
   },
 
   /** 활성 회차가 있는 날짜 목록 (Asia/Seoul 기준, 오름차순) */

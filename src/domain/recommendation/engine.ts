@@ -2,7 +2,7 @@
 // 하드 필터 → 축 점수 → 신뢰도·최신성 보정 → 브랜드 가산 차단 → 다양성 선택 → 설명 생성
 import { estimateTravelMinutes } from '../../lib/geo';
 import { FORMAT_LABELS, INFO_STATUS_LABELS, VERIFIED_STATUSES, WEIGHT_PRESETS } from './presets';
-import { suggestSeatZone } from './seatZone';
+import { desiredPurposes, matchZones, suggestSeatZone } from './seatZone';
 import type {
   CandidateShowtime,
   Citation,
@@ -206,11 +206,33 @@ export function scoreCandidate(
   const best = spec.imax_expanded_ar ? 'imax' : spec.dolby_vision?.value ? 'dolby_cinema' : 'standard';
   const pm = c.format === best ? 1 : c.format === 'standard' ? 0.6 : 0.75;
 
-  // 4.4~4.6 — 스파이크 범위 밖은 중립 0.5 (문서 05 §4.4 '추정' 라벨)
-  const seatQ = 0.5;
+  // 4.4 SeatQuality — 좌석 존(목적별 구역) 기반 근사. 잔여석 미수집 전제 (문서 05 §4.4)
+  const zones = c.auditorium.seatZones;
+  const desired = desiredPurposes(c.format, request);
+  let seatQ = 0.5;
+  if (zones.length) {
+    const matched = matchZones(zones, desired);
+    const covered = desired.filter((p) => matched.some((z) => z.purposes.includes(p)));
+    if (matched.length) {
+      const avgConf = matched.reduce((a, z) => a + z.confidence, 0) / matched.length;
+      seatQ = clamp01(0.5 + 0.35 * (covered.length / desired.length) * avgConf);
+      const best = matched[0];
+      citations.push({
+        what: `좌석 존 (${best.purposes.join('·')})`,
+        sourceName: best.sourceName ?? '출처 없음',
+        sourceUrl: null,
+        observedAt: best.observedAt,
+        infoStatus: best.infoStatus,
+      });
+      used.push({ conf: best.confidence, at: best.observedAt, halfLife: 90 }); // 좌석 제보 반감기 90일 (문서 05 §4.10)
+    }
+    uncertainties.push('좌석 존은 제보·추정 기반 — 실제 잔여 좌석 미반영');
+  } else {
+    uncertainties.push('좌석 존 데이터 없음 — 좌석 점수는 중립값');
+  }
+  // 4.5~4.6 — 스파이크 범위 밖은 중립 0.5
   const userPref = 0.5;
   const accFit = 0.5;
-  uncertainties.push('좌석 존·잔여석 데이터 미수집 — 좌석 관련 값은 추정');
 
   // 4.7 Convenience
   const travelMinutes = estimateTravelMinutes(request.origin, c.location);
@@ -261,7 +283,7 @@ export function scoreCandidate(
     pros,
     cons,
     uncertainties: [...new Set(uncertainties)],
-    seatZone: suggestSeatZone(c.format, aud, request),
+    seatZone: suggestSeatZone(c.format, aud, request, zones),
     citations,
   };
 }

@@ -110,4 +110,15 @@ test.describe('시각 회귀', () => {
     await expect(page.getByRole('heading', { name: '제보 검토' })).toBeVisible();
     await expect(page).toHaveScreenshot('admin-reports.png', { fullPage: true, ...SCREENSHOT_OPTS });
   });
+
+  test('관리자 데이터 품질 대시보드', async ({ page }) => {
+    await page.setViewportSize(VIEWPORTS.desktop);
+    await page.goto('/admin/login');
+    await page.getByLabel('관리자 비밀번호').fill('e2e-admin-pw');
+    await page.getByRole('button', { name: '로그인' }).click();
+    await expect(page.getByRole('heading', { name: '관리자 대시보드' })).toBeVisible();
+    await page.goto('/admin/quality');
+    await expect(page.getByRole('heading', { name: '데이터 품질 대시보드' })).toBeVisible();
+    await expect(page).toHaveScreenshot('admin-quality.png', { fullPage: true, ...SCREENSHOT_OPTS });
+  });
 });

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import type { PickLabel, ScoredCandidate } from '../src/domain/recommendation/types';
 import { FormatTag } from './FormatTag';
 import { TrustBadge } from './TrustBadge';
@@ -55,7 +56,13 @@ export function RecommendCard({
         {rank}순위 · {PICK_DESC[label]}
       </p>
       <h3 id={`pick-${rank}-title`} className="m-0 mb-2 mt-1 text-lg font-bold text-text">
-        {c.location.name} {c.auditorium.no} · {timeFmt.format(new Date(c.startsAt))}
+        <Link
+          href={`/cinemas/${c.auditorium.id}`}
+          className="text-text underline decoration-border underline-offset-4 hover:decoration-primary"
+        >
+          {c.location.name} {c.auditorium.no}
+        </Link>{' '}
+        · {timeFmt.format(new Date(c.startsAt))}
       </h3>
 
       <div className="mb-2.5 flex flex-wrap items-center gap-1.5">

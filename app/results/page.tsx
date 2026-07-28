@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { CompareTable } from '../../components/CompareTable';
+import { IconFilm, IconLightbulb } from '../../components/Icon';
 import { Notice } from '../../components/Notice';
 import { RecommendCard } from '../../components/RecommendCard';
 import { getRecommendations } from '../../src/data/recommendationService';
@@ -20,7 +21,7 @@ export default async function ResultsPage({
 
   if (!parsed.ok) {
     return (
-      <main className="mx-auto max-w-xl px-4 pb-24 pt-6">
+      <main className="mx-auto max-w-content px-4 pb-24 pt-6">
         <h1 className="text-2xl font-extrabold text-text">추천 결과</h1>
         <div className="mt-4 rounded-card-lg border border-trust-low/40 bg-trust-low/5 p-5" role="alert">
           <h3 className="m-0 text-lg font-bold text-text">입력값을 확인해 주세요</h3>
@@ -46,15 +47,16 @@ export default async function ResultsPage({
   const origin = result.request.origin;
 
   return (
-    <main className="mx-auto max-w-xl px-4 pb-24 pt-6">
+    <main className="mx-auto max-w-wide px-4 pb-24 pt-6">
       <h1 className="text-2xl font-extrabold text-text">추천 결과</h1>
-      <p className="mt-1 text-sm text-text-sub">
-        🎬 {result.movie.title} ({result.movie.runtimeMin}분) · {result.request.date} ·{' '}
+      <p className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm text-text-sub">
+        <IconFilm className="h-4 w-4 shrink-0" />
+        {result.movie.title} ({result.movie.runtimeMin}분) · {result.request.date} ·{' '}
         {origin.label ?? '지정 위치'} 출발 · 이동 ≤ {result.request.maxTravelMinutes}분 · 가격 ≤{' '}
         {result.request.maxPrice.toLocaleString('ko-KR')}원 — 조건에 맞는 회차 {result.scored.length}개
         (전체 {result.totalCandidates}개 중)
       </p>
-      <div className="mt-3">
+      <div className="mt-3 max-w-content">
         {result.dataMode?.usedSynthetic ? (
           <Notice>
             이 결과의 회차·가격은 <strong className="font-semibold">검증용 합성 데이터</strong>예요(실제
@@ -71,7 +73,11 @@ export default async function ResultsPage({
       </div>
 
       {result.picks.length === 0 ? (
-        <div className="mt-5 rounded-card-lg border border-border bg-surface p-5" role="alert" data-testid="empty-state">
+        <div
+          className="mt-5 max-w-content rounded-card-lg border border-border bg-surface p-5"
+          role="alert"
+          data-testid="empty-state"
+        >
           <h3 className="m-0 text-lg font-bold text-text">조건에 맞는 상영 회차가 없어요</h3>
           {result.excluded.length > 0 ? (
             <>
@@ -83,8 +89,9 @@ export default async function ResultsPage({
                   </li>
                 ))}
               </ul>
-              <p className="mt-2 text-sm text-text-sub">
-                💡 최대 이동 시간을 늘리거나, 허용 포맷·가격 상한을 넓혀서 다시 시도해 보세요.
+              <p className="mt-2 flex items-start gap-1.5 text-sm text-text-sub">
+                <IconLightbulb className="mt-0.5 h-4 w-4 shrink-0" />
+                최대 이동 시간을 늘리거나, 허용 포맷·가격 상한을 넓혀서 다시 시도해 보세요.
               </p>
             </>
           ) : (
@@ -99,7 +106,7 @@ export default async function ResultsPage({
         </div>
       ) : (
         <>
-          <div className="mt-5 flex flex-col gap-3">
+          <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-3">
             {result.picks.map((p, i) => (
               <RecommendCard key={p.scored.candidate.showtimeId} rank={i + 1} label={p.label} scored={p.scored} />
             ))}
@@ -110,7 +117,7 @@ export default async function ResultsPage({
           </div>
 
           {result.excluded.length > 0 ? (
-            <details className="mt-5 rounded-card-lg border border-border bg-surface p-4">
+            <details className="mt-5 max-w-content rounded-card-lg border border-border bg-surface p-4">
               <summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium text-primary">
                 조건에 안 맞아 제외된 회차 {result.excluded.length}건 보기
               </summary>

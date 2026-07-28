@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import type { PickLabel, ScoredCandidate } from '../src/domain/recommendation/types';
 import { FormatTag } from './FormatTag';
+import { IconNote, IconPrice, IconQuestion, IconSeat, IconThumbsDown, IconThumbsUp, IconTransit, IconWrench } from './Icon';
+import { ShowtimeStatusBadge } from './StatusBadge';
 import { TrustBadge } from './TrustBadge';
 
 const timeFmt = new Intl.DateTimeFormat('ko-KR', {
@@ -45,14 +47,22 @@ export function RecommendCard({
   const { candidate: c } = scored;
   const spec = c.auditorium.spec;
   const confCls = CONFIDENCE_CLS[scored.confidenceLabel] ?? CONFIDENCE_CLS['낮음'];
+  const isTop = rank === 1;
 
   return (
     <article
-      className="rounded-card-lg border border-border bg-surface p-4"
+      className={`rounded-card-lg border bg-surface p-4 ${
+        isTop ? 'border-primary shadow-highlight' : 'border-border shadow-card'
+      }`}
       aria-labelledby={`pick-${rank}-title`}
       data-testid={`pick-${label}`}
     >
-      <p className="m-0 text-sm text-text-sub">
+      <p className="m-0 flex items-center gap-1.5 text-sm text-text-sub">
+        {isTop ? (
+          <span className="inline-flex items-center rounded-full bg-primary px-2 py-0.5 text-[11px] font-bold text-white">
+            가장 잘 맞아요
+          </span>
+        ) : null}
         {rank}순위 · {PICK_DESC[label]}
       </p>
       <h3 id={`pick-${rank}-title`} className="m-0 mb-2 mt-1 text-lg font-bold text-text">
@@ -76,44 +86,64 @@ export function RecommendCard({
       </div>
 
       <div className="mb-2.5 flex flex-wrap gap-x-3 gap-y-1 text-sm text-text-sub">
-        <span>🚇 이동 약 {scored.travelMinutes}분(추정)</span>
-        <span>💰 {c.priceAdult.toLocaleString('ko-KR')}원</span>
-        <span>
-          🪑 {scored.seatZone.zone} <span>({scored.seatZone.label})</span>
+        <span className="inline-flex items-center gap-1">
+          <IconTransit className="h-4 w-4" /> 이동 약 {scored.travelMinutes}분(추정)
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <IconPrice className="h-4 w-4" /> {c.priceAdult.toLocaleString('ko-KR')}원
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <IconSeat className="h-4 w-4" /> {scored.seatZone.zone} <span>({scored.seatZone.label})</span>
         </span>
       </div>
 
-      <ul className="m-0 flex list-none flex-col gap-1 p-0 text-[15px] text-text">
-        {scored.pros.slice(0, 3).map((p) => (
-          <li key={p} className="before:mr-1.5 before:content-['👍']">
-            {p}
-          </li>
-        ))}
-        {scored.cons.slice(0, 2).map((n) => (
-          <li key={n} className="before:mr-1.5 before:content-['👎']">
-            {n}
-          </li>
-        ))}
-        {scored.uncertainties.slice(0, 2).map((u) => (
-          <li key={u} className="before:mr-1.5 before:content-['❓']">
-            {u}
-          </li>
-        ))}
-      </ul>
+      <div className="flex flex-col gap-2 text-[15px] text-text">
+        {scored.pros.length > 0 ? (
+          <div>
+            <h4 className="m-0 mb-1 text-xs font-bold text-text-sub">잘 맞는 이유</h4>
+            <ul className="m-0 flex list-none flex-col gap-1 p-0">
+              {scored.pros.slice(0, 3).map((p) => (
+                <li key={p} className="flex items-start gap-1.5">
+                  <IconThumbsUp className="mt-0.5 h-4 w-4 shrink-0 text-trust-high" />
+                  {p}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        {scored.cons.length > 0 ? (
+          <div>
+            <h4 className="m-0 mb-1 text-xs font-bold text-text-sub">고려할 점</h4>
+            <ul className="m-0 flex list-none flex-col gap-1 p-0">
+              {scored.cons.slice(0, 2).map((n) => (
+                <li key={n} className="flex items-start gap-1.5">
+                  <IconThumbsDown className="mt-0.5 h-4 w-4 shrink-0 text-trust-mid" />
+                  {n}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        {scored.uncertainties.length > 0 ? (
+          <div>
+            <h4 className="m-0 mb-1 text-xs font-bold text-text-sub">확인 필요</h4>
+            <ul className="m-0 flex list-none flex-col gap-1 p-0">
+              {scored.uncertainties.slice(0, 2).map((u) => (
+                <li key={u} className="flex items-start gap-1.5">
+                  <IconQuestion className="mt-0.5 h-4 w-4 shrink-0 text-text-sub" />
+                  {u}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </div>
 
       <p className="mt-2.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm text-text-sub">
         <span>상영관 정보 확인일 {spec ? spec.observedAt.slice(0, 10) : '정보 없음'}</span>
         {spec ? <TrustBadge status={spec.infoStatus} /> : null}
         <span>· 회차 확인일 {(c.verifiedAt ?? c.dataCheckedAt).slice(0, 10)}</span>
-        {c.isSynthetic ? (
-          <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-trust-mid/40 px-2.5 py-0.5 text-xs font-medium text-trust-mid">
-            ≈ 검증용 합성 회차
-          </span>
-        ) : (
-          <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-trust-high/40 px-2.5 py-0.5 text-xs font-medium text-trust-high">
-            ✔ 관리자 확인 회차
-          </span>
-        )}
+        <ShowtimeStatusBadge kind={c.isSynthetic ? 'synthetic' : 'verified'} />
       </p>
 
       {c.bookingUrl && !c.isSynthetic ? (
@@ -133,7 +163,11 @@ export function RecommendCard({
         <summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium text-primary">
           점수는 어떻게 계산되나요?
         </summary>
-        <p className="mb-2 text-sm text-text-sub">아래 항목들을 종합해서 계산한 점수예요.</p>
+        <p className="mb-2 text-sm text-text-sub">
+          아래 항목들을 종합해서 계산한 점수예요. 영화의 절대적인 품질이 아니라{' '}
+          <strong className="font-semibold text-text">지금 입력한 조건에서만</strong> 상대적으로
+          얼마나 잘 맞는지를 나타내요.
+        </p>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
           <StatRow label="종합 점수" value={pct(scored.final)} />
           <StatRow label="신뢰 보정" value={pct(scored.trust)} />
@@ -143,8 +177,16 @@ export function RecommendCard({
           <StatRow label="정보 신뢰도" value={pct(scored.axes.dc)} />
           <StatRow label="최신성" value={pct(scored.axes.fr)} />
         </div>
-        {spec?.renewalEvent ? <p className="mt-2 text-sm text-text-sub">🛠 {spec.renewalEvent}</p> : null}
-        {spec?.notes ? <p className="mt-1 text-sm text-text-sub">📋 {spec.notes}</p> : null}
+        {spec?.renewalEvent ? (
+          <p className="mt-2 flex items-start gap-1.5 text-sm text-text-sub">
+            <IconWrench className="mt-0.5 h-4 w-4 shrink-0" /> {spec.renewalEvent}
+          </p>
+        ) : null}
+        {spec?.notes ? (
+          <p className="mt-1 flex items-start gap-1.5 text-sm text-text-sub">
+            <IconNote className="mt-0.5 h-4 w-4 shrink-0" /> {spec.notes}
+          </p>
+        ) : null}
         <p className="mt-2 text-sm text-text-sub">
           좌석 구역 추천 근거({scored.seatZone.label}): {scored.seatZone.rationale.join(' / ')}
         </p>

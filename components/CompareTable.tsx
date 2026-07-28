@@ -30,8 +30,27 @@ export function CompareTable({ picks }: { picks: { label: PickLabel; scored: Sco
   return (
     <section aria-label="추천 상영관 비교">
       <h2 className="text-lg font-bold text-text">한눈에 비교</h2>
+
+      {/* 모바일: 속성 우선 카드형 — 좁은 화면에서 가로 스크롤 표보다 읽기 쉽다 */}
+      <div className="mt-2 flex flex-col gap-2 sm:hidden">
+        {rows.map((row) => (
+          <div key={row.name} className="rounded-card border border-border bg-surface p-3">
+            <p className="m-0 text-xs font-semibold text-text-sub">{row.name}</p>
+            <div className="mt-1.5 grid grid-cols-3 gap-2">
+              {picks.map((p) => (
+                <div key={p.label} className="text-sm text-text">
+                  <span className="block text-[11px] text-text-sub">{p.label}</span>
+                  {row.render(p.scored)}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* 태블릿 이상: 3열 표 — 항목이 많아도 데스크톱 폭에서는 스크롤 없이 한눈에 들어온다 */}
       <div
-        className="mt-2 overflow-x-auto rounded-card-lg border border-border"
+        className="mt-2 hidden overflow-x-auto rounded-card-lg border border-border sm:block"
         tabIndex={0}
         role="region"
         aria-label="비교 표 (가로 스크롤)"

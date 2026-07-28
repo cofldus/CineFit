@@ -19,8 +19,7 @@ export function ShowtimeStatusBadge({
   if (variant === 'compact') {
     return (
       <span className={`inline-flex items-center gap-1 whitespace-nowrap text-xs font-medium ${c.cls}`}>
-        <span aria-hidden>{c.icon}</span>
-        {c.compact}
+        <span aria-hidden>{c.icon}</span> {c.compact}
       </span>
     );
   }
@@ -28,8 +27,7 @@ export function ShowtimeStatusBadge({
     <span
       className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-medium ${c.cls}`}
     >
-      <span aria-hidden>{c.icon}</span>
-      {c.full}
+      <span aria-hidden>{c.icon}</span> {c.full}
     </span>
   );
 }

@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { IconFilm, IconHome, IconInfo } from './Icon';
+import { IconFilm, IconHome, IconInfo, IconSearch } from './Icon';
 
 // 모바일 하단 내비 — 데스크톱은 상단 헤더 내비만 사용(sm 이상 숨김). 관리자 링크는 넣지 않는다.
 const ITEMS = [
   { href: '/', label: '홈', Icon: IconHome, match: (p: string) => p === '/' },
   { href: '/movies', label: '영화', Icon: IconFilm, match: (p: string) => p.startsWith('/movies') || p.startsWith('/recommend') || p.startsWith('/results') },
+  { href: '/search', label: '검색', Icon: IconSearch, match: (p: string) => p.startsWith('/search') },
   { href: '/sources', label: '출처', Icon: IconInfo, match: (p: string) => p.startsWith('/sources') || p.startsWith('/cinemas') },
 ] as const;
 

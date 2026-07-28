@@ -35,6 +35,7 @@ const PAGES = [
   { name: '영화 선택', path: '/movies' },
   { name: '추천 조건 입력', path: '/recommend/1' },
   { name: '상영관 상세', path: '/cinemas/1' },
+  { name: '검색', path: '/search?q=CGV' },
   { name: '출처·신뢰도 안내', path: '/sources' },
   { name: '제보 폼', path: '/cinemas/1/report' },
   { name: '관리자 로그인', path: '/admin/login' },

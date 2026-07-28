@@ -12,4 +12,5 @@ export default function globalSetup() {
   execSync('node spikes/minimal-db/seed.mjs', { env, stdio: 'inherit' });
   execSync('node db/migrate.mjs', { env, stdio: 'inherit' });
   execSync('node db/seed-seat-zones.mjs', { env, stdio: 'inherit' });
+  execSync('node db/seed-aliases.mjs', { env, stdio: 'inherit' });
 }

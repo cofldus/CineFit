@@ -41,3 +41,19 @@ test('모든 후보 제외 시 이유와 완화 제안을 보여준다', async (
   await expect(page.getByTestId('empty-state')).toContainText('제외');
   await expect(page.getByTestId('empty-state')).toContainText('다시 시도');
 });
+
+test('별칭으로 영화·상영관을 검색해 각각의 상세로 이동한다', async ({ page }) => {
+  await page.goto('/search');
+  await page.getByLabel(/영화 제목/).fill('듄2');
+  await page.getByRole('button', { name: '검색' }).click();
+  await expect(page).toHaveURL(/\/search\?q=/);
+  await expect(page.getByRole('heading', { name: '영화' })).toBeVisible();
+  await expect(page.getByRole('link', { name: /듄: 파트 2/ })).toBeVisible();
+  await page.getByRole('link', { name: /듄: 파트 2/ }).click();
+  await expect(page).toHaveURL(/\/recommend\/\d+/);
+
+  await page.goto('/search?q=용아맥');
+  await expect(page.getByRole('heading', { name: '상영관' })).toBeVisible();
+  await page.getByRole('link', { name: /용산아이파크몰 IMAX관/ }).click();
+  await expect(page).toHaveURL(/\/cinemas\/\d+/);
+});

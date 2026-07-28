@@ -165,6 +165,15 @@ export function IconHome(props: IconProps) {
   );
 }
 
+export function IconSearch(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="10.5" cy="10.5" r="6.5" />
+      <path d="M19.5 19.5 15 15" />
+    </svg>
+  );
+}
+
 export function IconInfo(props: IconProps) {
   return (
     <svg {...base} {...props}>

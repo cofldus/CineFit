@@ -43,6 +43,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 영화 찾기
               </Link>
               <Link
+                href="/search"
+                className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-text-sub transition-colors hover:bg-bg hover:text-text"
+              >
+                검색
+              </Link>
+              <Link
                 href="/sources"
                 className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-text-sub transition-colors hover:bg-bg hover:text-text"
               >

@@ -86,6 +86,13 @@ test.describe('시각 회귀', () => {
     await expect(page).toHaveScreenshot('sources.png', { fullPage: true, ...SCREENSHOT_OPTS });
   });
 
+  test('검색', async ({ page }) => {
+    await page.setViewportSize(VIEWPORTS.mobile);
+    await page.goto('/search?q=CGV');
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page).toHaveScreenshot('search.png', { fullPage: true, ...SCREENSHOT_OPTS });
+  });
+
   test('제보 폼', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
     await page.goto('/cinemas/1/report');

@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import { IconChevronRight, IconEdit, IconFilm, IconLightbulb } from '../components/Icon';
 import { Notice } from '../components/Notice';
+import { OnboardingCard } from '../components/OnboardingCard';
 import { HeroVisual } from '../components/ScreenArt';
 import { DbNotSeededError } from '../src/data/db';
+import { featureFlagRepository } from '../src/data/featureFlagRepository';
 import { movieRepository } from '../src/data/movieRepository';
 import type { MovieWithSpecs } from '../src/domain/recommendation/types';
 
@@ -25,8 +27,10 @@ const COMPARE_POINTS = [
 export default async function HomePage() {
   let movies: MovieWithSpecs[] = [];
   let dbMissing = false;
+  let onboardingEnabled = false;
   try {
     movies = await movieRepository.list();
+    onboardingEnabled = await featureFlagRepository.isEnabled('onboarding');
   } catch (e) {
     if (e instanceof DbNotSeededError) dbMissing = true;
     else throw e;
@@ -63,6 +67,8 @@ export default async function HomePage() {
         </div>
         <HeroVisual className="hidden h-auto w-full text-primary lg:block" />
       </section>
+
+      {onboardingEnabled && <OnboardingCard />}
 
       {dbMissing ? (
         <div className="mt-6 max-w-content rounded-card-lg border border-border bg-surface p-5">

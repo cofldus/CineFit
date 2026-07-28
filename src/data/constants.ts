@@ -13,3 +13,17 @@ export const ORIGIN_PRESETS = [
 ] as const;
 
 export type OriginId = (typeof ORIGIN_PRESETS)[number]['id'];
+
+// 추천 폼과 경량 온보딩(components/OnboardingCard.tsx)이 공유하는 선택지 — 값이 갈리면
+// 온보딩에서 고른 답이 추천 폼 기본값과 어긋나므로 한 곳에서만 정의한다.
+export const PRIORITY_OPTIONS = [
+  { value: 'balance', label: '균형 있게' },
+  { value: 'quality', label: '영상·음향 품질' },
+  { value: 'logistics', label: '가까운 곳·가성비' },
+] as const;
+
+export const MOTION_OPTIONS = [
+  { value: '0', label: '괜찮아요' },
+  { value: '1', label: '조금 신경 쓰여요' },
+  { value: '2', label: '많이 힘들어요' },
+] as const;

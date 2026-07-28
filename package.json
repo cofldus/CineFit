@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "db:seed": "node spikes/minimal-db/seed.mjs && node db/migrate.mjs && node db/seed-seat-zones.mjs && node db/seed-aliases.mjs",
+    "db:seed": "node spikes/minimal-db/seed.mjs && node db/migrate.mjs && node db/seed-seat-zones.mjs && node db/seed-aliases.mjs && node db/seed-feature-flags.mjs",
     "db:migrate": "node --env-file-if-exists=.env db/migrate.mjs",
     "db:status": "node --env-file-if-exists=.env db/migrate.mjs --status",
     "db:validate": "node --env-file-if-exists=.env db/migrate.mjs --validate",

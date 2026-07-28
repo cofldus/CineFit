@@ -1,8 +1,9 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { ORIGIN_PRESETS } from '../src/data/constants';
+import { useEffect, useState } from 'react';
+import { MOTION_OPTIONS, ORIGIN_PRESETS, PRIORITY_OPTIONS } from '../src/data/constants';
+import { readOnboardingState, type OnboardingAnswers } from '../src/lib/onboarding';
 import { SegmentedControl } from './SegmentedControl';
 
 const inputCls =
@@ -12,22 +13,19 @@ const sectionCls = 'rounded-card-lg border border-border bg-surface p-4';
 const checkRowCls = 'flex min-h-11 items-center gap-2.5 text-[15px] text-text';
 const checkboxCls = 'h-5 w-5 accent-primary';
 
-const PRIORITY_OPTIONS = [
-  { value: 'balance', label: '균형 있게' },
-  { value: 'quality', label: '영상·음향 품질' },
-  { value: 'logistics', label: '가까운 곳·가성비' },
-] as const;
-
-const MOTION_OPTIONS = [
-  { value: '0', label: '괜찮아요' },
-  { value: '1', label: '조금 신경 쓰여요' },
-  { value: '2', label: '많이 힘들어요' },
-] as const;
-
 // 기본값이 채워져 있어 그대로 제출해도 추천을 받을 수 있다 (요구사항: 전부 입력 불필요)
 export function RecommendForm({ movieId, defaultDate }: { movieId: number; defaultDate: string }) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
+  // 온보딩 답변은 localStorage에만 있어 서버 렌더링 시점엔 알 수 없다 — 마운트 후 읽어와서
+  // 적용한다. 이미 그려진 defaultValue/defaultChecked는 React가 재적용하지 않으므로, prefill이
+  // 도착하면 key를 바꿔 해당 입력만 다시 마운트한다(초기 렌더와 하이드레이션은 항상 동일하게
+  // 서버 기본값으로 그려지므로 하이드레이션 불일치는 생기지 않는다).
+  const [prefill, setPrefill] = useState<OnboardingAnswers | null>(null);
+  useEffect(() => {
+    setPrefill(readOnboardingState()?.answers ?? null);
+  }, []);
+  const prefillKey = prefill ? 'prefilled' : 'initial';
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -111,7 +109,13 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
           무엇을 가장 중요하게 보나요?
         </h2>
         <div className="flex flex-col gap-3.5">
-          <SegmentedControl name="priority" legend="가장 중요한 것" options={PRIORITY_OPTIONS} defaultValue="balance" />
+          <SegmentedControl
+            key={prefillKey}
+            name="priority"
+            legend="가장 중요한 것"
+            options={PRIORITY_OPTIONS}
+            defaultValue={prefill?.priority ?? 'balance'}
+          />
           <fieldset className="m-0 border-0 p-0">
             <legend className="mb-1.5 block text-sm font-semibold text-text">허용할 상영 방식</legend>
             <div className="flex flex-col gap-1">
@@ -139,17 +143,23 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
         </h2>
         <div className="flex flex-col gap-3.5">
           <SegmentedControl
+            key={prefillKey}
             name="motionSickness"
             legend="4DX 멀미, 얼마나 신경 쓰이세요?"
             options={MOTION_OPTIONS}
-            defaultValue="0"
+            defaultValue={prefill?.motionSickness ?? '0'}
           />
           <fieldset className="m-0 border-0 p-0">
             <legend className="mb-1.5 block text-sm font-semibold text-text">좌석·편의 선호</legend>
             <div className="flex flex-col gap-1">
-              <label className={checkRowCls}>
-                <input className={checkboxCls} type="checkbox" name="subtitleReadability" /> 자막이 잘 보이는 좌석
-                우선
+              <label className={checkRowCls} key={prefillKey}>
+                <input
+                  className={checkboxCls}
+                  type="checkbox"
+                  name="subtitleReadability"
+                  defaultChecked={prefill?.subtitleReadability ?? false}
+                />{' '}
+                자막이 잘 보이는 좌석 우선
               </label>
               <label className={checkRowCls}>
                 <input className={checkboxCls} type="checkbox" name="neckComfort" /> 목 덜 아픈 좌석 우선

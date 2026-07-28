@@ -42,6 +42,24 @@ test('모든 후보 제외 시 이유와 완화 제안을 보여준다', async (
   await expect(page.getByTestId('empty-state')).toContainText('다시 시도');
 });
 
+test('온보딩에 답하면 추천 폼 기본값이 바뀐다(건너뛰면 바뀌지 않는다)', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: '세 가지만 알려주시면 기본값을 맞춰드려요' })).toBeVisible();
+  // SegmentedControl의 radio는 sr-only라 클릭 가능 영역이 거의 없다 — 실제로 보이고 눌리는
+  // 라벨(텍스트)을 클릭해야 한다.
+  await page.getByText('영상·음향 품질', { exact: true }).click();
+  await page.getByText('많이 힘들어요', { exact: true }).click();
+  await page.getByLabel('자막이 잘 보이는 좌석을 선호해요').check();
+  await page.getByRole('button', { name: '저장하고 시작' }).click();
+  await expect(page.getByRole('heading', { name: '세 가지만 알려주시면 기본값을 맞춰드려요' })).not.toBeVisible();
+
+  await page.locator('a[href^="/recommend/"]').first().click();
+  await expect(page).toHaveURL(/\/recommend\/\d+/);
+  await expect(page.getByRole('radio', { name: '영상·음향 품질' })).toBeChecked();
+  await expect(page.getByRole('radio', { name: '많이 힘들어요' })).toBeChecked();
+  await expect(page.getByLabel('자막이 잘 보이는 좌석 우선')).toBeChecked();
+});
+
 test('별칭으로 영화·상영관을 검색해 각각의 상세로 이동한다', async ({ page }) => {
   await page.goto('/search');
   await page.getByLabel(/영화 제목/).fill('듄2');

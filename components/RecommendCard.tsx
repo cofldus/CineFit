@@ -3,6 +3,7 @@ import type { PickLabel, ScoredCandidate } from '../src/domain/recommendation/ty
 import { FormatTag } from './FormatTag';
 import { IconNote, IconPrice, IconQuestion, IconSeat, IconThumbsDown, IconThumbsUp, IconTransit, IconWrench } from './Icon';
 import { ShowtimeStatusBadge } from './StatusBadge';
+import { TrackedExternalLink } from './TrackedLink';
 import { TrustBadge } from './TrustBadge';
 
 const timeFmt = new Intl.DateTimeFormat('ko-KR', {
@@ -148,14 +149,16 @@ export function RecommendCard({
 
       {c.bookingUrl && !c.isSynthetic ? (
         <p className="mt-2.5">
-          <a
+          <TrackedExternalLink
+            event="booking_link_clicked"
+            eventProperties={{ showtimeId: c.showtimeId }}
             className="flex min-h-11 w-full items-center justify-center rounded-card bg-primary-strong px-5 text-[15px] font-semibold text-white transition-colors hover:bg-primary-strong-hover"
             href={c.bookingUrl}
             target="_blank"
             rel="noopener noreferrer nofollow"
           >
             공식 예매 페이지로 이동 ↗
-          </a>
+          </TrackedExternalLink>
         </p>
       ) : null}
 

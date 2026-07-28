@@ -1,7 +1,7 @@
-import Link from 'next/link';
 import type { MovieWithSpecs } from '../src/domain/recommendation/types';
 import { formatSpecValue, keySpecEntries, SPEC_KEY_LABELS } from '../src/lib/display';
 import { AspectFrame } from './ScreenArt';
+import { TrackedLink } from './TrackedLink';
 import { TrustBadge } from './TrustBadge';
 
 // 포스터 없이 실제 화면비 데이터를 시각화한 프레임 + 텍스트·태그로 성립하는 카드
@@ -30,12 +30,14 @@ export function MovieCard({ movie }: { movie: MovieWithSpecs }) {
         ))}
       </ul>
       <div className="mt-auto pt-4">
-        <Link
+        <TrackedLink
+          event="movie_selected"
+          eventProperties={{ movieId: movie.id }}
           href={`/recommend/${movie.id}`}
           className="flex min-h-11 w-full items-center justify-center rounded-card bg-primary-strong px-5 text-[15px] font-semibold text-white transition-colors hover:bg-primary-strong-hover"
         >
           이 영화로 추천받기
-        </Link>
+        </TrackedLink>
       </div>
     </article>
   );

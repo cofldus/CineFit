@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import Link from 'next/link';
+import { AppOpenedTracker } from '../components/AppOpenedTracker';
 import { MobileNav } from '../components/MobileNav';
 import { ServiceWorkerRegister } from '../components/ServiceWorkerRegister';
 import './globals.css';
@@ -53,6 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div id="main-content">{children}</div>
         <MobileNav />
         <ServiceWorkerRegister />
+        <AppOpenedTracker />
       </body>
     </html>
   );

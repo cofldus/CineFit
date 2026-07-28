@@ -71,6 +71,12 @@ export interface SeatZone {
   observedAt: string;
   confidence: number;
   sourceName: string | null;
+  /** 관리자 검수 시각 (사용자 제보 승격분) */
+  reviewedAt?: string | null;
+  /** 적용 시작일 — 승격 lineage */
+  validFrom?: string | null;
+  /** 대체된 존의 id — null이면 최초 등록 */
+  supersedesSeatZoneId?: number | null;
 }
 
 export interface CandidateShowtime {

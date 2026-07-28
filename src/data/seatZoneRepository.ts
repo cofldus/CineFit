@@ -12,6 +12,9 @@ interface SeatZoneRow {
   observed_at: string;
   confidence: number;
   source_name: string | null;
+  reviewed_at: string | null;
+  valid_from: string | null;
+  supersedes_seat_zone_id: number | null;
 }
 
 function toZone(r: SeatZoneRow): SeatZone {
@@ -24,6 +27,9 @@ function toZone(r: SeatZoneRow): SeatZone {
     observedAt: r.observed_at,
     confidence: r.confidence,
     sourceName: r.source_name,
+    reviewedAt: r.reviewed_at,
+    validFrom: r.valid_from,
+    supersedesSeatZoneId: r.supersedes_seat_zone_id,
   };
 }
 
@@ -36,9 +42,10 @@ export function createSeatZoneRepository(getDb: () => DbClient) {
       const placeholders = auditoriumIds.map(() => '?').join(',');
       const rows = await getDb().query<SeatZoneRow>(
         `SELECT z.auditorium_id, z.purpose, z.row_range, z.col_range, z.rationale,
-                z.info_status, z.observed_at, z.confidence, s.name AS source_name
+                z.info_status, z.observed_at, z.confidence, s.name AS source_name,
+                z.reviewed_at, z.valid_from, z.supersedes_seat_zone_id
          FROM seat_zones z LEFT JOIN sources s ON s.id = z.source_id
-         WHERE z.auditorium_id IN (${placeholders})
+         WHERE z.auditorium_id IN (${placeholders}) AND z.is_active = 1
          ORDER BY z.confidence DESC`,
         auditoriumIds,
       );

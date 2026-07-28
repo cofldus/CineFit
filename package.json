@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "db:seed": "node spikes/minimal-db/seed.mjs && node db/migrate.mjs",
+    "db:seed": "node spikes/minimal-db/seed.mjs && node db/migrate.mjs && node db/seed-seat-zones.mjs",
     "db:migrate": "node db/migrate.mjs",
     "sync:kobis": "node --env-file-if-exists=.env scripts/sync-kobis.ts"
   },

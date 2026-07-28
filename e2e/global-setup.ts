@@ -11,4 +11,5 @@ export default function globalSetup() {
   const env = { ...process.env, CINEFIT_DB_PATH: E2E_DB_PATH };
   execSync('node spikes/minimal-db/seed.mjs', { env, stdio: 'inherit' });
   execSync('node db/migrate.mjs', { env, stdio: 'inherit' });
+  execSync('node db/seed-seat-zones.mjs', { env, stdio: 'inherit' });
 }

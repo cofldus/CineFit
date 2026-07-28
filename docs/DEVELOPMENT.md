@@ -112,6 +112,17 @@ npm run sync:kobis -- --date=20260726 --dry-run       # 변경 예측만 (쓰기
 4. 수정·비활성화는 `/admin/showtimes/[id]` — **삭제는 없다.** 모든 변경은 이력에 남는다.
 5. 관리자 확인(비합성) 회차가 있는 날짜는 사용자 추천에서 합성 회차가 자동 제외된다.
 
+## 좌석 존·상영관 상세
+
+- `seat_zones`(마이그레이션 002): "명당"은 단일 좌표가 아니라 **목적별 구역**으로만 저장
+  (immersive/overview/subtitle/sound/low_motion/neck_easy/…, docs/06 §3.2). 시드는
+  `db/seed-seat-zones.mjs`(멱등, `db:seed` 체인에 포함) — 커뮤니티 통설(용아맥 J~L열,
+  코돌비 H열)은 `user_report` 0.7, 나머지는 `estimated` 0.3으로 구분 기록.
+- 추천 4.4축(SeatQuality): 원하는 목적(포맷+자막/목편함/멀미) 커버율 × 존 신뢰도로
+  0.5~0.85 근사, 존 없으면 중립 0.5 + 불확실 표기. 좌석 제보 반감기 90일.
+- 상영관 상세 `/cinemas/[id]`: 현재 사양·사양 이력·근거 관측 기록·좌석 구역·예정 회차.
+  추천 카드의 상영관명에서 진입.
+
 ## 시계(Clock) 규칙
 
 `new Date()` 직접 호출 대신 `src/lib/clock.ts`의 `getAppClock()`을 사용한다.

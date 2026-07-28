@@ -111,7 +111,9 @@ export function ReportForm({
   if (phase.kind === 'done') {
     return (
       <div className="rounded-card-lg border border-trust-high/40 bg-trust-high/10 p-5" role="status">
-        <h2 className="m-0 text-lg font-bold text-text">제보가 접수됐어요 (접수번호 #{phase.id})</h2>
+        <h2 className="m-0 text-lg font-bold text-text">
+          제보가 접수됐어요 (접수번호 #<span data-testid="report-id">{phase.id}</span>)
+        </h2>
         {phase.duplicateSuspect ? (
           <p className="mt-2 text-sm text-text-sub">
             비슷한 제보가 이미 접수되어 있어요. 함께 검토되며, 서로 다른 제보가 일치하면 신뢰도가

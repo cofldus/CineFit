@@ -92,6 +92,13 @@ test.describe('시각 회귀', () => {
     await page.getByRole('button', { name: '로그인' }).click();
     await expect(page.getByRole('heading', { name: '관리자 대시보드' })).toBeVisible();
     await page.goto('/admin/reports');
+    // 알려진 이슈: 리눅스에서 이 스펙 전체를 한 프로세스로 실행하면(운영 CI와 동일 조건)
+    // report-flow.spec.ts가 방금 쓴 제보가 이 목록에 반영되지 않고 0건으로 보이는 현상을
+    // 재현 확인함(윈도우에서는 재현 안 됨 — node:sqlite 커넥션 관련 플랫폼 차이로 추정,
+    // 근본 원인 미확정). reload로도 해결되지 않아 원인 조사가 더 필요하다(docs/TESTING.md
+    // "알려진 이슈" 참고). 프로덕션은 PostgreSQL만 허용되어(docs/DATABASE.md) 이 경로의
+    // 영향을 받지 않지만, SQLite 셀프호스트 배포에는 영향을 줄 수 있다.
+    await page.reload();
     await expect(page.getByRole('heading', { name: '제보 검토' })).toBeVisible();
     await expect(page).toHaveScreenshot('admin-reports.png', { fullPage: true, ...SCREENSHOT_OPTS });
   });

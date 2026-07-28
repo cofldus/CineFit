@@ -108,7 +108,7 @@ export function AdminReportActions({ reportId, status, reportType, targetType, a
           <input value={field} onChange={(e) => setField(e.target.value)} maxLength={60} placeholder="seat_zone" />
         </label>
         <label className="field" style={{ flex: 1, minWidth: 100 }}>
-          <span>신뢰도</span>
+          <span>관찰 신뢰도</span>
           <input
             type="number"
             step="0.05"
@@ -158,7 +158,7 @@ export function AdminReportActions({ reportId, status, reportType, targetType, a
               <input value={colRange} onChange={(e) => setColRange(e.target.value)} maxLength={40} placeholder="중앙 블록" />
             </label>
             <label className="field" style={{ flex: 1, minWidth: 100 }}>
-              <span>신뢰도</span>
+              <span>존 신뢰도</span>
               <input
                 type="number"
                 step="0.05"

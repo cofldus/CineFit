@@ -1,10 +1,15 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { CompareTable } from '../../components/CompareTable';
 import { IconFilm, IconLightbulb } from '../../components/Icon';
 import { Notice } from '../../components/Notice';
 import { RecommendCard } from '../../components/RecommendCard';
+import { SelectionWidget } from '../../components/SelectionWidget';
+import { serverAnalytics } from '../../src/analytics/serverAnalytics';
+import { ANALYTICS_COOKIE } from '../../src/lib/analyticsSession';
+import { getAppClock } from '../../src/lib/clock';
 import { getRecommendations } from '../../src/data/recommendationService';
 import { parseRecommendationInput } from '../../src/lib/validation';
 
@@ -41,10 +46,39 @@ export default async function ResultsPage({
     );
   }
 
-  const res = await getRecommendations(parsed.input);
+  const sessionId = (await cookies()).get(ANALYTICS_COOKIE)?.value;
+  const res = await getRecommendations(parsed.input, { sessionId });
   if (!res.ok) notFound();
   const { result } = res;
   const origin = result.request.origin;
+
+  // 추천 완료·빈 결과를 서버에서 직접 기록 — 클라이언트 왕복 없이 정확한 처리 시간을 남긴다.
+  // app_opened 등으로 세션 쿠키가 이미 있을 때만 기록한다(없으면 session_id는 NULL로 남는다).
+  if (sessionId && result.runId) {
+    const dataConfidenceBucket =
+      result.picks[0]?.scored.confidenceLabel ?? ('낮음' as const);
+    if (result.picks.length > 0) {
+      void serverAnalytics.recordEvent(
+        'recommendation_completed',
+        {
+          recommendationRunId: result.runId,
+          movieId: result.movie.id,
+          candidateCount: result.scored.length,
+          resultTypes: result.picks.map((p) => p.label),
+          processingTimeMs: result.latencyMs ?? 0,
+          dataConfidenceBucket,
+          syntheticDataUsed: result.dataMode?.usedSynthetic ?? false,
+        },
+        { sessionId, now: getAppClock().now() },
+      );
+    } else {
+      void serverAnalytics.recordEvent(
+        'recommendation_empty',
+        { movieId: result.movie.id, excludedCount: result.excluded.length },
+        { sessionId, now: getAppClock().now() },
+      );
+    }
+  }
 
   return (
     <main className="mx-auto max-w-wide px-4 pb-24 pt-6">
@@ -108,13 +142,24 @@ export default async function ResultsPage({
         <>
           <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-3">
             {result.picks.map((p, i) => (
-              <RecommendCard key={p.scored.candidate.showtimeId} rank={i + 1} label={p.label} scored={p.scored} />
+              <RecommendCard key={p.scored.candidate.showtimeId} rank={i + 1} label={p.label} scored={p.scored} runId={result.runId} />
             ))}
           </div>
 
           <div className="mt-6">
             <CompareTable picks={result.picks} />
           </div>
+
+          {result.runId ? (
+            <SelectionWidget
+              runId={result.runId}
+              picks={result.picks.map((p) => ({
+                auditoriumId: p.scored.candidate.auditorium.id,
+                auditoriumLabel: `${p.scored.candidate.location.name} ${p.scored.candidate.auditorium.no}`,
+                pickLabel: p.label,
+              }))}
+            />
+          ) : null}
 
           {result.excluded.length > 0 ? (
             <details className="mt-5 max-w-content rounded-card-lg border border-border bg-surface p-4">

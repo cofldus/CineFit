@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { PickLabel, ScoredCandidate } from '../src/domain/recommendation/types';
+import { FeedbackWidget } from './FeedbackWidget';
 import { FormatTag } from './FormatTag';
 import { IconNote, IconPrice, IconQuestion, IconSeat, IconThumbsDown, IconThumbsUp, IconTransit, IconWrench } from './Icon';
 import { ShowtimeStatusBadge } from './StatusBadge';
@@ -40,10 +41,13 @@ export function RecommendCard({
   rank,
   label,
   scored,
+  runId,
 }: {
   rank: number;
   label: PickLabel;
   scored: ScoredCandidate;
+  /** 이 추천 실행의 recommendation_runs id — 있으면 카드에 즉시 피드백 위젯을 보여준다 */
+  runId?: number;
 }) {
   const { candidate: c } = scored;
   const spec = c.auditorium.spec;
@@ -210,6 +214,8 @@ export function RecommendCard({
           ))}
         </ul>
       </details>
+
+      {runId ? <FeedbackWidget runId={runId} showtimeId={c.showtimeId} /> : null}
     </article>
   );
 }

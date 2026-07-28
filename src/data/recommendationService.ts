@@ -1,4 +1,6 @@
+import packageJson from '../../package.json';
 import { recommend } from '../domain/recommendation/engine';
+import { ACTIVE_POLICY } from '../domain/recommendation/policies/activePolicy';
 import type { RecommendationRequest, RecommendationResult } from '../domain/recommendation/types';
 import { getAppClock } from '../lib/clock';
 import type { RecommendationInput } from '../lib/validation';
@@ -6,6 +8,8 @@ import { ORIGIN_PRESETS } from './constants';
 import { movieRepository } from './movieRepository';
 import { recommendationRepository } from './recommendationRepository';
 import { showtimeRepository } from './showtimeRepository';
+
+const CODE_VERSION = packageJson.version;
 
 export type RecommendationServiceResult =
   | { ok: true; result: RecommendationResult }
@@ -30,7 +34,10 @@ export function toDomainRequest(input: RecommendationInput): RecommendationReque
   };
 }
 
-export async function getRecommendations(input: RecommendationInput): Promise<RecommendationServiceResult> {
+export async function getRecommendations(
+  input: RecommendationInput,
+  ctx: { sessionId?: string } = {},
+): Promise<RecommendationServiceResult> {
   const movie = await movieRepository.findById(input.movieId);
   if (!movie) return { ok: false, error: 'movie_not_found' };
 
@@ -45,12 +52,17 @@ export async function getRecommendations(input: RecommendationInput): Promise<Re
   const candidates = verified.length > 0 && !allowSynthetic ? verified : all;
 
   const started = performance.now();
-  const result = recommend({ movie, candidates, request, now });
+  const result = recommend({ movie, candidates, request, now, weightsOverride: ACTIVE_POLICY.weights[request.priority] });
   result.dataMode = {
     usedSynthetic: candidates.some((c) => c.isSynthetic),
     syntheticSuppressed: all.length - candidates.length,
   };
-  await recommendationRepository.saveRun(result, Math.round(performance.now() - started), now.toISOString());
+  result.latencyMs = Math.round(performance.now() - started);
+  result.runId = await recommendationRepository.saveRun(result, result.latencyMs, now.toISOString(), {
+    policyVersion: ACTIVE_POLICY.version,
+    codeVersion: CODE_VERSION,
+    sessionId: ctx.sessionId,
+  });
 
   return { ok: true, result };
 }

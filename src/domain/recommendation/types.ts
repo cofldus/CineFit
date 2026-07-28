@@ -185,4 +185,8 @@ export interface RecommendationResult {
     usedSynthetic: boolean;
     syntheticSuppressed: number; // 검증 회차 우선으로 제외된 합성 회차 수
   };
+  /** 이 실행의 recommendation_runs 행 id — 피드백·선택·관람후 평가가 참조 (서비스 계층에서 설정) */
+  runId?: number;
+  /** 추천 계산에 걸린 시간(ms) — 분석 이벤트에 그대로 실어 보낸다 (서비스 계층에서 설정) */
+  latencyMs?: number;
 }

@@ -13,6 +13,7 @@ import type {
   RecommendationResult,
   ScoredCandidate,
   SpecValue,
+  Weights,
 } from './types';
 
 export interface EngineInput {
@@ -20,6 +21,8 @@ export interface EngineInput {
   candidates: CandidateShowtime[];
   request: RecommendationRequest;
   now: Date; // 최신성 계산 기준 시각 (주입 — 테스트 결정성)
+  /** 정책 버전 비교용 — 생략 시 기본 정책(WEIGHT_PRESETS) 사용 (docs/RECOMMENDATION-EVALUATION.md) */
+  weightsOverride?: Weights;
 }
 
 const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
@@ -69,8 +72,10 @@ export function scoreCandidate(
   request: RecommendationRequest,
   now: Date,
   minPriceAmongCandidates: number,
+  /** 정책 버전 비교(docs/RECOMMENDATION-EVALUATION.md)용 — 생략 시 기본 정책(WEIGHT_PRESETS) 사용 */
+  weightsOverride?: Weights,
 ): ScoredCandidate {
-  const W = WEIGHT_PRESETS[request.priority];
+  const W = weightsOverride ?? WEIGHT_PRESETS[request.priority];
   const spec = movie.specs;
   const aud = c.auditorium.spec;
   const proj = aud?.projector ?? {};
@@ -302,7 +307,8 @@ export function selectDiverse(scored: ScoredCandidate[]): { label: PickLabel; sc
 }
 
 export function recommend(input: EngineInput): RecommendationResult {
-  const { movie, candidates, request, now } = input;
+  const { movie, candidates, request, now, weightsOverride } = input;
+  const weights = weightsOverride ?? WEIGHT_PRESETS[request.priority];
 
   // 배급 버전에 없는 포맷 회차 제거 (문서 05 §4.1 — 4DX 버전 미확인이면 후보 아님)
   // 수퍼플렉스 등 대형 일반관 상영은 표준(2D) 배급 버전을 사용한다.
@@ -318,13 +324,13 @@ export function recommend(input: EngineInput): RecommendationResult {
   const { passed, excluded } = hardFilter(inVersion, request);
   const minPrice = passed.length ? Math.min(...passed.map((c) => c.priceAdult)) : 0;
   const scored = passed
-    .map((c) => scoreCandidate(movie, c, request, now, minPrice))
+    .map((c) => scoreCandidate(movie, c, request, now, minPrice, weights))
     .sort((a, b) => b.final - a.final);
 
   return {
     movie,
     request,
-    weights: WEIGHT_PRESETS[request.priority],
+    weights,
     totalCandidates: candidates.length,
     excluded: [...versionExcluded, ...excluded],
     picks: selectDiverse(scored),

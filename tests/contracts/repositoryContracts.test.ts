@@ -9,6 +9,8 @@ import { createPostgresClient } from '../../src/data/client/postgresClient';
 import { createSqliteClient } from '../../src/data/client/sqliteClient';
 import type { DbClient } from '../../src/data/client/types';
 import { createMovieRepository } from '../../src/data/movieRepository';
+import { createReportPromotionService } from '../../src/data/reportPromotionService';
+import { createReportService } from '../../src/data/reportService';
 import { createSeatZoneRepository } from '../../src/data/seatZoneRepository';
 import { createShowtimeRepository } from '../../src/data/showtimeRepository';
 
@@ -211,6 +213,77 @@ function runContracts(providerName: string, makeDb: () => Promise<DbClient>, clo
         [fx.auditoriumId],
       );
       expect(JSON.parse(rows[0].value)).toBe('new');
+    });
+
+    it('ReportPromotionContract: 신뢰도 상한·좌석 존 계보·상태 종결', async () => {
+      const reports = createReportService(getDb);
+      const promotion = createReportPromotionService(getDb);
+      const now = new Date('2026-07-27T12:00:00+09:00');
+      const makeReport = (sessionHash: string, evidenceUrl?: string) =>
+        reports.create(
+          {
+            reportType: 'seat_zone', targetType: 'auditorium', targetId: fx.auditoriumId,
+            summary: '계약 테스트 좌석 제보', claimedValue: { rowRange: 'J~K열' }, evidenceUrl,
+          } as Parameters<typeof reports.create>[0],
+          { sessionHash, now },
+        );
+
+      // 기존 활성 존 — 승격 시 대체될 대상
+      await db.run(
+        `INSERT INTO seat_zones (auditorium_id, purpose, row_range, info_status, observed_at, confidence) VALUES (?,?,?,?,?,?)`,
+        [fx.auditoriumId, '["immersive"]', 'H~I열', 'estimated', '2026-06-01', 0.3],
+      );
+      const prevId = (await db.query<{ id: number }>(
+        `SELECT id FROM seat_zones WHERE auditorium_id = ? AND is_active = 1`,
+        [fx.auditoriumId],
+      ))[0].id;
+
+      // 서로 다른 세션 2건 → 복수 일치 상한 0.75
+      await makeReport('contract-a');
+      const second = await makeReport('contract-b');
+      if (!second.ok) throw new Error('제보 생성 실패');
+      const promoted = await promotion.promoteSeatZone(
+        second.id,
+        { purposes: ['immersive', 'subtitle'], rowRange: 'J~K열', rationale: '복수 제보 일치', confidence: 0.95, supersedesSeatZoneId: prevId },
+        { actor: 'admin', now },
+      );
+      expect(promoted.ok).toBe(true);
+      if (!promoted.ok) return;
+      expect(Number(promoted.confidence)).toBeCloseTo(0.75, 5);
+
+      const old = (await db.query<{ is_active: number; valid_to: string | null }>(
+        `SELECT is_active, valid_to FROM seat_zones WHERE id = ?`, [prevId],
+      ))[0];
+      expect(Number(old.is_active)).toBe(0);
+      expect(old.valid_to).not.toBeNull();
+      const zones = await createSeatZoneRepository(getDb).listByAuditorium(fx.auditoriumId);
+      expect(zones).toHaveLength(1); // 활성 존만 — 대체된 존 제외
+      expect(zones[0].supersedesSeatZoneId).toBe(prevId);
+      expect(zones[0].infoStatus).toBe('user_report');
+
+      const report = await reports.get(second.id);
+      expect(report?.status).toBe('promoted');
+      // promoted는 종결 — 재승격·상태 변경 불가
+      expect((await promotion.promoteSeatZone(second.id, { purposes: ['immersive'], rationale: '중복', confidence: 0.5 }, { actor: 'admin', now })).ok).toBe(false);
+      expect((await reports.review(second.id, 'rejected', { actor: 'admin', now })).ok).toBe(false);
+
+      // 증빙 없는 단일 제보(다른 유형)는 0.55 상한
+      const single = await reports.create(
+        {
+          reportType: 'auditorium_spec', targetType: 'auditorium', targetId: fx.auditoriumId,
+          summary: '스크린 사양 계약 제보', claimedValue: { aspect: '1.43' },
+        } as Parameters<typeof reports.create>[0],
+        { sessionHash: 'contract-c', now },
+      );
+      if (!single.ok) throw new Error('제보 생성 실패');
+      const approved = await promotion.approveAsObservation(single.id, { field: 'screen.aspect', confidence: 0.9 }, { actor: 'admin', now });
+      expect(approved.ok).toBe(true);
+      if (!approved.ok) return;
+      expect(Number(approved.confidence)).toBeCloseTo(0.55, 5);
+      const obs = (await db.query<{ info_status: string }>(
+        `SELECT info_status FROM observations WHERE id = ?`, [approved.observationId],
+      ))[0];
+      expect(obs.info_status).toBe('user_report');
     });
   });
 }

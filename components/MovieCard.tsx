@@ -32,7 +32,7 @@ export function MovieCard({ movie }: { movie: MovieWithSpecs }) {
       <div className="mt-auto pt-4">
         <Link
           href={`/recommend/${movie.id}`}
-          className="flex min-h-11 w-full items-center justify-center rounded-card bg-primary px-5 text-[15px] font-semibold text-white transition-colors hover:bg-primary-hover"
+          className="flex min-h-11 w-full items-center justify-center rounded-card bg-primary-strong px-5 text-[15px] font-semibold text-white transition-colors hover:bg-primary-strong-hover"
         >
           이 영화로 추천받기
         </Link>

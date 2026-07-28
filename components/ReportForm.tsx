@@ -130,7 +130,7 @@ export function ReportForm({
   }
 
   const stepBadge = (n: number) => (
-    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-white">
+    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-strong text-[11px] font-bold text-white">
       {n}
     </span>
   );
@@ -289,7 +289,7 @@ export function ReportForm({
 
       <button
         type="submit"
-        className="flex min-h-12 w-full items-center justify-center rounded-card bg-primary text-base font-semibold text-white transition-colors hover:bg-primary-hover disabled:opacity-60"
+        className="flex min-h-12 w-full items-center justify-center rounded-card bg-primary-strong text-base font-semibold text-white transition-colors hover:bg-primary-strong-hover disabled:opacity-60"
         disabled={phase.kind === 'submitting'}
       >
         {phase.kind === 'submitting' ? '제출 중…' : '제보 제출'}

@@ -55,7 +55,7 @@ export default async function HomePage() {
           {!dbMissing ? (
             <Link
               href="/movies"
-              className="mt-5 flex min-h-11 w-full items-center justify-center rounded-card bg-primary px-5 text-base font-semibold text-white transition-colors hover:bg-primary-hover sm:w-auto"
+              className="mt-5 flex min-h-11 w-full items-center justify-center rounded-card bg-primary-strong px-5 text-base font-semibold text-white transition-colors hover:bg-primary-strong-hover sm:w-auto"
             >
               추천 시작하기
             </Link>

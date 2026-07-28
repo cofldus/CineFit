@@ -8,7 +8,7 @@ export default function NotFound() {
         <p className="mt-2 text-sm text-text-sub">주소가 잘못됐거나, 요청한 영화·정보가 없어요.</p>
         <Link
           href="/"
-          className="mt-4 inline-flex min-h-11 items-center rounded-card bg-primary px-5 text-[15px] font-semibold text-white hover:bg-primary-hover"
+          className="mt-4 inline-flex min-h-11 items-center rounded-card bg-primary-strong px-5 text-[15px] font-semibold text-white hover:bg-primary-strong-hover"
         >
           홈으로
         </Link>

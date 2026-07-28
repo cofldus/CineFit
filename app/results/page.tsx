@@ -32,7 +32,7 @@ export default async function ResultsPage({
           </ul>
           <Link
             href="/movies"
-            className="mt-4 inline-flex min-h-11 items-center rounded-card bg-primary px-5 text-[15px] font-semibold text-white hover:bg-primary-hover"
+            className="mt-4 inline-flex min-h-11 items-center rounded-card bg-primary-strong px-5 text-[15px] font-semibold text-white hover:bg-primary-strong-hover"
           >
             영화 선택으로 돌아가기
           </Link>
@@ -99,7 +99,7 @@ export default async function ResultsPage({
           )}
           <Link
             href={`/recommend/${result.movie.id}`}
-            className="mt-4 inline-flex min-h-11 items-center rounded-card bg-primary px-5 text-[15px] font-semibold text-white hover:bg-primary-hover"
+            className="mt-4 inline-flex min-h-11 items-center rounded-card bg-primary-strong px-5 text-[15px] font-semibold text-white hover:bg-primary-strong-hover"
           >
             조건 다시 입력
           </Link>

@@ -18,7 +18,7 @@ export function SegmentedControl({
         {options.map((opt) => (
           <label
             key={opt.value}
-            className="has-[:checked]:border-primary has-[:checked]:bg-primary has-[:checked]:text-white has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-primary has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-surface flex min-h-11 cursor-pointer items-center justify-center rounded-card border border-border bg-bg px-3 text-center text-sm font-medium text-text transition-colors"
+            className="has-[:checked]:border-primary-strong has-[:checked]:bg-primary-strong has-[:checked]:text-white has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-primary has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-surface flex min-h-11 cursor-pointer items-center justify-center rounded-card border border-border bg-bg px-3 text-center text-sm font-medium text-text transition-colors"
           >
             <input
               type="radio"

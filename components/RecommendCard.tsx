@@ -59,7 +59,7 @@ export function RecommendCard({
     >
       <p className="m-0 flex items-center gap-1.5 text-sm text-text-sub">
         {isTop ? (
-          <span className="inline-flex items-center rounded-full bg-primary px-2 py-0.5 text-[11px] font-bold text-white">
+          <span className="inline-flex items-center rounded-full bg-primary-strong px-2 py-0.5 text-[11px] font-bold text-white">
             가장 잘 맞아요
           </span>
         ) : null}
@@ -149,7 +149,7 @@ export function RecommendCard({
       {c.bookingUrl && !c.isSynthetic ? (
         <p className="mt-2.5">
           <a
-            className="flex min-h-11 w-full items-center justify-center rounded-card bg-primary px-5 text-[15px] font-semibold text-white transition-colors hover:bg-primary-hover"
+            className="flex min-h-11 w-full items-center justify-center rounded-card bg-primary-strong px-5 text-[15px] font-semibold text-white transition-colors hover:bg-primary-strong-hover"
             href={c.bookingUrl}
             target="_blank"
             rel="noopener noreferrer nofollow"

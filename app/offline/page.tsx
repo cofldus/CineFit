@@ -16,7 +16,7 @@ export default function OfflinePage() {
         <p className="mt-2 text-sm text-text-sub">연결이 복구되면 아래 버튼으로 다시 시작해 주세요.</p>
         <Link
           href="/"
-          className="mt-4 inline-flex min-h-11 items-center rounded-card bg-primary px-5 text-[15px] font-semibold text-white hover:bg-primary-hover"
+          className="mt-4 inline-flex min-h-11 items-center rounded-card bg-primary-strong px-5 text-[15px] font-semibold text-white hover:bg-primary-strong-hover"
         >
           홈으로
         </Link>

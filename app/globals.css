@@ -9,7 +9,11 @@
   --text: #e8ecf2;
   --text-sub: #9aa5b5;
   --primary: #4c8dff;
-  --primary-hover: #6ba0ff;
+  /* 흰 글자를 얹는 채워진 배경 전용(버튼·배지) — 링크·테두리용 --primary보다 어둡게 고정해
+     WCAG AA 4.5:1을 항상 만족시킨다(axe-core color-contrast 자동 검사로 확인, docs/ACCESSIBILITY.md).
+     라이트/다크 모드에서 값이 같아도 되는 이유: 흰 글자 대비는 배경색 자체에만 좌우된다. */
+  --primary-strong: #2f6fe0;
+  --primary-strong-hover: #3f7ce8;
   --accent: #8b7cf6;
   --trust-high: #3dbe7b;
   --trust-mid: #e0a83c;
@@ -32,9 +36,13 @@
     --border: #e2e6ec;
     --text: #1a202c;
     --text-sub: #5a6474;
-    --trust-mid: #a87310;
+    /* 라이트 배경(흰색 계열)에서 텍스트·링크로 쓰일 때만 어둡게 — 다크 모드는 배경이 이미
+       어두워 원래 --primary(#4c8dff)로도 충분한 대비가 나온다(axe-core로 확인). */
+    --primary: #2a68d9;
+    --accent: #6a4fe0;
+    --trust-mid: #8f5c0c;
     --trust-low: #c23434;
-    --trust-high: #1f8f57;
+    --trust-high: #167a48;
     --elevation-1: 0 1px 2px rgba(20, 26, 36, 0.06), 0 1px 1px rgba(20, 26, 36, 0.04);
     --elevation-2: 0 8px 20px rgba(20, 26, 36, 0.1);
     --elevation-3: 0 16px 40px rgba(20, 26, 36, 0.18);
@@ -51,7 +59,8 @@
   --color-text: var(--text);
   --color-text-sub: var(--text-sub);
   --color-primary: var(--primary);
-  --color-primary-hover: var(--primary-hover);
+  --color-primary-strong: var(--primary-strong);
+  --color-primary-strong-hover: var(--primary-strong-hover);
   --color-accent: var(--accent);
   --color-trust-high: var(--trust-high);
   --color-trust-mid: var(--trust-mid);
@@ -150,8 +159,8 @@
     outline-offset: 2px;
   }
   .btn-primary {
-    background: var(--primary);
-    border-color: var(--primary);
+    background: var(--primary-strong);
+    border-color: var(--primary-strong);
     color: #fff;
     font-weight: 600;
   }

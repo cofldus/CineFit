@@ -56,7 +56,7 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
     <form onSubmit={onSubmit} aria-label="추천 조건 입력" className="flex flex-col gap-4 pb-4">
       <div className={sectionCls}>
         <h2 className="m-0 mb-3 flex items-center gap-2 text-sm font-bold text-text-sub">
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-white">
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-strong text-[11px] font-bold text-white">
             1
           </span>
           언제, 어디서 볼까요?
@@ -105,7 +105,7 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
 
       <div className={sectionCls}>
         <h2 className="m-0 mb-3 flex items-center gap-2 text-sm font-bold text-text-sub">
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-white">
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-strong text-[11px] font-bold text-white">
             2
           </span>
           무엇을 가장 중요하게 보나요?
@@ -132,7 +132,7 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
 
       <div className={sectionCls}>
         <h2 className="m-0 mb-3 flex items-center gap-2 text-sm font-bold text-text-sub">
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-white">
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-strong text-[11px] font-bold text-white">
             3
           </span>
           피하고 싶은 조건이 있나요?
@@ -170,7 +170,7 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
         <div className="mx-auto max-w-content">
           <button
             type="submit"
-            className="flex min-h-12 w-full items-center justify-center rounded-card bg-primary text-base font-semibold text-white transition-colors hover:bg-primary-hover disabled:opacity-60"
+            className="flex min-h-12 w-full items-center justify-center rounded-card bg-primary-strong text-base font-semibold text-white transition-colors hover:bg-primary-strong-hover disabled:opacity-60"
             disabled={submitting}
           >
             {submitting ? '추천 계산 중…' : '추천 받기'}

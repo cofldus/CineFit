@@ -12,7 +12,7 @@ export default function GlobalError({ reset }: { error: Error; reset: () => void
           실행해 주세요.
         </p>
         <button
-          className="mt-4 inline-flex min-h-11 items-center rounded-card bg-primary px-5 text-[15px] font-semibold text-white hover:bg-primary-hover"
+          className="mt-4 inline-flex min-h-11 items-center rounded-card bg-primary-strong px-5 text-[15px] font-semibold text-white hover:bg-primary-strong-hover"
           onClick={() => reset()}
         >
           다시 시도

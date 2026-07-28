@@ -33,7 +33,7 @@ export default async function SourcesPage() {
   const sources = await sourceRepository.list();
 
   return (
-    <main className="mx-auto max-w-xl px-4 pb-24 pt-6">
+    <main className="mx-auto max-w-content px-4 pb-24 pt-6">
       <h1 className="text-2xl font-extrabold text-text">정보 출처·신뢰도 기준</h1>
       <p className="mt-2 leading-relaxed text-text-sub">
         CineFit의 모든 사양 값에는 출처·정보 상태·확인일이 함께 붙어요. 근거가 약한 정보일수록
@@ -54,7 +54,37 @@ export default async function SourcesPage() {
       </div>
 
       <h2 className="mt-7 text-lg font-bold text-text">등록된 출처</h2>
-      <div className="mt-3 overflow-x-auto rounded-card-lg border border-border" tabIndex={0} role="region" aria-label="출처 목록 (가로 스크롤)">
+
+      {/* 모바일: 카드형 — 좁은 화면에서 가로 스크롤 표보다 읽기 쉽다 */}
+      <ul className="m-0 mt-3 flex list-none flex-col gap-2 p-0 sm:hidden">
+        {sources.map((s) => (
+          <li key={s.id} className="rounded-card-lg border border-border bg-surface p-4 shadow-card">
+            <p className="m-0 font-semibold text-text">
+              {s.url ? (
+                <a className="text-primary" href={s.url} target="_blank" rel="noopener noreferrer">
+                  {s.name}
+                </a>
+              ) : (
+                s.name
+              )}
+            </p>
+            <p className="m-0 mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-text-sub">
+              <span>{KIND_LABELS[s.kind] ?? s.kind}</span>
+              <span>· 신뢰 가중치 {s.trust_weight.toFixed(2)}</span>
+            </p>
+            {s.terms_note ? <p className="m-0 mt-1.5 text-sm text-text-sub">{s.terms_note}</p> : null}
+            {!s.url ? <p className="m-0 mt-1.5 text-xs text-text-sub">출처 URL 없음</p> : null}
+          </li>
+        ))}
+      </ul>
+
+      {/* 태블릿 이상: 표 */}
+      <div
+        className="mt-3 hidden overflow-x-auto rounded-card-lg border border-border sm:block"
+        tabIndex={0}
+        role="region"
+        aria-label="출처 목록 (가로 스크롤)"
+      >
         <table className="w-full min-w-[480px] border-collapse text-sm">
           <thead>
             <tr>

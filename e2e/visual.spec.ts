@@ -71,6 +71,13 @@ test.describe('시각 회귀', () => {
     await expect(page).toHaveScreenshot('cinema-detail.png', { fullPage: true, ...SCREENSHOT_OPTS });
   });
 
+  test('출처·신뢰도 안내', async ({ page }) => {
+    await page.setViewportSize(VIEWPORTS.mobile);
+    await page.goto('/sources');
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page).toHaveScreenshot('sources.png', { fullPage: true, ...SCREENSHOT_OPTS });
+  });
+
   test('제보 폼', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
     await page.goto('/cinemas/1/report');

@@ -127,11 +127,20 @@ export function ReportForm({
     );
   }
 
+  const stepBadge = (n: number) => (
+    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-white">
+      {n}
+    </span>
+  );
+
   return (
     <form onSubmit={onSubmit} aria-label="정보 수정 제보" className="flex flex-col gap-4">
       <div className={sectionCls}>
+        <h2 className="m-0 mb-3 flex items-center gap-2 text-sm font-bold text-text-sub">
+          {stepBadge(1)} 무엇이 잘못됐나요?
+        </h2>
         <label className="block">
-          <span className={labelCls}>무엇을 제보하시겠어요?</span>
+          <span className={labelCls}>제보 유형</span>
           <select
             className={`${inputCls} mt-1.5`}
             name="reportType"
@@ -146,6 +155,10 @@ export function ReportForm({
           </select>
         </label>
       </div>
+
+      <h2 className="-mb-2 flex items-center gap-2 px-0.5 text-sm font-bold text-text-sub">
+        {stepBadge(2)} 올바른 정보는 무엇인가요?
+      </h2>
 
       {isSeatZone ? (
         <div className={sectionCls}>
@@ -229,6 +242,9 @@ export function ReportForm({
       ) : null}
 
       <div className={sectionCls}>
+        <h2 className="m-0 mb-3 flex items-center gap-2 text-sm font-bold text-text-sub">
+          {stepBadge(3)} 언제, 어떤 근거로 확인하셨나요?
+        </h2>
         <label className="block">
           <span className={labelCls}>근거 설명</span>
           <textarea

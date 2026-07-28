@@ -22,7 +22,9 @@
     "pg:logs": "docker compose logs -f postgres",
     "pg:status": "docker compose ps postgres",
     "pg:reset": "node scripts/pg-reset.mjs",
-    "sync:kobis": "node --env-file-if-exists=.env scripts/sync-kobis.ts"
+    "sync:kobis": "node --env-file-if-exists=.env scripts/sync-kobis.ts",
+    "eval:recommendations": "tsx scripts/eval-recommendations.ts",
+    "compare:recommendations": "tsx scripts/compare-recommendations.ts"
   },
   "dependencies": {
     "next": "^16.2.12",
@@ -41,6 +43,7 @@
     "@types/react-dom": "^19.2.3",
     "eslint": "^10.8.0",
     "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.1",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.65.0",
     "vitest": "^4.1.10"

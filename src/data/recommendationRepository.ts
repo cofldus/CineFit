@@ -1,4 +1,4 @@
-import type { RecommendationResult } from '../domain/recommendation/types';
+import type { RecommendationRequest, RecommendationResult } from '../domain/recommendation/types';
 import { getAppDbClient } from './client/index';
 import type { DbClient } from './client/types';
 
@@ -51,6 +51,20 @@ export function createRecommendationRepository(getDb: () => DbClient) {
       const request = JSON.parse(rows[0].request) as { movieId: number };
       const results = JSON.parse(rows[0].results) as { showtimeId: number }[];
       return { id: rows[0].id, movieId: request.movieId, showtimeIds: results.map((r) => r.showtimeId) };
+    },
+
+    /** 정책 비교 CLI(scripts/compare-recommendations.ts)용 — 저장된 요청 전체를 그대로 복원한다. */
+    async getRunRequest(id: number): Promise<{ request: RecommendationRequest; policyVersion: string | null; createdAt: string } | null> {
+      const rows = await getDb().query<{ request: string; policy_version: string | null; created_at: string }>(
+        `SELECT request, policy_version, created_at FROM recommendation_runs WHERE id = ?`,
+        [id],
+      );
+      if (!rows.length) return null;
+      return {
+        request: JSON.parse(rows[0].request) as RecommendationRequest,
+        policyVersion: rows[0].policy_version,
+        createdAt: rows[0].created_at,
+      };
     },
   };
 }

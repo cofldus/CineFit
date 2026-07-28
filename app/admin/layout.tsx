@@ -32,6 +32,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/admin/showtimes/new">새 회차</Link>
           <Link href="/admin/reports">제보 검토</Link>
           <Link href="/admin/quality">데이터 품질</Link>
+          <Link href="/admin/booking-links">예매 링크</Link>
         </div>
       </nav>
       {children}

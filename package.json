@@ -24,7 +24,10 @@
     "pg:reset": "node scripts/pg-reset.mjs",
     "sync:kobis": "node --env-file-if-exists=.env scripts/sync-kobis.ts",
     "eval:recommendations": "tsx scripts/eval-recommendations.ts",
-    "compare:recommendations": "tsx scripts/compare-recommendations.ts"
+    "compare:recommendations": "tsx scripts/compare-recommendations.ts",
+    "maintenance:daily": "tsx scripts/maintenance-daily.ts",
+    "maintenance:stale": "tsx scripts/maintenance/markStaleData.ts",
+    "maintenance:links": "tsx scripts/maintenance/validateBookingLinks.ts"
   },
   "dependencies": {
     "next": "^16.2.12",

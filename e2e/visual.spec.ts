@@ -121,4 +121,15 @@ test.describe('시각 회귀', () => {
     await expect(page.getByRole('heading', { name: '데이터 품질 대시보드' })).toBeVisible();
     await expect(page).toHaveScreenshot('admin-quality.png', { fullPage: true, ...SCREENSHOT_OPTS });
   });
+
+  test('관리자 예매 링크 상태', async ({ page }) => {
+    await page.setViewportSize(VIEWPORTS.desktop);
+    await page.goto('/admin/login');
+    await page.getByLabel('관리자 비밀번호').fill('e2e-admin-pw');
+    await page.getByRole('button', { name: '로그인' }).click();
+    await expect(page.getByRole('heading', { name: '관리자 대시보드' })).toBeVisible();
+    await page.goto('/admin/booking-links');
+    await expect(page.getByRole('heading', { name: '예매 링크 상태' })).toBeVisible();
+    await expect(page).toHaveScreenshot('admin-booking-links.png', { fullPage: true, ...SCREENSHOT_OPTS });
+  });
 });

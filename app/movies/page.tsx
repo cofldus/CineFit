@@ -6,8 +6,8 @@ import { movieRepository } from '../../src/data/movieRepository';
 export const metadata: Metadata = { title: '영화 선택' };
 export const dynamic = 'force-dynamic';
 
-export default function MoviesPage() {
-  const movies = movieRepository.list();
+export default async function MoviesPage() {
+  const movies = await movieRepository.list();
 
   return (
     <main className="mx-auto max-w-xl px-4 pb-24 pt-6">

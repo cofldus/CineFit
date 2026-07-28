@@ -23,7 +23,7 @@ export default async function AdminNewShowtimePage({
   let initial: AdminFormInitial = {};
   let duplicateOf: number | undefined;
   if (from) {
-    const src = getShowtime(Number(from));
+    const src = await getShowtime(Number(from));
     if (src) {
       duplicateOf = src.id;
       initial = {
@@ -53,8 +53,8 @@ export default async function AdminNewShowtimePage({
         필수입니다.
       </p>
       <AdminShowtimeForm
-        movies={movieRepository.list().map((m) => ({ id: m.id, label: `${m.title} (${m.runtimeMin}분)` }))}
-        auditoriums={cinemaRepository.listAuditoriums().map((a) => ({ id: a.id, label: `${a.label} [${a.brand}]` }))}
+        movies={(await movieRepository.list()).map((m) => ({ id: m.id, label: `${m.title} (${m.runtimeMin}분)` }))}
+        auditoriums={(await cinemaRepository.listAuditoriums()).map((a) => ({ id: a.id, label: `${a.label} [${a.brand}]` }))}
         initial={initial}
         duplicateOf={duplicateOf}
       />

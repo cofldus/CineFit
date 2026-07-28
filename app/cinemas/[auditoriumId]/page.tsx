@@ -57,7 +57,7 @@ export default async function AuditoriumDetailPage({
 }) {
   const id = Number((await params).auditoriumId);
   const detail = Number.isInteger(id)
-    ? cinemaRepository.getAuditoriumDetail(id, getAppClock().now().toISOString())
+    ? await cinemaRepository.getAuditoriumDetail(id, getAppClock().now().toISOString())
     : null;
   if (!detail) notFound();
 

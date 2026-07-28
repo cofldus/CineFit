@@ -22,10 +22,10 @@ export default async function AdminEditShowtimePage({
 }) {
   if (!(await isAdminAuthed())) redirect('/admin/login');
   const id = Number((await params).id);
-  const showtime = Number.isInteger(id) ? getShowtime(id) : null;
+  const showtime = Number.isInteger(id) ? await getShowtime(id) : null;
   if (!showtime) notFound();
 
-  const changes = listChanges(id);
+  const changes = await listChanges(id);
 
   return (
     <main>
@@ -49,8 +49,8 @@ export default async function AdminEditShowtimePage({
       </div>
 
       <AdminShowtimeForm
-        movies={movieRepository.list().map((m) => ({ id: m.id, label: `${m.title} (${m.runtimeMin}분)` }))}
-        auditoriums={cinemaRepository.listAuditoriums().map((a) => ({ id: a.id, label: `${a.label} [${a.brand}]` }))}
+        movies={(await movieRepository.list()).map((m) => ({ id: m.id, label: `${m.title} (${m.runtimeMin}분)` }))}
+        auditoriums={(await cinemaRepository.listAuditoriums()).map((a) => ({ id: a.id, label: `${a.label} [${a.brand}]` }))}
         showtimeId={id}
         initial={{
           movieId: showtime.movie_id,

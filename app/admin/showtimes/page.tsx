@@ -21,8 +21,8 @@ export default async function AdminShowtimesPage({
 }) {
   if (!(await isAdminAuthed())) redirect('/admin/login');
   const q = await searchParams;
-  const movies = movieRepository.list();
-  const rows = listShowtimes({
+  const movies = await movieRepository.list();
+  const rows = await listShowtimes({
     date: q.date || undefined,
     movieId: q.movieId ? Number(q.movieId) : undefined,
     format: q.format || undefined,

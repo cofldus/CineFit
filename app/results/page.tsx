@@ -40,7 +40,7 @@ export default async function ResultsPage({
     );
   }
 
-  const res = getRecommendations(parsed.input);
+  const res = await getRecommendations(parsed.input);
   if (!res.ok) notFound();
   const { result } = res;
   const origin = result.request.origin;

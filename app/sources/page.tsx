@@ -29,8 +29,8 @@ const KIND_LABELS: Record<string, string> = {
   spike_seed: '검증용 합성',
 };
 
-export default function SourcesPage() {
-  const sources = sourceRepository.list();
+export default async function SourcesPage() {
+  const sources = await sourceRepository.list();
 
   return (
     <main className="mx-auto max-w-xl px-4 pb-24 pt-6">

@@ -44,3 +44,10 @@ export function seoulDateString(d: Date): string {
 export function seoulTimeString(d: Date): string {
   return seoulTime.format(d);
 }
+
+/** 서울 기준 하루(YYYY-MM-DD)의 UTC ISO 범위 [start, end) — DB 방언 독립 날짜 필터용 */
+export function seoulDayUtcRange(date: string): { start: string; end: string } {
+  const start = new Date(`${date}T00:00:00+09:00`);
+  if (Number.isNaN(start.getTime())) throw new Error(`잘못된 날짜: ${date}`);
+  return { start: start.toISOString(), end: new Date(start.getTime() + 86_400_000).toISOString() };
+}

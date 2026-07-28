@@ -5,7 +5,7 @@ import { isAdminAuthed } from '../../src/lib/adminAuthServer';
 
 export default async function AdminDashboardPage() {
   if (!(await isAdminAuthed())) redirect('/admin/login');
-  const all = listShowtimes();
+  const all = await listShowtimes();
   const active = all.filter((s) => s.status === 'active');
   const verified = active.filter((s) => !s.is_synthetic);
   const synthetic = active.filter((s) => s.is_synthetic);

@@ -16,9 +16,9 @@ type Params = { params: Promise<{ id: string }> };
 export async function GET(req: Request, { params }: Params) {
   if (!isAdminRequest(req)) return unauthorized();
   const id = Number((await params).id);
-  const showtime = getShowtime(id);
+  const showtime = await getShowtime(id);
   if (!showtime) return NextResponse.json({ error: '회차를 찾을 수 없습니다.' }, { status: 404 });
-  return NextResponse.json({ showtime, changes: listChanges(id) });
+  return NextResponse.json({ showtime, changes: await listChanges(id) });
 }
 
 export async function PATCH(req: Request, { params }: Params) {
@@ -37,7 +37,7 @@ export async function PATCH(req: Request, { params }: Params) {
       if (body.status !== 'active' && body.status !== 'disabled') {
         return NextResponse.json({ error: 'status는 active/disabled 중 하나입니다.' }, { status: 400 });
       }
-      const result = setShowtimeStatus(id, body.status);
+      const result = await setShowtimeStatus(id, body.status);
       if (!result.ok) return NextResponse.json({ error: result.errors[0] }, { status: 404 });
       return NextResponse.json({ ok: true, id });
     }
@@ -46,7 +46,7 @@ export async function PATCH(req: Request, { params }: Params) {
     if (!parsed.ok) {
       return NextResponse.json({ error: '입력값을 확인해 주세요.', details: parsed.errors }, { status: 400 });
     }
-    const result = updateShowtime(id, parsed.input);
+    const result = await updateShowtime(id, parsed.input);
     if (!result.ok) {
       const notFound = result.errors[0]?.includes('존재하지 않는 회차');
       return NextResponse.json(

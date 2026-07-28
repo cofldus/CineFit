@@ -14,12 +14,12 @@ export const dynamic = 'force-dynamic';
 export default async function RecommendPage({ params }: { params: Promise<{ movieId: string }> }) {
   const { movieId } = await params;
   const id = Number(movieId);
-  const movie = Number.isInteger(id) ? movieRepository.findById(id) : null;
+  const movie = Number.isInteger(id) ? await movieRepository.findById(id) : null;
   if (!movie) notFound();
 
   // 기본 관람 날짜: 오늘(Asia/Seoul) 이후 활성 회차가 있는 가장 가까운 날짜, 없으면 데모 날짜
   const today = seoulDateString(getAppClock().now());
-  const dates = showtimeRepository.listActiveDates(movie.id);
+  const dates = await showtimeRepository.listActiveDates(movie.id);
   const defaultDate = dates.find((d) => d >= today) ?? dates.at(-1) ?? DEMO_DATE;
 
   return (

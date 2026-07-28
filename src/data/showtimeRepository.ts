@@ -1,6 +1,8 @@
 import type { AuditoriumSpec, CandidateShowtime, FormatId, InfoStatus, SeatZone } from '../domain/recommendation/types';
-import { getDb } from './db';
-import { seatZoneRepository } from './seatZoneRepository';
+import { seoulDateString, seoulDayUtcRange } from '../lib/clock';
+import { getAppDbClient } from './client/index';
+import type { DbClient } from './client/types';
+import { createSeatZoneRepository } from './seatZoneRepository';
 
 interface CandidateRow {
   id: number;
@@ -13,6 +15,9 @@ interface CandidateRow {
   entry_method: string;
   data_checked_at: string;
   st_status: InfoStatus;
+  is_synthetic: number;
+  booking_url: string | null;
+  verified_at: string | null;
   aud_id: number;
   auditorium_no: string;
   brand: string;
@@ -25,9 +30,6 @@ interface CandidateRow {
   lng: number;
   loc_status: string;
   transit_note: string | null;
-  is_synthetic: number;
-  booking_url: string | null;
-  verified_at: string | null;
   projector: string | null;
   screen: string | null;
   sound: string | null;
@@ -125,10 +127,14 @@ function toCandidate(r: CandidateRow, seatZones: SeatZone[]): CandidateShowtime 
   };
 }
 
-export const showtimeRepository = {
-  listCandidates(movieId: number, date: string): CandidateShowtime[] {
-    const rows = getDb()
-      .prepare(
+export function createShowtimeRepository(getDb: () => DbClient) {
+  const seatZones = createSeatZoneRepository(getDb);
+
+  return {
+    async listCandidates(movieId: number, date: string): Promise<CandidateShowtime[]> {
+      // KST 날짜 → UTC ISO 범위 (방언 독립 — 문자열 비교는 ISO-Z에서 시간순과 일치)
+      const { start, end } = seoulDayUtcRange(date);
+      const rows = await getDb().query<CandidateRow>(
         `SELECT st.id, st.movie_id, st.starts_at, st.ends_at_est, st.format, st.language,
                 st.price_adult, st.entry_method, st.data_checked_at, st.info_status AS st_status,
                 st.is_synthetic, st.booking_url, st.verified_at,
@@ -144,22 +150,23 @@ export const showtimeRepository = {
          JOIN cinema_locations l ON l.id = a.location_id
          LEFT JOIN auditorium_specs sp ON sp.auditorium_id = a.id AND sp.valid_to IS NULL
          LEFT JOIN sources ssrc ON ssrc.id = sp.source_id
-         WHERE st.movie_id = ? AND date(st.starts_at, '+9 hours') = ? AND st.status = 'active'
+         WHERE st.movie_id = ? AND st.starts_at >= ? AND st.starts_at < ? AND st.status = 'active'
          ORDER BY st.starts_at`,
-      )
-      .all(movieId, date) as unknown as CandidateRow[];
-    const zoneMap = seatZoneRepository.listByAuditoriums([...new Set(rows.map((r) => r.aud_id))]);
-    return rows.map((r) => toCandidate(r, zoneMap.get(r.aud_id) ?? []));
-  },
+        [movieId, start, end],
+      );
+      const zoneMap = await seatZones.listByAuditoriums([...new Set(rows.map((r) => r.aud_id))]);
+      return rows.map((r) => toCandidate(r, zoneMap.get(r.aud_id) ?? []));
+    },
 
-  /** 활성 회차가 있는 날짜 목록 (Asia/Seoul 기준, 오름차순) */
-  listActiveDates(movieId: number): string[] {
-    const rows = getDb()
-      .prepare(
-        `SELECT DISTINCT date(starts_at, '+9 hours') AS d FROM showtimes
-         WHERE movie_id = ? AND status = 'active' ORDER BY d`,
-      )
-      .all(movieId) as unknown as { d: string }[];
-    return rows.map((r) => r.d);
-  },
-};
+    /** 활성 회차가 있는 날짜 목록 (Asia/Seoul 기준, 오름차순) — 날짜 계산은 JS에서 */
+    async listActiveDates(movieId: number): Promise<string[]> {
+      const rows = await getDb().query<{ starts_at: string }>(
+        `SELECT starts_at FROM showtimes WHERE movie_id = ? AND status = 'active' ORDER BY starts_at`,
+        [movieId],
+      );
+      return [...new Set(rows.map((r) => seoulDateString(new Date(r.starts_at))))];
+    },
+  };
+}
+
+export const showtimeRepository = createShowtimeRepository(getAppDbClient);

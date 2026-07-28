@@ -6,11 +6,11 @@ import type { MovieWithSpecs } from '../src/domain/recommendation/types';
 
 export const dynamic = 'force-dynamic';
 
-export default function HomePage() {
+export default async function HomePage() {
   let movies: MovieWithSpecs[] = [];
   let dbMissing = false;
   try {
-    movies = movieRepository.list();
+    movies = await movieRepository.list();
   } catch (e) {
     if (e instanceof DbNotSeededError) dbMissing = true;
     else throw e;

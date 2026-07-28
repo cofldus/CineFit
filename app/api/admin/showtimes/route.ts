@@ -12,7 +12,7 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const q = (k: string) => url.searchParams.get(k) ?? undefined;
   try {
-    const rows = listShowtimes({
+    const rows = await listShowtimes({
       date: q('date'),
       movieId: q('movieId') ? Number(q('movieId')) : undefined,
       auditoriumId: q('auditoriumId') ? Number(q('auditoriumId')) : undefined,
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: '입력값을 확인해 주세요.', details: parsed.errors }, { status: 400 });
   }
   try {
-    const result = createShowtime(parsed.input, {
+    const result = await createShowtime(parsed.input, {
       duplicateOf: typeof duplicateOf === 'number' ? duplicateOf : undefined,
     });
     if (!result.ok) {

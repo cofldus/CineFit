@@ -20,7 +20,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const res = getRecommendations(parsed.input);
+    const res = await getRecommendations(parsed.input);
     if (!res.ok) {
       return NextResponse.json({ error: '해당 영화를 찾을 수 없습니다.' }, { status: 404 });
     }

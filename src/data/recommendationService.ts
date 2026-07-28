@@ -30,12 +30,13 @@ export function toDomainRequest(input: RecommendationInput): RecommendationReque
   };
 }
 
-export function getRecommendations(input: RecommendationInput): RecommendationServiceResult {
-  const movie = movieRepository.findById(input.movieId);
+export async function getRecommendations(input: RecommendationInput): Promise<RecommendationServiceResult> {
+  const movie = await movieRepository.findById(input.movieId);
   if (!movie) return { ok: false, error: 'movie_not_found' };
 
   const request = toDomainRequest(input);
-  const all = showtimeRepository.listCandidates(movie.id, request.date);
+  const now = getAppClock().now();
+  const all = await showtimeRepository.listCandidates(movie.id, request.date);
 
   // 관리자 확인(비합성) 회차가 있으면 기본 추천에서 합성 회차 제외.
   // CINEFIT_ALLOW_SYNTHETIC=true(개발·데모)일 때만 함께 노출.
@@ -44,12 +45,12 @@ export function getRecommendations(input: RecommendationInput): RecommendationSe
   const candidates = verified.length > 0 && !allowSynthetic ? verified : all;
 
   const started = performance.now();
-  const result = recommend({ movie, candidates, request, now: getAppClock().now() });
+  const result = recommend({ movie, candidates, request, now });
   result.dataMode = {
     usedSynthetic: candidates.some((c) => c.isSynthetic),
     syntheticSuppressed: all.length - candidates.length,
   };
-  recommendationRepository.saveRun(result, Math.round(performance.now() - started));
+  await recommendationRepository.saveRun(result, Math.round(performance.now() - started), now.toISOString());
 
   return { ok: true, result };
 }

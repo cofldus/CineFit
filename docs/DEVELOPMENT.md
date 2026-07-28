@@ -112,6 +112,21 @@ npm run sync:kobis -- --date=20260726 --dry-run       # 변경 예측만 (쓰기
 4. 수정·비활성화는 `/admin/showtimes/[id]` — **삭제는 없다.** 모든 변경은 이력에 남는다.
 5. 관리자 확인(비합성) 회차가 있는 날짜는 사용자 추천에서 합성 회차가 자동 제외된다.
 
+## 제보 검토 운영 절차
+
+사용자 제보(`/cinemas/[id]/report`)는 접수만으로는 추천에 반영되지 않는다.
+반영 규칙 전체는 **docs/DATA-PROMOTION-POLICY.md** — 요약:
+
+1. `/admin/reports`에서 대기 제보 확인 → 상세에서 증빙·주장 값 검토.
+2. 상태 전이(검토 중/추가 정보 필요/반려/중복)는 사유 메모와 함께. 반려·중복은 종결이다.
+3. **관찰 기록 승인**: 사실만 관찰 로그(observations)에 남긴다 — 추천 미반영.
+   신뢰도는 정책 상한(단일 0.55/증빙 0.65/복수 일치 0.75)으로 자동 캡, info_status는
+   `user_report` 고정(official 승격 금지).
+4. **좌석 존 승격**(좌석 구역 제보만): 기존 존을 덮어쓰지 않고 supersedes 계보로 대체 —
+   이전 존은 is_active=0·valid_to 마감으로 남는다. promoted는 되돌릴 수 없다(새 승격으로 대체).
+5. 모든 처리는 audit_logs에 남는다. 관련 코드: `src/data/reportPromotionService.ts`,
+   `src/domain/trust/confidencePolicy.ts`, 테스트 `tests/api/adminReports.test.ts`.
+
 ## 좌석 존·상영관 상세
 
 - `seat_zones`(마이그레이션 002): "명당"은 단일 좌표가 아니라 **목적별 구역**으로만 저장

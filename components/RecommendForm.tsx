@@ -175,6 +175,9 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
           >
             {submitting ? '추천 계산 중…' : '추천 받기'}
           </button>
+          <span className="sr-only" role="status" aria-live="polite">
+            {submitting ? '추천을 계산하고 있습니다. 잠시만 기다려 주세요.' : ''}
+          </span>
         </div>
       </div>
     </form>

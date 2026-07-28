@@ -292,6 +292,9 @@ export function ReportForm({
       >
         {phase.kind === 'submitting' ? '제출 중…' : '제보 제출'}
       </button>
+      <span className="sr-only" role="status" aria-live="polite">
+        {phase.kind === 'submitting' ? '제보를 제출하고 있습니다. 잠시만 기다려 주세요.' : ''}
+      </span>
     </form>
   );
 }

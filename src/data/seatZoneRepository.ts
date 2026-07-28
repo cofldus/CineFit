@@ -60,6 +60,30 @@ export function createSeatZoneRepository(getDb: () => DbClient) {
     async listByAuditorium(auditoriumId: number): Promise<SeatZone[]> {
       return (await this.listByAuditoriums([auditoriumId])).get(auditoriumId) ?? [];
     },
+
+    /** 관리자 화면용 — 활성 존을 id 포함으로 조회 (supersedes 대상 선택) */
+    async listActiveForAdmin(
+      auditoriumId: number,
+    ): Promise<Array<{ id: number; purposes: string[]; rowRange: string | null; colRange: string | null; confidence: number }>> {
+      const rows = await getDb().query<{
+        id: number;
+        purpose: string;
+        row_range: string | null;
+        col_range: string | null;
+        confidence: number;
+      }>(
+        `SELECT id, purpose, row_range, col_range, confidence FROM seat_zones
+         WHERE auditorium_id = ? AND is_active = 1 ORDER BY confidence DESC`,
+        [auditoriumId],
+      );
+      return rows.map((r) => ({
+        id: r.id,
+        purposes: JSON.parse(r.purpose) as string[],
+        rowRange: r.row_range,
+        colRange: r.col_range,
+        confidence: r.confidence,
+      }));
+    },
   };
 }
 

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { listShowtimes } from '../../src/data/adminShowtimeService';
+import { reportService } from '../../src/data/reportService';
 import { isAdminAuthed } from '../../src/lib/adminAuthServer';
 
 export default async function AdminDashboardPage() {
@@ -9,6 +10,10 @@ export default async function AdminDashboardPage() {
   const active = all.filter((s) => s.status === 'active');
   const verified = active.filter((s) => !s.is_synthetic);
   const synthetic = active.filter((s) => s.is_synthetic);
+  const reports = await reportService.list();
+  const openReports = reports.filter((r) =>
+    ['submitted', 'under_review', 'needs_more_information'].includes(r.status),
+  );
 
   return (
     <main>
@@ -19,6 +24,7 @@ export default async function AdminDashboardPage() {
           <li>관리자 확인 회차: <strong>{verified.length}</strong>건</li>
           <li>검증용 합성 회차: <strong>{synthetic.length}</strong>건</li>
           <li>비활성 회차: <strong>{all.length - active.length}</strong>건</li>
+          <li>검토 대기 제보: <strong>{openReports.length}</strong>건</li>
         </ul>
         <div className="row">
           <Link className="btn btn-primary" href="/admin/showtimes/new">
@@ -26,6 +32,9 @@ export default async function AdminDashboardPage() {
           </Link>
           <Link className="btn" href="/admin/showtimes">
             회차 목록
+          </Link>
+          <Link className="btn" href="/admin/reports">
+            제보 검토
           </Link>
         </div>
       </div>

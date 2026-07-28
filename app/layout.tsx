@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import Link from 'next/link';
+import { MobileNav } from '../components/MobileNav';
 import { ServiceWorkerRegister } from '../components/ServiceWorkerRegister';
 import './globals.css';
 
@@ -20,8 +21,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko">
       <body>
+        <a href="#main-content" className="skip-link">
+          본문으로 바로가기
+        </a>
         <header className="sticky top-0 z-40 border-b border-border bg-surface/85 backdrop-blur-md">
-          <div className="mx-auto flex max-w-xl items-center justify-between px-4 py-3">
+          <div className="mx-auto flex max-w-wide items-center justify-between px-4 py-3">
             <Link
               href="/"
               className="inline-flex min-h-11 items-center gap-1.5 text-lg font-extrabold tracking-tight text-text"
@@ -30,7 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <span className="inline-block h-2 w-2 rounded-full bg-primary" aria-hidden />
               Cine<span className="text-primary">Fit</span>
             </Link>
-            <nav className="flex items-center gap-1" aria-label="주요 메뉴">
+            <nav className="hidden items-center gap-1 sm:flex" aria-label="주요 메뉴">
               <Link
                 href="/movies"
                 className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-text-sub transition-colors hover:bg-bg hover:text-text"
@@ -46,7 +50,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </nav>
           </div>
         </header>
-        {children}
+        <div id="main-content">{children}</div>
+        <MobileNav />
         <ServiceWorkerRegister />
       </body>
     </html>

@@ -37,7 +37,7 @@ jobs:
       - run: npm run build
 
   e2e:
-    name: Playwright E2E (admin + user flow)
+    name: Playwright E2E + visual regression (admin + user flow)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -48,7 +48,10 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run build
-      - run: npx playwright test # DB는 global-setup이 test-results/e2e.db로 격리 생성
+      # DB는 global-setup이 test-results/e2e.db로 격리 생성. e2e/visual.spec.ts는 CI와 동일한
+      # 리눅스 컨테이너(mcr.microsoft.com/playwright)에서 만든 -linux.png 베이스라인과 비교한다
+      # (docs/TESTING.md — 로컬 OS에서 생성한 스크린샷은 폰트 렌더링 차이로 여기서 항상 실패한다).
+      - run: npx playwright test
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

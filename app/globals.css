@@ -17,6 +17,11 @@
   --radius: 12px;
   --radius-lg: 16px;
   --radius-xl: 20px;
+  /* elevation-1..4 = 기본 카드 / 떠 있는 컨트롤 / 모달 / 강조 결과 (docs/DESIGN-SYSTEM.md §그림자) */
+  --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 1px rgba(0, 0, 0, 0.2);
+  --elevation-2: 0 8px 20px rgba(0, 0, 0, 0.35);
+  --elevation-3: 0 16px 40px rgba(0, 0, 0, 0.45);
+  --elevation-4: 0 0 0 1px var(--primary), 0 8px 24px rgba(76, 141, 255, 0.25);
 }
 
 @media (prefers-color-scheme: light) {
@@ -30,6 +35,10 @@
     --trust-mid: #a87310;
     --trust-low: #c23434;
     --trust-high: #1f8f57;
+    --elevation-1: 0 1px 2px rgba(20, 26, 36, 0.06), 0 1px 1px rgba(20, 26, 36, 0.04);
+    --elevation-2: 0 8px 20px rgba(20, 26, 36, 0.1);
+    --elevation-3: 0 16px 40px rgba(20, 26, 36, 0.18);
+    --elevation-4: 0 0 0 1px var(--primary), 0 8px 24px rgba(76, 141, 255, 0.18);
   }
 }
 
@@ -50,6 +59,13 @@
   --radius-card: var(--radius);
   --radius-card-lg: var(--radius-lg);
   --radius-card-xl: var(--radius-xl);
+  --shadow-card: var(--elevation-1);
+  --shadow-float: var(--elevation-2);
+  --shadow-modal: var(--elevation-3);
+  --shadow-highlight: var(--elevation-4);
+  /* 컨텐츠 폭 — 읽기 중심 화면(content)과 비교·그리드가 필요한 화면(wide) 구분 (docs/DESIGN-SYSTEM.md §레이아웃) */
+  --container-content: 40rem;
+  --container-wide: 72rem;
   --font-sans:
     'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
     'Malgun Gothic', system-ui, sans-serif;
@@ -306,15 +322,6 @@
   ul.plain li {
     margin-bottom: 6px;
   }
-  .pro::before {
-    content: '👍 ';
-  }
-  .con::before {
-    content: '👎 ';
-  }
-  .unc::before {
-    content: '❓ ';
-  }
 
   details.expand {
     margin-top: 10px;
@@ -328,6 +335,29 @@
     min-height: 44px;
     display: flex;
     align-items: center;
+  }
+}
+
+@layer components {
+  /* 키보드 사용자를 위한 스킵 링크 — 평소엔 화면 밖, 포커스 시에만 나타난다 (docs/ACCESSIBILITY.md) */
+  .skip-link {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    z-index: 100;
+    transform: translateY(-150%);
+    background: var(--primary);
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    transition: transform 0.15s ease;
+  }
+  .skip-link:focus-visible {
+    transform: translateY(0);
+    outline: 3px solid #fff;
+    outline-offset: 2px;
   }
 }
 

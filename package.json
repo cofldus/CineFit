@@ -30,7 +30,9 @@
     "compare:recommendations": "tsx scripts/compare-recommendations.ts",
     "maintenance:daily": "tsx scripts/maintenance-daily.ts",
     "maintenance:stale": "tsx scripts/maintenance/markStaleData.ts",
-    "maintenance:links": "tsx scripts/maintenance/validateBookingLinks.ts"
+    "maintenance:links": "tsx scripts/maintenance/validateBookingLinks.ts",
+    "retention:preview": "tsx scripts/retention-preview.ts",
+    "retention:apply": "tsx scripts/retention-apply.ts"
   },
   "dependencies": {
     "next": "^16.2.12",

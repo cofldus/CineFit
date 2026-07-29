@@ -38,6 +38,7 @@ const PAGES = [
   { name: '검색', path: '/search?q=CGV' },
   { name: '알파 초대 코드', path: '/alpha/invite' },
   { name: '알파 참여 동의', path: '/alpha/consent' },
+  { name: '개인정보 삭제 요청', path: '/privacy' },
   { name: '출처·신뢰도 안내', path: '/sources' },
   { name: '제보 폼', path: '/cinemas/1/report' },
   { name: '관리자 로그인', path: '/admin/login' },
@@ -67,6 +68,15 @@ test.describe('접근성 자동 검사 (axe)', () => {
         await page.getByRole('button', { name: '로그인' }).click();
         await expect(page.getByRole('heading', { name: '관리자 대시보드' })).toBeVisible();
         await page.goto('/admin/reports');
+        await assertNoViolations(page);
+      });
+
+      test('관리자 개인정보 요청', async ({ page }) => {
+        await page.goto('/admin/login');
+        await page.getByLabel('관리자 비밀번호').fill('e2e-admin-pw');
+        await page.getByRole('button', { name: '로그인' }).click();
+        await expect(page.getByRole('heading', { name: '관리자 대시보드' })).toBeVisible();
+        await page.goto('/admin/privacy-requests');
         await assertNoViolations(page);
       });
     });

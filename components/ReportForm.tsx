@@ -268,6 +268,13 @@ export function ReportForm({
         <label className="mt-3 block">
           <span className={labelCls}>연락 이메일 (선택 — 공개되지 않아요)</span>
           <input className={`${inputCls} mt-1.5`} type="email" name="contactEmail" />
+          <span className="mt-1 block text-xs text-text-sub">
+            나중에 이 이메일을 지우고 싶다면{' '}
+            <a href="/privacy" className="font-semibold text-primary underline underline-offset-2">
+              여기서 요청
+            </a>
+            할 수 있어요.
+          </span>
         </label>
         {/* honeypot — 사람에게는 보이지 않는 필드 */}
         <div aria-hidden className="absolute left-[-9999px] top-auto h-px w-px overflow-hidden">

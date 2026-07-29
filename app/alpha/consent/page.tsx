@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { Suspense } from 'react';
 import { AlphaConsentForm } from '../../../components/AlphaConsentForm';
 
@@ -12,7 +13,6 @@ const POINTS = [
   '사용 흐름과 추천에 대한 피드백은 서비스 개선에 사용돼요.',
   '정확한 위치(GPS)나 전체 IP 주소는 저장하지 않아요(docs/PRIVACY-BETA.md).',
   '언제든 참여를 중단할 수 있어요.',
-  '남기신 피드백의 삭제를 요청할 수 있어요.',
 ];
 
 export default function AlphaConsentPage() {
@@ -26,6 +26,16 @@ export default function AlphaConsentPage() {
             {p}
           </li>
         ))}
+        <li className="flex items-start gap-2 text-sm text-text-sub">
+          <span aria-hidden className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+          <span>
+            남기신 데이터의 삭제를{' '}
+            <Link href="/privacy" className="font-semibold text-primary underline underline-offset-2">
+              요청
+            </Link>
+            할 수 있어요.
+          </span>
+        </li>
       </ul>
       <Suspense>
         <AlphaConsentForm />

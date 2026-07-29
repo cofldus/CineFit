@@ -99,3 +99,23 @@ npx playwright test e2e/accessibility.spec.ts                                   
 **교훈**: 문서에 "CI와 동일한 환경"이라고 적혀 있어도, 실제 CI 실행 결과(GitHub Actions
 API/UI)로 주기적으로 재검증하지 않으면 이런 괴리가 오래 발각되지 않는다 — 로컬 Docker
 실행이 여러 번 통과했다는 사실이 실제 CI 통과를 보장하지 않는다.
+
+## 7. `CINEFIT_TEST_PG_URL` 설정 시 전체 스위트를 드물게 흔드는 자원 경합
+
+**2026-07-29 발견**: 로컬에서 `CINEFIT_TEST_PG_URL`을 설정하고 전체 스위트(`npm test`, 26개
+파일)를 반복 실행하면 5회 중 1회꼴로 실패했다(단, `tests/contracts/`의 두 PostgreSQL
+파일만 따로 반복 실행하면 5/5 항상 통과). 두 가지 실제 버그는 찾아서 고쳤다:
+
+1. `tests/contracts/repositoryContracts.test.ts`가 `beforeEach`마다 새 커넥션 풀을 만들면서
+   `afterAll`에서만 닫아 테스트마다 풀이 하나씩 샜다 — `afterEach`로 고침.
+2. `tests/contracts/importSqliteToPostgres.test.ts`가 같은 `repositoryContracts.test.ts`와
+   똑같이 `cinefit_test` DB를 파괴적으로(`DROP SCHEMA CASCADE`) 초기화해 두 파일이 동시
+   실행될 때 충돌했다 — 이 파일 전용 DB(`cinefit_test_import`)로 분리해 고침.
+
+두 수정 후에도 전체 스위트 반복 실행에서 드물게(위 두 재현 조건 자체가 통제된 상황에서는
+안 나타남) 실패가 남아 있다 — 로컬 머신의 일반적인 자원 경합(Docker Desktop·다른 프로세스와의
+동시 실행)으로 추정하며, §4의 기존 원칙("고립된 재실행에서 통과하면 환경 문제로 보고 더
+쫓지 않는다")을 그대로 적용했다. **영향 범위**: 현재 실제 CI(`ci.yml`)는 `CINEFIT_TEST_PG_URL`을
+설정하지 않으므로 이 경합의 영향을 받지 않는다 — PostgreSQL 계약 테스트는 로컬에서 개발자가
+명시적으로 켤 때만 실행된다. CI에 PostgreSQL 서비스 컨테이너를 추가하게 되면(8차 마일스톤
+작업 후보) 이 문서를 다시 참고할 것.

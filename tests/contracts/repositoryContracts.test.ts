@@ -3,7 +3,7 @@
 // 운영·Supabase DB를 절대 대상으로 하지 않는다.
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { afterAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createAdminShowtimeService } from '../../src/data/adminShowtimeService';
 import { createPostgresClient } from '../../src/data/client/postgresClient';
 import { createSqliteClient } from '../../src/data/client/sqliteClient';
@@ -94,7 +94,11 @@ function runContracts(providerName: string, makeDb: () => Promise<DbClient>, clo
       fx = await seedFixture(db);
     });
 
-    afterAll(async () => {
+    // beforeEach가 매 테스트마다 새 커넥션 풀을 만든다 — afterAll(스위트 끝) 대신 afterEach로
+    // 매번 닫아야 한다. 이전에는 afterAll만 있어 테스트마다 풀이 하나씩 새는 버그였다(로컬
+    // PostgreSQL의 max_connections를 소진해 다른 테스트 파일과 동시 실행 시 커넥션 타임아웃을
+    // 유발함 — 8차 마일스톤에서 postgresClient에 connectionTimeoutMillis를 추가하며 발견).
+    afterEach(async () => {
       if (db) await closeDb(db);
     });
 

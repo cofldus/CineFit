@@ -4,35 +4,29 @@
 //  - 자연키 기반 중복 제거 → 재실행해도 중복 생성 없음
 //  - FK 순서 처리 + id 재매핑, 합성 상태·출처·확신도·확인일·이력 보존
 //  - 실패 로그에 사용자 입력 본문·비밀값을 출력하지 않는다 (테이블·키만)
+import { fileURLToPath } from 'node:url';
 import { createPostgresClient } from '../src/data/client/postgresClient.ts';
 import { createSqliteClient } from '../src/data/client/sqliteClient.ts';
 import type { DbClient } from '../src/data/client/types.ts';
 
 type Row = Record<string, unknown>;
-interface Counts {
+export interface Counts {
   created: number;
   updated: number;
   skipped: number;
   failed: number;
 }
 
-const args = process.argv.slice(2);
-const dryRun = args.includes('--dry-run');
-const sourceArg = args.find((a) => a.startsWith('--source='))?.slice(9);
-const sourcePath = sourceArg ?? 'spikes/minimal-db/cinefit-spike.db';
-
-const pgUrl = process.env.DATABASE_DIRECT_URL || process.env.DATABASE_URL;
-if (!pgUrl) {
-  console.error('DATABASE_URL(또는 DATABASE_DIRECT_URL)이 필요합니다. npm run pg:up 후 .env를 설정하세요.');
-  process.exit(1);
+export interface ImportOptions {
+  sourcePath: string;
+  pgUrl: string;
+  dryRun?: boolean;
 }
 
-const summary = new Map<string, Counts>();
-const bump = (table: string, key: keyof Counts) => {
-  const c = summary.get(table) ?? { created: 0, updated: 0, skipped: 0, failed: 0 };
-  c[key]++;
-  summary.set(table, c);
-};
+export interface ImportResult {
+  dryRun: boolean;
+  summary: Map<string, Counts>;
+}
 
 class DryRunRollback extends Error {}
 
@@ -52,9 +46,17 @@ async function insertRow(tx: DbClient, table: string, row: Record<string, unknow
   return rows[0].id;
 }
 
-async function main() {
+export async function importSqliteToPostgres(opts: ImportOptions): Promise<ImportResult> {
+  const { sourcePath, pgUrl, dryRun = false } = opts;
+  const summary = new Map<string, Counts>();
+  const bump = (table: string, key: keyof Counts) => {
+    const c = summary.get(table) ?? { created: 0, updated: 0, skipped: 0, failed: 0 };
+    c[key]++;
+    summary.set(table, c);
+  };
+
   const src = createSqliteClient(sourcePath);
-  const pg = createPostgresClient(pgUrl!);
+  const pg = createPostgresClient(pgUrl);
   const all = (table: string) => src.query<Row>(`SELECT * FROM ${table} ORDER BY id`);
 
   // id 재매핑 테이블 (구 SQLite id → 신 PG id)
@@ -321,7 +323,42 @@ async function main() {
         bump('user_preferences', res.changes ? 'created' : 'skipped');
       }
 
-      // 15. recommendation_runs — 과거 실행 기록 보존, (user_id, created_at, request) 중복 제거
+      // 15. movie_aliases — 자연키: (movie_id, alias)
+      for (const r of await all('movie_aliases')) {
+        const movId = mapId(movieMap, r.movie_id);
+        if (!movId) { bump('movie_aliases', 'skipped'); continue; }
+        const existing = await findId(tx, `SELECT id FROM movie_aliases WHERE movie_id=? AND alias=?`, [movId, r.alias]);
+        if (existing) { bump('movie_aliases', 'skipped'); continue; }
+        await insertRow(tx, 'movie_aliases', { movie_id: movId, alias: r.alias });
+        bump('movie_aliases', 'created');
+      }
+
+      // 16. auditorium_aliases — 자연키: (auditorium_id, alias)
+      for (const r of await all('auditorium_aliases')) {
+        const audId = mapId(audMap, r.auditorium_id);
+        if (!audId) { bump('auditorium_aliases', 'skipped'); continue; }
+        const existing = await findId(tx, `SELECT id FROM auditorium_aliases WHERE auditorium_id=? AND alias=?`, [audId, r.alias]);
+        if (existing) { bump('auditorium_aliases', 'skipped'); continue; }
+        await insertRow(tx, 'auditorium_aliases', { auditorium_id: audId, alias: r.alias });
+        bump('auditorium_aliases', 'created');
+      }
+
+      // 17. feature_flags — key가 자연키(PK, id 컬럼 없음) — 운영에 이미 있는 값을 덮어쓰지
+      // 않는다(운영자가 이미 켜고 끈 상태가 개발용 시드 값보다 우선한다).
+      for (const r of await src.query<Row>(`SELECT * FROM feature_flags ORDER BY key`)) {
+        const res = await tx.run(
+          `INSERT INTO feature_flags (key, enabled, description, updated_at, updated_by)
+           VALUES (?,?,?,?,?) ON CONFLICT (key) DO NOTHING`,
+          [r.key, r.enabled, r.description, r.updated_at, r.updated_by],
+        );
+        bump('feature_flags', res.changes ? 'created' : 'skipped');
+      }
+
+      // issue_reports·audit_logs는 의도적으로 이전하지 않는다 — 개발·테스트 중 남긴 제보·
+      // 감사 로그를 운영 DB의 실제 이력처럼 보이게 섞는 것이 오히려 데이터 무결성 문제다.
+      // 운영은 빈 제보 큐·빈 감사 로그로 시작한다(docs/DATABASE.md).
+
+      // 18. recommendation_runs — 과거 실행 기록 보존, (user_id, created_at, request) 중복 제거
       for (const r of await all('recommendation_runs')) {
         const existing = await findId(
           tx, `SELECT id FROM recommendation_runs WHERE COALESCE(user_id,'')=COALESCE(?,'') AND COALESCE(created_at,'')=COALESCE(?,'') AND request=?`,
@@ -342,19 +379,42 @@ async function main() {
     });
   } catch (e) {
     if (!(e instanceof DryRunRollback)) {
-      console.error(`import 실패(전체 롤백됨): ${e instanceof Error ? e.message : '알 수 없는 오류'}`);
       await src.close();
       await pg.close();
-      process.exit(1);
+      throw new Error(`import 실패(전체 롤백됨): ${e instanceof Error ? e.message : '알 수 없는 오류'}`);
     }
   }
 
-  console.log(`\n${dryRun ? '[dry-run — 전체 롤백됨] ' : ''}SQLite → PostgreSQL import 결과 (${sourcePath}):`);
-  for (const [table, c] of summary) {
-    console.log(`  ${table.padEnd(24)} 신규 ${c.created} / 갱신 ${c.updated} / 건너뜀 ${c.skipped} / 실패 ${c.failed}`);
-  }
   await src.close();
   await pg.close();
+  return { dryRun, summary };
 }
 
-main();
+export function formatImportSummary(result: ImportResult, sourcePath: string): string {
+  const lines = [`${result.dryRun ? '[dry-run — 전체 롤백됨] ' : ''}SQLite → PostgreSQL import 결과 (${sourcePath}):`];
+  for (const [table, c] of result.summary) {
+    lines.push(`  ${table.padEnd(24)} 신규 ${c.created} / 갱신 ${c.updated} / 건너뜀 ${c.skipped} / 실패 ${c.failed}`);
+  }
+  return lines.join('\n');
+}
+
+async function main() {
+  const args = process.argv.slice(2);
+  const dryRun = args.includes('--dry-run');
+  const sourceArg = args.find((a) => a.startsWith('--source='))?.slice(9);
+  const sourcePath = sourceArg ?? 'spikes/minimal-db/cinefit-spike.db';
+  const pgUrl = process.env.DATABASE_DIRECT_URL || process.env.DATABASE_URL;
+  if (!pgUrl) {
+    console.error('DATABASE_URL(또는 DATABASE_DIRECT_URL)이 필요합니다. npm run pg:up 후 .env를 설정하세요.');
+    process.exit(1);
+  }
+  const result = await importSqliteToPostgres({ sourcePath, pgUrl, dryRun });
+  console.log(`\n${formatImportSummary(result, sourcePath)}`);
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((err) => {
+    console.error(err instanceof Error ? err.message : err);
+    process.exitCode = 1;
+  });
+}

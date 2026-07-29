@@ -1,9 +1,33 @@
 import type { Metadata, Viewport } from 'next';
+import { Bricolage_Grotesque, Geist_Mono, Hanken_Grotesk } from 'next/font/google';
 import Link from 'next/link';
 import { AppOpenedTracker } from '../components/AppOpenedTracker';
 import { MobileNav } from '../components/MobileNav';
 import { ServiceWorkerRegister } from '../components/ServiceWorkerRegister';
 import './globals.css';
+
+// Cinematic Editorial Utility 타이포그래피(design/reference/cinefit/DESIGN.md) — 셋 다
+// 한글 글리프가 없어 한글은 자동으로 Pretendard로 폴백된다(globals.css의 font-family 스택
+// 마지막에 Pretendard를 둠) — 영문·숫자·기호(제목의 영문 단어, "2.39:1", "IMAX" 같은 라벨)만
+// 이 폰트로 그려지고 한글 프로즈는 그대로 Pretendard로 읽힌다. 의도된 동작이다.
+const displayFont = Bricolage_Grotesque({
+  subsets: ['latin'],
+  variable: '--font-display',
+  weight: ['700', '800'],
+  display: 'swap',
+});
+const editorialBody = Hanken_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-editorial-body',
+  weight: ['400', '500', '600'],
+  display: 'swap',
+});
+const labelMono = Geist_Mono({
+  subsets: ['latin'],
+  variable: '--font-label-mono',
+  weight: ['400', '500'],
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: { default: 'CineFit — 시네핏', template: '%s | CineFit' },
@@ -20,7 +44,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko">
+    <html lang="ko" className={`${displayFont.variable} ${editorialBody.variable} ${labelMono.variable}`}>
       <body>
         <a href="#main-content" className="skip-link">
           본문으로 바로가기

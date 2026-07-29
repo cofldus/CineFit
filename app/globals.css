@@ -47,7 +47,31 @@
     --elevation-2: 0 8px 20px rgba(20, 26, 36, 0.1);
     --elevation-3: 0 16px 40px rgba(20, 26, 36, 0.18);
     --elevation-4: 0 0 0 1px var(--primary), 0 8px 24px rgba(76, 141, 255, 0.18);
+
+    /* Cinematic Editorial Utility — 라이트 모드 (design/reference/cinefit/DESIGN.md) */
+    --ed-canvas: #f7f3ec;
+    --ed-surface: #ffffff;
+    --ed-surface-sunken: #efe9df;
+    --ed-ink: #14161a;
+    --ed-ink-muted: #5c5a55;
+    --ed-hairline: rgba(20, 22, 26, 0.14);
+    --ed-gold: #8a6a1f;
+    --ed-gold-ink: #ffffff;
   }
+}
+
+/* Cinematic Editorial Utility — 다크 모드 기본값(design/reference/cinefit/DESIGN.md, 사용자
+   화면 전용). 관리자 화면은 위 --bg/--surface/--primary 등 기존 토큰을 그대로 쓴다 — 섞지
+   않는다(8차 마일스톤 지시서 §4). */
+:root {
+  --ed-canvas: #14161a;
+  --ed-surface: #1b1e23;
+  --ed-surface-sunken: #101215;
+  --ed-ink: #f3f1ec;
+  --ed-ink-muted: #a8a9ad;
+  --ed-hairline: rgba(243, 241, 236, 0.14);
+  --ed-gold: #c9a35c;
+  --ed-gold-ink: #14161a;
 }
 
 /* 기존 CSS 커스텀 프로퍼티를 Tailwind 유틸리티(bg-bg, text-primary, rounded-card 등)로 노출 */
@@ -78,6 +102,23 @@
   --font-sans:
     'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
     'Malgun Gothic', system-ui, sans-serif;
+
+  /* Cinematic Editorial Utility — 사용자 화면 전용 토큰(design/reference/cinefit/DESIGN.md).
+     한글은 세 폰트 다 글리프가 없어 자동으로 Pretendard로 폴백된다(app/layout.tsx 주석 참고). */
+  --color-ed-canvas: var(--ed-canvas);
+  --color-ed-surface: var(--ed-surface);
+  --color-ed-surface-sunken: var(--ed-surface-sunken);
+  --color-ed-ink: var(--ed-ink);
+  --color-ed-ink-muted: var(--ed-ink-muted);
+  --color-ed-hairline: var(--ed-hairline);
+  --color-ed-gold: var(--ed-gold);
+  --color-ed-gold-ink: var(--ed-gold-ink);
+  --font-display: var(--font-display), 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
+  --font-editorial: var(--font-editorial-body), 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
+  --font-label: var(--font-label-mono), ui-monospace, 'Pretendard Variable', Pretendard, monospace;
+  /* DESIGN.md: 모서리는 원칙적으로 각지다(0px) — 아주 작은 컨트롤(체크박스 등)만 --radius-ed-xs 허용 */
+  --radius-ed-none: 0px;
+  --radius-ed-xs: 2px;
 }
 
 /*

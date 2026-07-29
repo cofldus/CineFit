@@ -26,17 +26,38 @@
 2. **리전은 서울(ap-northeast-2)을 선택한다**(ADR-6 — 국내 서비스 지연 최소화).
 3. 요금제: 상시 가동이 필요하므로 무료 티어(일정 시간 미사용 시 일시정지)가 아닌 **Pro
    플랜**을 선택한다(알파 운영 중 접속 실패를 막기 위함).
-4. 프로젝트 생성 후 **Project Settings → Database**에서 연결 문자열 두 개를 확인한다:
-   - **Connection pooling(Transaction 모드, PgBouncer)** 문자열 → `DATABASE_URL`로 쓴다.
+4. 최근 Supabase 대시보드는 프로젝트 이름 옆의 **"Connect"** 버튼을 누르면 연결 문자열
+   패널이 뜬다(예전 경로: **Project Settings → Database → Connection string**, 둘 다
+   같은 값을 보여준다). 여기서 두 개를 확인한다:
+   - **Transaction pooler** 문자열 → `DATABASE_URL`로 쓴다.
    - **Direct connection** 문자열 → `DATABASE_DIRECT_URL`로 쓴다(migration·import 전용).
+   - **주의 — IPv6 전용 문제(2026-07-29 실제로 겪음)**: Supabase의 Direct connection
+     호스트(`db.<project-ref>.supabase.co`)는 기본적으로 **IPv6 주소만** 갖고 있다(IPv4
+     add-on은 유료). 사용 중인 네트워크가 IPv6을 지원하지 않으면(한국 가정용 인터넷에 흔함)
+     `node db/migrate.mjs` 실행 시 `getaddrinfo ENOTFOUND db.<project-ref>.supabase.co`
+     오류가 난다 — 비밀번호나 문자열 오타가 아니다. 이 경우 Direct connection 대신
+     **Session pooler** 문자열(같은 Connect 패널에 있음, IPv4 호환)을 `DATABASE_DIRECT_URL`
+     자리에 대신 쓴다 — Transaction pooler와 달리 세션 상태를 유지해 migration 러너의
+     `BEGIN`/`COMMIT` 흐름과도 문제없이 동작한다.
 5. 이 두 값을 안전한 곳(비밀번호 관리자 등)에 잠시 보관한다 — 아래 C에서 Vercel에 그대로
    입력한다.
 6. **로컬 컴퓨터에서** (아직 Vercel에 배포하기 전) 두 문자열로 스키마를 만든다 — `DATABASE_PROVIDER=postgres`를
    반드시 함께 지정한다(빠뜨리면 `db/migrate.mjs`가 조용히 로컬 SQLite를 건드리고 운영
-   Postgres는 그대로 비어 있는다):
+   Postgres는 그대로 비어 있는다). PostgreSQL 쪽 migration은 SQLite와 파일 구성이 달라
+   총 6개다(`000_base.sql`이 SQLite의 `001`+`002`를 한 파일로 합친 것):
+
+   macOS/Linux(bash):
    ```bash
-   DATABASE_PROVIDER=postgres DATABASE_DIRECT_URL="<direct 연결 문자열>" node db/migrate.mjs
-   DATABASE_PROVIDER=postgres DATABASE_DIRECT_URL="<direct 연결 문자열>" node db/migrate.mjs --status  # 7개 전부 적용 확인
+   DATABASE_PROVIDER=postgres DATABASE_DIRECT_URL="<direct 또는 session pooler 연결 문자열>" node db/migrate.mjs
+   DATABASE_PROVIDER=postgres DATABASE_DIRECT_URL="<direct 또는 session pooler 연결 문자열>" node db/migrate.mjs --status  # 6개 전부 적용 확인
+   ```
+
+   Windows(PowerShell):
+   ```powershell
+   $env:DATABASE_PROVIDER = "postgres"
+   $env:DATABASE_DIRECT_URL = "<direct 또는 session pooler 연결 문자열>"
+   node db/migrate.mjs
+   node db/migrate.mjs --status  # 6개 전부 적용 확인 — 같은 세션이면 $env: 값이 남아있어 다시 지정할 필요 없다
    ```
 7. **초기 데이터 채우기 — 반드시 아래 순서를 그대로 따른다(§E "합성 데이터 오염" 필독)**:
    1. 로컬 SQLite로 실제 서비스에 쓸 참조 데이터를 만든다(합성 회차 시드는 건너뛴다 — 아래

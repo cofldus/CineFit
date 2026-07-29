@@ -38,8 +38,12 @@ CI에는 gitleaks 기반 secret scan 잡이 추가되어 이후 커밋을 상시
 | 변수 | 위치 | 용도 |
 |---|---|---|
 | `KOBIS_API_KEY` | 루트 `.env` | KOBIS 동기화 CLI (앱 런타임에는 불필요) |
-| `KMDB_API_KEY` | 루트 `.env` | KMDb 어댑터(승인 대기) |
+| `KMDB_API_KEY` | 루트 `.env` | KMDb 어댑터·연결 CLI (2026-07-29 구현 완료, `docs/KMDB-INTEGRATION.md`) |
 | `ADMIN_PASSWORD` | 루트 `.env` / 배포 환경 | 관리자 화면·API 인증 |
+| `CRON_SECRET` | 배포 환경(Vercel) | `/api/admin/cron/*` 인증(`docs/DEPLOYMENT.md`) — 미설정 시 항상 401 |
+| `CINEFIT_HASH_SECRET` | 배포 환경 | 제보·삭제요청 남용 방지 세션 해시 salt(운영은 고유값 필수) |
+| `CINEFIT_INSECURE_COOKIE` | 개발·자체호스팅 전용 | 쿠키 Secure 플래그 강제 해제 — 운영(Vercel)에서는 설정 금지 |
+| `DATABASE_PROVIDER`/`DATABASE_URL`/`DATABASE_DIRECT_URL`/`CINEFIT_ENV` | 배포 환경 | PostgreSQL 연결(`docs/DATABASE.md`, `docs/DEPLOYMENT.md`) |
 | `CINEFIT_DB_PATH` | 선택 | SQLite 경로 재지정 |
 | `CINEFIT_CLOCK_MODE` | 선택 | `system`(기본) / `demo` |
 | `CINEFIT_DEMO_NOW` | 선택 | demo 모드 기준 시각(ISO) |

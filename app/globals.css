@@ -78,6 +78,23 @@
   --font-sans:
     'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
     'Malgun Gothic', system-ui, sans-serif;
+
+  /* "Cinematic Product Editorial" 홈 전용 토큰(2026-07-29, phase10/home-visual-reset).
+     시스템 라이트/다크 설정과 무관하게 섹션마다 고정된 팔레트를 의도적으로 번갈아 써서
+     한 페이지 안에 리듬을 만든다 — 나머지 화면(영화 선택·추천 결과 등)의 기존
+     prefers-color-scheme 기반 토큰과는 별개다. */
+  --color-home-navy: #0b0f16;
+  --color-home-navy-raised: #131926;
+  --color-home-navy-ink: #f5f3ee;
+  --color-home-navy-ink-muted: #9aa1b0;
+  --color-home-light: #f4f5f7;
+  --color-home-light-raised: #ffffff;
+  --color-home-light-ink: #12151c;
+  --color-home-light-ink-muted: #5b6270;
+  --color-home-brand: #3a5fd9;
+  --color-home-brand-hover: #4a6de3;
+  --color-home-ice: #8fc2ff;
+  --font-wanted: var(--font-display), 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
 }
 
 /*

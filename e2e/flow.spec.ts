@@ -2,9 +2,11 @@ import { expect, test } from '@playwright/test';
 
 test('홈 → 영화 선택 → 조건 입력 → 추천 3종 → 상세 확인', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('상영관');
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('어디서 봐야 할까요');
 
-  await page.getByRole('link', { name: '추천 시작하기' }).click();
+  // 헤더 CTA와 히어로 CTA가 둘 다 "영화 선택하기"라 이름만으로는 모호하다(§4-A "핵심 CTA
+  // 하나"를 헤더·히어로에 동일하게 노출하는 게 의도된 디자인) — 히어로 쪽만 집는다.
+  await page.getByRole('link', { name: '영화 선택하기' }).last().click();
   await expect(page).toHaveURL(/\/movies/);
 
   await page.getByRole('link', { name: '이 영화로 추천받기' }).first().click();
@@ -42,7 +44,11 @@ test('모든 후보 제외 시 이유와 완화 제안을 보여준다', async (
   await expect(page.getByTestId('empty-state')).toContainText('다시 시도');
 });
 
-test('온보딩에 답하면 추천 폼 기본값이 바뀐다(건너뛰면 바뀌지 않는다)', async ({ page }) => {
+// 홈 재구축(phase10/home-visual-reset)으로 온보딩 3문항 폼을 홈 본문에서 제거했다(§5) —
+// localStorage 읽기/쓰기 유틸과 recommend 폼의 기본값 연동 로직 자체는 그대로 남아있지만,
+// 지금은 그 폼을 채울 진입점이 어디에도 없다. 온보딩을 recommend 플로우 초기 단계 등으로
+// 옮기는 후속 작업에서 이 테스트를 되살린다.
+test.skip('온보딩에 답하면 추천 폼 기본값이 바뀐다(건너뛰면 바뀌지 않는다)', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { name: '세 가지만 알려주시면 기본값을 맞춰드려요' })).toBeVisible();
   // SegmentedControl의 radio는 sr-only라 클릭 가능 영역이 거의 없다 — 실제로 보이고 눌리는

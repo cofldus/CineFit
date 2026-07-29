@@ -26,10 +26,10 @@ export default async function HomePage() {
       {dbMissing ? (
         <section className="bg-home-light py-16">
           <div className="mx-auto max-w-[1360px] px-5 sm:px-8">
-            <h2 className="m-0 font-display text-xl font-bold text-home-light-ink">아직 준비된 데이터가 없어요</h2>
+            <h2 className="m-0 font-wanted text-xl font-bold text-home-light-ink">아직 준비된 데이터가 없어요</h2>
             <p className="mt-2 text-sm text-home-light-ink-muted">
               터미널에서{' '}
-              <code className="bg-black/5 px-1.5 py-0.5 font-label text-[13px]">npm run db:seed</code>를 실행한 뒤
+              <code className="bg-black/5 px-1.5 py-0.5 font-wanted text-[13px]">npm run db:seed</code>를 실행한 뒤
               새로고침해 주세요.
             </p>
           </div>

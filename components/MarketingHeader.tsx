@@ -17,8 +17,8 @@ export function MarketingHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-home-navy/90 backdrop-blur-md">
-      <div className="mx-auto flex max-w-[1360px] items-center justify-between px-5 py-4 sm:px-8">
-        <Link href="/" className="font-display text-lg font-extrabold tracking-[-0.02em] text-home-navy-ink" aria-label="CineFit 홈">
+      <div className="mx-auto flex max-w-[1360px] items-center justify-between px-5 py-4 sm:px-8 lg:px-16">
+        <Link href="/" className="font-wanted text-lg font-extrabold tracking-[-0.02em] text-home-navy-ink" aria-label="CineFit 홈">
           CineFit
         </Link>
 
@@ -27,14 +27,14 @@ export function MarketingHeader() {
             <Link
               key={l.href}
               href={l.href}
-              className="inline-flex min-h-11 items-center px-3 text-sm font-medium text-home-navy-ink-muted transition-colors hover:text-home-navy-ink"
+              className="inline-flex min-h-11 items-center px-3 text-sm font-medium tracking-[-0.01em] text-home-navy-ink-muted transition-colors hover:text-home-navy-ink"
             >
               {l.label}
             </Link>
           ))}
           <Link
             href="/movies"
-            className="ml-2 inline-flex min-h-11 items-center rounded-full bg-home-brand px-5 text-sm font-semibold text-white transition-colors hover:bg-home-brand-hover"
+            className="group ml-2 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-home-brand px-5 text-sm font-semibold text-white transition-[background-color,gap] duration-200 hover:gap-2.5 hover:bg-home-brand-hover"
           >
             영화 선택하기
           </Link>

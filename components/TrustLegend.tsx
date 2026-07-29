@@ -5,12 +5,12 @@ const LEGEND = [
   { label: '추정치', detail: '확인 전, 참고용' },
 ] as const;
 
-/** §4-E — 신뢰도 4단계를 색 배지 대신 담백한 legend 한 줄로 정리한다. */
+/** 신뢰도 4단계를 색 배지 대신, 인쇄물 뒷면의 콜로폰(발행 정보)처럼 조용히 정리한다. */
 export function TrustLegend() {
   return (
-    <ul className="m-0 flex list-none flex-wrap gap-x-8 gap-y-4 p-0">
+    <ul className="m-0 flex list-none flex-col gap-5 p-0">
       {LEGEND.map((l) => (
-        <li key={l.label} className="flex items-start gap-2">
+        <li key={l.label} className="flex items-start gap-3">
           <span aria-hidden className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-home-brand" />
           <span>
             <span className="block text-sm font-semibold text-home-light-ink">{l.label}</span>

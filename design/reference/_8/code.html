@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CineFit | Recommendation Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&amp;family=Hanken+Grotesk:wght@400;500&amp;family=Geist:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error": "#ffffff",
+                    "error": "#ba1a1a",
+                    "outline": "#76777b",
+                    "surface-container-low": "#f0f4f9",
+                    "tertiary-container": "#221a17",
+                    "background": "#f6fafe",
+                    "on-primary-fixed-variant": "#45474b",
+                    "on-secondary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed": "#ffdea5",
+                    "on-surface-variant": "#45474b",
+                    "secondary-fixed-dim": "#e9c176",
+                    "on-background": "#171c20",
+                    "tertiary-fixed-dim": "#d2c3be",
+                    "on-error-container": "#93000a",
+                    "tertiary-fixed": "#efdfda",
+                    "surface-container": "#eaeef3",
+                    "on-surface": "#171c20",
+                    "surface-tint": "#5d5e63",
+                    "surface-variant": "#dfe3e7",
+                    "secondary": "#775a19",
+                    "primary-fixed": "#e2e2e7",
+                    "on-secondary-fixed": "#261900",
+                    "on-secondary-container": "#785a1a",
+                    "surface-container-high": "#e4e9ed",
+                    "outline-variant": "#c6c6cb",
+                    "inverse-surface": "#2c3135",
+                    "on-tertiary-fixed": "#221a17",
+                    "surface": "#f6fafe",
+                    "secondary-container": "#fed488",
+                    "on-primary-fixed": "#1a1c20",
+                    "surface-bright": "#f6fafe",
+                    "primary": "#000102",
+                    "on-secondary-fixed-variant": "#5d4201",
+                    "on-tertiary-container": "#8e817d",
+                    "primary-container": "#1a1c20",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-container": "#838489",
+                    "surface-container-highest": "#dfe3e7",
+                    "surface-dim": "#d6dadf",
+                    "inverse-on-surface": "#edf1f6",
+                    "primary-fixed-dim": "#c6c6cb",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-primary": "#c6c6cb",
+                    "on-tertiary-fixed-variant": "#4f4541",
+                    "tertiary": "#010000",
+                    "on-primary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-gap": "80px",
+                    "aspect-ratio-standard": "1.85/1",
+                    "unit": "4px",
+                    "gutter": "24px",
+                    "margin-safe": "40px",
+                    "aspect-ratio-wide": "2.39/1"
+            },
+            "fontFamily": {
+                    "headline-xl": ["Bricolage Grotesque"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "headline-lg-mobile": ["Bricolage Grotesque"],
+                    "body-md": ["Hanken Grotesk"],
+                    "label-technical": ["Geist"],
+                    "headline-lg": ["Bricolage Grotesque"],
+                    "label-data": ["Geist"]
+            },
+            "fontSize": {
+                    "headline-xl": ["64px", {"lineHeight": "72px", "letterSpacing": "-0.04em", "fontWeight": "800"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["32px", {"lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-technical": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "headline-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-data": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .custom-slider::-webkit-slider-runnable-track {
+            background: #dfe3e7;
+            height: 2px;
+        }
+        .custom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            margin-top: -7px;
+            background-color: #000102;
+            height: 16px;
+            width: 16px;
+            border-radius: 0;
+        }
+        .step-inactive { opacity: 0.3; filter: grayscale(1); pointer-events: none; }
+        .hairline-separator { height: 0.5px; background-color: #c6c6cb; width: 100%; }
+        .dotted-leader { flex-grow: 1; border-bottom: 1px dotted #c6c6cb; margin: 0 8px; position: relative; top: -5px; }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky bg-background border-b border-outline-variant z-50">
+<div class="max-w-[1280px] mx-auto px-gutter py-4 flex justify-between items-center">
+<div class="font-headline-lg text-headline-lg tracking-tighter text-primary">CineFit</div>
+<nav class="hidden md:flex gap-8 items-center">
+<a class="text-on-surface-variant font-label-technical uppercase tracking-widest hover:text-primary transition-colors duration-300" href="#">Curation</a>
+<a class="text-on-surface-variant font-label-technical uppercase tracking-widest hover:text-primary transition-colors duration-300" href="#">Theaters</a>
+<a class="text-on-surface-variant font-label-technical uppercase tracking-widest hover:text-primary transition-colors duration-300" href="#">Specs</a>
+<a class="text-on-surface-variant font-label-technical uppercase tracking-widest hover:text-primary transition-colors duration-300" href="#">Journal</a>
+</nav>
+<div class="flex items-center gap-4">
+<span class="font-label-technical text-primary bg-primary-container px-3 py-1 uppercase tracking-widest">Beta</span>
+<div class="w-8 h-8 bg-surface-variant rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">person</span>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-[1280px] mx-auto px-gutter py-20 min-h-screen">
+<!-- Header Section -->
+<section class="mb-section-gap">
+<div class="flex items-baseline gap-4 mb-2">
+<span class="font-label-technical text-secondary uppercase tracking-[0.2em]">Personalization Engine</span>
+<div class="h-[1px] flex-grow bg-outline-variant"></div>
+</div>
+<h1 class="font-headline-xl text-headline-xl mb-6">Define your cinematic <br/>environment.</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+                CineFit uses technical theater data and real-time logistics to find your perfect seat. Tailor your preferences below to calibrate the recommendation engine.
+            </p>
+</section>
+<form class="space-y-section-gap" id="recommendation-form">
+<!-- Step 1: When & Where -->
+<div class="transition-all duration-700" id="step-1">
+<div class="flex items-center gap-4 mb-12">
+<span class="font-headline-lg text-headline-lg text-outline-variant">01</span>
+<h2 class="font-headline-lg text-headline-lg">When &amp; Where</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-16">
+<div class="space-y-12">
+<!-- Date Selection -->
+<div class="group">
+<label class="font-label-technical uppercase tracking-widest text-on-surface-variant mb-6 block">Preferred Screening Window</label>
+<div class="flex gap-4">
+<button class="flex-1 py-4 border border-outline text-primary font-label-technical uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all" type="button">Today</button>
+<button class="flex-1 py-4 border border-outline text-primary font-label-technical uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all" type="button">Weekend</button>
+<button class="flex-1 py-4 border border-primary bg-primary text-on-primary font-label-technical uppercase tracking-widest" type="button">Next 7 Days</button>
+</div>
+</div>
+<!-- Price Range -->
+<div>
+<div class="flex justify-between items-end mb-6">
+<label class="font-label-technical uppercase tracking-widest text-on-surface-variant">Price Ceiling (Per Seat)</label>
+<span class="font-label-data text-label-data text-primary" id="price-val">$45.00</span>
+</div>
+<input class="w-full custom-slider accent-primary bg-transparent appearance-none cursor-pointer" max="100" min="15" oninput="document.getElementById('price-val').innerText = '$' + this.value + '.00'" step="5" type="range" value="45"/>
+<div class="flex justify-between mt-2 font-label-technical text-outline-variant uppercase">
+<span>$15</span>
+<span>$100+</span>
+</div>
+</div>
+</div>
+<div class="space-y-12">
+<!-- Region/Location -->
+<div>
+<label class="font-label-technical uppercase tracking-widest text-on-surface-variant mb-4 block">Metro Region</label>
+<div class="border-b border-primary py-4 flex justify-between items-center group cursor-pointer">
+<span class="font-headline-lg text-headline-lg text-primary">Seoul, Gangnam</span>
+<span class="material-symbols-outlined text-primary group-hover:translate-x-2 transition-transform">arrow_forward_ios</span>
+</div>
+</div>
+<!-- Travel Time -->
+<div>
+<div class="flex justify-between items-end mb-6">
+<label class="font-label-technical uppercase tracking-widest text-on-surface-variant">Maximum Travel Time</label>
+<span class="font-label-data text-label-data text-primary" id="travel-val">30 mins</span>
+</div>
+<input class="w-full custom-slider accent-primary bg-transparent appearance-none cursor-pointer" max="120" min="10" oninput="document.getElementById('travel-val').innerText = this.value + ' mins'" step="10" type="range" value="30"/>
+<div class="flex justify-between mt-2 font-label-technical text-outline-variant uppercase">
+<span>Local</span>
+<span>Regional</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="hairline-separator"></div>
+<!-- Step 2: Priorities -->
+<div class="transition-all duration-700" id="step-2">
+<div class="flex items-center gap-4 mb-12">
+<span class="font-headline-lg text-headline-lg text-outline-variant">02</span>
+<h2 class="font-headline-lg text-headline-lg">Core Priorities</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-16">
+<div class="md:col-span-5 space-y-12">
+<!-- Balance Sliders -->
+<div>
+<label class="font-label-technical uppercase tracking-widest text-on-surface-variant mb-8 block">Optimization Focus</label>
+<div class="space-y-10">
+<div>
+<div class="flex justify-between font-label-data text-label-data mb-3">
+<span>Value</span>
+<span>Premium Quality</span>
+</div>
+<input class="w-full custom-slider accent-primary bg-transparent appearance-none cursor-pointer" type="range"/>
+</div>
+<div>
+<div class="flex justify-between font-label-data text-label-data mb-3">
+<span>Accessibility</span>
+<span>Technical Spec</span>
+</div>
+<input class="w-full custom-slider accent-primary bg-transparent appearance-none cursor-pointer" type="range"/>
+</div>
+</div>
+</div>
+</div>
+<div class="md:col-span-7">
+<label class="font-label-technical uppercase tracking-widest text-on-surface-variant mb-8 block">Format Preferences</label>
+<div class="grid grid-cols-2 gap-4">
+<div class="p-6 border border-outline hover:border-primary transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-8">
+<span class="material-symbols-outlined text-secondary text-[32px]">view_quilt</span>
+<div class="w-4 h-4 border border-outline group-hover:bg-primary transition-colors"></div>
+</div>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile mb-2">IMAX Laser</h3>
+<p class="font-label-technical text-outline uppercase">Maximum Immersion</p>
+</div>
+<div class="p-6 border border-primary bg-primary text-on-primary cursor-pointer">
+<div class="flex justify-between items-start mb-8">
+<span class="material-symbols-outlined text-on-primary text-[32px]">surround_sound</span>
+<div class="w-4 h-4 bg-secondary"></div>
+</div>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile mb-2">Dolby Cinema</h3>
+<p class="font-label-technical text-on-primary-container uppercase">Acoustic Precision</p>
+</div>
+<div class="p-6 border border-outline hover:border-primary transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-8">
+<span class="material-symbols-outlined text-secondary text-[32px]">movie_filter</span>
+<div class="w-4 h-4 border border-outline group-hover:bg-primary transition-colors"></div>
+</div>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile mb-2">35mm Film</h3>
+<p class="font-label-technical text-outline uppercase">Analog Texture</p>
+</div>
+<div class="p-6 border border-outline hover:border-primary transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-8">
+<span class="material-symbols-outlined text-secondary text-[32px]">bolt</span>
+<div class="w-4 h-4 border border-outline group-hover:bg-primary transition-colors"></div>
+</div>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile mb-2">4DX / ScreenX</h3>
+<p class="font-label-technical text-outline uppercase">Sensory Effects</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="hairline-separator"></div>
+<!-- Step 3: Avoidance -->
+<div class="transition-all duration-700" id="step-3">
+<div class="flex items-center gap-4 mb-12">
+<span class="font-headline-lg text-headline-lg text-outline-variant">03</span>
+<h2 class="font-headline-lg text-headline-lg">Avoidance &amp; Constraints</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+<!-- Constraint Card 1 -->
+<div class="border-t border-outline-variant pt-8 flex flex-col justify-between min-h-[200px]">
+<div>
+<h4 class="font-headline-lg-mobile text-headline-lg-mobile mb-4">Motion Sickness</h4>
+<p class="font-body-md text-on-surface-variant">Filter out screens with extreme brightness fluctuations or intense hydraulic movement.</p>
+</div>
+<div class="mt-8 flex items-center justify-between">
+<span class="font-label-technical uppercase text-outline">Enable Filter</span>
+<button class="w-12 h-6 bg-surface-container-highest flex items-center px-1 transition-colors" type="button">
+<div class="w-4 h-4 bg-outline"></div>
+</button>
+</div>
+</div>
+<!-- Constraint Card 2 -->
+<div class="border-t border-outline-variant pt-8 flex flex-col justify-between min-h-[200px]">
+<div>
+<h4 class="font-headline-lg-mobile text-headline-lg-mobile mb-4">Legibility Focus</h4>
+<p class="font-body-md text-on-surface-variant">Prioritize theaters with high-contrast subtitles and larger vertical screen offsets.</p>
+</div>
+<div class="mt-8 flex items-center justify-between">
+<span class="font-label-technical uppercase text-on-background">Enabled</span>
+<button class="w-12 h-6 bg-primary flex items-center justify-end px-1 transition-colors" type="button">
+<div class="w-4 h-4 bg-white"></div>
+</button>
+</div>
+</div>
+<!-- Constraint Card 3 -->
+<div class="border-t border-outline-variant pt-8 flex flex-col justify-between min-h-[200px]">
+<div>
+<h4 class="font-headline-lg-mobile text-headline-lg-mobile mb-4">Spacious Seating</h4>
+<p class="font-body-md text-on-surface-variant">Exclude tight row configurations. Only show theaters with 120cm+ legroom.</p>
+</div>
+<div class="mt-8 flex items-center justify-between">
+<span class="font-label-technical uppercase text-outline">Enable Filter</span>
+<button class="w-12 h-6 bg-surface-container-highest flex items-center px-1 transition-colors" type="button">
+<div class="w-4 h-4 bg-outline"></div>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Summary & CTA Section -->
+<section class="mt-section-gap bg-surface-container-low p-12 relative overflow-hidden">
+<div class="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-12 items-end">
+<div class="md:col-span-8">
+<span class="font-label-technical text-secondary uppercase tracking-[0.2em] mb-6 block">Calibration Summary</span>
+<div class="space-y-4">
+<div class="flex items-center">
+<span class="font-label-technical uppercase text-on-surface-variant min-w-[120px]">Timeline</span>
+<div class="dotted-leader"></div>
+<span class="font-label-data text-primary">Next 7 Days</span>
+</div>
+<div class="flex items-center">
+<span class="font-label-technical uppercase text-on-surface-variant min-w-[120px]">Location</span>
+<div class="dotted-leader"></div>
+<span class="font-label-data text-primary">Seoul, Gangnam (30m Radius)</span>
+</div>
+<div class="flex items-center">
+<span class="font-label-technical uppercase text-on-surface-variant min-w-[120px]">Primary Format</span>
+<div class="dotted-leader"></div>
+<span class="font-label-data text-primary">Dolby Cinema, IMAX Laser</span>
+</div>
+</div>
+</div>
+<div class="md:col-span-4 text-right">
+<button class="w-full bg-primary text-on-primary py-6 px-12 font-label-technical uppercase tracking-[0.2em] text-lg hover:bg-secondary transition-all flex items-center justify-center gap-4 group" type="submit">
+                            Find My Best Fit
+                            <span class="material-symbols-outlined group-hover:translate-x-2 transition-transform">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Subtle Projector Spill Effect -->
+<div class="absolute -right-20 -top-20 w-80 h-80 bg-secondary/5 blur-[100px] rounded-full"></div>
+</section>
+</form>
+</main>
+<!-- Footer -->
+<footer class="w-full mt-section-gap border-t border-outline-variant bg-background">
+<div class="max-w-[1280px] mx-auto px-gutter py-12 flex flex-col md:flex-row justify-between items-start gap-8">
+<div class="space-y-4">
+<div class="font-label-technical font-bold uppercase text-primary">CineFit</div>
+<p class="font-body-md text-on-surface-variant max-w-xs">
+                    Precision engineering for the cinematic enthusiast. Calibrating the world's theaters to your unique biology.
+                </p>
+</div>
+<div class="grid grid-cols-2 gap-x-16 gap-y-4">
+<a class="text-on-surface-variant font-body-md hover:text-primary transition-opacity duration-200" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant font-body-md hover:text-primary transition-opacity duration-200" href="#">Technical Specs</a>
+<a class="text-on-surface-variant font-body-md hover:text-primary transition-opacity duration-200" href="#">Data Integrity</a>
+<a class="text-on-surface-variant font-body-md hover:text-primary transition-opacity duration-200" href="#">Contact</a>
+</div>
+<div class="text-on-surface-variant font-body-md text-right md:max-w-xs">
+                © 2024 CineFit. All Rights Reserved. <br/>
+<span class="text-label-technical uppercase opacity-60">Data provided by MotionDB.</span>
+</div>
+</div>
+</footer>
+<script>
+        // Micro-interactions for the Toggle Switches
+        document.querySelectorAll('button[type="button"]').forEach(btn => {
+            if (btn.querySelector('div.w-4.h-4')) { // It's a toggle
+                btn.addEventListener('click', () => {
+                    const isEnabled = btn.classList.contains('bg-primary');
+                    const textSpan = btn.previousElementSibling;
+                    const dot = btn.querySelector('div');
+
+                    if (isEnabled) {
+                        btn.classList.replace('bg-primary', 'bg-surface-container-highest');
+                        btn.classList.replace('justify-end', 'justify-start');
+                        dot.classList.replace('bg-white', 'bg-outline');
+                        textSpan.textContent = 'Enable Filter';
+                        textSpan.classList.replace('text-on-background', 'text-outline');
+                    } else {
+                        btn.classList.replace('bg-surface-container-highest', 'bg-primary');
+                        btn.classList.replace('justify-start', 'justify-end');
+                        dot.classList.replace('bg-outline', 'bg-white');
+                        textSpan.textContent = 'Enabled';
+                        textSpan.classList.replace('text-outline', 'text-on-background');
+                    }
+                });
+            }
+        });
+
+        // Simple Form Submission Logic
+        document.getElementById('recommendation-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.innerHTML = 'Calibrating...';
+            setTimeout(() => {
+                btn.innerHTML = 'Calibration Complete';
+                btn.classList.replace('bg-primary', 'bg-secondary');
+            }, 1500);
+        });
+
+        // Scroll reveal logic for steps
+        const observerOptions = {
+            threshold: 0.2
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.remove('opacity-30', 'translate-y-10');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('#step-1, #step-2, #step-3').forEach(step => {
+            step.classList.add('opacity-30', 'translate-y-10');
+            observer.observe(step);
+        });
+    </script>
+</body></html>

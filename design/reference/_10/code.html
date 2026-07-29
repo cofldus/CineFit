@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CineFit | Theater Details</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Hanken+Grotesk:wght@400;500&family=Geist:wght@400;500&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@100..900&family=Geist:wght@100..900&family=Hanken+Grotesk:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error": "#ffffff",
+                    "error": "#ba1a1a",
+                    "outline": "#76777b",
+                    "surface-container-low": "#f0f4f9",
+                    "tertiary-container": "#221a17",
+                    "background": "#f6fafe",
+                    "on-primary-fixed-variant": "#45474b",
+                    "on-secondary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed": "#ffdea5",
+                    "on-surface-variant": "#45474b",
+                    "secondary-fixed-dim": "#e9c176",
+                    "on-background": "#171c20",
+                    "tertiary-fixed-dim": "#d2c3be",
+                    "on-error-container": "#93000a",
+                    "tertiary-fixed": "#efdfda",
+                    "surface-container": "#eaeef3",
+                    "on-surface": "#171c20",
+                    "surface-tint": "#5d5e63",
+                    "surface-variant": "#dfe3e7",
+                    "secondary": "#775a19",
+                    "primary-fixed": "#e2e2e7",
+                    "on-secondary-fixed": "#261900",
+                    "on-secondary-container": "#785a1a",
+                    "surface-container-high": "#e4e9ed",
+                    "outline-variant": "#c6c6cb",
+                    "inverse-surface": "#2c3135",
+                    "on-tertiary-fixed": "#221a17",
+                    "surface": "#f6fafe",
+                    "secondary-container": "#fed488",
+                    "on-primary-fixed": "#1a1c20",
+                    "surface-bright": "#f6fafe",
+                    "primary": "#000102",
+                    "on-secondary-fixed-variant": "#5d4201",
+                    "on-tertiary-container": "#8e817d",
+                    "primary-container": "#1a1c20",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-container": "#838489",
+                    "surface-container-highest": "#dfe3e7",
+                    "surface-dim": "#d6dadf",
+                    "inverse-on-surface": "#edf1f6",
+                    "primary-fixed-dim": "#c6c6cb",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-primary": "#c6c6cb",
+                    "on-tertiary-fixed-variant": "#4f4541",
+                    "tertiary": "#010000",
+                    "on-primary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-gap": "80px",
+                    "aspect-ratio-standard": "1.85/1",
+                    "unit": "4px",
+                    "gutter": "24px",
+                    "margin-safe": "40px",
+                    "aspect-ratio-wide": "2.39/1"
+            },
+            "fontFamily": {
+                    "headline-xl": ["Bricolage Grotesque"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "headline-lg-mobile": ["Bricolage Grotesque"],
+                    "body-md": ["Hanken Grotesk"],
+                    "label-technical": ["Geist"],
+                    "headline-lg": ["Bricolage Grotesque"],
+                    "label-data": ["Geist"]
+            },
+            "fontSize": {
+                    "headline-xl": ["64px", {"lineHeight": "72px", "letterSpacing": "-0.04em", "fontWeight": "800"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["32px", {"lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-technical": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "headline-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-data": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+      body {
+        background-color: #1a1c20; /* Dark Slate Background as requested */
+        color: #ffffff;
+        -webkit-font-smoothing: antialiased;
+      }
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        display: inline-block;
+        line-height: 1;
+      }
+      .dotted-leader {
+        background-image: radial-gradient(circle, #76777b 1px, transparent 1px);
+        background-position: bottom;
+        background-size: 4px 1px;
+        background-repeat: repeat-x;
+        height: 1px;
+        flex-grow: 1;
+        margin: 0 8px 4px 8px;
+      }
+      .hall-grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 4px;
+      }
+      .seat {
+        width: 100%;
+        padding-top: 100%;
+        border: 0.5px solid rgba(255,255,255,0.1);
+        position: relative;
+      }
+      .seat.active {
+        background-color: #e9c176; /* Muted Gold Point Color */
+        border: none;
+      }
+      .seat.unavailable {
+        background-color: rgba(255,255,255,0.05);
+      }
+      .screen-curve {
+        height: 4px;
+        background: linear-gradient(90deg, transparent, #e9c176, transparent);
+        border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+        width: 100%;
+        margin-bottom: 24px;
+      }
+      details[open] summary .expand-icon {
+        transform: rotate(180deg);
+      }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="max-w-[390px] mx-auto min-h-screen pb-24 overflow-x-hidden">
+<!-- Top Navigation Placeholder (Simulating TopAppBar Mobile context) -->
+<header class="w-full top-0 sticky z-50 bg-[#1a1c20] border-b border-white/10 px-gutter py-4 flex justify-between items-center">
+<div class="font-headline-lg-mobile text-headline-lg-mobile tracking-tighter text-white">CineFit</div>
+<button class="material-symbols-outlined text-white">close</button>
+</header>
+<main class="flex flex-col">
+<!-- Hero Section -->
+<section class="px-gutter pt-8 pb-12 border-b border-white/10">
+<div class="mb-2">
+<span class="font-label-technical text-label-technical text-secondary-fixed uppercase">Premier Selection</span>
+</div>
+<h1 class="font-headline-xl text-[48px] leading-[1] text-white mb-6">Orion Cinema Hall 04</h1>
+<div class="flex items-center gap-2 mb-8">
+<span class="material-symbols-outlined text-secondary-fixed text-[18px]">location_on</span>
+<span class="font-label-data text-label-data text-white/60">Seongsu-dong, Seoul</span>
+</div>
+<div class="aspect-[2.39/1] w-full bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover opacity-80" data-alt="A moody, high-contrast interior shot of a professional cinema projection booth with a high-end laser projector emitting a focused beam of light into the darkness. The scene is illuminated by soft, dim amber status lights and the clinical white glow of technical monitors. The aesthetic is ultra-modern, professional, and precise, mirroring Korean high-end architectural design with dark slate surfaces and metallic accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCiWLOVWnnCrKnIrhOolYZAtAYssWqEL0idiO_AXoitjq5UTA8ddKEtMqRjM5rN9qDTyFZ5rTsGPos150Zq_3JSdGj4i0-yZW1-MnC7Nj5-BuCd5K7_NQu_hpzOqb4-Jn5wIR5d8pUifFsHxw6y4Tdvs6W3BEbTwjS9uj4OnFFcrNHWtVIXZInGnLHKmlP2UM0Fq13TnA6FLZyQaXhez1RfCX9v-ZtR7-ZvNFFIzseVtvcQmXLNf5it"/>
+</div>
+</section>
+<!-- Technical Specs Grid -->
+<section class="px-gutter py-12 border-b border-white/10">
+<h2 class="font-label-technical text-label-technical text-white/40 uppercase tracking-widest mb-8">Technical Specifications</h2>
+<div class="grid grid-cols-2 gap-y-12 gap-x-8">
+<!-- Screen -->
+<div class="flex flex-col gap-2">
+<span class="font-label-technical text-label-technical text-secondary-fixed">SCREEN</span>
+<p class="font-headline-lg-mobile text-headline-lg-mobile text-white">22.4m</p>
+<p class="font-label-data text-label-data text-white/40">Silver Mat Matte</p>
+</div>
+<!-- Sound -->
+<div class="flex flex-col gap-2">
+<span class="font-label-technical text-label-technical text-secondary-fixed">SOUND</span>
+<p class="font-headline-lg-mobile text-headline-lg-mobile text-white">11.1</p>
+<p class="font-label-data text-label-data text-white/40">Dolby Atmos Certified</p>
+</div>
+<!-- Projector -->
+<div class="flex flex-col gap-2">
+<span class="font-label-technical text-label-technical text-secondary-fixed">PROJECTOR</span>
+<p class="font-headline-lg-mobile text-headline-lg-mobile text-white">Laser</p>
+<p class="font-label-data text-label-data text-white/40">Dual 4K RGB Christies</p>
+</div>
+<!-- Masking -->
+<div class="flex flex-col gap-2">
+<span class="font-label-technical text-label-technical text-secondary-fixed">MASKING</span>
+<p class="font-headline-lg-mobile text-headline-lg-mobile text-white">Side</p>
+<p class="font-label-data text-label-data text-white/40">Automated Variable</p>
+</div>
+</div>
+</section>
+<!-- Recommended Seats Visualization -->
+<section class="px-gutter py-12 border-b border-white/10">
+<div class="flex justify-between items-end mb-8">
+<h2 class="font-label-technical text-label-technical text-white/40 uppercase tracking-widest">Sweet Spot Analysis</h2>
+<div class="font-label-data text-label-data text-secondary-fixed">Optimal Row: H-K</div>
+</div>
+<div class="w-full bg-[#111214] p-8 flex flex-col items-center">
+<div class="screen-curve"></div>
+<div class="w-full hall-grid">
+<!-- Row A -->
+<div class="seat unavailable"></div><div class="seat unavailable"></div><div class="seat unavailable"></div><div class="seat unavailable"></div><div class="seat unavailable"></div><div class="seat unavailable"></div><div class="seat unavailable"></div><div class="seat unavailable"></div><div class="seat unavailable"></div><div class="seat unavailable"></div><div class="seat unavailable"></div><div class="seat unavailable"></div>
+<!-- Row B-G -->
+<div class="col-span-12 h-4"></div>
+<div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div>
+<div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div>
+<div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div>
+<!-- Row H (Sweet Spot) -->
+<div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat active"></div><div class="seat active"></div><div class="seat active"></div><div class="seat active"></div><div class="seat active"></div><div class="seat active"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div>
+<!-- Row I (Sweet Spot) -->
+<div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat active"></div><div class="seat active"></div><div class="seat active"></div><div class="seat active"></div><div class="seat active"></div><div class="seat active"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div>
+</div>
+<div class="mt-8 flex gap-6">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 bg-secondary-fixed"></div>
+<span class="font-label-technical text-[10px] text-white/60">PRIME VIEW</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 border border-white/20"></div>
+<span class="font-label-technical text-[10px] text-white/60">STANDARD</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Auxiliary Info: Collapsible sections -->
+<section class="px-gutter py-8 border-b border-white/10">
+<details class="group py-4 border-b border-white/5">
+<summary class="flex justify-between items-center cursor-pointer list-none">
+<span class="font-body-md text-body-md text-white">Venue History</span>
+<span class="material-symbols-outlined expand-icon transition-transform text-white/40">expand_more</span>
+</summary>
+<div class="pt-4 pb-2">
+<p class="font-body-md text-body-md text-white/60 leading-relaxed">
+                        Established in 2018, Orion Cinema Hall 04 was designed by Studio CineForm to provide an uncompromising visual experience. The hall underwent a full technical retrofit in 2023 to install the current RGB Laser system.
+                    </p>
+</div>
+</details>
+<details class="group py-4 border-b border-white/5">
+<summary class="flex justify-between items-center cursor-pointer list-none">
+<span class="font-body-md text-body-md text-white">Data Sources</span>
+<span class="material-symbols-outlined expand-icon transition-transform text-white/40">expand_more</span>
+</summary>
+<div class="pt-4 pb-2">
+<p class="font-body-md text-body-md text-white/60 leading-relaxed">
+                        Information compiled from MotionDB technical filings, theatre floor plans, and user-submitted calibrations. Last verified: October 2024.
+                    </p>
+</div>
+</details>
+</section>
+<!-- Informational List (Key-Value) -->
+<section class="px-gutter py-12">
+<div class="flex flex-col gap-4">
+<div class="flex items-end">
+<span class="font-label-technical text-label-technical text-white/40">Throw Distance</span>
+<div class="dotted-leader"></div>
+<span class="font-label-data text-label-data text-white">32.4m</span>
+</div>
+<div class="flex items-end">
+<span class="font-label-technical text-label-technical text-white/40">Incline Angle</span>
+<div class="dotted-leader"></div>
+<span class="font-label-data text-label-data text-white">18.5°</span>
+</div>
+<div class="flex items-end">
+<span class="font-label-technical text-label-technical text-white/40">Brightness Peak</span>
+<div class="dotted-leader"></div>
+<span class="font-label-data text-label-data text-white">14.2 fL</span>
+</div>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="px-gutter py-12 flex flex-col gap-4">
+<button class="w-full py-4 bg-white text-[#1a1c20] font-label-technical text-label-technical font-bold uppercase tracking-widest transition-opacity active:opacity-80">
+                Book Through Partner
+            </button>
+<button class="w-full py-4 border border-white/20 text-white font-label-technical text-label-technical uppercase tracking-widest hover:bg-white/5 transition-colors">
+                Report Data Change
+            </button>
+</section>
+</main>
+<!-- Footer Space -->
+<footer class="px-gutter py-12 border-t border-white/10 text-center">
+<p class="font-label-technical text-[10px] text-white/20 uppercase tracking-[0.2em]">CineFit Technical Specification V4.2.1</p>
+</footer>
+<!-- Bottom Navigation (Shared Component Logic - Suppressed because this is a Detail/Task-focused sub-page) -->
+<script>
+        // Micro-interaction for seat selection simulation
+        document.querySelectorAll('.seat:not(.unavailable)').forEach(seat => {
+            seat.addEventListener('click', () => {
+                seat.classList.toggle('active');
+                if(seat.classList.contains('active')) {
+                    seat.style.backgroundColor = '#e9c176';
+                } else {
+                    seat.style.backgroundColor = 'transparent';
+                }
+            });
+        });
+    </script>
+</body></html>

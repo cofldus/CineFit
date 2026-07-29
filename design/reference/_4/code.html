@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CineFit | Movie Selection</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Hanken+Grotesk:wght@400;500&family=Geist:wght@400;500&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@100..900&family=Geist:wght@100..900&family=Hanken+Grotesk:wght@100..900&display=swap" rel="stylesheet"/>
+<!-- Tailwind Config Execution -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error": "#ffffff",
+                    "error": "#ba1a1a",
+                    "outline": "#76777b",
+                    "surface-container-low": "#f0f4f9",
+                    "tertiary-container": "#221a17",
+                    "background": "#f6fafe",
+                    "on-primary-fixed-variant": "#45474b",
+                    "on-secondary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed": "#ffdea5",
+                    "on-surface-variant": "#45474b",
+                    "secondary-fixed-dim": "#e9c176",
+                    "on-background": "#171c20",
+                    "tertiary-fixed-dim": "#d2c3be",
+                    "on-error-container": "#93000a",
+                    "tertiary-fixed": "#efdfda",
+                    "surface-container": "#eaeef3",
+                    "on-surface": "#171c20",
+                    "surface-tint": "#5d5e63",
+                    "surface-variant": "#dfe3e7",
+                    "secondary": "#775a19",
+                    "primary-fixed": "#e2e2e7",
+                    "on-secondary-fixed": "#261900",
+                    "on-secondary-container": "#785a1a",
+                    "surface-container-high": "#e4e9ed",
+                    "outline-variant": "#c6c6cb",
+                    "inverse-surface": "#2c3135",
+                    "on-tertiary-fixed": "#221a17",
+                    "surface": "#f6fafe",
+                    "secondary-container": "#fed488",
+                    "on-primary-fixed": "#1a1c20",
+                    "surface-bright": "#f6fafe",
+                    "primary": "#000102",
+                    "on-secondary-fixed-variant": "#5d4201",
+                    "on-tertiary-container": "#8e817d",
+                    "primary-container": "#1a1c20",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-container": "#838489",
+                    "surface-container-highest": "#dfe3e7",
+                    "surface-dim": "#d6dadf",
+                    "inverse-on-surface": "#edf1f6",
+                    "primary-fixed-dim": "#c6c6cb",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-primary": "#c6c6cb",
+                    "on-tertiary-fixed-variant": "#4f4541",
+                    "tertiary": "#010000",
+                    "on-primary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-gap": "80px",
+                    "aspect-ratio-standard": "1.85/1",
+                    "unit": "4px",
+                    "gutter": "24px",
+                    "margin-safe": "40px",
+                    "aspect-ratio-wide": "2.39/1"
+            },
+            "fontFamily": {
+                    "headline-xl": ["Bricolage Grotesque"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "headline-lg-mobile": ["Bricolage Grotesque"],
+                    "body-md": ["Hanken Grotesk"],
+                    "label-technical": ["Geist"],
+                    "headline-lg": ["Bricolage Grotesque"],
+                    "label-data": ["Geist"]
+            },
+            "fontSize": {
+                    "headline-xl": ["64px", {"lineHeight": "72px", "letterSpacing": "-0.04em", "fontWeight": "800"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["32px", {"lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-technical": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "headline-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-data": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        
+        /* Custom Hairlines & Cinematic Touches */
+        .hairline-b { border-bottom: 0.5px solid #c6c6cb; }
+        .hairline-r { border-right: 0.5px solid #c6c6cb; }
+        .aspect-ratio-box { position: relative; width: 100%; overflow: hidden; }
+        .aspect-ratio-239 { padding-top: 41.84%; } /* 2.39:1 */
+        .aspect-ratio-185 { padding-top: 54.05%; } /* 1.85:1 */
+        
+        .custom-scroll::-webkit-scrollbar { display: none; }
+        
+        /* Interactive Card States */
+        .movie-card {
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .movie-card:active {
+            transform: scale(0.98);
+        }
+        .selected-ring {
+            outline: 2px solid #775a19;
+            outline-offset: 2px;
+        }
+
+        /* Abstract Projector Glow */
+        .projector-glow {
+            background: radial-gradient(circle at top right, rgba(226, 226, 231, 0.4) 0%, transparent 70%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col antialiased projector-glow">
+<!-- Top Navigation Anchor (Based on JSON) -->
+<header class="w-full top-0 sticky z-50 bg-background/90 backdrop-blur-sm border-b border-outline-variant">
+<div class="max-w-[390px] mx-auto px-4 py-4 flex justify-between items-center">
+<span class="font-headline-lg-mobile text-headline-lg-mobile tracking-tighter text-primary">CineFit</span>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary cursor-pointer">search</span>
+<span class="font-label-technical text-label-technical bg-primary text-on-primary px-2 py-0.5 rounded-sm">BETA</span>
+</div>
+</div>
+</header>
+<!-- Search & Filter Cluster -->
+<section class="px-4 pt-6 pb-4">
+<div class="flex flex-col gap-4">
+<div class="flex justify-between items-end border-b border-primary pb-2">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile uppercase">Selection</h1>
+<span class="font-label-technical text-label-technical text-on-surface-variant mb-1">24 TITLES FOUND</span>
+</div>
+<!-- Filter Pills -->
+<div class="flex gap-2 overflow-x-auto custom-scroll py-2">
+<button class="flex-shrink-0 font-label-technical text-label-technical px-3 py-1 bg-primary text-on-primary border border-primary">NOW SHOWING</button>
+<button class="flex-shrink-0 font-label-technical text-label-technical px-3 py-1 border border-outline text-on-surface-variant hover:border-primary transition-colors">4K LASER</button>
+<button class="flex-shrink-0 font-label-technical text-label-technical px-3 py-1 border border-outline text-on-surface-variant hover:border-primary transition-colors">DOLBY ATMOS</button>
+<button class="flex-shrink-0 font-label-technical text-label-technical px-3 py-1 border border-outline text-on-surface-variant hover:border-primary transition-colors">CURATED</button>
+</div>
+</div>
+</section>
+<!-- Movie List Canvas -->
+<main class="flex-grow px-4 pb-32 space-y-8">
+<!-- Movie Card 1: Master of Quiet -->
+<article class="movie-card group cursor-pointer" onclick="toggleSelection(this)">
+<div class="relative w-full overflow-hidden bg-surface-variant border border-outline-variant mb-3">
+<div class="aspect-ratio-box aspect-ratio-239">
+<img class="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" data-alt="A cinematic wide-angle shot of a lone character standing in a vast, misty mountain range at dawn. The color palette is muted with deep blues and soft greys, captured in a 2.39:1 aspect ratio to emphasize the scale and isolation. The aesthetic is clean, sharp, and highly technical, reminiscent of a premium film journal scan." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBW6BZsR5Ufm6R5WQi0DAZbkJ2LaZY2hvEBKlWromcL1pFqm37ULx6yAU5ytsVKugJk1saiK_PR1tcMYjYGvdHB6def4JLdnID0m5_CRdLeqmWGa59vcR-CCjpKUNLbeZoJmQCOGZzZhIMMtKewMpupV-U2zwzvabE60M-hymK9cqsYnCYxJ4zTkw8PP7ldbMCuiJ4XMepwiH03e21RFiFih9_OvqMD8s4hhs5az-Hh9YudMlp-DRmb"/>
+</div>
+<!-- Abstract Ratio Overlay -->
+<div class="absolute top-2 left-2 flex gap-1">
+<div class="w-4 h-2 border border-white/50"></div>
+<span class="font-label-technical text-[8px] text-white/70 tracking-tighter">2.39:1 SCOPE</span>
+</div>
+</div>
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile leading-none mb-1">THE SILENT HARBOR</h2>
+<div class="flex gap-4 items-center">
+<span class="font-label-technical text-label-technical text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">hd</span> 4K SCAN
+                        </span>
+<span class="font-label-technical text-label-technical text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">surround_sound</span> ATMOS
+                        </span>
+</div>
+</div>
+<button class="font-label-technical text-label-technical underline uppercase tracking-widest text-on-surface-variant pt-2">Details</button>
+</div>
+<div class="mt-3 flex items-center">
+<div class="flex-grow h-[0.5px] bg-outline-variant"></div>
+<span class="px-2 font-label-technical text-[10px] text-outline">TECHNICAL NO. 0822</span>
+</div>
+</article>
+<!-- Movie Card 2: Technical Focus -->
+<article class="movie-card group cursor-pointer" onclick="toggleSelection(this)">
+<div class="relative w-full overflow-hidden bg-surface-variant border border-outline-variant mb-3">
+<div class="aspect-ratio-box aspect-ratio-185">
+<img class="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" data-alt="An intimate close-up shot of architectural blueprints under a focused orange task lamp. The lighting creates strong shadows and highlights the fine texture of the paper, presented in a 1.85:1 aspect ratio. The image is clean and functional, with a color palette of warm paper tones and deep blacks, evoking a sense of precise editorial design." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD93w5wGdEDOp_QiHsC7QMM_5BftdAQiQNarEnc97uK-HgJhXYuIGUYWw7n4ZggOwbvm0iABFtftzk3Z85HACTiRkhcNypiImSLhy2XbeRmW93x4HW8VMQSzFsKPsRLGm57zYR-Yvkyv8reOQXuLyq-RgrMS5x_GYPpHEWIxZroSSqadtz4QpjDQBF6GVE6PzoRKBJaAPssq7-JaNUQ2-LvaICoc6S6glSJ0dme2fiBHKOKSU3B8XVQ"/>
+</div>
+<div class="absolute top-2 left-2 flex gap-1">
+<div class="w-3 h-2 border border-white/50"></div>
+<span class="font-label-technical text-[8px] text-white/70 tracking-tighter">1.85:1 FLAT</span>
+</div>
+</div>
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile leading-none mb-1">CHRONO-STRUCT</h2>
+<div class="flex gap-4 items-center">
+<span class="font-label-technical text-label-technical text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">shutter_speed</span> 48 FPS
+                        </span>
+<span class="font-label-technical text-label-technical text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">lightbulb</span> LASER
+                        </span>
+</div>
+</div>
+<button class="font-label-technical text-label-technical underline uppercase tracking-widest text-on-surface-variant pt-2">Details</button>
+</div>
+<div class="mt-3 flex items-center">
+<div class="flex-grow h-[0.5px] bg-outline-variant"></div>
+<span class="px-2 font-label-technical text-[10px] text-outline">TECHNICAL NO. 0914</span>
+</div>
+</article>
+<!-- Movie Card 3: Curation -->
+<article class="movie-card group cursor-pointer" onclick="toggleSelection(this)">
+<div class="relative w-full overflow-hidden bg-surface-variant border border-outline-variant mb-3">
+<div class="aspect-ratio-box aspect-ratio-239">
+<img class="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" data-alt="A minimalist urban cityscape at night, featuring clean geometric buildings and a single red neon sign reflecting on a wet street. Captured in 2.39:1 scope format with deep contrast and a focus on structural alignment. The mood is sophisticated and quiet, reflecting a modern cinematic aesthetic with sharp details." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6Zs3x1mHifjfMrtNrrQyx66NS_-9LiX-uLtNscgd6vLvsxol0wDtt3YDckrdSlCyiXv3Vs-0LP_tcttcIvlFwcVAWTN1mtOkcitGtdFkpUxoh6UwD_CPR-hZ23RDpDzDPqOoq9LdbTODSu70HnEp7KdawViO7-N2OibeToCGctrczx-HjytnNOZF_AhH_KBXYpPk0bgyiJ2TAg4Z5X2jG-M3bnBZt_e1xzMHAPLJunXifQOTsSRZ7"/>
+</div>
+<div class="absolute top-2 left-2 flex gap-1">
+<div class="w-4 h-2 border border-white/50"></div>
+<span class="font-label-technical text-[8px] text-white/70 tracking-tighter">2.39:1 SCOPE</span>
+</div>
+</div>
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile leading-none mb-1">NEON VERBATIM</h2>
+<div class="flex gap-4 items-center">
+<span class="font-label-technical text-label-technical text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">movie</span> 70MM
+                        </span>
+<span class="font-label-technical text-label-technical text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">volume_up</span> DTS:X
+                        </span>
+</div>
+</div>
+<button class="font-label-technical text-label-technical underline uppercase tracking-widest text-on-surface-variant pt-2">Details</button>
+</div>
+<div class="mt-3 flex items-center">
+<div class="flex-grow h-[0.5px] bg-outline-variant"></div>
+<span class="px-2 font-label-technical text-[10px] text-outline">TECHNICAL NO. 1102</span>
+</div>
+</article>
+</main>
+<!-- Sticky Bottom CTA -->
+<div class="fixed bottom-0 left-0 w-full p-4 bg-background/80 backdrop-blur-md z-50">
+<div class="max-w-[390px] mx-auto">
+<button class="w-full bg-primary text-on-primary py-5 font-label-technical text-body-md uppercase tracking-[0.2em] transition-all active:scale-95 disabled:opacity-50" disabled="" id="cta-button">
+                Select Movie
+            </button>
+<!-- Minimal indicator -->
+<div class="mt-3 flex justify-center gap-1">
+<div class="w-8 h-0.5 bg-outline-variant"></div>
+<div class="w-8 h-0.5 bg-outline-variant"></div>
+<div class="w-8 h-0.5 bg-outline-variant"></div>
+</div>
+</div>
+</div>
+<!-- Technical Footer Anchor -->
+<footer class="mt-auto px-4 py-12 border-t border-outline-variant bg-surface">
+<div class="flex flex-col gap-6">
+<div class="flex justify-between items-start">
+<div class="flex flex-col gap-1">
+<span class="font-label-technical text-label-technical font-bold uppercase tracking-widest text-primary">CineFit</span>
+<p class="font-label-technical text-[10px] text-on-surface-variant max-w-[200px]">PROFESSIONAL CALIBRATION AND CURATION FOR CINEMATIC EXCELLENCE.</p>
+</div>
+<div class="grid grid-cols-1 gap-2">
+<a class="font-label-technical text-label-technical text-on-surface-variant uppercase hover:text-primary transition-colors" href="#">Privacy</a>
+<a class="font-label-technical text-label-technical text-on-surface-variant uppercase hover:text-primary transition-colors" href="#">Specs</a>
+</div>
+</div>
+<p class="font-label-technical text-[10px] text-outline text-center">© 2024 CINEFIT. ALL RIGHTS RESERVED. DATA BY MOTIONDB.</p>
+</div>
+</footer>
+<script>
+        let selectedMovie = null;
+
+        function toggleSelection(element) {
+            const cards = document.querySelectorAll('.movie-card');
+            const cta = document.getElementById('cta-button');
+            const posterContainer = element.querySelector('.relative');
+
+            // Remove previous selections
+            cards.forEach(card => {
+                card.querySelector('.relative').classList.remove('selected-ring');
+            });
+
+            if (selectedMovie === element) {
+                selectedMovie = null;
+                cta.disabled = true;
+                cta.innerText = "Select Movie";
+            } else {
+                selectedMovie = element;
+                posterContainer.classList.add('selected-ring');
+                cta.disabled = false;
+                cta.innerText = "Confirm Selection";
+                
+                // Micro-interaction haptic simulation
+                if (window.navigator.vibrate) {
+                    window.navigator.vibrate(10);
+                }
+            }
+        }
+
+        // Search highlight micro-interaction
+        document.querySelector('.material-symbols-outlined').addEventListener('click', () => {
+            console.log('Search activation logic');
+        });
+    </script>
+</body></html>

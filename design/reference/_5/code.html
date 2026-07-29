@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CineFit | Recommendation Results</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&amp;family=Hanken+Grotesk:wght@400;500&amp;family=Geist:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .projector-glow {
+            background: radial-gradient(circle at 50% -20%, rgba(226, 226, 231, 0.4) 0%, rgba(246, 250, 254, 0) 70%);
+        }
+        .editorial-line {
+            height: 0.5px;
+            background-color: #c6c6cb;
+        }
+        .dotted-leader {
+            border-bottom: 1px dotted #76777b;
+            flex-grow: 1;
+            margin: 0 8px;
+            margin-bottom: 4px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-error": "#ffffff",
+                      "error": "#ba1a1a",
+                      "outline": "#76777b",
+                      "surface-container-low": "#f0f4f9",
+                      "tertiary-container": "#221a17",
+                      "background": "#f6fafe",
+                      "on-primary-fixed-variant": "#45474b",
+                      "on-secondary": "#ffffff",
+                      "error-container": "#ffdad6",
+                      "secondary-fixed": "#ffdea5",
+                      "on-surface-variant": "#45474b",
+                      "secondary-fixed-dim": "#e9c176",
+                      "on-background": "#171c20",
+                      "tertiary-fixed-dim": "#d2c3be",
+                      "on-error-container": "#93000a",
+                      "tertiary-fixed": "#efdfda",
+                      "surface-container": "#eaeef3",
+                      "on-surface": "#171c20",
+                      "surface-tint": "#5d5e63",
+                      "surface-variant": "#dfe3e7",
+                      "secondary": "#775a19",
+                      "primary-fixed": "#e2e2e7",
+                      "on-secondary-fixed": "#261900",
+                      "on-secondary-container": "#785a1a",
+                      "surface-container-high": "#e4e9ed",
+                      "outline-variant": "#c6c6cb",
+                      "inverse-surface": "#2c3135",
+                      "on-tertiary-fixed": "#221a17",
+                      "surface": "#f6fafe",
+                      "secondary-container": "#fed488",
+                      "on-primary-fixed": "#1a1c20",
+                      "surface-bright": "#f6fafe",
+                      "primary": "#000102",
+                      "on-secondary-fixed-variant": "#5d4201",
+                      "on-tertiary-container": "#8e817d",
+                      "primary-container": "#1a1c20",
+                      "on-tertiary": "#ffffff",
+                      "on-primary-container": "#838489",
+                      "surface-container-highest": "#dfe3e7",
+                      "surface-dim": "#d6dadf",
+                      "inverse-on-surface": "#edf1f6",
+                      "primary-fixed-dim": "#c6c6cb",
+                      "surface-container-lowest": "#ffffff",
+                      "inverse-primary": "#c6c6cb",
+                      "on-tertiary-fixed-variant": "#4f4541",
+                      "tertiary": "#010000",
+                      "on-primary": "#ffffff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "section-gap": "80px",
+                      "aspect-ratio-standard": "1.85/1",
+                      "unit": "4px",
+                      "gutter": "24px",
+                      "margin-safe": "40px",
+                      "aspect-ratio-wide": "2.39/1"
+              },
+              "fontFamily": {
+                      "headline-xl": ["Bricolage Grotesque"],
+                      "body-lg": ["Hanken Grotesk"],
+                      "headline-lg-mobile": ["Bricolage Grotesque"],
+                      "body-md": ["Hanken Grotesk"],
+                      "label-technical": ["Geist"],
+                      "headline-lg": ["Bricolage Grotesque"],
+                      "label-data": ["Geist"]
+              },
+              "fontSize": {
+                      "headline-xl": ["64px", {"lineHeight": "72px", "letterSpacing": "-0.04em", "fontWeight": "800"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "headline-lg-mobile": ["32px", {"lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "label-technical": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                      "headline-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "label-data": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+      </script>
+</head>
+<body class="bg-background text-on-surface font-body-md antialiased projector-glow min-h-screen">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky bg-background border-b border-outline-variant z-50">
+<div class="max-w-[1280px] mx-auto px-gutter py-4 flex justify-between items-center">
+<div class="font-headline-lg text-headline-lg tracking-tighter text-primary">CineFit</div>
+<nav class="hidden md:flex items-center space-gap gap-8">
+<a class="text-primary font-bold border-b-2 border-primary pb-1 cursor-pointer transition-opacity active:opacity-70" href="#">Curation</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-300 cursor-pointer active:opacity-70" href="#">Theaters</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-300 cursor-pointer active:opacity-70" href="#">Specs</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-300 cursor-pointer active:opacity-70" href="#">Journal</a>
+</nav>
+<div class="flex items-center gap-4">
+<div class="bg-surface-container-high px-3 py-1 rounded text-label-technical font-label-technical flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]">search</span>
+<span>SEARCH</span>
+</div>
+<div class="bg-primary text-on-primary px-4 py-1.5 text-label-technical font-label-technical cursor-pointer">BETA</div>
+</div>
+</div>
+</header>
+<main class="max-w-[1280px] mx-auto px-gutter py-12">
+<!-- Breadcrumbs / Context -->
+<div class="mb-12 flex justify-between items-end border-b border-outline-variant pb-4">
+<div>
+<p class="font-label-technical text-label-technical text-on-surface-variant uppercase mb-2">Recommendation Engine v4.2</p>
+<h1 class="font-headline-xl text-headline-xl">Dune: Part Two</h1>
+</div>
+<div class="text-right">
+<p class="font-label-technical text-label-technical text-on-surface-variant uppercase">Preference Profile</p>
+<p class="font-body-md text-on-surface">Visual Fidelity + Distance Minimized</p>
+</div>
+</div>
+<!-- 1st Recommendation: Hero Card -->
+<section class="mb-section-gap grid grid-cols-12 gap-8 items-start">
+<div class="col-span-12 lg:col-span-8 group">
+<div class="aspect-ratio-wide overflow-hidden bg-surface-container mb-6 relative">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="A cinematic, high-contrast wide shot of a futuristic theater interior with plush dark gray seating and a massive glowing IMAX screen displaying a sweeping desert landscape. The lighting is low and moody, with a subtle golden projector light spill highlighting the texture of the fabric. The overall aesthetic is clean and modern, following the CineFit brand style of sophisticated cinematic utility." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDr7v_QFHOz18IfZFRQwHVg05H5XnpQnkgL7g_If9cJf6BdvlnB_cYwYDzDnwET9pOeVwaM-lTJCXnPgaWwF7av9Fnlqaf9rJcOl0AQfkE4soLLio0S3N0FNcISeAxEvGKYO5q6VLgtFm7I2KGEcQfOQNjfYBtOW29IebRMtCmQz1JLf8j6r8QzdtTGZnD76klSoMjJOVqbvkgfoG7gDWNny3E09kw0c19bdTdp5g5Ss95KcKDubQp"/>
+<div class="absolute top-6 left-6 flex gap-2">
+<div class="bg-primary text-on-primary px-3 py-1 font-label-technical text-label-technical">MATCH 98%</div>
+<div class="bg-secondary-container text-on-secondary-container px-3 py-1 font-label-technical text-label-technical">OPTIMAL FOR SPECTACLE</div>
+</div>
+</div>
+<div class="border-t border-primary pt-6">
+<h2 class="font-headline-lg text-headline-lg mb-4 uppercase tracking-tight">The Grand A1 — IMAX with Laser</h2>
+<p class="font-body-lg text-body-lg mb-8 max-w-2xl text-on-surface">
+<span class="font-bold">Why this fits:</span> This selection prioritizes the 1.43:1 aspect ratio required for the film's native format. The laser projection system provides the necessary luminance for the dark interior sequences while keeping your travel time under 15 minutes.
+                    </p>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8 border-y border-outline-variant py-8">
+<div>
+<p class="font-label-technical text-label-technical text-on-surface-variant uppercase mb-1">Time</p>
+<p class="font-headline-lg-mobile text-headline-lg-mobile">20:30</p>
+</div>
+<div>
+<p class="font-label-technical text-label-technical text-on-surface-variant uppercase mb-1">Price</p>
+<p class="font-headline-lg-mobile text-headline-lg-mobile">$24.00</p>
+</div>
+<div>
+<p class="font-label-technical text-label-technical text-on-surface-variant uppercase mb-1">Travel</p>
+<p class="font-headline-lg-mobile text-headline-lg-mobile">12m</p>
+</div>
+<div>
+<p class="font-label-technical text-label-technical text-on-surface-variant uppercase mb-1">Seats</p>
+<p class="font-headline-lg-mobile text-headline-lg-mobile">G12-G15</p>
+</div>
+</div>
+</div>
+</div>
+<div class="col-span-12 lg:col-span-4 flex flex-col gap-8">
+<!-- Technical Checklist -->
+<div class="bg-surface-container p-6 border-l-4 border-primary">
+<h3 class="font-label-technical text-label-technical uppercase mb-4 tracking-widest text-on-surface-variant">Technical Specifications</h3>
+<div class="space-y-3">
+<div class="flex justify-between items-end">
+<span class="font-label-technical text-label-technical text-on-surface">Projection</span>
+<div class="dotted-leader"></div>
+<span class="font-label-data text-label-data">Dual 4K Laser</span>
+</div>
+<div class="flex justify-between items-end">
+<span class="font-label-technical text-label-technical text-on-surface">Sound</span>
+<div class="dotted-leader"></div>
+<span class="font-label-data text-label-data">12.1 Immersive</span>
+</div>
+<div class="flex justify-between items-end">
+<span class="font-label-technical text-label-technical text-on-surface">Brightness</span>
+<div class="dotted-leader"></div>
+<span class="font-label-data text-label-data">22 fL (Peak)</span>
+</div>
+<div class="flex justify-between items-end">
+<span class="font-label-technical text-label-technical text-on-surface">Screen Type</span>
+<div class="dotted-leader"></div>
+<span class="font-label-data text-label-data">Silver Matte</span>
+</div>
+</div>
+</div>
+<!-- Seat Grid visualization -->
+<div class="p-6 border border-outline-variant">
+<h3 class="font-label-technical text-label-technical uppercase mb-4 tracking-widest text-on-surface-variant text-center">Best Seat Zone: G8-G18</h3>
+<div class="grid grid-cols-10 gap-1 mb-4">
+<!-- Simple seat grid visualization -->
+<script>
+                            for(let i=0; i<60; i++) {
+                                let color = "bg-outline-variant";
+                                if (i >= 32 && i <= 37) color = "bg-secondary";
+                                document.write(`<div class="aspect-square ${color} opacity-40"></div>`);
+                            }
+                        </script>
+</div>
+<p class="font-label-data text-label-data text-on-surface-variant text-center">Center-aligned at 2.4x screen height distance.</p>
+</div>
+<!-- Reliability & Cons -->
+<div class="p-6 border border-outline-variant bg-white">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-secondary">verified_user</span>
+<h3 class="font-label-technical text-label-technical uppercase tracking-widest">Data Integrity</h3>
+</div>
+<p class="font-label-data text-label-data text-on-surface mb-6">Last calibrated 4 days ago. High reliability on projection alignment and seat availability.</p>
+<div class="space-y-4">
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-error text-[18px]">info</span>
+<p class="font-label-data text-label-data"><span class="font-bold">Trade-off:</span> Higher ambient noise from lobby during evening sessions.</p>
+</div>
+</div>
+</div>
+<button class="bg-primary text-on-primary w-full py-4 font-label-technical text-label-technical uppercase tracking-widest hover:bg-on-primary-container transition-colors">
+                    Book Now
+                </button>
+</div>
+</section>
+<!-- Comparisons Heading -->
+<div class="mb-8 border-b border-outline-variant pb-2">
+<h3 class="font-label-technical text-label-technical uppercase tracking-[0.2em] text-on-surface-variant">Alternative Comparisons</h3>
+</div>
+<!-- 2nd & 3rd Recommendations -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-section-gap">
+<!-- Alternative 1 -->
+<div class="group border border-outline-variant p-6 hover:bg-surface-container transition-colors">
+<div class="flex justify-between items-start mb-6">
+<div>
+<span class="font-label-technical text-label-technical bg-surface-container-high px-2 py-0.5 uppercase mb-2 inline-block">Option 02 — Boutique</span>
+<h4 class="font-headline-lg-mobile text-headline-lg-mobile">Cinema Noir: 35mm</h4>
+</div>
+<div class="text-right">
+<span class="font-label-technical text-label-technical uppercase text-on-surface-variant">Match</span>
+<p class="font-body-md text-on-surface">84%</p>
+</div>
+</div>
+<p class="font-body-md text-on-surface mb-6">
+                    A textural choice for purists. Sacrifices scale for chemical grain and authentic color timing. Smaller screen, but significantly closer travel distance.
+                </p>
+<div class="space-y-2 mb-8">
+<div class="flex justify-between border-b border-outline-variant/30 pb-2">
+<span class="font-label-technical text-label-technical text-on-surface-variant uppercase">Format</span>
+<span class="font-label-data text-label-data">35mm Optical Scan</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 pb-2">
+<span class="font-label-technical text-label-technical text-on-surface-variant uppercase">Seats</span>
+<span class="font-label-data text-label-data">Row D (Center)</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 pb-2">
+<span class="font-label-technical text-label-technical text-on-surface-variant uppercase">Travel</span>
+<span class="font-label-data text-label-data">5m (Walking)</span>
+</div>
+</div>
+<button class="border border-primary text-primary w-full py-2 font-label-technical text-label-technical uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all">
+                    View Details
+                </button>
+</div>
+<!-- Alternative 2 -->
+<div class="group border border-outline-variant p-6 hover:bg-surface-container transition-colors">
+<div class="flex justify-between items-start mb-6">
+<div>
+<span class="font-label-technical text-label-technical bg-surface-container-high px-2 py-0.5 uppercase mb-2 inline-block">Option 03 — Comfort</span>
+<h4 class="font-headline-lg-mobile text-headline-lg-mobile">Vertex Suite: Atmos</h4>
+</div>
+<div class="text-right">
+<span class="font-label-technical text-label-technical uppercase text-on-surface-variant">Match</span>
+<p class="font-body-md text-on-surface">76%</p>
+</div>
+</div>
+<p class="font-body-md text-on-surface mb-6">
+                    Best for long-duration viewing. Fully reclining heated seats and premium audio isolation. Lower brightness than the primary choice but zero distractions.
+                </p>
+<div class="space-y-2 mb-8">
+<div class="flex justify-between border-b border-outline-variant/30 pb-2">
+<span class="font-label-technical text-label-technical text-on-surface-variant uppercase">Format</span>
+<span class="font-label-data text-label-data">4K Digital + Atmos</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 pb-2">
+<span class="font-label-technical text-label-technical text-on-surface-variant uppercase">Seats</span>
+<span class="font-label-data text-label-data">Executive Row B</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/30 pb-2">
+<span class="font-label-technical text-label-technical text-on-surface-variant uppercase">Travel</span>
+<span class="font-label-data text-label-data">22m (Drive)</span>
+</div>
+</div>
+<button class="border border-primary text-primary w-full py-2 font-label-technical text-label-technical uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all">
+                    View Details
+                </button>
+</div>
+</section>
+<!-- Newsletter / Journal Hook -->
+<section class="bg-primary text-on-primary p-12 flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="max-w-md">
+<h3 class="font-headline-lg text-headline-lg mb-2">The Journal</h3>
+<p class="font-body-md opacity-80">Deep dives into projection science, aspect ratio history, and monthly theater audits.</p>
+</div>
+<div class="flex flex-col gap-4 w-full md:w-auto">
+<div class="flex gap-2">
+<input class="bg-transparent border border-on-primary/30 p-3 font-label-technical text-label-technical focus:ring-0 focus:border-on-primary w-full md:w-64" placeholder="ENTER EMAIL ADDRESS" type="email"/>
+<button class="bg-on-primary text-primary px-6 font-label-technical text-label-technical uppercase tracking-widest">Join</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full mt-section-gap border-t border-outline-variant">
+<div class="max-w-[1280px] mx-auto px-gutter py-12 flex flex-col md:flex-row justify-between items-start gap-8">
+<div class="flex flex-col gap-4">
+<div class="font-label-technical text-label-technical font-bold uppercase text-primary">CineFit</div>
+<p class="font-body-md text-on-surface-variant max-w-xs">© 2024 CineFit. All Rights Reserved. Data provided by MotionDB.</p>
+</div>
+<div class="flex flex-wrap gap-x-12 gap-y-4">
+<div class="flex flex-col gap-2">
+<span class="font-label-technical text-label-technical uppercase text-on-surface-variant mb-2">Legal</span>
+<a class="font-body-md text-on-surface-variant hover:text-primary transition-opacity duration-200" href="#">Privacy Policy</a>
+<a class="font-body-md text-on-surface-variant hover:text-primary transition-opacity duration-200" href="#">Data Integrity</a>
+</div>
+<div class="flex flex-col gap-2">
+<span class="font-label-technical text-label-technical uppercase text-on-surface-variant mb-2">Support</span>
+<a class="font-body-md text-on-surface-variant hover:text-primary transition-opacity duration-200" href="#">Technical Specs</a>
+<a class="font-body-md text-on-surface-variant hover:text-primary transition-opacity duration-200" href="#">Contact</a>
+</div>
+</div>
+</div>
+</footer>
+<!-- Micro-interaction script -->
+<script>
+        document.querySelectorAll('button, a').forEach(el => {
+            el.addEventListener('mousedown', () => {
+                el.style.opacity = '0.7';
+            });
+            el.addEventListener('mouseup', () => {
+                el.style.opacity = '1';
+            });
+        });
+
+        // Subtle parallax effect for the hero image
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const heroImage = document.querySelector('.group img');
+            if (heroImage) {
+                heroImage.style.transform = `translateY(${scrolled * 0.05}px) scale(1.05)`;
+            }
+        });
+    </script>
+</body></html>

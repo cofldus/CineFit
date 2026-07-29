@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CineFit | Recommendation Results</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&amp;family=Hanken+Grotesk:wght@400;500&amp;family=Geist:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error": "#ffffff",
+                    "error": "#ba1a1a",
+                    "outline": "#76777b",
+                    "surface-container-low": "#f0f4f9",
+                    "tertiary-container": "#221a17",
+                    "background": "#f6fafe",
+                    "on-primary-fixed-variant": "#45474b",
+                    "on-secondary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed": "#ffdea5",
+                    "on-surface-variant": "#45474b",
+                    "secondary-fixed-dim": "#e9c176",
+                    "on-background": "#171c20",
+                    "tertiary-fixed-dim": "#d2c3be",
+                    "on-error-container": "#93000a",
+                    "tertiary-fixed": "#efdfda",
+                    "surface-container": "#eaeef3",
+                    "on-surface": "#171c20",
+                    "surface-tint": "#5d5e63",
+                    "surface-variant": "#dfe3e7",
+                    "secondary": "#775a19",
+                    "primary-fixed": "#e2e2e7",
+                    "on-secondary-fixed": "#261900",
+                    "on-secondary-container": "#785a1a",
+                    "surface-container-high": "#e4e9ed",
+                    "outline-variant": "#c6c6cb",
+                    "inverse-surface": "#2c3135",
+                    "on-tertiary-fixed": "#221a17",
+                    "surface": "#f6fafe",
+                    "secondary-container": "#fed488",
+                    "on-primary-fixed": "#1a1c20",
+                    "surface-bright": "#f6fafe",
+                    "primary": "#000102",
+                    "on-secondary-fixed-variant": "#5d4201",
+                    "on-tertiary-container": "#8e817d",
+                    "primary-container": "#1a1c20",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-container": "#838489",
+                    "surface-container-highest": "#dfe3e7",
+                    "surface-dim": "#d6dadf",
+                    "inverse-on-surface": "#edf1f6",
+                    "primary-fixed-dim": "#c6c6cb",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-primary": "#c6c6cb",
+                    "on-tertiary-fixed-variant": "#4f4541",
+                    "tertiary": "#010000",
+                    "on-primary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-gap": "80px",
+                    "aspect-ratio-standard": "1.85/1",
+                    "unit": "4px",
+                    "gutter": "24px",
+                    "margin-safe": "40px",
+                    "aspect-ratio-wide": "2.39/1"
+            },
+            "fontFamily": {
+                    "headline-xl": ["Bricolage Grotesque"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "headline-lg-mobile": ["Bricolage Grotesque"],
+                    "body-md": ["Hanken Grotesk"],
+                    "label-technical": ["Geist"],
+                    "headline-lg": ["Bricolage Grotesque"],
+                    "label-data": ["Geist"]
+            },
+            "fontSize": {
+                    "headline-xl": ["64px", {"lineHeight": "72px", "letterSpacing": "-0.04em", "fontWeight": "800"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["32px", {"lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-technical": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "headline-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-data": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #f6fafe;
+            color: #171c20;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .hairline {
+            border-bottom-width: 0.5px;
+        }
+
+        .seat-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 2px;
+        }
+
+        .seat {
+            aspect-ratio: 1/1;
+            background-color: #e2e2e7;
+            border-radius: 1px;
+        }
+
+        .seat.recommended {
+            background-color: #775a19;
+        }
+
+        .seat.unavailable {
+            opacity: 0.2;
+        }
+
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease-out;
+        }
+
+        .scroll-reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background">
+<!-- Top Navigation Anchor (Based on JSON) -->
+<header class="w-full top-0 sticky bg-background border-b border-outline-variant z-50">
+<div class="max-w-[1280px] mx-auto px-gutter py-4 flex justify-between items-center">
+<span class="font-headline-lg-mobile text-headline-lg-mobile tracking-tighter text-primary">CineFit</span>
+<div class="flex gap-4 items-center">
+<span class="font-label-technical text-label-technical text-primary bg-primary-container px-2 py-1">BETA</span>
+<span class="material-symbols-outlined cursor-pointer text-on-surface-variant">search</span>
+</div>
+</div>
+</header>
+<main class="w-full pb-32">
+<!-- Hero: Best Fit Recommendation -->
+<section class="px-gutter pt-8">
+<div class="flex flex-col gap-2 mb-6">
+<span class="font-label-technical text-label-technical text-secondary uppercase tracking-widest">Match Score: 98%</span>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary">The Criterion, Seoul</h1>
+</div>
+<!-- Best Fit Card -->
+<div class="w-full border border-primary p-6 bg-white flex flex-col gap-8">
+<!-- Abstract Seat Pattern Visualization -->
+<div class="w-full">
+<p class="font-label-technical text-label-technical mb-4 uppercase text-on-surface-variant">Recommended Zone: Row F - J, Center</p>
+<div class="seat-grid w-full mb-2">
+<!-- Pattern Generation with JS -->
+<script>
+                            document.write(Array(72).fill(0).map((_, i) => {
+                                let isRec = i > 30 && i < 42;
+                                let isUn = i % 7 === 0;
+                                return `<div class="seat ${isRec ? 'recommended' : ''} ${isUn ? 'unavailable' : ''}"></div>`;
+                            }).join(''));
+                        </script>
+</div>
+<div class="flex justify-between items-center mt-2">
+<span class="font-label-data text-label-data text-on-surface-variant italic">Screen Centerline</span>
+<div class="flex gap-2 items-center">
+<span class="w-2 h-2 bg-secondary"></span>
+<span class="font-label-technical text-label-technical">Optimum</span>
+</div>
+</div>
+</div>
+<!-- Pros/Cons Summary -->
+<div class="grid grid-cols-1 gap-6 border-t border-outline-variant pt-6">
+<div class="space-y-4">
+<h3 class="font-label-technical text-label-technical uppercase font-bold text-primary">Technical Assets</h3>
+<ul class="space-y-2">
+<li class="flex items-start gap-2">
+<span class="material-symbols-outlined text-secondary text-sm">check_circle</span>
+<span class="font-body-md text-body-md">Laser 4K Projection with 1.85:1 native mask.</span>
+</li>
+<li class="flex items-start gap-2">
+<span class="material-symbols-outlined text-secondary text-sm">check_circle</span>
+<span class="font-body-md text-body-md">Dolby Atmos calibrated for vertical seat pitch.</span>
+</li>
+</ul>
+</div>
+<div class="space-y-4">
+<h3 class="font-label-technical text-label-technical uppercase font-bold text-on-surface-variant">Minor Compromises</h3>
+<ul class="space-y-2">
+<li class="flex items-start gap-2">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">info</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Elevated floor path lights visible during dark scenes.</span>
+</li>
+</ul>
+</div>
+</div>
+<!-- Trust Indicator Badges -->
+<div class="flex flex-wrap gap-2 pt-4">
+<div class="border border-outline-variant px-2 py-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">verified</span>
+<span class="font-label-technical text-label-technical uppercase">Verified Spec</span>
+</div>
+<div class="border border-outline-variant px-2 py-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">database</span>
+<span class="font-label-technical text-label-technical uppercase">MotionDB 2.1</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Image Break -->
+<section class="mt-section-gap px-gutter">
+<div class="w-full aspect-[2.39/1] overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional, close-up interior shot of a high-end luxury cinema theater in Seoul. The image features plush velvet seating in deep slate gray, perfectly aligned in a symmetrical perspective. The lighting is sophisticated, with warm muted gold accents highlighting the architectural details of the sound-dampening wall panels. The atmosphere is quiet, expert, and premium, evoking a sense of refined cinematic utility." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAVCJ7C2qMsfwq2J4jaEcZFe1eMNfgx4Uyy8hHswg0CjhdKimsSRZpqJFqzPWCBW4pkCk-CG9O9p2JS6XL3j18MrtwFO9ZocaSDkOCPm5UVoeBJa23WQzxYzYtnJyYGOy0lmW6V-xXBUC3colIJ8PcwfF2tDEzMR_XUYXHjeS23CG_LNLalm8p0qZkbgKelJapSUN3G_sx63gBl-oSom2MUNwGNKSgsBcl-LvABPOrWOYXzoAYrKLN1"/>
+</div>
+</section>
+<!-- Alternatives Section -->
+<section class="mt-section-gap px-gutter">
+<h2 class="font-label-technical text-label-technical uppercase tracking-widest text-on-surface-variant mb-6">Secondary Alternatives</h2>
+<div class="flex flex-col gap-4">
+<!-- Alternative Card 1 -->
+<div class="group border border-outline-variant p-4 bg-surface hover:border-primary transition-colors cursor-pointer overflow-hidden" onclick="toggleCard(this)">
+<div class="flex justify-between items-center">
+<div>
+<span class="font-label-technical text-label-technical text-on-surface-variant uppercase">88% Match</span>
+<h3 class="font-headline-lg-mobile text-[20px] text-primary">Megabox COEX (Dolby)</h3>
+</div>
+<span class="material-symbols-outlined transition-transform duration-300 group-data-[open=true]:rotate-180">expand_more</span>
+</div>
+<div class="hidden mt-4 pt-4 border-t border-outline-variant space-y-4" id="content-1">
+<p class="font-body-md text-body-md">Exceptional contrast levels, but 12% loss in audio clarity at your preferred row (H).</p>
+<div class="flex gap-2">
+<span class="font-label-technical text-label-technical border border-outline-variant px-2 py-1 uppercase">Dolby Cinema</span>
+<span class="font-label-technical text-label-technical border border-outline-variant px-2 py-1 uppercase">4K Laser</span>
+</div>
+</div>
+</div>
+<!-- Alternative Card 2 -->
+<div class="group border border-outline-variant p-4 bg-surface hover:border-primary transition-colors cursor-pointer" onclick="toggleCard(this)">
+<div class="flex justify-between items-center">
+<div>
+<span class="font-label-technical text-label-technical text-on-surface-variant uppercase">82% Match</span>
+<h3 class="font-headline-lg-mobile text-[20px] text-primary">CGV Yongsan (IMAX)</h3>
+</div>
+<span class="material-symbols-outlined transition-transform duration-300">expand_more</span>
+</div>
+<div class="hidden mt-4 pt-4 border-t border-outline-variant space-y-4">
+<p class="font-body-md text-body-md">Screen size is unparalleled, but geometry distortion occurs beyond Row L.</p>
+<div class="flex gap-2">
+<span class="font-label-technical text-label-technical border border-outline-variant px-2 py-1 uppercase">IMAX GT</span>
+<span class="font-label-technical text-label-technical border border-outline-variant px-2 py-1 uppercase">1.43:1</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Trust Info / Footer-ish area -->
+<section class="mt-section-gap px-gutter text-center border-t border-outline-variant pt-12 pb-8">
+<p class="font-label-technical text-label-technical text-on-surface-variant uppercase mb-4">Integrity Disclaimer</p>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-[300px] mx-auto">
+                All recommendations are generated based on real-time hardware calibration data and architectural blueprints. Distance: 4.2km from current location.
+            </p>
+</section>
+</main>
+<!-- Sticky Bottom CTA (Primary Choice) -->
+<div class="fixed bottom-0 left-0 w-full bg-background p-4 border-t border-outline-variant z-50">
+<div class="flex gap-4 items-center">
+<div class="flex-1">
+<span class="font-label-technical text-label-technical text-on-surface-variant uppercase block">Starting @</span>
+<span class="font-headline-lg-mobile text-[20px] text-primary">₩18,000</span>
+</div>
+<button class="bg-primary text-on-primary px-8 py-4 font-label-technical text-label-technical uppercase tracking-widest hover:opacity-90 active:opacity-70 transition-all">
+                Select Criterion
+            </button>
+</div>
+</div>
+<!-- Hidden SideNav/BottomNav Logic Check -->
+<!-- JSON specifies SideNavBar & BottomNavBar but the prompt is "Task-Focused" (Recommendation results) 
+         so we prioritize content canvas as per "Relevance Check" instructions. -->
+<script>
+        // Toggle Expandable Cards
+        function toggleCard(el) {
+            const content = el.querySelector('div[id^="content-"]');
+            const icon = el.querySelector('.material-symbols-outlined');
+            const isHidden = content ? content.classList.contains('hidden') : el.lastElementChild.classList.contains('hidden');
+            
+            // Generic toggle for demonstration
+            const toggleTarget = content || el.lastElementChild;
+            
+            if (isHidden) {
+                toggleTarget.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+                el.dataset.open = "true";
+            } else {
+                toggleTarget.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+                el.dataset.open = "false";
+            }
+        }
+
+        // Scroll Reveal Interaction
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section').forEach(section => {
+            section.classList.add('scroll-reveal');
+            observer.observe(section);
+        });
+
+        // Small visual micro-interaction for the "Best Fit" card
+        const heroCard = document.querySelector('.border-primary');
+        if (heroCard) {
+            heroCard.addEventListener('mousemove', (e) => {
+                const { left, top, width, height } = heroCard.getBoundingClientRect();
+                const x = (e.clientX - left) / width - 0.5;
+                const y = (e.clientY - top) / height - 0.5;
+                heroCard.style.transform = `perspective(1000px) rotateY(${x * 2}deg) rotateX(${-y * 2}deg)`;
+            });
+            heroCard.addEventListener('mouseleave', () => {
+                heroCard.style.transform = 'none';
+            });
+        }
+    </script>
+</body></html>

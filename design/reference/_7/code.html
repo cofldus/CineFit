@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CineFit | Theater Technical Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;700;800&amp;family=Hanken+Grotesk:wght@400;500;700&amp;family=Geist:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error": "#ffffff",
+                    "error": "#ba1a1a",
+                    "outline": "#76777b",
+                    "surface-container-low": "#f0f4f9",
+                    "tertiary-container": "#221a17",
+                    "background": "#f6fafe",
+                    "on-primary-fixed-variant": "#45474b",
+                    "on-secondary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed": "#ffdea5",
+                    "on-surface-variant": "#45474b",
+                    "secondary-fixed-dim": "#e9c176",
+                    "on-background": "#171c20",
+                    "tertiary-fixed-dim": "#d2c3be",
+                    "on-error-container": "#93000a",
+                    "tertiary-fixed": "#efdfda",
+                    "surface-container": "#eaeef3",
+                    "on-surface": "#171c20",
+                    "surface-tint": "#5d5e63",
+                    "surface-variant": "#dfe3e7",
+                    "secondary": "#775a19",
+                    "primary-fixed": "#e2e2e7",
+                    "on-secondary-fixed": "#261900",
+                    "on-secondary-container": "#785a1a",
+                    "surface-container-high": "#e4e9ed",
+                    "outline-variant": "#c6c6cb",
+                    "inverse-surface": "#2c3135",
+                    "on-tertiary-fixed": "#221a17",
+                    "surface": "#f6fafe",
+                    "secondary-container": "#fed488",
+                    "on-primary-fixed": "#1a1c20",
+                    "surface-bright": "#f6fafe",
+                    "primary": "#000102",
+                    "on-secondary-fixed-variant": "#5d4201",
+                    "on-tertiary-container": "#8e817d",
+                    "primary-container": "#1a1c20",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-container": "#838489",
+                    "surface-container-highest": "#dfe3e7",
+                    "surface-dim": "#d6dadf",
+                    "inverse-on-surface": "#edf1f6",
+                    "primary-fixed-dim": "#c6c6cb",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-primary": "#c6c6cb",
+                    "on-tertiary-fixed-variant": "#4f4541",
+                    "tertiary": "#010000",
+                    "on-primary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-gap": "80px",
+                    "aspect-ratio-standard": "1.85/1",
+                    "unit": "4px",
+                    "gutter": "24px",
+                    "margin-safe": "40px",
+                    "aspect-ratio-wide": "2.39/1"
+            },
+            "fontFamily": {
+                    "headline-xl": ["Bricolage Grotesque"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "headline-lg-mobile": ["Bricolage Grotesque"],
+                    "body-md": ["Hanken Grotesk"],
+                    "label-technical": ["Geist"],
+                    "headline-lg": ["Bricolage Grotesque"],
+                    "label-data": ["Geist"]
+            },
+            "fontSize": {
+                    "headline-xl": ["64px", {"lineHeight": "72px", "letterSpacing": "-0.04em", "fontWeight": "800"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["32px", {"lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-technical": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "headline-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-data": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .dotted-leader {
+            background-image: radial-gradient(#76777b 1px, transparent 1px);
+            background-position: bottom;
+            background-size: 8px 1px;
+            background-repeat: repeat-x;
+        }
+        .cinematic-grid {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(118, 119, 123, 0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(118, 119, 123, 0.05) 1px, transparent 1px);
+        }
+        .seat-recommended {
+            background-color: #775a19;
+            filter: drop-shadow(0 0 8px rgba(119, 90, 25, 0.4));
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md cinematic-grid min-h-screen">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky z-50 bg-background border-b border-outline-variant">
+<div class="max-w-[1280px] mx-auto px-gutter py-4 flex justify-between items-center">
+<div class="font-headline-lg text-headline-lg tracking-tighter text-primary">CineFit</div>
+<nav class="hidden md:flex gap-8">
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-300 font-label-technical uppercase tracking-widest cursor-pointer" href="#">Curation</a>
+<a class="text-primary font-bold border-b-2 border-primary pb-1 font-label-technical uppercase tracking-widest cursor-pointer" href="#">Theaters</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-300 font-label-technical uppercase tracking-widest cursor-pointer" href="#">Specs</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-300 font-label-technical uppercase tracking-widest cursor-pointer" href="#">Journal</a>
+</nav>
+<div class="flex items-center gap-4">
+<span class="font-label-technical px-3 py-1 border border-outline uppercase text-[10px] tracking-widest">Beta Access</span>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional studio portrait of a young Korean curator in a minimalist dark workspace, soft directional lighting illuminating their face against a background of high-end cinematic equipment. The image uses a muted color palette of slate grays and warm creams to evoke a sense of expert sophistication and modern utility." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHDBxuL87hKD5Ke1cRIK1WMrSyprUl4bsb8CLfFqek9LJMEQ6te4wwHsRia81Cf7Zh8K2UMoZj1aBra4ZMcOlAqvHFCFz8ajglWjYB29XoY5D7gkPtAj53LStK4k78aLmnYKpzzzxeMUfeRJIb-A3KlsseUHcci9Sm8epc3AQpKL8mEV9loibou6YUJDelAAvumzl6BsVndoridCeBinpgZAGJJ4-62AOkju43qJkV4w4S7pE6UtR9"/>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-[1280px] mx-auto px-gutter py-12">
+<!-- Theater Hero Profile -->
+<section class="mb-section-gap">
+<div class="flex flex-col md:flex-row justify-between items-end gap-6 pb-8 border-b border-outline-variant">
+<div>
+<span class="font-label-technical text-secondary tracking-[0.2em] uppercase mb-4 block">Arthouse Premium • Hall 01</span>
+<h1 class="font-headline-xl text-headline-xl text-primary leading-none">The Luminal Cinema, Seoul</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-4 max-w-2xl">A flagship technical environment designed for exacting color accuracy and acoustic isolation. Optimized for 4K DCP projection with calibrated soundstages.</p>
+</div>
+<div class="flex gap-4">
+<button class="bg-primary text-on-primary px-8 py-4 font-label-technical uppercase tracking-widest hover:opacity-90 transition-opacity">Book Session</button>
+<button class="border border-outline text-primary px-8 py-4 font-label-technical uppercase tracking-widest hover:bg-surface-container-low transition-colors">Follow Theater</button>
+</div>
+</div>
+</section>
+<!-- Technical Specs Bento -->
+<section class="mb-section-gap">
+<div class="flex items-center gap-2 mb-8">
+<span class="material-symbols-outlined text-primary">settings_input_component</span>
+<h2 class="font-label-technical uppercase tracking-[0.3em] text-on-surface-variant">Technical Specifications</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 border-t border-l border-outline-variant">
+<!-- Spec Item -->
+<div class="p-8 border-r border-b border-outline-variant">
+<span class="font-label-technical text-on-surface-variant uppercase text-[10px] block mb-6">Screen Size</span>
+<span class="font-headline-lg text-headline-lg text-primary block">22.4m</span>
+<span class="font-label-technical text-secondary uppercase mt-2 block">Matte White 1.4 Gain</span>
+</div>
+<!-- Spec Item -->
+<div class="p-8 border-r border-b border-outline-variant">
+<span class="font-label-technical text-on-surface-variant uppercase text-[10px] block mb-6">Projector</span>
+<span class="font-headline-lg text-headline-lg text-primary block">Barco 4K</span>
+<span class="font-label-technical text-secondary uppercase mt-2 block">Laser Phosphor SP4K</span>
+</div>
+<!-- Spec Item -->
+<div class="p-8 border-r border-b border-outline-variant">
+<span class="font-label-technical text-on-surface-variant uppercase text-[10px] block mb-6">Aspect Ratio</span>
+<span class="font-headline-lg text-headline-lg text-primary block">2.39:1</span>
+<span class="font-label-technical text-secondary uppercase mt-2 block">Native Scope</span>
+</div>
+<!-- Spec Item -->
+<div class="p-8 border-r border-b border-outline-variant">
+<span class="font-label-technical text-on-surface-variant uppercase text-[10px] block mb-6">Sound System</span>
+<span class="font-headline-lg text-headline-lg text-primary block">Atmos</span>
+<span class="font-label-technical text-secondary uppercase mt-2 block">Meyer Sound EXP</span>
+</div>
+<!-- Spec Item -->
+<div class="p-8 border-r border-b border-outline-variant">
+<span class="font-label-technical text-on-surface-variant uppercase text-[10px] block mb-6">Masking</span>
+<span class="font-headline-lg text-headline-lg text-primary block">4-Way</span>
+<span class="font-label-technical text-secondary uppercase mt-2 block">Automated Motorized</span>
+</div>
+</div>
+</section>
+<!-- Main Content Area: Seat Map & Session List -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-16">
+<!-- Left Column: Seat Quality Map -->
+<div class="lg:col-span-7">
+<div class="flex justify-between items-center mb-8">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">event_seat</span>
+<h2 class="font-label-technical uppercase tracking-[0.3em] text-on-surface-variant">Seat Quality Index</h2>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 bg-secondary"></div>
+<span class="text-[10px] font-label-technical uppercase">Prime Focus</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 bg-outline-variant"></div>
+<span class="text-[10px] font-label-technical uppercase">Standard</span>
+</div>
+</div>
+</div>
+<div class="aspect-video bg-surface border border-outline-variant flex flex-col items-center justify-center relative p-12 overflow-hidden">
+<!-- Screen Indicator -->
+<div class="w-3/4 h-2 bg-primary mb-24 relative">
+<div class="absolute -bottom-6 left-1/2 -translate-x-1/2 font-label-technical text-[10px] uppercase tracking-widest text-on-surface-variant">Projection Surface</div>
+</div>
+<!-- Abstract Seat Grid -->
+<div class="grid grid-cols-12 gap-2 w-full">
+<!-- Simulated Rows -->
+<script>
+                            const grid = document.currentScript.parentElement;
+                            for (let i = 0; i < 96; i++) {
+                                const seat = document.createElement('div');
+                                const isRecommended = i > 38 && i < 58;
+                                seat.className = `aspect-square border border-outline-variant/30 ${isRecommended ? 'seat-recommended opacity-100' : 'bg-surface-container-low opacity-40'} transition-all duration-500 hover:scale-110 cursor-help`;
+                                grid.appendChild(seat);
+                            }
+                        </script>
+</div>
+<!-- Atmospheric Gradient Spill -->
+<div class="absolute inset-0 pointer-events-none bg-gradient-to-t from-transparent via-transparent to-primary/5"></div>
+</div>
+<p class="mt-6 font-body-md text-on-surface-variant italic">Recommended seating: Rows F-H, seats 10-18 for optimal binocular field of view and acoustic alignment.</p>
+</div>
+<!-- Right Column: Sessions -->
+<div class="lg:col-span-5">
+<div class="flex items-center gap-2 mb-8">
+<span class="material-symbols-outlined text-primary">schedule</span>
+<h2 class="font-label-technical uppercase tracking-[0.3em] text-on-surface-variant">Upcoming Technical Sessions</h2>
+</div>
+<div class="space-y-8">
+<!-- Session Item -->
+<div class="group cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-primary">In the Mood for Love</h3>
+<span class="font-label-technical text-secondary border border-secondary px-2 py-0.5 uppercase text-[10px]">4K Restored</span>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant font-label-technical uppercase text-[12px] mb-4">
+<span>Today 19:30</span>
+<span>•</span>
+<span>DCP Master</span>
+<span>•</span>
+<span>98 Mins</span>
+</div>
+<div class="h-[1px] w-full bg-outline-variant group-hover:bg-primary transition-colors"></div>
+</div>
+<!-- Session Item -->
+<div class="group cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-primary">Decision to Leave</h3>
+<span class="font-label-technical text-on-surface-variant border border-outline-variant px-2 py-0.5 uppercase text-[10px]">Digital 4K</span>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant font-label-technical uppercase text-[12px] mb-4">
+<span>Today 22:15</span>
+<span>•</span>
+<span>Director's Cut</span>
+<span>•</span>
+<span>138 Mins</span>
+</div>
+<div class="h-[1px] w-full bg-outline-variant group-hover:bg-primary transition-colors"></div>
+</div>
+<!-- Session Item -->
+<div class="group cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-primary">Memories of Murder</h3>
+<span class="font-label-technical text-secondary border border-secondary px-2 py-0.5 uppercase text-[10px]">Special Screening</span>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant font-label-technical uppercase text-[12px] mb-4">
+<span>Tomorrow 14:00</span>
+<span>•</span>
+<span>4K Scan</span>
+<span>•</span>
+<span>131 Mins</span>
+</div>
+<div class="h-[1px] w-full bg-outline-variant group-hover:bg-primary transition-colors"></div>
+</div>
+</div>
+<a class="inline-flex items-center gap-2 mt-12 font-label-technical text-primary uppercase tracking-widest border-b border-primary pb-1 group hover:gap-4 transition-all" href="#">
+                    View Full Schedule
+                    <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- History & Sources Secondary Layer -->
+<section class="mt-section-gap pt-16 border-t border-outline-variant">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-16">
+<div>
+<h4 class="font-label-technical uppercase tracking-widest text-primary mb-8">Data Integrity &amp; Updates</h4>
+<div class="space-y-4">
+<div class="flex justify-between items-end gap-4">
+<span class="font-label-technical text-on-surface-variant uppercase text-[10px]">Last Calibration</span>
+<div class="flex-grow dotted-leader h-1"></div>
+<span class="font-label-technical text-primary uppercase text-[12px]">Oct 12, 2023</span>
+</div>
+<div class="flex justify-between items-end gap-4">
+<span class="font-label-technical text-on-surface-variant uppercase text-[10px]">Data Source</span>
+<div class="flex-grow dotted-leader h-1"></div>
+<span class="font-label-technical text-primary uppercase text-[12px]">Direct API / Theater Tech</span>
+</div>
+<div class="flex justify-between items-end gap-4">
+<span class="font-label-technical text-on-surface-variant uppercase text-[10px]">Community Verification</span>
+<div class="flex-grow dotted-leader h-1"></div>
+<span class="font-label-technical text-secondary uppercase text-[12px]">Verified High (98%)</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low p-10 flex flex-col justify-between border border-outline-variant">
+<div>
+<h4 class="font-headline-lg-mobile text-headline-lg-mobile text-primary mb-2">Technical Discrepancy?</h4>
+<p class="font-body-md text-on-surface-variant">Our data is crowd-verified and manufacturer-supplied. If you notice a change in projector model or sound masking, please report it to our curators.</p>
+</div>
+<button class="mt-8 self-start flex items-center gap-2 font-label-technical uppercase tracking-widest text-primary border border-primary px-6 py-3 hover:bg-primary hover:text-on-primary transition-all">
+                        Report Correction
+                        <span class="material-symbols-outlined text-[18px]">edit_note</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full mt-section-gap bg-background border-t border-outline-variant">
+<div class="max-w-[1280px] mx-auto px-gutter py-12 flex flex-col md:flex-row justify-between items-start gap-8">
+<div class="flex flex-col gap-4">
+<div class="font-label-technical text-label-technical font-bold uppercase text-primary">CineFit</div>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xs">The precision guide for cinema enthusiasts and technical professionals.</p>
+<div class="text-on-surface-variant font-label-technical text-[10px] mt-4">© 2024 CineFit. All Rights Reserved. Data provided by MotionDB.</div>
+</div>
+<div class="grid grid-cols-2 gap-x-16 gap-y-4">
+<a class="text-on-surface-variant hover:text-primary transition-opacity duration-200 font-label-technical uppercase text-[12px]" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant hover:text-primary transition-opacity duration-200 font-label-technical uppercase text-[12px]" href="#">Technical Specs</a>
+<a class="text-on-surface-variant hover:text-primary transition-opacity duration-200 font-label-technical uppercase text-[12px]" href="#">Data Integrity</a>
+<a class="text-on-surface-variant hover:text-primary transition-opacity duration-200 font-label-technical uppercase text-[12px]" href="#">Contact</a>
+</div>
+</div>
+</footer>
+<!-- Interactive Layer for micro-interactions -->
+<script>
+        document.querySelectorAll('.seat-recommended').forEach(seat => {
+            seat.addEventListener('mouseenter', () => {
+                seat.style.transform = 'scale(1.2) translateY(-2px)';
+                seat.style.zIndex = '10';
+            });
+            seat.addEventListener('mouseleave', () => {
+                seat.style.transform = 'scale(1) translateY(0)';
+                seat.style.zIndex = '1';
+            });
+        });
+
+        // Simple parallax-like light spill effect on mouse move over seat map
+        const seatMap = document.querySelector('.aspect-video');
+        seatMap.addEventListener('mousemove', (e) => {
+            const { left, top, width, height } = seatMap.getBoundingClientRect();
+            const x = (e.clientX - left) / width * 100;
+            const y = (e.clientY - top) / height * 100;
+            seatMap.querySelector('.bg-gradient-to-t').style.background = `radial-gradient(circle at ${x}% ${y}%, rgba(119, 90, 25, 0.08) 0%, transparent 70%)`;
+        });
+    </script>
+</body></html>

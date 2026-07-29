@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=390, initial-scale=1.0" name="viewport"/>
+<title>CineFit | Recommendation Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&amp;family=Hanken+Grotesk:wght@400&amp;family=Geist:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        
+        /* Custom Range Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 2px;
+            cursor: pointer;
+            background: #c6c6cb;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            height: 20px;
+            width: 20px;
+            border-radius: 0;
+            background: #000102;
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -9px;
+        }
+        
+        /* Hide scrollbars but keep functionality */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .active-chip {
+            background-color: #000102;
+            color: #ffffff;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-error": "#ffffff",
+                      "error": "#ba1a1a",
+                      "outline": "#76777b",
+                      "surface-container-low": "#f0f4f9",
+                      "tertiary-container": "#221a17",
+                      "background": "#f6fafe",
+                      "on-primary-fixed-variant": "#45474b",
+                      "on-secondary": "#ffffff",
+                      "error-container": "#ffdad6",
+                      "secondary-fixed": "#ffdea5",
+                      "on-surface-variant": "#45474b",
+                      "secondary-fixed-dim": "#e9c176",
+                      "on-background": "#171c20",
+                      "tertiary-fixed-dim": "#d2c3be",
+                      "on-error-container": "#93000a",
+                      "tertiary-fixed": "#efdfda",
+                      "surface-container": "#eaeef3",
+                      "on-surface": "#171c20",
+                      "surface-tint": "#5d5e63",
+                      "surface-variant": "#dfe3e7",
+                      "secondary": "#775a19",
+                      "primary-fixed": "#e2e2e7",
+                      "on-secondary-fixed": "#261900",
+                      "on-secondary-container": "#785a1a",
+                      "surface-container-high": "#e4e9ed",
+                      "outline-variant": "#c6c6cb",
+                      "inverse-surface": "#2c3135",
+                      "on-tertiary-fixed": "#221a17",
+                      "surface": "#f6fafe",
+                      "secondary-container": "#fed488",
+                      "on-primary-fixed": "#1a1c20",
+                      "surface-bright": "#f6fafe",
+                      "primary": "#000102",
+                      "on-secondary-fixed-variant": "#5d4201",
+                      "on-tertiary-container": "#8e817d",
+                      "primary-container": "#1a1c20",
+                      "on-tertiary": "#ffffff",
+                      "on-primary-container": "#838489",
+                      "surface-container-highest": "#dfe3e7",
+                      "surface-dim": "#d6dadf",
+                      "inverse-on-surface": "#edf1f6",
+                      "primary-fixed-dim": "#c6c6cb",
+                      "surface-container-lowest": "#ffffff",
+                      "inverse-primary": "#c6c6cb",
+                      "on-tertiary-fixed-variant": "#4f4541",
+                      "tertiary": "#010000",
+                      "on-primary": "#ffffff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "section-gap": "80px",
+                      "aspect-ratio-standard": "1.85/1",
+                      "unit": "4px",
+                      "gutter": "24px",
+                      "margin-safe": "40px",
+                      "aspect-ratio-wide": "2.39/1"
+              },
+              "fontFamily": {
+                      "headline-xl": ["Bricolage Grotesque"],
+                      "body-lg": ["Hanken Grotesk"],
+                      "headline-lg-mobile": ["Bricolage Grotesque"],
+                      "body-md": ["Hanken Grotesk"],
+                      "label-technical": ["Geist"],
+                      "headline-lg": ["Bricolage Grotesque"],
+                      "label-data": ["Geist"]
+              },
+              "fontSize": {
+                      "headline-xl": ["64px", {"lineHeight": "72px", "letterSpacing": "-0.04em", "fontWeight": "800"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "headline-lg-mobile": ["32px", {"lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "label-technical": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                      "headline-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "label-data": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen pb-32">
+<!-- Top Navigation Anchor -->
+<header class="w-full top-0 sticky z-50 bg-background border-b border-outline-variant">
+<div class="px-gutter py-4 flex justify-between items-center max-w-[1280px] mx-auto">
+<div class="flex items-center gap-3">
+<button class="w-11 h-11 flex items-center justify-center transition-opacity active:opacity-70">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile tracking-tighter text-primary">Preferences</h1>
+</div>
+<div class="flex items-center gap-2">
+<div class="px-2 py-1 border border-primary">
+<span class="font-label-technical text-label-technical text-primary">v2.4.0</span>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-[390px] mx-auto overflow-x-hidden">
+<!-- Header Visual Frame -->
+<section class="mt-8 px-gutter">
+<div class="relative w-full aspect-video overflow-hidden">
+
+<div class="absolute inset-0 flex flex-col justify-end p-6 bg-gradient-to-t from-background to-transparent">
+<p class="font-label-technical text-label-technical uppercase tracking-widest text-on-surface-variant mb-1">Curation Logic</p>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile leading-tight">Tailor your cinematic experience.</h2>
+</div>
+</div>
+<div class="h-px w-full bg-outline-variant mt-6"></div>
+</section>
+<!-- Technical Specs: Formats -->
+<section class="mt-10 px-gutter">
+<div class="flex justify-between items-end mb-4">
+<h3 class="font-label-technical text-label-technical uppercase tracking-widest font-bold">Projection Formats</h3>
+<span class="font-label-technical text-label-technical text-on-surface-variant">Multi-select enabled</span>
+</div>
+<div class="flex flex-wrap gap-2">
+<button class="active-chip h-11 px-4 border border-primary flex items-center justify-center transition-all">
+<span class="font-label-technical text-label-technical">70MM IMAX</span>
+</button>
+<button class="h-11 px-4 border border-outline-variant bg-surface flex items-center justify-center transition-all hover:border-primary">
+<span class="font-label-technical text-label-technical">35MM FILM</span>
+</button>
+<button class="active-chip h-11 px-4 border border-primary flex items-center justify-center transition-all">
+<span class="font-label-technical text-label-technical">DOLBY CINEMA</span>
+</button>
+<button class="h-11 px-4 border border-outline-variant bg-surface flex items-center justify-center transition-all hover:border-primary">
+<span class="font-label-technical text-label-technical">LASER 4K</span>
+</button>
+<button class="h-11 px-4 border border-outline-variant bg-surface flex items-center justify-center transition-all hover:border-primary">
+<span class="font-label-technical text-label-technical">ONYX LED</span>
+</button>
+</div>
+</section>
+<!-- Dynamic Parameters: Time & Budget -->
+<section class="mt-section-gap px-gutter">
+<div class="space-y-12">
+<!-- Time Slider -->
+<div class="space-y-6">
+<div class="flex justify-between items-baseline">
+<label class="font-label-technical text-label-technical uppercase tracking-widest font-bold">Preferred Start Time</label>
+<span class="font-label-data text-label-data" id="time-val">After 18:00</span>
+</div>
+<div class="relative pt-2">
+<input class="w-full" id="time-slider" max="24" min="8" type="range" value="18"/>
+<div class="flex justify-between mt-2 font-label-technical text-[10px] text-on-surface-variant uppercase">
+<span>Morning</span>
+<span>Noon</span>
+<span>Late</span>
+</div>
+</div>
+</div>
+<!-- Price Slider -->
+<div class="space-y-6">
+<div class="flex justify-between items-baseline">
+<label class="font-label-technical text-label-technical uppercase tracking-widest font-bold">Budget Ceiling</label>
+<span class="font-label-data text-label-data" id="price-val">$25.00</span>
+</div>
+<div class="relative pt-2">
+<input class="w-full" id="price-slider" max="50" min="10" type="range" value="25"/>
+<div class="flex justify-between mt-2 font-label-technical text-[10px] text-on-surface-variant uppercase">
+<span>Value</span>
+<span>Standard</span>
+<span>Premium</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Avoidance Section: Icon-based Toggles -->
+<section class="mt-section-gap px-gutter">
+<div class="mb-6">
+<h3 class="font-label-technical text-label-technical uppercase tracking-widest font-bold">Accessibility &amp; Comfort</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Filter out screenings that do not meet your specific needs.</p>
+</div>
+<div class="grid grid-cols-2 gap-px bg-outline-variant border border-outline-variant">
+<!-- Toggle Item 1 -->
+<button class="bg-surface p-6 flex flex-col items-center justify-center gap-3 transition-colors active:bg-surface-container hover:bg-surface-container group">
+<span class="material-symbols-outlined text-primary text-3xl group-active:scale-90 transition-transform" data-icon="accessible_forward">accessible_forward</span>
+<span class="font-label-technical text-label-technical uppercase text-center">Wheelchair</span>
+</button>
+<!-- Toggle Item 2 -->
+<button class="bg-primary p-6 flex flex-col items-center justify-center gap-3 transition-colors group">
+<span class="material-symbols-outlined text-on-primary text-3xl group-active:scale-90 transition-transform" data-icon="motion_sensor_active">motion_sensor_active</span>
+<span class="font-label-technical text-label-technical uppercase text-center text-on-primary">Motion Sensitivity</span>
+</button>
+<!-- Toggle Item 3 -->
+<button class="bg-surface p-6 flex flex-col items-center justify-center gap-3 transition-colors active:bg-surface-container hover:bg-surface-container group">
+<span class="material-symbols-outlined text-primary text-3xl group-active:scale-90 transition-transform" data-icon="hearing">hearing</span>
+<span class="font-label-technical text-label-technical uppercase text-center">Assisted Audio</span>
+</button>
+<!-- Toggle Item 4 -->
+<button class="bg-surface p-6 flex flex-col items-center justify-center gap-3 transition-colors active:bg-surface-container hover:bg-surface-container group">
+<span class="material-symbols-outlined text-primary text-3xl group-active:scale-90 transition-transform" data-icon="closed_caption">closed_caption</span>
+<span class="font-label-technical text-label-technical uppercase text-center">CC Subtitles</span>
+</button>
+</div>
+</section>
+<!-- Distance Matrix -->
+<section class="mt-section-gap px-gutter mb-12">
+<h3 class="font-label-technical text-label-technical uppercase tracking-widest font-bold mb-6">Proximity Threshold</h3>
+<div class="space-y-2">
+<div class="flex justify-between py-3 border-t border-outline-variant items-center">
+<span class="font-body-md text-body-md">Walkable</span>
+<div class="flex items-center gap-4">
+<span class="font-label-data text-label-data text-on-surface-variant">2km</span>
+<div class="w-4 h-4 border border-primary"></div>
+</div>
+</div>
+<div class="flex justify-between py-3 border-t border-outline-variant items-center">
+<span class="font-body-md text-body-md">Urban Transit</span>
+<div class="flex items-center gap-4">
+<span class="font-label-data text-label-data text-on-surface-variant">5km</span>
+<div class="w-4 h-4 bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary text-[10px]">check</span>
+</div>
+</div>
+</div>
+<div class="flex justify-between py-3 border-t border-outline-variant items-center">
+<span class="font-body-md text-body-md">Regional Drive</span>
+<div class="flex items-center gap-4">
+<span class="font-label-data text-label-data text-on-surface-variant">15km+</span>
+<div class="w-4 h-4 border border-primary"></div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Sticky Summary Bar -->
+<footer class="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-outline-variant max-w-[390px] mx-auto">
+<div class="p-gutter flex items-center justify-between gap-6">
+<div class="flex flex-col">
+<span class="font-label-technical text-[10px] uppercase text-on-surface-variant">Active Filters</span>
+<div class="flex items-baseline gap-1">
+<span class="font-headline-lg-mobile text-xl text-primary">03</span>
+<span class="font-label-technical text-label-technical text-on-surface-variant">Selected</span>
+</div>
+</div>
+<button class="flex-1 h-14 bg-primary text-on-primary flex items-center justify-center transition-all active:scale-[0.98]">
+<span class="font-label-technical text-label-technical uppercase tracking-widest font-bold">Apply Calibration</span>
+</button>
+</div>
+</footer>
+<script>
+        // Micro-interactions for sliders
+        const timeSlider = document.getElementById('time-slider');
+        const timeVal = document.getElementById('time-val');
+        const priceSlider = document.getElementById('price-slider');
+        const priceVal = document.getElementById('price-val');
+
+        timeSlider.addEventListener('input', (e) => {
+            const h = e.target.value;
+            timeVal.textContent = `After ${h.padStart(2, '0')}:00`;
+        });
+
+        priceSlider.addEventListener('input', (e) => {
+            priceVal.textContent = `$${e.target.value}.00`;
+        });
+
+        // Toggle chip states
+        document.querySelectorAll('button').forEach(btn => {
+            if(btn.querySelector('.font-label-technical') && !btn.closest('footer') && !btn.closest('header')) {
+                btn.addEventListener('click', () => {
+                   if(btn.classList.contains('active-chip')) {
+                       btn.classList.remove('active-chip');
+                       btn.classList.add('bg-surface');
+                       btn.classList.remove('border-primary');
+                       btn.classList.add('border-outline-variant');
+                   } else {
+                       btn.classList.add('active-chip');
+                       btn.classList.remove('bg-surface');
+                       btn.classList.add('border-primary');
+                       btn.classList.remove('border-outline-variant');
+                   }
+                });
+            }
+        });
+    </script>
+</body></html>

@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { IconChevronRight, IconEdit, IconFilm, IconLightbulb } from '../components/Icon';
-import { Notice } from '../components/Notice';
+import { IconEdit, IconFilm, IconLightbulb } from '../components/Icon';
+import { EditorialMovieCard } from '../components/EditorialMovieCard';
+import { EditorialPage } from '../components/EditorialPage';
 import { OnboardingCard } from '../components/OnboardingCard';
 import { HeroVisual } from '../components/ScreenArt';
 import { DbNotSeededError } from '../src/data/db';
@@ -17,11 +18,11 @@ const STEPS = [
 ] as const;
 
 const COMPARE_POINTS = [
-  '영화의 화면비·촬영 포맷과 상영관 사양의 궁합',
-  'IMAX·Dolby Cinema 등 특별관 인증 여부',
-  '목적별 좌석 구역(몰입/자막 가독/멀미 완화 등)',
-  '이동 시간과 가격',
-  '이 모든 정보가 얼마나 최근에, 어떤 출처로 확인됐는지',
+  { label: '화면비·촬영 포맷', detail: '영화 원본 규격과 상영관 스크린의 궁합' },
+  { label: '특별관 인증', detail: 'IMAX·Dolby Cinema 등 공식 인증 여부' },
+  { label: '목적별 좌석 구역', detail: '몰입·자막 가독·멀미 완화 등' },
+  { label: '이동 시간·가격', detail: '실제로 갈 수 있는 거리인지' },
+  { label: '정보 신선도', detail: '언제, 어떤 출처로 확인됐는지' },
 ];
 
 export default async function HomePage() {
@@ -37,97 +38,93 @@ export default async function HomePage() {
   }
 
   return (
-    <main className="mx-auto max-w-wide px-4 pb-24 pt-6">
-      <section className="grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-10">
+    <EditorialPage className="mx-auto max-w-wide px-4 pb-24 pt-8 sm:pt-12">
+      <section className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-12">
         <div className="max-w-content">
-          <h1 className="text-[28px] font-extrabold leading-tight text-text lg:text-4xl">
-            영화에 <span className="text-primary">딱 맞는</span> 상영관을 찾아드려요
+          <p className="m-0 font-label text-xs font-medium uppercase tracking-[0.12em] text-ed-gold">Cinematic Recommendation</p>
+          <h1 className="mt-2 font-display text-[34px] font-extrabold leading-[1.02] tracking-[-0.045em] text-ed-ink sm:text-5xl">
+            영화에 딱 맞는 <span className="text-ed-gold">상영관</span>을 찾아드려요
           </h1>
-          <p className="mt-3 leading-relaxed text-text-sub lg:text-lg">
+          <p className="mt-4 max-w-md leading-[1.65] tracking-[-0.015em] text-ed-ink-muted">
             평점 하나만 보고 고르지 마세요. 어디가 좋은지, 뭐가 아쉬운지, 그 정보를 얼마나 믿을 수
             있는지까지 이유와 함께 알려드려요.
           </p>
 
-          <div className="mt-4">
-            <Notice tone="info">
-              지금은 테스트 중인 베타예요. 회차·가격은{' '}
-              <strong className="font-semibold">실제가 아닌 테스트용 데이터</strong>이고, 상영관
-              정보는 조사한 자료를 바탕으로 출처와 확인 날짜를 함께 보여드려요.
-            </Notice>
-          </div>
-
           {!dbMissing ? (
             <Link
               href="/movies"
-              className="mt-5 flex min-h-11 w-full items-center justify-center rounded-card bg-primary-strong px-5 text-base font-semibold text-white transition-colors hover:bg-primary-strong-hover sm:w-auto"
+              className="mt-7 flex min-h-12 w-full items-center justify-center bg-ed-ink px-6 text-base font-semibold text-ed-canvas transition-opacity hover:opacity-85 sm:w-auto"
             >
               추천 시작하기
             </Link>
           ) : null}
+          <p className="mt-3 max-w-md text-xs leading-[1.65] tracking-[-0.015em] text-ed-ink-muted">
+            지금은 테스트 중인 서비스예요 — 회차·가격은 실제가 아닌 테스트용 데이터이고, 상영관
+            정보는 조사한 자료를 바탕으로 출처와 확인 날짜를 함께 보여드려요.
+          </p>
+
+          {onboardingEnabled && (
+            <div className="mt-8 max-w-md border-t border-ed-hairline pt-6">
+              <OnboardingCard />
+            </div>
+          )}
         </div>
-        <HeroVisual className="hidden h-auto w-full text-primary lg:block" />
+        <HeroVisual className="hidden h-auto w-full lg:block" />
       </section>
 
-      {onboardingEnabled && <OnboardingCard />}
-
       {dbMissing ? (
-        <div className="mt-6 max-w-content rounded-card-lg border border-border bg-surface p-5">
-          <h3 className="m-0 text-lg font-bold text-text">아직 준비된 데이터가 없어요</h3>
-          <p className="mt-2 text-sm text-text-sub">
+        <div className="mt-10 max-w-content border border-ed-hairline bg-ed-surface p-5">
+          <h3 className="m-0 font-display text-lg font-bold tracking-[-0.035em] leading-[1.1] text-ed-ink">아직 준비된 데이터가 없어요</h3>
+          <p className="mt-2 text-sm text-ed-ink-muted">
             터미널에서{' '}
-            <code className="rounded-md bg-bg px-1.5 py-0.5 text-[13px]">npm run db:seed</code>를
+            <code className="bg-ed-surface-sunken px-1.5 py-0.5 font-label text-[13px]">npm run db:seed</code>를
             실행한 뒤 새로고침해 주세요.
           </p>
         </div>
       ) : (
-        <section aria-label="추천 가능한 영화" className="mt-8 max-w-content">
-          <h2 className="text-base font-bold text-text">지금 추천받을 수 있는 영화</h2>
-          <ul className="mt-3 flex list-none flex-col gap-2 p-0">
+        <section aria-label="추천 가능한 영화" className="mt-14">
+          <div className="flex items-baseline justify-between border-b border-ed-hairline pb-3">
+            <h2 className="m-0 font-display text-lg font-bold tracking-[-0.035em] leading-[1.1] text-ed-ink">지금 추천받을 수 있는 영화</h2>
+            <span className="font-label text-xs font-medium tracking-[0.1em] text-ed-ink-muted">
+              01 — {String(movies.length).padStart(2, '0')}
+            </span>
+          </div>
+          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {movies.map((m) => (
-              <li key={m.id}>
-                <Link
-                  href={`/recommend/${m.id}`}
-                  className="flex min-h-14 items-center justify-between rounded-card-lg border border-border bg-surface px-4 py-3 text-text transition-colors hover:border-primary/60 hover:bg-surface-raised"
-                >
-                  <span className="font-medium">
-                    {m.title}{' '}
-                    {m.releaseYear ? <span className="text-text-sub">({m.releaseYear})</span> : null}
-                  </span>
-                  <IconChevronRight className="h-4 w-4 text-text-sub" />
-                </Link>
-              </li>
+              <EditorialMovieCard key={m.id} movie={m} variant="compact" />
             ))}
-          </ul>
+          </div>
         </section>
       )}
 
-      <section aria-label="이용 흐름" className="mt-10 max-w-content">
-        <h2 className="text-base font-bold text-text">이렇게 추천해 드려요</h2>
-        <ol className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {STEPS.map((s, i) => (
-            <li key={s.title} className="rounded-card-lg border border-border bg-surface p-4">
-              <div className="flex items-center gap-2 text-text-sub">
-                <s.Icon className="h-5 w-5 text-primary" />
-                <span className="text-xs font-semibold">STEP {i + 1}</span>
-              </div>
-              <h3 className="m-0 mt-2 text-[15px] font-bold text-text">{s.title}</h3>
-              <p className="m-0 mt-1 text-sm text-text-sub">{s.desc}</p>
-            </li>
-          ))}
-        </ol>
-      </section>
+      <div className="mt-16 grid gap-10 lg:grid-cols-2 lg:gap-16">
+        <section aria-label="이용 흐름">
+          <h2 className="font-label text-xs font-medium uppercase tracking-[0.12em] text-ed-ink-muted">How it works</h2>
+          <ol className="mt-4 flex list-none flex-col gap-5 p-0">
+            {STEPS.map((s, i) => (
+              <li key={s.title} className="flex gap-4 border-t border-ed-hairline pt-4 first:border-t-0 first:pt-0">
+                <span className="font-label text-2xl font-medium text-ed-gold">{String(i + 1).padStart(2, '0')}</span>
+                <div>
+                  <h3 className="m-0 font-display text-base font-bold tracking-[-0.035em] leading-[1.1] text-ed-ink">{s.title}</h3>
+                  <p className="m-0 mt-1 text-sm leading-[1.65] tracking-[-0.015em] text-ed-ink-muted">{s.desc}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
 
-      <section aria-label="비교 요소" className="mt-8 max-w-content">
-        <h2 className="text-base font-bold text-text">CineFit이 비교하는 것들</h2>
-        <ul className="m-0 mt-3 flex list-none flex-col gap-2 p-0">
-          {COMPARE_POINTS.map((p) => (
-            <li key={p} className="flex items-start gap-2 text-sm text-text-sub">
-              <span aria-hidden className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-              {p}
-            </li>
-          ))}
-        </ul>
-      </section>
-    </main>
+        <section aria-label="비교 요소">
+          <h2 className="font-label text-xs font-medium uppercase tracking-[0.12em] text-ed-ink-muted">CineFit compares</h2>
+          <dl className="m-0 mt-4 flex flex-col gap-3">
+            {COMPARE_POINTS.map((p) => (
+              <div key={p.label} className="flex items-baseline justify-between gap-4 border-t border-ed-hairline pt-3 first:border-t-0 first:pt-0">
+                <dt className="font-display text-sm font-bold tracking-[-0.03em] text-ed-ink">{p.label}</dt>
+                <dd className="m-0 text-right text-xs leading-[1.65] tracking-[-0.015em] text-ed-ink-muted">{p.detail}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      </div>
+    </EditorialPage>
   );
 }

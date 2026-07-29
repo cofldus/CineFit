@@ -42,6 +42,7 @@
     "pg": "^8.22.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "wanted-sans": "^1.0.3",
     "zod": "^4.4.3"
   },
   "devDependencies": {

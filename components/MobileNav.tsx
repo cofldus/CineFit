@@ -20,7 +20,7 @@ export function MobileNav() {
   return (
     <nav
       aria-label="하단 메뉴"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 backdrop-blur-md sm:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-ed-hairline bg-ed-canvas/95 backdrop-blur-md sm:hidden"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <div className="mx-auto flex max-w-wide items-stretch justify-around">
@@ -32,7 +32,7 @@ export function MobileNav() {
               href={href}
               aria-current={active ? 'page' : undefined}
               className={`flex min-h-14 min-w-16 flex-col items-center justify-center gap-0.5 px-2 text-xs font-medium transition-colors ${
-                active ? 'text-primary' : 'text-text-sub hover:text-text'
+                active ? 'text-ed-gold' : 'text-ed-ink-muted hover:text-ed-ink'
               }`}
             >
               <Icon className="h-5 w-5" />

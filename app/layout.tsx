@@ -1,25 +1,20 @@
 import type { Metadata, Viewport } from 'next';
-import { Bricolage_Grotesque, Geist_Mono, Hanken_Grotesk } from 'next/font/google';
-import Link from 'next/link';
+import { Geist_Mono } from 'next/font/google';
+import localFont from 'next/font/local';
+import { AppHeader } from '../components/AppHeader';
 import { AppOpenedTracker } from '../components/AppOpenedTracker';
 import { MobileNav } from '../components/MobileNav';
 import { ServiceWorkerRegister } from '../components/ServiceWorkerRegister';
 import './globals.css';
 
-// Cinematic Editorial Utility 타이포그래피(design/reference/cinefit/DESIGN.md) — 셋 다
-// 한글 글리프가 없어 한글은 자동으로 Pretendard로 폴백된다(globals.css의 font-family 스택
-// 마지막에 Pretendard를 둠) — 영문·숫자·기호(제목의 영문 단어, "2.39:1", "IMAX" 같은 라벨)만
-// 이 폰트로 그려지고 한글 프로즈는 그대로 Pretendard로 읽힌다. 의도된 동작이다.
-const displayFont = Bricolage_Grotesque({
-  subsets: ['latin'],
+// 사용자 확정(2026-07-29): 한글 글리프를 직접 포함한 가변 폰트(Wanted Sans)로 제목·본문을
+// 통일한다 — Pretendard 폴백 없이 한글도 이 폰트 그대로 그려진다(Bricolage Grotesque/Baloo
+// 2/Hanken Grotesk는 전부 한글 글리프가 없어 시도했던 이전 안이었다). 굵기별 자간·행간은
+// docs/UI-REDESIGN-AUDIT.md의 타이포그래피 표를 각 컴포넌트에서 그대로 적용한다.
+const editorialFont = localFont({
+  src: '../node_modules/wanted-sans/fonts/variable/WantedSansVariable.ttf',
   variable: '--font-display',
-  weight: ['700', '800'],
-  display: 'swap',
-});
-const editorialBody = Hanken_Grotesk({
-  subsets: ['latin'],
-  variable: '--font-editorial-body',
-  weight: ['400', '500', '600'],
+  weight: '400 900',
   display: 'swap',
 });
 const labelMono = Geist_Mono({
@@ -44,43 +39,12 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className={`${displayFont.variable} ${editorialBody.variable} ${labelMono.variable}`}>
+    <html lang="ko" className={`${editorialFont.variable} ${labelMono.variable}`}>
       <body>
         <a href="#main-content" className="skip-link">
           본문으로 바로가기
         </a>
-        <header className="sticky top-0 z-40 border-b border-border bg-surface/85 backdrop-blur-md">
-          <div className="mx-auto flex max-w-wide items-center justify-between px-4 py-3">
-            <Link
-              href="/"
-              className="inline-flex min-h-11 items-center gap-1.5 text-lg font-extrabold tracking-tight text-text"
-              aria-label="CineFit 홈"
-            >
-              <span className="inline-block h-2 w-2 rounded-full bg-primary" aria-hidden />
-              Cine<span className="text-primary">Fit</span>
-            </Link>
-            <nav className="hidden items-center gap-1 sm:flex" aria-label="주요 메뉴">
-              <Link
-                href="/movies"
-                className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-text-sub transition-colors hover:bg-bg hover:text-text"
-              >
-                영화 찾기
-              </Link>
-              <Link
-                href="/search"
-                className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-text-sub transition-colors hover:bg-bg hover:text-text"
-              >
-                검색
-              </Link>
-              <Link
-                href="/sources"
-                className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-text-sub transition-colors hover:bg-bg hover:text-text"
-              >
-                출처 안내
-              </Link>
-            </nav>
-          </div>
-        </header>
+        <AppHeader />
         <div id="main-content">{children}</div>
         <MobileNav />
         <ServiceWorkerRegister />

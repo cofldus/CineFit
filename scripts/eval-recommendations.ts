@@ -50,7 +50,7 @@ function flag(args: string[], name: string): string | null {
   return found ? found.slice(name.length + 3) : null;
 }
 
-async function toDomainRequest(req: GoldenScenario['request']): Promise<RecommendationRequest> {
+export async function toDomainRequest(req: GoldenScenario['request']): Promise<RecommendationRequest> {
   const origin = ORIGIN_PRESETS.find((o) => o.id === req.originId) ?? ORIGIN_PRESETS[0];
   return {
     movieId: req.movieId,

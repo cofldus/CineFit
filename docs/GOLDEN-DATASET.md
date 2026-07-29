@@ -1,6 +1,9 @@
 # 골든 추천 데이터셋
 
-- 기준일: 2026-07-28 (7차 마일스톤)
+- 기준일: 2026-07-29 (8차 마일스톤 갱신)
+- 8차 마일스톤에서 이 데이터셋(v1)을 감사한 결과(`docs/GOLDEN-DATASET-AUDIT.md`) 우선순위·
+  출발지가 심하게 쏠려 있음을 확인해 **development(튜닝용) 세트**로 재분류했다. 최종 검증은
+  별도의 독립 holdout 세트(`docs/HOLDOUT-EVALUATION.md`)를 쓴다.
 
 ## 방법론 — 검증 가능한 주장만 단언한다
 
@@ -63,3 +66,9 @@ npm run eval:recommendations          # 51/51 통과, 필수 제외 위반 0건 
 - 소프트 랭킹 검증이 필요해지면(예: "이 시나리오는 반드시 균형 pick이 X여야 한다") 별도
   필드(`expectedPick` 등)를 추가하되, 실제 사용자 다수의 합의나 문서화된 도메인 규칙 없이
   임의로 채우지 않는다.
+
+## 관련 문서
+
+- `docs/GOLDEN-DATASET-AUDIT.md` — 이 v1 데이터셋의 편중·누수 감사 결과.
+- `docs/HOLDOUT-EVALUATION.md` — 독립 holdout 세트(`eval/golden/holdout-v1.json`)와
+  적대적(변형) 평가 세트(`eval/adversarial/v1.json`).

@@ -57,6 +57,17 @@ npm run compare:recommendations -- --run-id=123 [--policies=v1,v2]
 **정책을 바꾼 이유는 자동으로 기록되지 않는다** — 정책 변경 시 왜 바꿨는지는 커밋 메시지나
 `ACTIVE_POLICY` 파일 주석에 사람이 직접 남겨야 한다.
 
+## 독립 holdout·적대적 평가 (8차 마일스톤)
+
+`npm run eval:recommendations`(development 세트, v1)만으로는 부족하다는 것이 감사
+결과 드러났다 — `docs/GOLDEN-DATASET-AUDIT.md`가 v1의 편중을, `docs/HOLDOUT-EVALUATION.md`가
+독립 holdout 세트와 적대적(변형) 평가 세트를 설명한다.
+
+```bash
+npm run eval:recommendations -- --dataset=holdout-v1   # 독립 holdout
+npm run eval:adversarial                                # 불변식 기반 적대적 평가
+```
+
 ## 사용자 피드백 → 실패 분류
 
 추천 결과 화면의 `FeedbackWidget`/`SelectionWidget`이 `recommendation_feedback`/

@@ -26,6 +26,7 @@
     "sync:kmdb": "node --env-file-if-exists=.env scripts/sync-kmdb.ts",
     "sync:movie-identifiers": "node --env-file-if-exists=.env scripts/sync-movie-identifiers.ts",
     "eval:recommendations": "tsx scripts/eval-recommendations.ts",
+    "eval:adversarial": "tsx scripts/eval-adversarial.ts",
     "compare:recommendations": "tsx scripts/compare-recommendations.ts",
     "maintenance:daily": "tsx scripts/maintenance-daily.ts",
     "maintenance:stale": "tsx scripts/maintenance/markStaleData.ts",

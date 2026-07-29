@@ -1,0 +1,1088 @@
+{
+  "version": "holdout-v1",
+  "scenarios": [
+    {
+      "id": "h001",
+      "description": "영화1 — quality 우선순위, 출발지 gangnam",
+      "request": {
+        "movieId": 1,
+        "originId": "gangnam",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 100000,
+        "priority": "quality",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": null,
+      "acceptableTop3AuditoriumIds": null,
+      "mustExcludeAuditoriumIds": [],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "v1은 quality 우선순위를 cityhall에서만 확인했다 — 다른 출발지에서도 하드 필터 통과 집합 자체는 우선순위와 무관해야 한다."
+    },
+    {
+      "id": "h002",
+      "description": "영화1 — quality 우선순위, 출발지 hongdae",
+      "request": {
+        "movieId": 1,
+        "originId": "hongdae",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 100000,
+        "priority": "quality",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": null,
+      "acceptableTop3AuditoriumIds": null,
+      "mustExcludeAuditoriumIds": [],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "v1은 quality 우선순위를 cityhall에서만 확인했다 — 다른 출발지에서도 하드 필터 통과 집합 자체는 우선순위와 무관해야 한다."
+    },
+    {
+      "id": "h003",
+      "description": "영화1 — quality 우선순위, 출발지 yeouido",
+      "request": {
+        "movieId": 1,
+        "originId": "yeouido",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 100000,
+        "priority": "quality",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": null,
+      "acceptableTop3AuditoriumIds": null,
+      "mustExcludeAuditoriumIds": [],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "v1은 quality 우선순위를 cityhall에서만 확인했다 — 다른 출발지에서도 하드 필터 통과 집합 자체는 우선순위와 무관해야 한다."
+    },
+    {
+      "id": "h004",
+      "description": "영화2 — quality 우선순위, 출발지 gangnam",
+      "request": {
+        "movieId": 2,
+        "originId": "gangnam",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 100000,
+        "priority": "quality",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": null,
+      "acceptableTop3AuditoriumIds": null,
+      "mustExcludeAuditoriumIds": [],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "v1은 quality 우선순위를 cityhall에서만 확인했다 — 다른 출발지에서도 하드 필터 통과 집합 자체는 우선순위와 무관해야 한다."
+    },
+    {
+      "id": "h005",
+      "description": "영화2 — quality 우선순위, 출발지 hongdae",
+      "request": {
+        "movieId": 2,
+        "originId": "hongdae",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 100000,
+        "priority": "quality",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": null,
+      "acceptableTop3AuditoriumIds": null,
+      "mustExcludeAuditoriumIds": [],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "v1은 quality 우선순위를 cityhall에서만 확인했다 — 다른 출발지에서도 하드 필터 통과 집합 자체는 우선순위와 무관해야 한다."
+    },
+    {
+      "id": "h006",
+      "description": "영화2 — quality 우선순위, 출발지 yeouido",
+      "request": {
+        "movieId": 2,
+        "originId": "yeouido",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 100000,
+        "priority": "quality",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": null,
+      "acceptableTop3AuditoriumIds": null,
+      "mustExcludeAuditoriumIds": [],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "v1은 quality 우선순위를 cityhall에서만 확인했다 — 다른 출발지에서도 하드 필터 통과 집합 자체는 우선순위와 무관해야 한다."
+    },
+    {
+      "id": "h007",
+      "description": "영화3 — quality 우선순위, 출발지 gangnam",
+      "request": {
+        "movieId": 3,
+        "originId": "gangnam",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 100000,
+        "priority": "quality",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": null,
+      "acceptableTop3AuditoriumIds": null,
+      "mustExcludeAuditoriumIds": [],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "v1은 quality 우선순위를 cityhall에서만 확인했다 — 다른 출발지에서도 하드 필터 통과 집합 자체는 우선순위와 무관해야 한다."
+    },
+    {
+      "id": "h008",
+      "description": "영화3 — quality 우선순위, 출발지 hongdae",
+      "request": {
+        "movieId": 3,
+        "originId": "hongdae",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 100000,
+        "priority": "quality",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": null,
+      "acceptableTop3AuditoriumIds": null,
+      "mustExcludeAuditoriumIds": [],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "v1은 quality 우선순위를 cityhall에서만 확인했다 — 다른 출발지에서도 하드 필터 통과 집합 자체는 우선순위와 무관해야 한다."
+    },
+    {
+      "id": "h009",
+      "description": "영화3 — quality 우선순위, 출발지 yeouido",
+      "request": {
+        "movieId": 3,
+        "originId": "yeouido",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 100000,
+        "priority": "quality",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": null,
+      "acceptableTop3AuditoriumIds": null,
+      "mustExcludeAuditoriumIds": [],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "v1은 quality 우선순위를 cityhall에서만 확인했다 — 다른 출발지에서도 하드 필터 통과 집합 자체는 우선순위와 무관해야 한다."
+    },
+    {
+      "id": "h010",
+      "description": "영화1 — logistics 우선순위, 출발지 cheonho",
+      "request": {
+        "movieId": 1,
+        "originId": "cheonho",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 100000,
+        "priority": "logistics",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": null,
+      "acceptableTop3AuditoriumIds": null,
+      "mustExcludeAuditoriumIds": [],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "v1은 logistics 우선순위를 cityhall에서만 확인했다 — 우선순위는 소프트 점수에만 영향을 주므로 하드 필터 통과 집합은 balance와 같아야 한다."
+    },
+    {
+      "id": "h011",
+      "description": "영화1 — logistics 우선순위, 출발지 nowon",
+      "request": {
+        "movieId": 1,
+        "originId": "nowon",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 100000,
+        "priority": "logistics",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": null,
+      "acceptableTop3AuditoriumIds": null,
+      "mustExcludeAuditoriumIds": [],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "v1은 logistics 우선순위를 cityhall에서만 확인했다 — 우선순위는 소프트 점수에만 영향을 주므로 하드 필터 통과 집합은 balance와 같아야 한다."
+    },
+    {
+      "id": "h012",
+      "description": "영화1 — logistics 우선순위, 출발지 cityhall",
+      "request": {
+        "movieId": 1,
+        "originId": "cityhall",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 100000,
+        "priority": "logistics",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": null,
+      "acceptableTop3AuditoriumIds": null,
+      "mustExcludeAuditoriumIds": [],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "v1은 logistics 우선순위를 cityhall에서만 확인했다 — 우선순위는 소프트 점수에만 영향을 주므로 하드 필터 통과 집합은 balance와 같아야 한다."
+    },
+    {
+      "id": "h013",
+      "description": "영화2 — logistics 우선순위, 출발지 cheonho",
+      "request": {
+        "movieId": 2,
+        "originId": "cheonho",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 100000,
+        "priority": "logistics",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": null,
+      "acceptableTop3AuditoriumIds": null,
+      "mustExcludeAuditoriumIds": [],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "v1은 logistics 우선순위를 cityhall에서만 확인했다 — 우선순위는 소프트 점수에만 영향을 주므로 하드 필터 통과 집합은 balance와 같아야 한다."
+    },
+    {
+      "id": "h014",
+      "description": "영화2 — logistics 우선순위, 출발지 nowon",
+      "request": {
+        "movieId": 2,
+        "originId": "nowon",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 100000,
+        "priority": "logistics",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": null,
+      "acceptableTop3AuditoriumIds": null,
+      "mustExcludeAuditoriumIds": [],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "v1은 logistics 우선순위를 cityhall에서만 확인했다 — 우선순위는 소프트 점수에만 영향을 주므로 하드 필터 통과 집합은 balance와 같아야 한다."
+    },
+    {
+      "id": "h015",
+      "description": "영화2 — logistics 우선순위, 출발지 cityhall",
+      "request": {
+        "movieId": 2,
+        "originId": "cityhall",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 100000,
+        "priority": "logistics",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": null,
+      "acceptableTop3AuditoriumIds": null,
+      "mustExcludeAuditoriumIds": [],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "v1은 logistics 우선순위를 cityhall에서만 확인했다 — 우선순위는 소프트 점수에만 영향을 주므로 하드 필터 통과 집합은 balance와 같아야 한다."
+    },
+    {
+      "id": "h016",
+      "description": "영화3 — logistics 우선순위, 출발지 cheonho",
+      "request": {
+        "movieId": 3,
+        "originId": "cheonho",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 100000,
+        "priority": "logistics",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": null,
+      "acceptableTop3AuditoriumIds": null,
+      "mustExcludeAuditoriumIds": [],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "v1은 logistics 우선순위를 cityhall에서만 확인했다 — 우선순위는 소프트 점수에만 영향을 주므로 하드 필터 통과 집합은 balance와 같아야 한다."
+    },
+    {
+      "id": "h017",
+      "description": "영화3 — logistics 우선순위, 출발지 nowon",
+      "request": {
+        "movieId": 3,
+        "originId": "nowon",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 100000,
+        "priority": "logistics",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": null,
+      "acceptableTop3AuditoriumIds": null,
+      "mustExcludeAuditoriumIds": [],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "v1은 logistics 우선순위를 cityhall에서만 확인했다 — 우선순위는 소프트 점수에만 영향을 주므로 하드 필터 통과 집합은 balance와 같아야 한다."
+    },
+    {
+      "id": "h018",
+      "description": "영화3 — logistics 우선순위, 출발지 cityhall",
+      "request": {
+        "movieId": 3,
+        "originId": "cityhall",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 100000,
+        "priority": "logistics",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": null,
+      "acceptableTop3AuditoriumIds": null,
+      "mustExcludeAuditoriumIds": [],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "v1은 logistics 우선순위를 cityhall에서만 확인했다 — 우선순위는 소프트 점수에만 영향을 주므로 하드 필터 통과 집합은 balance와 같아야 한다."
+    },
+    {
+      "id": "h019",
+      "description": "영화1 — 이동시간 상한 30분(현실적인 값)",
+      "request": {
+        "movieId": 1,
+        "originId": "cityhall",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 30,
+        "maxPrice": 100000,
+        "priority": "balance",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": null,
+      "acceptableTop3AuditoriumIds": [
+        1,
+        2,
+        3
+      ],
+      "mustExcludeAuditoriumIds": [
+        4,
+        5,
+        7,
+        9
+      ],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "v1의 이동시간 시나리오는 1분(전부 제외)·200분(전부 통과) 극단값뿐이었다 — 실제로 일부만 걸러지는 현실적인 값을 확인한다."
+    },
+    {
+      "id": "h020",
+      "description": "영화1 — 이동시간 상한 45분(현실적인 값)",
+      "request": {
+        "movieId": 1,
+        "originId": "cityhall",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 45,
+        "maxPrice": 100000,
+        "priority": "balance",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": null,
+      "acceptableTop3AuditoriumIds": null,
+      "mustExcludeAuditoriumIds": [
+        4,
+        7
+      ],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "v1의 이동시간 시나리오는 1분(전부 제외)·200분(전부 통과) 극단값뿐이었다 — 실제로 일부만 걸러지는 현실적인 값을 확인한다."
+    },
+    {
+      "id": "h021",
+      "description": "영화1 — 이동시간 상한 90분(현실적인 값)",
+      "request": {
+        "movieId": 1,
+        "originId": "cityhall",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 90,
+        "maxPrice": 100000,
+        "priority": "balance",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": null,
+      "acceptableTop3AuditoriumIds": null,
+      "mustExcludeAuditoriumIds": [],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "v1의 이동시간 시나리오는 1분(전부 제외)·200분(전부 통과) 극단값뿐이었다 — 실제로 일부만 걸러지는 현실적인 값을 확인한다."
+    },
+    {
+      "id": "h022",
+      "description": "영화1 — 자막+목 편안 선호 × 가격 상한 2만원",
+      "request": {
+        "movieId": 1,
+        "originId": "cityhall",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 20000,
+        "priority": "balance",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": true,
+        "neckComfort": true,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": 2,
+      "acceptableTop3AuditoriumIds": [
+        2
+      ],
+      "mustExcludeAuditoriumIds": [
+        1,
+        3,
+        4,
+        5,
+        7,
+        9
+      ],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "v1은 좌석 선호를 항상 관대한 가격 한도와만 조합했다 — 가격 하드 필터와 동시에 적용해도 통과 집합이 가격 조건만으로 결정되는지 확인."
+    },
+    {
+      "id": "h023",
+      "description": "영화2 — 자막+목 편안 선호 × 가격 상한 2만원",
+      "request": {
+        "movieId": 2,
+        "originId": "cityhall",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 20000,
+        "priority": "balance",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": true,
+        "neckComfort": true,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": 8,
+      "acceptableTop3AuditoriumIds": [
+        8
+      ],
+      "mustExcludeAuditoriumIds": [
+        1,
+        4,
+        5
+      ],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "v1은 좌석 선호를 항상 관대한 가격 한도와만 조합했다 — 가격 하드 필터와 동시에 적용해도 통과 집합이 가격 조건만으로 결정되는지 확인."
+    },
+    {
+      "id": "h024",
+      "description": "영화3 — 자막+목 편안 선호 × 가격 상한 2만원",
+      "request": {
+        "movieId": 3,
+        "originId": "cityhall",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 20000,
+        "priority": "balance",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": true,
+        "neckComfort": true,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": null,
+      "acceptableTop3AuditoriumIds": [
+        2,
+        6
+      ],
+      "mustExcludeAuditoriumIds": [
+        7,
+        10
+      ],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "v1은 좌석 선호를 항상 관대한 가격 한도와만 조합했다 — 가격 하드 필터와 동시에 적용해도 통과 집합이 가격 조건만으로 결정되는지 확인."
+    },
+    {
+      "id": "h025",
+      "description": "영화1 — 멀미 약간 신경쓰임(1) + IMAX 비허용",
+      "request": {
+        "movieId": 1,
+        "originId": "cityhall",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 100000,
+        "priority": "balance",
+        "allowImax": false,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 1,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": null,
+      "acceptableTop3AuditoriumIds": null,
+      "mustExcludeAuditoriumIds": [
+        1,
+        3,
+        4
+      ],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "motionSickness=1은 4DX를 하드 제외하지 않는다 — allowImax=false와 동시에 걸어도 4DX는 통과 집합에 남아야 한다."
+    },
+    {
+      "id": "h026",
+      "description": "영화1 — quality 우선순위 × 가격 상한 2만원",
+      "request": {
+        "movieId": 1,
+        "originId": "cityhall",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 20000,
+        "priority": "quality",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": 2,
+      "acceptableTop3AuditoriumIds": [
+        2
+      ],
+      "mustExcludeAuditoriumIds": [
+        1,
+        3,
+        4,
+        5,
+        7,
+        9
+      ],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "우선순위는 소프트 점수에만 영향을 주므로, 가격 하드 필터로 걸러지는 통과 집합은 balance일 때와 같아야 한다."
+    },
+    {
+      "id": "h027",
+      "description": "영화2 — quality 우선순위 × 가격 상한 2만원",
+      "request": {
+        "movieId": 2,
+        "originId": "cityhall",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 20000,
+        "priority": "quality",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": 8,
+      "acceptableTop3AuditoriumIds": [
+        8
+      ],
+      "mustExcludeAuditoriumIds": [
+        1,
+        4,
+        5
+      ],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "우선순위는 소프트 점수에만 영향을 주므로, 가격 하드 필터로 걸러지는 통과 집합은 balance일 때와 같아야 한다."
+    },
+    {
+      "id": "h028",
+      "description": "영화3 — quality 우선순위 × 가격 상한 2만원",
+      "request": {
+        "movieId": 3,
+        "originId": "cityhall",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 20000,
+        "priority": "quality",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": null,
+      "acceptableTop3AuditoriumIds": [
+        2,
+        6
+      ],
+      "mustExcludeAuditoriumIds": [
+        7,
+        10
+      ],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "우선순위는 소프트 점수에만 영향을 주므로, 가격 하드 필터로 걸러지는 통과 집합은 balance일 때와 같아야 한다."
+    },
+    {
+      "id": "h029",
+      "description": "영화1 — logistics 우선순위 × 가격 상한 2만원",
+      "request": {
+        "movieId": 1,
+        "originId": "cityhall",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 20000,
+        "priority": "logistics",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": 2,
+      "acceptableTop3AuditoriumIds": [
+        2
+      ],
+      "mustExcludeAuditoriumIds": [
+        1,
+        3,
+        4,
+        5,
+        7,
+        9
+      ],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "우선순위는 소프트 점수에만 영향을 주므로, 가격 하드 필터로 걸러지는 통과 집합은 balance일 때와 같아야 한다."
+    },
+    {
+      "id": "h030",
+      "description": "영화2 — logistics 우선순위 × 가격 상한 2만원",
+      "request": {
+        "movieId": 2,
+        "originId": "cityhall",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 20000,
+        "priority": "logistics",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": 8,
+      "acceptableTop3AuditoriumIds": [
+        8
+      ],
+      "mustExcludeAuditoriumIds": [
+        1,
+        4,
+        5
+      ],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "우선순위는 소프트 점수에만 영향을 주므로, 가격 하드 필터로 걸러지는 통과 집합은 balance일 때와 같아야 한다."
+    },
+    {
+      "id": "h031",
+      "description": "영화3 — logistics 우선순위 × 가격 상한 2만원",
+      "request": {
+        "movieId": 3,
+        "originId": "cityhall",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 200,
+        "maxPrice": 20000,
+        "priority": "logistics",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": null,
+      "acceptableTop3AuditoriumIds": [
+        2,
+        6
+      ],
+      "mustExcludeAuditoriumIds": [
+        7,
+        10
+      ],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "우선순위는 소프트 점수에만 영향을 주므로, 가격 하드 필터로 걸러지는 통과 집합은 balance일 때와 같아야 한다."
+    },
+    {
+      "id": "h032",
+      "description": "영화1 — 출발지 홍대, 이동시간 25분 + 가격 상한 16,000원(동시 제약)",
+      "request": {
+        "movieId": 1,
+        "originId": "hongdae",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 25,
+        "maxPrice": 16000,
+        "priority": "balance",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": false,
+      "expectedTop1AuditoriumId": 2,
+      "acceptableTop3AuditoriumIds": [
+        2
+      ],
+      "mustExcludeAuditoriumIds": [
+        1,
+        3,
+        4,
+        5,
+        7,
+        9
+      ],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "개별로는 극단적이지 않은 두 제약(이동시간·가격)을 동시에 걸었을 때의 통과 집합 — v1은 항상 한 번에 하나씩만 좁혔다."
+    },
+    {
+      "id": "h033",
+      "description": "영화3 — 출발지 노원, 이동시간 40분 + 가격 상한 16,000원(동시 제약)",
+      "request": {
+        "movieId": 3,
+        "originId": "nowon",
+        "date": "2026-07-28",
+        "maxTravelMinutes": 40,
+        "maxPrice": 16000,
+        "priority": "balance",
+        "allowImax": true,
+        "allowDolby": true,
+        "allowStandard": true,
+        "motionSickness": 0,
+        "subtitleReadability": false,
+        "neckComfort": false,
+        "wheelchair": false
+      },
+      "expectEmpty": true,
+      "expectedTop1AuditoriumId": null,
+      "acceptableTop3AuditoriumIds": null,
+      "mustExcludeAuditoriumIds": [
+        2,
+        6,
+        7,
+        10
+      ],
+      "dataCheckedAt": "2026-07-29",
+      "authors": [
+        "claude-sonnet-5"
+      ],
+      "reviewedByCount": 1,
+      "disagreement": null,
+      "reasoning": "개별로는 극단적이지 않은 두 제약을 동시에 걸었을 때의 통과 집합."
+    }
+  ]
+}

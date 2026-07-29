@@ -1,0 +1,96 @@
+{
+  "version": "adversarial-v1",
+  "cases": [
+    {
+      "id": "adv001",
+      "description": "영화1 — 이동시간 상한을 200분→20분으로 좁히면 결과가 줄거나 같아야 한다",
+      "baseRequest": { "movieId": 1, "originId": "cityhall", "date": "2026-07-28", "maxTravelMinutes": 200, "maxPrice": 100000, "priority": "balance", "allowImax": true, "allowDolby": true, "allowStandard": true, "motionSickness": 0, "subtitleReadability": false, "neckComfort": false, "wheelchair": false },
+      "transform": { "maxTravelMinutes": 20 },
+      "invariant": "subset_or_equal"
+    },
+    {
+      "id": "adv002",
+      "description": "영화1 — 가격 상한을 10만원→15,000원으로 좁히면 결과가 줄거나 같아야 한다",
+      "baseRequest": { "movieId": 1, "originId": "cityhall", "date": "2026-07-28", "maxTravelMinutes": 200, "maxPrice": 100000, "priority": "balance", "allowImax": true, "allowDolby": true, "allowStandard": true, "motionSickness": 0, "subtitleReadability": false, "neckComfort": false, "wheelchair": false },
+      "transform": { "maxPrice": 15000 },
+      "invariant": "subset_or_equal"
+    },
+    {
+      "id": "adv003",
+      "description": "영화1 — IMAX 허용→비허용이면 imax 포맷 후보가 결과에서 완전히 사라져야 한다",
+      "baseRequest": { "movieId": 1, "originId": "cityhall", "date": "2026-07-28", "maxTravelMinutes": 200, "maxPrice": 100000, "priority": "balance", "allowImax": true, "allowDolby": true, "allowStandard": true, "motionSickness": 0, "subtitleReadability": false, "neckComfort": false, "wheelchair": false },
+      "transform": { "allowImax": false },
+      "invariant": "format_removed:imax"
+    },
+    {
+      "id": "adv004",
+      "description": "영화1 — Dolby Cinema 허용→비허용이면 dolby_cinema 포맷 후보가 완전히 사라져야 한다",
+      "baseRequest": { "movieId": 1, "originId": "cityhall", "date": "2026-07-28", "maxTravelMinutes": 200, "maxPrice": 100000, "priority": "balance", "allowImax": true, "allowDolby": true, "allowStandard": true, "motionSickness": 0, "subtitleReadability": false, "neckComfort": false, "wheelchair": false },
+      "transform": { "allowDolby": false },
+      "invariant": "format_removed:dolby_cinema"
+    },
+    {
+      "id": "adv005",
+      "description": "영화1 — 멀미 민감도 0→2(매우 심함)이면 4DX 후보가 완전히 사라져야 한다",
+      "baseRequest": { "movieId": 1, "originId": "cityhall", "date": "2026-07-28", "maxTravelMinutes": 200, "maxPrice": 100000, "priority": "balance", "allowImax": true, "allowDolby": true, "allowStandard": true, "motionSickness": 0, "subtitleReadability": false, "neckComfort": false, "wheelchair": false },
+      "transform": { "motionSickness": 2 },
+      "invariant": "format_removed:4dx"
+    },
+    {
+      "id": "adv006",
+      "description": "영화1 — 휠체어 접근 불필요→필수면 결과가 비어야 한다(접근성 필드 없음, 알려진 데이터 한계)",
+      "baseRequest": { "movieId": 1, "originId": "cityhall", "date": "2026-07-28", "maxTravelMinutes": 200, "maxPrice": 100000, "priority": "balance", "allowImax": true, "allowDolby": true, "allowStandard": true, "motionSickness": 0, "subtitleReadability": false, "neckComfort": false, "wheelchair": false },
+      "transform": { "wheelchair": true },
+      "invariant": "expect_empty_after"
+    },
+    {
+      "id": "adv007",
+      "description": "영화2 — 휠체어 접근 불필요→필수면 결과가 비어야 한다",
+      "baseRequest": { "movieId": 2, "originId": "cityhall", "date": "2026-07-28", "maxTravelMinutes": 200, "maxPrice": 100000, "priority": "balance", "allowImax": true, "allowDolby": true, "allowStandard": true, "motionSickness": 0, "subtitleReadability": false, "neckComfort": false, "wheelchair": false },
+      "transform": { "wheelchair": true },
+      "invariant": "expect_empty_after"
+    },
+    {
+      "id": "adv008",
+      "description": "영화1 — 자막 가독성·목 편안 선호는 소프트 점수만 바꿔야 한다(하드 필터 통과 집합 불변)",
+      "baseRequest": { "movieId": 1, "originId": "cityhall", "date": "2026-07-28", "maxTravelMinutes": 200, "maxPrice": 100000, "priority": "balance", "allowImax": true, "allowDolby": true, "allowStandard": true, "motionSickness": 0, "subtitleReadability": false, "neckComfort": false, "wheelchair": false },
+      "transform": { "subtitleReadability": true, "neckComfort": true },
+      "invariant": "unchanged_candidate_set"
+    },
+    {
+      "id": "adv009",
+      "description": "영화2 — 자막 가독성 선호는 소프트 점수만 바꿔야 한다",
+      "baseRequest": { "movieId": 2, "originId": "cityhall", "date": "2026-07-28", "maxTravelMinutes": 200, "maxPrice": 100000, "priority": "balance", "allowImax": true, "allowDolby": true, "allowStandard": true, "motionSickness": 0, "subtitleReadability": false, "neckComfort": false, "wheelchair": false },
+      "transform": { "subtitleReadability": true },
+      "invariant": "unchanged_candidate_set"
+    },
+    {
+      "id": "adv010",
+      "description": "영화3 — 이동시간 상한을 200분→30분으로 좁히면 결과가 줄거나 같아야 한다",
+      "baseRequest": { "movieId": 3, "originId": "cityhall", "date": "2026-07-28", "maxTravelMinutes": 200, "maxPrice": 100000, "priority": "balance", "allowImax": true, "allowDolby": true, "allowStandard": true, "motionSickness": 0, "subtitleReadability": false, "neckComfort": false, "wheelchair": false },
+      "transform": { "maxTravelMinutes": 30 },
+      "invariant": "subset_or_equal"
+    },
+    {
+      "id": "adv011",
+      "description": "영화2 — 일반관 허용→비허용이면 standard 포맷 후보가 완전히 사라져야 한다",
+      "baseRequest": { "movieId": 2, "originId": "cityhall", "date": "2026-07-28", "maxTravelMinutes": 200, "maxPrice": 100000, "priority": "balance", "allowImax": true, "allowDolby": true, "allowStandard": true, "motionSickness": 0, "subtitleReadability": false, "neckComfort": false, "wheelchair": false },
+      "transform": { "allowStandard": false },
+      "invariant": "format_removed:standard"
+    },
+    {
+      "id": "adv012",
+      "description": "영화1 — 우선순위 balance→quality는 소프트 점수 계산만 바꿔야 한다(하드 필터 통과 집합 불변)",
+      "baseRequest": { "movieId": 1, "originId": "cityhall", "date": "2026-07-28", "maxTravelMinutes": 200, "maxPrice": 100000, "priority": "balance", "allowImax": true, "allowDolby": true, "allowStandard": true, "motionSickness": 0, "subtitleReadability": false, "neckComfort": false, "wheelchair": false },
+      "transform": { "priority": "quality" },
+      "invariant": "unchanged_candidate_set"
+    },
+    {
+      "id": "adv013",
+      "description": "영화1 — 우선순위 balance→logistics는 소프트 점수 계산만 바꿔야 한다(하드 필터 통과 집합 불변)",
+      "baseRequest": { "movieId": 1, "originId": "cityhall", "date": "2026-07-28", "maxTravelMinutes": 200, "maxPrice": 100000, "priority": "balance", "allowImax": true, "allowDolby": true, "allowStandard": true, "motionSickness": 0, "subtitleReadability": false, "neckComfort": false, "wheelchair": false },
+      "transform": { "priority": "logistics" },
+      "invariant": "unchanged_candidate_set"
+    }
+  ]
+}

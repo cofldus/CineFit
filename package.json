@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "description": "영화에 딱 맞는 상영관을 찾아주는 맞춤형 영화 관람 추천 서비스 — 첫 마일스톤 PWA",
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

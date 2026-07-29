@@ -1,0 +1,7 @@
+{
+  "crons": [
+    { "path": "/api/admin/cron/maintenance-daily", "schedule": "0 18 * * *" },
+    { "path": "/api/admin/cron/maintenance-links", "schedule": "0 19 * * 1" },
+    { "path": "/api/admin/cron/retention-apply", "schedule": "0 17 * * 0" }
+  ]
+}

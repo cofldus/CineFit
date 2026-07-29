@@ -62,10 +62,11 @@ export function AdminFeatureFlagCreateForm() {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const fd = new FormData(e.currentTarget);
+    const form = e.currentTarget; // await 이후 e.currentTarget은 null이 될 수 있어 미리 잡아둔다
+    const fd = new FormData(form);
     try {
       await setFlag(String(fd.get('key') ?? '').trim(), fd.get('enabled') === 'on', String(fd.get('description') ?? ''));
-      e.currentTarget.reset();
+      form.reset();
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : '저장에 실패했습니다.');

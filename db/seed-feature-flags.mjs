@@ -13,7 +13,10 @@ if (!existsSync(dbPath)) {
 }
 const db = new DatabaseSync(dbPath);
 
-const DEFAULT_FLAGS = [['onboarding', 1, '홈 화면 3문항 온보딩 — 추천 폼 기본값 채우기']];
+const DEFAULT_FLAGS = [
+  ['onboarding', 1, '홈 화면 3문항 온보딩 — 추천 폼 기본값 채우기'],
+  ['private_alpha_gate', 0, '비공개 알파 게이트(초대 코드+동의 강제) — 실제 알파 시작 전까지 꺼둔다(docs/PRIVATE-ALPHA.md)'],
+];
 
 db.exec('BEGIN');
 try {

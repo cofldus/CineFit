@@ -74,7 +74,7 @@ describe.skipIf(!BASE_PG_URL)('SQLite → PostgreSQL import (CINEFIT_TEST_PG_URL
     expect(await countRows('showtimes')).toBe(15);
     expect(await countRows('movie_aliases')).toBe(1);
     expect(await countRows('auditorium_aliases')).toBe(4);
-    expect(await countRows('feature_flags')).toBe(1);
+    expect(await countRows('feature_flags')).toBe(2); // onboarding + private_alpha_gate(db/seed-feature-flags.mjs)
 
     // 합성 회차 플래그가 그대로 보존됐는지 확인
     const pg = createPostgresClient(PG_URL!);

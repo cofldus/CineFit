@@ -93,6 +93,20 @@ test.describe('시각 회귀', () => {
     await expect(page).toHaveScreenshot('search.png', { fullPage: true, ...SCREENSHOT_OPTS });
   });
 
+  test('알파 초대 코드', async ({ page }) => {
+    await page.setViewportSize(VIEWPORTS.mobile);
+    await page.goto('/alpha/invite');
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page).toHaveScreenshot('alpha-invite.png', { fullPage: true, ...SCREENSHOT_OPTS });
+  });
+
+  test('알파 참여 동의', async ({ page }) => {
+    await page.setViewportSize(VIEWPORTS.mobile);
+    await page.goto('/alpha/consent');
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page).toHaveScreenshot('alpha-consent.png', { fullPage: true, ...SCREENSHOT_OPTS });
+  });
+
   test('제보 폼', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
     await page.goto('/cinemas/1/report');

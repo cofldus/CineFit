@@ -36,6 +36,8 @@ const PAGES = [
   { name: '추천 조건 입력', path: '/recommend/1' },
   { name: '상영관 상세', path: '/cinemas/1' },
   { name: '검색', path: '/search?q=CGV' },
+  { name: '알파 초대 코드', path: '/alpha/invite' },
+  { name: '알파 참여 동의', path: '/alpha/consent' },
   { name: '출처·신뢰도 안내', path: '/sources' },
   { name: '제보 폼', path: '/cinemas/1/report' },
   { name: '관리자 로그인', path: '/admin/login' },

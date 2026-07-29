@@ -78,3 +78,24 @@ npx playwright test e2e/flow.spec.ts e2e/admin-flow.spec.ts e2e/report-flow.spec
 npx playwright test e2e/accessibility.spec.ts                                        # 접근성(로컬 OS에서도 유효)
 # 시각 회귀는 위 §2의 도커 절차로만 검증한다(로컬 OS 실행은 무의미)
 ```
+
+## 6. CI의 `e2e` job은 반드시 §2와 동일한 컨테이너 안에서 실행한다
+
+**2026-07-28 발견·수정**: `e2e` job이 처음 도입된 커밋(`4a5ac2d`)부터 실제 CI에서 계속
+실패하고 있었다(GitHub Actions API로 재검증해 확인 — 최소 9개 커밋에서 전부 실패,
+문서·이전 세션 보고에는 이 사실이 반영되지 않았었다). 원인은 `ubuntu-latest` 러너에
+`actions/setup-node` + `npx playwright install --with-deps chromium`만 설치했을 뿐,
+§2의 베이스라인을 만든 `mcr.microsoft.com/playwright:vX.Y.Z-noble` **컨테이너 자체
+안에서 실행하지 않았기 때문**이다 — 두 환경의 폰트 구성이 달라 텍스트 줄바꿈·페이지
+높이 자체가 달라졌다(픽셀 노이즈 수준이 아니라 "Expected 1464px, received 844px"처럼
+이미지 크기 자체가 달랐다). 로컬 재현: `node:24-bookworm` + 수동 설치 조합에서도 동일하게
+11개 시각 회귀 테스트가 구조적으로 실패함을 확인했다.
+
+**수정**: `.github/workflows/ci.yml`의 `e2e` job에 `container: mcr.microsoft.com/playwright:v1.62.0-noble`을
+추가해 §2와 완전히 동일한 이미지 안에서 돌게 했다(`actions/setup-node`·수동 브라우저 설치
+단계 제거 — 컨테이너에 이미 Node·Chromium이 들어있다). 이제 "로컬에서 이 컨테이너로 만든
+베이스라인"과 "CI가 검증하는 환경"이 이미지 레벨에서 동일하다.
+
+**교훈**: 문서에 "CI와 동일한 환경"이라고 적혀 있어도, 실제 CI 실행 결과(GitHub Actions
+API/UI)로 주기적으로 재검증하지 않으면 이런 괴리가 오래 발각되지 않는다 — 로컬 Docker
+실행이 여러 번 통과했다는 사실이 실제 CI 통과를 보장하지 않는다.

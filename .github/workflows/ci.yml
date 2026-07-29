@@ -39,18 +39,18 @@ jobs:
   e2e:
     name: Playwright E2E + visual regression (admin + user flow)
     runs-on: ubuntu-latest
+    # 반드시 베이스라인을 생성한 것과 완전히 동일한 이미지 안에서 실행한다 — 이전에는
+    # ubuntu-latest 러너에서 npx playwright install --with-deps만 했는데, 러너 기본 이미지의
+    # 폰트 세트가 이 컨테이너와 달라 텍스트 줄바꿈·페이지 높이가 달라지고 시각 회귀 테스트가
+    # 구조적으로(픽셀 노이즈가 아니라 이미지 크기 자체가) 계속 실패했다(2026-07-28, docs/TESTING.md §5).
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.0-noble
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
       - run: npm run build
-      # DB는 global-setup이 test-results/e2e.db로 격리 생성. e2e/visual.spec.ts는 CI와 동일한
-      # 리눅스 컨테이너(mcr.microsoft.com/playwright)에서 만든 -linux.png 베이스라인과 비교한다
-      # (docs/TESTING.md — 로컬 OS에서 생성한 스크린샷은 폰트 렌더링 차이로 여기서 항상 실패한다).
+      # DB는 global-setup이 test-results/e2e.db로 격리 생성. e2e/visual.spec.ts는 이 컨테이너에서
+      # 만든 -linux.png 베이스라인과 비교한다(docs/TESTING.md).
       - run: npx playwright test
       - uses: actions/upload-artifact@v4
         if: failure()

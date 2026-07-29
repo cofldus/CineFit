@@ -105,6 +105,41 @@ KOFIC 개방 문의·제휴 병행. 결과: 커버리지가 관리자 처리량�
 **ADR-5. 추천 엔진과 수익 시스템 분리** — 상태: 채택.
 결정: recommender는 광고·제휴 데이터에 접근 불가(패키지 경계), 제휴 표시는 프레젠테이션 레이어에서만.
 
+**ADR-6. 배포: Vercel(앱) + Supabase(운영 PostgreSQL 호스팅)** — 상태: 채택(2026-07-29, 8차 마일스톤).
+
+맥락: 7차 마일스톤에서 코드 인프라는 다 갖췄지만 실제 배포는 하지 않았다(`docs/ALPHA-PLAN.md`).
+비공개 알파를 시작하려면 실제 HTTPS 배포 + 영속 PostgreSQL이 필요하다. 후보: Vercel+Supabase,
+Vercel+Neon, Railway(앱+DB), Render(앱+DB).
+
+**결정: Vercel(Next.js 앱) + Supabase(PostgreSQL 호스팅만, BaaS 클라이언트는 쓰지 않음)**.
+
+- Next.js 호환성: Vercel은 Next.js 벤더 — 별도 설정 없이 SSR·이미지 최적화·롤백·HTTPS·환경변수
+  대시보드가 즉시 동작한다.
+- **주의**: 이 결정은 ADR 이전의 "Supabase/Firebase는 이력 모델·복잡 쿼리 제약으로 코어 DB로는
+  배제" 판단(§1)과 충돌하지 않는다 — 그 판단은 Supabase의 **BaaS 클라이언트(PostgREST/RLS)를
+  코어 데이터 접근 계층으로 쓰지 않는다**는 뜻이었고, 이번 결정은 Supabase를 **순수 관리형
+  PostgreSQL 호스팅**으로만 쓴다(우리 코드는 지금처럼 `pg` 패키지로 표준 연결 문자열에 직접
+  접속 — `src/data/client/postgresClient.ts`는 이미 이 방식이며 변경하지 않는다).
+- 연결 풀링: Supabase가 앱 런타임용 pooled 연결(PgBouncer)과 migration용 direct 연결을
+  둘 다 기본 제공한다 — `.env.example`의 `DATABASE_URL`(pooled)/`DATABASE_DIRECT_URL`(direct)
+  구분이 이미 이 조합을 전제로 설계돼 있었다(우연이 아니라 원래 계획).
+- 리전: Supabase는 서울(ap-northeast-2) 리전을 제공한다 — 국내 서비스에 적합.
+- migration 실행: 기존 `db/migrate.mjs`가 `DATABASE_DIRECT_URL` 우선 사용을 이미 지원한다.
+- HTTPS·환경변수·배포 롤백: Vercel 대시보드에서 기본 제공.
+- cron: 유지보수 CLI(`maintenance:daily`/`:links`)는 그대로 Node 스크립트로 두고, Vercel Cron이
+  호출할 얇은 관리자 전용 API 라우트(`/api/admin/cron/*`)로 감싼다(Railway/Render의 자체 cron보다
+  Next.js 앱과 배포 단위가 같아 관리가 단순하다).
+- 비용: Vercel Pro(상업적 사용에 적합, Hobby 플랜은 ToS상 비상업 용도 전제) + Supabase Pro(상시
+  가동·자동 백업, 무료 티어는 일정 시간 미사용 시 일시정지돼 알파 운영에 부적합) — 문서 08 §6의
+  기존 비용 추정과 같은 범주.
+- 대안 기각 사유: Neon은 아시아 리전 지원이 상대적으로 제한적(서울 리전 없음, 도쿄만 최근 추가).
+  Railway/Render는 자체 cron·롤백은 되지만 Next.js 특화 최적화(이미지 최적화, ISR 등)가 Vercel만큼
+  성숙하지 않았고, 앱+DB를 한 플랫폼에 두는 것이 이번 규모(알파, 소수 사용자)에 필수는 아니다.
+
+**사람이 직접 해야 하는 일** (계정 생성·결제 정보 입력은 자동화하지 않는다): Vercel/Supabase
+계정 생성, 프로젝트 생성, 결제 플랜 선택, 연결 문자열 발급 후 `.env`/Vercel 환경변수에 설정 —
+정확한 순서는 `docs/DEPLOYMENT.md`에 체크리스트로 정리한다.
+
 ## 6. 비용 추정(월, MVP)
 
 Vercel Pro $20 + 컨테이너 $20–40 + Neon/RDS $19–50 + Upstash $10 + Sentry $0–26 + 지도 API(무료 쿼터 내)

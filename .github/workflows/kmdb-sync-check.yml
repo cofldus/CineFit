@@ -1,0 +1,27 @@
+# KMDb 실호출 점검 — 수동 실행 전용 (기본 CI 게이트 아님). kobis-sync-check.yml과 동일한
+# 패턴 — 저장소 Secrets에 KMDB_API_KEY가 설정된 경우에만 의미 있게 동작한다.
+name: KMDb sync check (manual)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run db:seed
+      - name: KMDb identifier linkage dry-run
+        env:
+          KMDB_API_KEY: ${{ secrets.KMDB_API_KEY }}
+        run: |
+          if [ -z "$KMDB_API_KEY" ]; then
+            echo "::warning::KMDB_API_KEY secret 미설정 — 실호출 점검을 건너뜁니다."
+            exit 0
+          fi
+          npm run sync:movie-identifiers -- --dry-run

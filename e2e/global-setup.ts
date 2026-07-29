@@ -14,4 +14,5 @@ export default function globalSetup() {
   execSync('node db/seed-seat-zones.mjs', { env, stdio: 'inherit' });
   execSync('node db/seed-aliases.mjs', { env, stdio: 'inherit' });
   execSync('node db/seed-feature-flags.mjs', { env, stdio: 'inherit' });
+  execSync('node db/seed-identifier-candidates.mjs', { env, stdio: 'inherit' });
 }

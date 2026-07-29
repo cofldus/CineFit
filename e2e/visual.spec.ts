@@ -150,4 +150,15 @@ test.describe('시각 회귀', () => {
     await expect(page.getByRole('heading', { name: '기능 플래그' })).toBeVisible();
     await expect(page).toHaveScreenshot('admin-feature-flags.png', { fullPage: true, ...SCREENSHOT_OPTS });
   });
+
+  test('관리자 KMDb 연결 검토', async ({ page }) => {
+    await page.setViewportSize(VIEWPORTS.desktop);
+    await page.goto('/admin/login');
+    await page.getByLabel('관리자 비밀번호').fill('e2e-admin-pw');
+    await page.getByRole('button', { name: '로그인' }).click();
+    await expect(page.getByRole('heading', { name: '관리자 대시보드' })).toBeVisible();
+    await page.goto('/admin/data-linkage');
+    await expect(page.getByRole('heading', { name: 'KOBIS↔KMDb 식별자 연결 검토' })).toBeVisible();
+    await expect(page).toHaveScreenshot('admin-data-linkage.png', { fullPage: true, ...SCREENSHOT_OPTS });
+  });
 });

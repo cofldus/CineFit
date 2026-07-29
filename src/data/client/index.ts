@@ -4,6 +4,7 @@ import path from 'node:path';
 import { createPostgresClient } from './postgresClient.ts';
 import { createSqliteClient } from './sqliteClient.ts';
 import type { DbClient, DbProvider } from './types.ts';
+import { logger } from '../../lib/logger.ts';
 
 export { DbNotSeededError } from './sqliteClient.ts';
 export type { DbClient, DbProvider } from './types.ts';
@@ -68,10 +69,10 @@ if (!gg.__cinefitShutdownRegistered) {
       process.exit(0);
       return;
     }
-    console.log(`[cinefit] ${signal} 수신 — DB 커넥션 정리 후 종료`);
+    logger.info('shutdown_signal_received', { signal });
     g.__cinefitClient
       .close()
-      .catch((e) => console.error('[cinefit] DB 종료 중 오류:', e))
+      .catch((e) => logger.error('shutdown_db_close_failed', e, { signal }))
       .finally(() => process.exit(0));
   };
   process.on('SIGTERM', () => shutdown('SIGTERM'));

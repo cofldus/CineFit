@@ -3,6 +3,7 @@ import { createShowtime, listShowtimes } from '../../../../src/data/adminShowtim
 import { DbNotSeededError } from '../../../../src/data/db';
 import { isAdminRequest } from '../../../../src/lib/adminAuth';
 import { parseAdminShowtimeInput } from '../../../../src/lib/adminValidation';
+import { logger } from '../../../../src/lib/logger';
 
 const unauthorized = () =>
   NextResponse.json({ error: '관리자 인증이 필요합니다.' }, { status: 401 });
@@ -23,7 +24,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ showtimes: rows });
   } catch (e) {
     if (e instanceof DbNotSeededError) return NextResponse.json({ error: e.message }, { status: 503 });
-    console.error('관리자 회차 목록 실패:', e);
+    logger.error('admin_showtimes_list_failed', e);
     return NextResponse.json({ error: '회차 목록 조회 중 오류가 발생했습니다.' }, { status: 500 });
   }
 }
@@ -54,7 +55,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, id: result.id, warnings: result.warnings }, { status: 201 });
   } catch (e) {
     if (e instanceof DbNotSeededError) return NextResponse.json({ error: e.message }, { status: 503 });
-    console.error('회차 생성 실패:', e);
+    logger.error('admin_showtime_create_failed', e);
     return NextResponse.json({ error: '회차 저장 중 오류가 발생했습니다.' }, { status: 500 });
   }
 }

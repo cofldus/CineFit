@@ -193,4 +193,15 @@ test.describe('시각 회귀', () => {
     await expect(page.getByRole('heading', { name: '개인정보 삭제 요청' })).toBeVisible();
     await expect(page).toHaveScreenshot('admin-privacy-requests.png', { fullPage: true, ...SCREENSHOT_OPTS });
   });
+
+  test('관리자 알파 운영 대시보드', async ({ page }) => {
+    await page.setViewportSize(VIEWPORTS.desktop);
+    await page.goto('/admin/login');
+    await page.getByLabel('관리자 비밀번호').fill('e2e-admin-pw');
+    await page.getByRole('button', { name: '로그인' }).click();
+    await expect(page.getByRole('heading', { name: '관리자 대시보드' })).toBeVisible();
+    await page.goto('/admin/alpha-ops');
+    await expect(page.getByRole('heading', { name: '알파 운영 대시보드' })).toBeVisible();
+    await expect(page).toHaveScreenshot('admin-alpha-ops.png', { fullPage: true, ...SCREENSHOT_OPTS });
+  });
 });

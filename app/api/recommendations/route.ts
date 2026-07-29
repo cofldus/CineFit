@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { DbNotSeededError } from '../../../src/data/db';
 import { getRecommendations } from '../../../src/data/recommendationService';
+import { logger } from '../../../src/lib/logger';
 import { parseRecommendationInput } from '../../../src/lib/validation';
 
 export async function POST(req: Request) {
@@ -32,7 +33,7 @@ export async function POST(req: Request) {
         { status: 503 },
       );
     }
-    console.error('추천 계산 실패:', e); // 내부 오류는 로그로만 — 화면 노출 금지
+    logger.error('recommendation_compute_failed', e); // 내부 오류는 로그로만 — 화면 노출 금지
     return NextResponse.json(
       { error: '추천 계산 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.' },
       { status: 500 },

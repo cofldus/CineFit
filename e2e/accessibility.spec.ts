@@ -79,6 +79,15 @@ test.describe('접근성 자동 검사 (axe)', () => {
         await page.goto('/admin/privacy-requests');
         await assertNoViolations(page);
       });
+
+      test('관리자 알파 운영 대시보드', async ({ page }) => {
+        await page.goto('/admin/login');
+        await page.getByLabel('관리자 비밀번호').fill('e2e-admin-pw');
+        await page.getByRole('button', { name: '로그인' }).click();
+        await expect(page.getByRole('heading', { name: '관리자 대시보드' })).toBeVisible();
+        await page.goto('/admin/alpha-ops');
+        await assertNoViolations(page);
+      });
     });
   }
 });

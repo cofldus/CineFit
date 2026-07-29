@@ -53,7 +53,11 @@ analytics_events(id, session_id → analytics_sessions, event_name, properties J
 
 ## 현재 한계
 
-- 이벤트를 집계·시각화하는 전용 대시보드는 없다. 지금은 `/admin/quality`가 `recommendation_runs`·
-  `recommendation_feedback`에서 파생한 지표(추천 없음 비율, 저신뢰 비율, 실패 원인 분류)만
-  보여준다 — 원시 이벤트 로그를 직접 조회하려면 SQL을 써야 한다.
-- 보존 기간·삭제 정책은 아직 강제되지 않는다(`docs/DATA-RETENTION.md` 참고).
+- ~~이벤트를 집계·시각화하는 전용 대시보드는 없다~~ → **2026-07-29 구현 완료**:
+  `/admin/alpha-ops`가 초대·동의 현황과 사용 퍼널(앱 열림 → 영화 선택 → 추천 시작 → 추천
+  완료 → 피드백 제출)을 원시 건수 + 백분율로 보여준다(`docs/OPERATIONS.md` "관측성·알파
+  운영 대시보드"). `/admin/quality`는 여전히 `recommendation_runs`·`recommendation_feedback`
+  파생 지표(추천 없음 비율, 저신뢰 비율, 실패 원인 분류)만 다루는 별개 화면이다. 개별 이벤트
+  속성까지 파고드는 세밀한 조회는 아직 SQL이 필요하다.
+- 보존 기간 자동 정리·삭제 요청은 구현됐다(`docs/DATA-DELETION.md`) — 다만 확정된 보존
+  일수 자체는 아직 법률 검토 전 잠정값이다(`docs/DATA-RETENTION.md`).

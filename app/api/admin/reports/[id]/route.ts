@@ -4,6 +4,7 @@ import { reportService } from '../../../../../src/data/reportService';
 import { getAppClock } from '../../../../../src/lib/clock';
 import { isAdminRequest } from '../../../../../src/lib/adminAuth';
 import { parseAdminReportAction } from '../../../../../src/lib/adminReportValidation';
+import { logger } from '../../../../../src/lib/logger';
 
 const unauthorized = () =>
   NextResponse.json({ error: '관리자 인증이 필요합니다.' }, { status: 401 });
@@ -70,7 +71,7 @@ export async function PATCH(req: Request, { params }: Params) {
     if (!result.ok) return NextResponse.json({ error: result.error }, { status: 422 });
     return NextResponse.json({ ok: true, id });
   } catch (e) {
-    console.error('제보 검토 처리 실패:', e);
+    logger.error('admin_report_review_failed', e, { reportId: id });
     return NextResponse.json({ error: '제보 처리 중 오류가 발생했습니다.' }, { status: 500 });
   }
 }

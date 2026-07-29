@@ -37,6 +37,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/admin/data-linkage">KMDb 연결 검토</Link>
           <Link href="/admin/invite-codes">초대 코드</Link>
           <Link href="/admin/privacy-requests">개인정보 요청</Link>
+          <Link href="/admin/alpha-ops">알파 운영</Link>
         </div>
       </nav>
       {children}

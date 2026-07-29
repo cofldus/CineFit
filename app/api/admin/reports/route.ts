@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { reportService } from '../../../../src/data/reportService';
 import { isAdminRequest } from '../../../../src/lib/adminAuth';
+import { logger } from '../../../../src/lib/logger';
 
 const unauthorized = () =>
   NextResponse.json({ error: '관리자 인증이 필요합니다.' }, { status: 401 });
@@ -27,7 +28,7 @@ export async function GET(req: Request) {
       }),
     });
   } catch (e) {
-    console.error('관리자 제보 목록 실패:', e);
+    logger.error('admin_reports_list_failed', e);
     return NextResponse.json({ error: '제보 목록 조회 중 오류가 발생했습니다.' }, { status: 500 });
   }
 }

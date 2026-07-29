@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { reportService } from '../../../src/data/reportService';
 import { getAppClock } from '../../../src/lib/clock';
+import { logger } from '../../../src/lib/logger';
 import { parsePublicReport } from '../../../src/lib/reportValidation';
 import { anonymousSessionHash } from '../../../src/lib/sessionHash';
 
@@ -40,7 +41,7 @@ export async function POST(req: Request) {
       { status: 201 },
     );
   } catch (e) {
-    console.error('제보 접수 실패:', e instanceof Error ? e.message : 'unknown'); // 본문·이메일 미기록
+    logger.error('report_create_failed', e); // 본문·이메일은 로그에 남기지 않는다 — logger.error는 message/stack만 남긴다
     return NextResponse.json({ error: '제보 접수 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.' }, { status: 500 });
   }
 }

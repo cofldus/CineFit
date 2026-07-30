@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { IconMenu } from './Icon';
 
@@ -10,10 +11,13 @@ const NAV_LINKS = [
   { href: '/sources', label: 'CineFit 정보' },
 ] as const;
 
-// 홈 전용 헤더 — 다른 화면은 기존 헤더(components/AppHeader.tsx)를 그대로 쓴다. 스크리닝
-// 룸 콘셉트의 다크 전경 위에 얹히므로 배경은 시네마 블랙을 유지한다(스크롤해도 sticky).
+// 사용자 화면 전체의 헤더(스크리닝 룸 콘셉트) — /admin만 제외한다(components/AppHeader.tsx가
+// 그쪽을 맡는다). 다크 전경 위에 얹히므로 배경은 시네마 블랙을 유지한다(스크롤해도 sticky).
 export function MarketingHeader() {
+  const pathname = usePathname() ?? '/';
   const [menuOpen, setMenuOpen] = useState(false);
+
+  if (pathname.startsWith('/admin')) return null;
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-cinema-black/90 backdrop-blur-md">

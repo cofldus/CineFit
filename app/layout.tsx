@@ -2,12 +2,14 @@ import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
 import { AppHeader } from '../components/AppHeader';
 import { AppOpenedTracker } from '../components/AppOpenedTracker';
+import { MarketingHeader } from '../components/MarketingHeader';
 import { MobileNav } from '../components/MobileNav';
 import { ServiceWorkerRegister } from '../components/ServiceWorkerRegister';
 import './globals.css';
 
-// 홈 전용 — Wanted Sans Variable(한글 글리프 포함, Pretendard 폴백). 다른 화면은 계속
-// 기존 --font-sans(Pretendard)를 쓴다(font-wanted 유틸리티를 실제로 쓰는 곳만 적용됨).
+// Wanted Sans Variable(한글 글리프 포함, Pretendard 폴백) — font-wanted 유틸리티를 실제로
+// 쓰는 헤딩류에만 적용된다. 본문 기본 폰트(--font-sans/Pretendard)는 그대로 둔다 — 폼·표가
+// 많은 기존 화면들의 줄바꿈·자간 가정을 흔들지 않기 위해 의도적으로 범위를 좁혔다.
 const wantedSans = localFont({
   src: '../node_modules/wanted-sans/fonts/variable/WantedSansVariable.ttf',
   variable: '--font-display',
@@ -23,7 +25,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#0E1116',
+  themeColor: '#0d0a09',
   width: 'device-width',
   initialScale: 1,
 };
@@ -36,6 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           본문으로 바로가기
         </a>
         <AppHeader />
+        <MarketingHeader />
         <div id="main-content">{children}</div>
         <MobileNav />
         <ServiceWorkerRegister />

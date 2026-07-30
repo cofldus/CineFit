@@ -1,20 +1,36 @@
 @import 'tailwindcss';
 
-/* CineFit 디자인 토큰 — docs/09-ux-ui.md §2 (다크 기본, 라이트 지원) */
+/* CineFit 디자인 토큰 — "The Screening Room" 사이트 전역 확장(2026-07-30).
+   기존에는 다크 기본 + 라이트 모드 지원(prefers-color-scheme)이었지만, 홈에서 이미 "실제
+   어두운 상영관에 있다"는 물리적 감각을 사이트 정체성으로 삼았고(app/globals.css 하단
+   --color-cinema-* 토큰 도입 당시 결정), 그 논리는 홈만이 아니라 추천 플로우 전체에 똑같이
+   적용된다 — 라이트 모드로 바뀐다고 실제 극장이 밝아지지 않는 것과 같은 이유다. 그래서
+   라이트 모드 오버라이드를 아예 없애고, 다크 팔레트를 유일한 테마로 고정한다. 값 자체는
+   home 전용으로 먼저 검증했던 --color-cinema-black/ink/red와 동일하게 맞춰 두 토큰 세트가
+   실제로는 하나의 팔레트를 가리키게 한다.
+   관리자 화면은 예외다 — 처음에는 이 토큰들을 그대로 물려받게 뒀다가, 관리자를 사용자
+   브랜드 경험과 구분한다는 원래 원칙(§12)에 맞지 않는다는 걸 뒤늦게 알아차려 되돌렸다.
+   .admin-scope 클래스(app/admin/layout.tsx, components/AppHeader.tsx)가 이 토큰들을
+   지역적으로 원래 블루 팔레트로 되돌린다 — 아래 :root 블록 바로 다음에 있다. */
 :root {
-  --bg: #0e1116;
-  --surface: #171c24;
-  --surface-raised: #1d232e;
-  --border: #2a3240;
-  --text: #e8ecf2;
-  --text-sub: #9aa5b5;
-  --primary: #4c8dff;
-  /* 흰 글자를 얹는 채워진 배경 전용(버튼·배지) — 링크·테두리용 --primary보다 어둡게 고정해
-     WCAG AA 4.5:1을 항상 만족시킨다(axe-core color-contrast 자동 검사로 확인, docs/ACCESSIBILITY.md).
-     라이트/다크 모드에서 값이 같아도 되는 이유: 흰 글자 대비는 배경색 자체에만 좌우된다. */
-  --primary-strong: #2f6fe0;
-  --primary-strong-hover: #3f7ce8;
-  --accent: #8b7cf6;
+  --bg: #0d0a09;
+  --surface: #181310;
+  --surface-raised: #221a16;
+  --border: #332822;
+  --text: #f2ece4;
+  /* 불투명도 대신 고정 hex — 이 값은 --bg·--surface 둘 다에서 6:1 이상 나오도록 미리 계산해
+     고정했다(Design Lab 라운드에서 opacity 값이 배경마다 대비가 달라져 여러 번 기준 미달을
+     냈던 것과 같은 실수를 피하기 위함). */
+  --text-sub: #a89a8a;
+  /* 링크·테두리용 — 작은 글자로 배경 위에 직접 써도 5:1 이상 나오도록 계산한 밝은 레드.
+     시네마 레드(--primary-strong)를 그대로 링크색으로 쓰면 3.6:1로 AA 미달이라 별도로
+     계산했다(직접 검증). */
+  --primary: #e8425c;
+  /* 흰 글자를 얹는 채워진 배경 전용(버튼·배지) — WCAG AA 4.5:1을 만족하도록 고정
+     (axe-core color-contrast 자동 검사로 확인, docs/ACCESSIBILITY.md). */
+  --primary-strong: #c81e3d;
+  --primary-strong-hover: #d4304e;
+  --accent: #d4a24e;
   --trust-high: #3dbe7b;
   --trust-mid: #e0a83c;
   --trust-low: #e05c5c;
@@ -25,19 +41,40 @@
   --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 1px rgba(0, 0, 0, 0.2);
   --elevation-2: 0 8px 20px rgba(0, 0, 0, 0.35);
   --elevation-3: 0 16px 40px rgba(0, 0, 0, 0.45);
+  --elevation-4: 0 0 0 1px var(--primary), 0 8px 24px rgba(200, 30, 61, 0.25);
+}
+
+/* 관리자 전용 — 사이트 전역이 시네마 레드로 바뀌기 전, 원래 쓰던 블루 팔레트를 그대로
+   복원한다(§12 "사용자 화면과 관리자 화면은 구분"). 라이트 모드 지원도 관리자에서만
+   유지한다 — 내부 운영 도구라 실제 극장 감각을 강제할 이유가 없다. */
+.admin-scope {
+  --bg: #0e1116;
+  --surface: #171c24;
+  --surface-raised: #1d232e;
+  --border: #2a3240;
+  --text: #e8ecf2;
+  --text-sub: #9aa5b5;
+  --primary: #4c8dff;
+  --primary-strong: #2f6fe0;
+  --primary-strong-hover: #3f7ce8;
+  --accent: #8b7cf6;
+  --trust-high: #3dbe7b;
+  --trust-mid: #e0a83c;
+  --trust-low: #e05c5c;
+  --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 1px rgba(0, 0, 0, 0.2);
+  --elevation-2: 0 8px 20px rgba(0, 0, 0, 0.35);
+  --elevation-3: 0 16px 40px rgba(0, 0, 0, 0.45);
   --elevation-4: 0 0 0 1px var(--primary), 0 8px 24px rgba(76, 141, 255, 0.25);
 }
 
 @media (prefers-color-scheme: light) {
-  :root {
+  .admin-scope {
     --bg: #f7f8fa;
     --surface: #ffffff;
     --surface-raised: #ffffff;
     --border: #e2e6ec;
     --text: #1a202c;
     --text-sub: #5a6474;
-    /* 라이트 배경(흰색 계열)에서 텍스트·링크로 쓰일 때만 어둡게 — 다크 모드는 배경이 이미
-       어두워 원래 --primary(#4c8dff)로도 충분한 대비가 나온다(axe-core로 확인). */
     --primary: #2a68d9;
     --accent: #6a4fe0;
     --trust-mid: #8f5c0c;

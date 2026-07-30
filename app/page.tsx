@@ -1,5 +1,4 @@
 import { HomeClosing } from '../components/HomeClosing';
-import { MarketingHeader } from '../components/MarketingHeader';
 import { ScreeningHero } from '../components/ScreeningHero';
 import { ScreeningRoomGrid } from '../components/ScreeningRoomGrid';
 import { DbNotSeededError } from '../src/data/db';
@@ -9,9 +8,11 @@ import type { MovieWithSpecs } from '../src/domain/recommendation/types';
 export const dynamic = 'force-dynamic';
 
 // "The Screening Room" — Design Lab에서 검증한 5개 시안 중 선택된 콘셉트를 실데이터로
-// 구현했다(design-lab/art-directions 브랜치의 /design-lab/e). 온보딩 3문항 폼은 홈에서
-// 뺐다 — localStorage 읽기/쓰기 유틸과 recommend 폼 기본값 연동 로직은 그대로 남아 있지만,
-// 지금은 이 폼을 채울 진입점이 홈에 없다(추후 recommend 플로우 초입으로 옮기는 별도 작업).
+// 구현했다(design-lab/art-directions 브랜치의 /design-lab/e). MarketingHeader는 이제
+// 사용자 화면 전체의 공통 헤더라 app/layout.tsx에서 렌더한다(여기서 다시 렌더하지 않음).
+// 온보딩 3문항 폼은 홈에서 뺐다 — localStorage 읽기/쓰기 유틸과 recommend 폼 기본값 연동
+// 로직은 그대로 남아 있지만, 지금은 이 폼을 채울 진입점이 홈에 없다(추후 recommend 플로우
+// 초입으로 옮기는 별도 작업).
 export default async function HomePage() {
   let movies: MovieWithSpecs[] = [];
   let dbMissing = false;
@@ -24,7 +25,6 @@ export default async function HomePage() {
 
   return (
     <main className="max-w-none p-0">
-      <MarketingHeader />
       <ScreeningHero />
       {dbMissing ? (
         <section className="bg-cinema-black px-5 py-16 sm:px-10">

@@ -12,36 +12,49 @@
    3) --accent(포맷 배지)가 --trust-mid(경고 앰버)와 색이 겹쳐서 "그냥 포맷 표시"와 "확인
       필요 경고"가 헷갈렸다 — accent를 차가운 스틸블루로 바꿔 앰버 계열과 완전히 분리했다.
    모든 값은 배경 위 직접 텍스트 기준 4.5:1 이상을 계산해서 확정했다(주석에 실측치 기록). */
+/* CineFit 디자인 토큰 (2) — "Deep Navy Black + Crimson + Icy Blue" 팔레트로 재조정
+   (2026-07-30, 2차 시각 개편). 이전 팔레트는 여전히 "정돈된 다크모드 관리자 도구" 수준으로
+   읽힌다는 피드백 — 순수 무채색 배경 대신 아주 짙은 네이비 톤(bg-deep과의 미세한 명도차)을
+   기본으로 쓰고, 표면을 3단계로 늘려 카드가 반복돼도 층이 구분되게 했다. 빨강은 --primary
+   한 톤만 남기고 CTA·현재 선택·대표 추천 배지에만 쓴다 — 일반 링크는 --primary(아이시 블루)로
+   옮겨서 토큰 자체가 "레드 남용"을 막는다(각 컴포넌트를 일일이 고치지 않아도 됨).
+   대비 검증: --primary-strong(#F04464 원안)은 흰 텍스트 위에서 3.64:1로 AA 미달이라
+   #D43A57로 살짝 낮춰 4.6:1을 확보했다(직접 계산) — 톤은 유지하되 대비만 보정. */
 :root {
-  --bg: #0a0a0c;
-  --surface: #18181b;
-  --surface-raised: #232328;
-  --border: #2c2c30;
-  --text: #f5f5f7;
-  --text-sub: #9b9ba3;
-  /* 텍스트 링크·보조 강조 전용 — --primary-strong과 같은 로즈/와인 색상 계열(H≈349°)이지만
-     작은 글자로 배경 위에 직접 써도 6.0:1이 나오도록 밝혔다(직접 계산). */
-  --primary: #db6177;
-  /* 페이지당 하나뿐인 주 CTA 버튼 전용 — "선명하지만 과도하지 않은" 시네마 레드. 흰 텍스트
-     기준 5.4:1(직접 계산) — 너무 어두워 칙칙해 보이지도, 네온처럼 튀지도 않는 지점을 찾았다. */
-  --primary-strong: #c62d49;
-  --primary-strong-hover: #cf3552;
-  /* 포맷 배지 전용(IMAX·Dolby Cinema 등) — 따뜻한 상태색(경고 앰버·성공 그린)과 확실히
-     구분되는 차가운 스틸블루로 바꿨다. 배경 위 텍스트 6.3:1(직접 계산). */
-  --accent: #6f8fb3;
-  --trust-high: #3dbe7b;
-  --trust-mid: #e0a83c;
+  --bg: #080a0f;
+  --bg-deep: #05070b;
+  --surface: #10141c;
+  --surface-raised: #151b25;
+  --surface-strong: #1b2330;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.15);
+  --text: #f5f7fa;
+  --text-sub: #aeb7c5;
+  --text-tertiary: #747f90;
+  /* 텍스트 링크·보조 강조·포맷 배지 전용 — 아이시 블루. 일반 링크에 빨강을 쓰지 않게
+     토큰 단계에서부터 분리했다(배경 위 텍스트 기준 대비 넉넉히 확보, 직접 계산 8:1대). */
+  --primary: #7ca7ff;
+  /* 페이지당 하나뿐인 주 CTA·현재 선택·대표 추천 표시 전용 크림슨. */
+  --primary-strong: #d43a57;
+  --primary-strong-hover: #c22f4b;
+  --primary-soft: rgba(240, 68, 100, 0.12);
+  --accent: #7ca7ff;
+  --trust-high: #45d6a6;
+  --trust-mid: #f3b84b;
   --trust-low: #e2683f;
   --radius: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 18px;
+  --radius-lg: 17px;
+  --radius-xl: 23px;
   /* elevation-1..4 = 기본 카드 / 떠 있는 컨트롤 / 모달 / 강조 결과 (docs/DESIGN-SYSTEM.md §그림자).
      그림자를 최소화하고(요청사항) 대신 --border 한 겹으로 켜켜이 쌓인 층을 구분한다 — 카드는
      테두리+배경차만으로 구분되고, elevation은 진짜 떠 있는 요소(모달·sticky bar)에만 쓴다. */
   --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.3);
   --elevation-2: 0 8px 20px rgba(0, 0, 0, 0.35);
   --elevation-3: 0 16px 40px rgba(0, 0, 0, 0.45);
-  --elevation-4: 0 0 0 1px var(--primary-strong), 0 8px 24px rgba(198, 45, 73, 0.25);
+  --elevation-4: 0 0 0 1px var(--primary-strong), 0 8px 24px rgba(212, 58, 87, 0.25);
+  /* 대표 추천 카드 전용 매우 약한 앰비언트 글로우 — 네온처럼 보이지 않도록 반경을 넓고
+     흐리게 잡았다. */
+  --glow-primary: 0 0 40px rgba(240, 68, 100, 0.08);
 }
 
 /* 관리자 전용 — 사이트 전역이 시네마 레드로 바뀌기 전, 원래 쓰던 블루 팔레트를 그대로
@@ -90,14 +103,19 @@
 /* 기존 CSS 커스텀 프로퍼티를 Tailwind 유틸리티(bg-bg, text-primary, rounded-card 등)로 노출 */
 @theme inline {
   --color-bg: var(--bg);
+  --color-bg-deep: var(--bg-deep);
   --color-surface: var(--surface);
   --color-surface-raised: var(--surface-raised);
+  --color-surface-strong: var(--surface-strong);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-text: var(--text);
   --color-text-sub: var(--text-sub);
+  --color-text-tertiary: var(--text-tertiary);
   --color-primary: var(--primary);
   --color-primary-strong: var(--primary-strong);
   --color-primary-strong-hover: var(--primary-strong-hover);
+  --color-primary-soft: var(--primary-soft);
   --color-accent: var(--accent);
   --color-trust-high: var(--trust-high);
   --color-trust-mid: var(--trust-mid);
@@ -109,6 +127,7 @@
   --shadow-float: var(--elevation-2);
   --shadow-modal: var(--elevation-3);
   --shadow-highlight: var(--elevation-4);
+  --shadow-glow-primary: var(--glow-primary);
   /* 컨텐츠 폭 — 읽기 중심 화면(content)과 비교·그리드가 필요한 화면(wide) 구분 (docs/DESIGN-SYSTEM.md §레이아웃) */
   --container-content: 40rem;
   --container-wide: 72rem;
@@ -416,6 +435,37 @@
     transform: translateY(0);
     outline: 3px solid #fff;
     outline-offset: 2px;
+  }
+}
+
+/* 페이지 진입 스태거 애니메이션 — 섹션이 순서대로 살짝 떠오르며 나타난다(제목 → 조건 요약 →
+   대표 추천 → 대안 추천 → 비교 영역 순). prefers-reduced-motion에서는 아래 미디어 쿼리가
+   모든 animation을 강제로 끄므로 별도 분기 없이 자동으로 대응된다. */
+@layer utilities {
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .enter-1 {
+    animation: fade-in-up 420ms ease-out both;
+  }
+  .enter-2 {
+    animation: fade-in-up 420ms ease-out 60ms both;
+  }
+  .enter-3 {
+    animation: fade-in-up 420ms ease-out 120ms both;
+  }
+  .enter-4 {
+    animation: fade-in-up 420ms ease-out 180ms both;
+  }
+  .enter-5 {
+    animation: fade-in-up 420ms ease-out 240ms both;
   }
 }
 

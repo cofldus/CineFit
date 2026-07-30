@@ -99,7 +99,7 @@ export function RecommendCard({
         </span>
       </div>
 
-      <div className="mb-3 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-text-sub">
+      <div className="mb-3 flex flex-wrap gap-x-4 gap-y-1.5 text-sm font-medium text-text-sub">
         <span className="inline-flex items-center gap-1.5">
           <IconTransit className="h-4 w-4" /> 이동 약 {scored.travelMinutes}분(추정)
         </span>

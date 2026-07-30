@@ -269,7 +269,7 @@ export default async function AuditoriumDetailPage({
                     {s.movieTitle}
                   </Link>
                   <FormatTag format={s.format} />
-                  <span className="text-text-sub">{s.priceAdult.toLocaleString('ko-KR')}원</span>
+                  <span className="font-medium text-text-sub">{s.priceAdult.toLocaleString('ko-KR')}원</span>
                   <ShowtimeStatusBadge kind={s.isSynthetic ? 'synthetic' : 'verified'} variant="compact" />
                   {s.bookingUrl && !s.isSynthetic ? (
                     <a

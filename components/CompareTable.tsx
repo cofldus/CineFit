@@ -29,7 +29,7 @@ export function CompareTable({ picks }: { picks: { label: PickLabel; scored: Sco
 
   return (
     <section aria-label="추천 상영관 비교">
-      <h2 className="text-lg font-bold text-text">한눈에 비교</h2>
+      <h2 className="font-wanted text-lg font-bold tracking-[-0.01em] text-text">한눈에 비교</h2>
 
       {/* 모바일: 속성 우선 카드형 — 좁은 화면에서 가로 스크롤 표보다 읽기 쉽다 */}
       <div className="mt-2 flex flex-col gap-2 sm:hidden">
@@ -38,8 +38,8 @@ export function CompareTable({ picks }: { picks: { label: PickLabel; scored: Sco
             <p className="m-0 text-xs font-semibold text-text-sub">{row.name}</p>
             <div className="mt-1.5 grid grid-cols-3 gap-2">
               {picks.map((p) => (
-                <div key={p.label} className="text-sm text-text">
-                  <span className="block text-[11px] text-text-sub">{p.label}</span>
+                <div key={p.label} className="text-sm font-medium text-text">
+                  <span className="block text-[11px] font-semibold text-text-sub">{p.label}</span>
                   {row.render(p.scored)}
                 </div>
               ))}
@@ -73,7 +73,7 @@ export function CompareTable({ picks }: { picks: { label: PickLabel; scored: Sco
                   {row.name}
                 </th>
                 {picks.map((p) => (
-                  <td key={p.label} className="border-b border-border p-3 align-top text-text">
+                  <td key={p.label} className="border-b border-border p-3 align-top font-medium text-text">
                     {row.render(p.scored)}
                   </td>
                 ))}

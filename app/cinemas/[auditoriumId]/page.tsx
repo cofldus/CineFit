@@ -6,6 +6,7 @@ import { IconEdit, IconNote, IconTransit, IconWrench } from '../../../components
 import { Notice } from '../../../components/Notice';
 import { ShowtimeStatusBadge } from '../../../components/StatusBadge';
 import { TrustBadge } from '../../../components/TrustBadge';
+import { INFO_STATUS_LABELS } from '../../../src/domain/recommendation/presets';
 import { cinemaRepository } from '../../../src/data/cinemaRepository';
 import { getAppClock } from '../../../src/lib/clock';
 
@@ -42,6 +43,17 @@ const MASKING_LABELS: Record<string, string> = {
   unknown: '마스킹 정보 없음',
 };
 
+// 상영관 브랜드(포맷)별 일반적인 관람 적합도 — 실제 사양 데이터를 새로 만들지 않고, 이미
+// 저장된 detail.brand(FormatId) 값 하나만으로 만들 수 있는 편집적 설명이다(도메인 상식
+// 수준의 문구이며 개별 상영관의 사실을 지어내지 않는다).
+const FORMAT_FIT: Record<string, string> = {
+  imax: '큰 화면비와 압도적 스케일이 중요한 영화(우주·자연·액션 스펙터클)에 잘 맞아요.',
+  dolby_cinema: '명암비와 공간감 있는 사운드가 중요한 영화(어두운 장면이 많은 작품 포함)에 잘 맞아요.',
+  '4dx': '모션·효과 연출이 살아나는 액션·어드벤처 영화에 잘 맞아요.',
+  superplex: '일반관보다 큰 화면으로 편하게 보고 싶을 때 잘 맞아요.',
+  standard: '가격 부담 없이 무난하게 관람하고 싶을 때 잘 맞아요.',
+};
+
 function SpecRow({ label, value }: { label: string; value: string | null }) {
   if (!value) return null;
   return (
@@ -68,6 +80,7 @@ export default async function AuditoriumDetailPage({
 
   return (
     <main className="mx-auto max-w-wide px-4 pb-24 pt-6">
+      {/* 1. 상영관 이름·위치·핵심 특징 */}
       <p className="m-0 text-sm text-text-sub">{detail.location.chain}</p>
       <h1 className="font-wanted m-0 text-2xl font-bold tracking-[-0.01em] text-text">
         {detail.location.name} {detail.no}
@@ -100,150 +113,57 @@ export default async function AuditoriumDetailPage({
         </Link>
       </p>
 
-      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* 현재 사양 */}
-        <section aria-label="현재 사양">
-          <h2 className="text-lg font-bold text-text">현재 사양</h2>
-          {current ? (
-            <div className="mt-3 rounded-card-lg border border-border bg-surface p-4 shadow-card">
-              <div className="flex flex-col gap-1.5">
-                <SpecRow
-                  label="영사기"
-                  value={[
-                    LIGHT_LABELS[current.projector?.lightSource ?? ''] ?? current.projector?.lightSource,
-                    current.projector?.resolution?.toUpperCase(),
-                    current.projector?.dual ? '듀얼' : null,
-                    current.projector?.imaxGrade ? `IMAX ${current.projector.imaxGrade}` : null,
-                    current.projector?.dolbyVision ? '돌비 비전' : null,
-                  ]
-                    .filter(Boolean)
-                    .join(' · ') || null}
-                />
-                <SpecRow
-                  label="스크린"
-                  value={[
-                    current.screen?.widthM ? `폭 ${current.screen.widthM}m` : null,
-                    current.screen?.heightM ? `높이 ${current.screen.heightM}m` : null,
-                    current.screen?.aspect ? `비율 ${current.screen.aspect}:1` : null,
-                  ]
-                    .filter(Boolean)
-                    .join(' · ') || '실측 정보 없음'}
-                />
-                <SpecRow label="사운드" value={current.sound?.format ?? null} />
-                <SpecRow
-                  label="표시 가능한 최대 확장비"
-                  value={current.supportedAr ? `${current.supportedAr}:1` : '확인 안 됨'}
-                />
-                <SpecRow label="마스킹" value={MASKING_LABELS[current.masking ?? 'unknown']} />
-              </div>
-              {current.renewalEvent ? (
-                <p className="mb-0 mt-2.5 flex items-start gap-1.5 text-sm text-text-sub">
-                  <IconWrench className="mt-0.5 h-4 w-4 shrink-0" /> {current.renewalEvent}
-                </p>
-              ) : null}
-              {current.notes ? (
-                <p className="mb-0 mt-1 flex items-start gap-1.5 text-sm text-text-sub">
-                  <IconNote className="mt-0.5 h-4 w-4 shrink-0" /> {current.notes}
-                </p>
-              ) : null}
-              <p className="mb-0 mt-2.5 flex flex-wrap items-center gap-1.5 text-sm text-text-sub">
-                <TrustBadge status={current.infoStatus} observedAt={current.observedAt} />
-                {current.sourceUrl ? (
-                  <a className="text-primary" href={current.sourceUrl} target="_blank" rel="noopener noreferrer">
-                    {current.sourceName ?? '출처'}
-                  </a>
-                ) : (
-                  <span>{current.sourceName ?? '출처 없음'}</span>
-                )}
-              </p>
-            </div>
-          ) : (
-            <p className="mt-2 text-sm text-text-sub">등록된 사양이 없어요.</p>
-          )}
-        </section>
+      {/* 2. 이 상영관이 어떤 관람 목적에 적합한지 */}
+      {FORMAT_FIT[detail.brand] ? (
+        <p className="mt-4 max-w-content text-[15px] leading-relaxed text-text">{FORMAT_FIT[detail.brand]}</p>
+      ) : null}
 
-        {/* 좌석 존 */}
-        <section aria-label="좌석 구역">
-          <h2 className="text-lg font-bold text-text">목적별 좌석 구역</h2>
-          <p className="mt-1 text-sm text-text-sub">
-            하나의 “명당”이 아니라 목적별 구역으로만 안내해요. 잔여 좌석은 반영되지 않아요.
-          </p>
-          {detail.seatZones.length === 0 ? (
-            <p className="mt-2 text-sm text-text-sub">아직 이 관의 좌석 구역 제보가 없어요.</p>
-          ) : (
-            <ul className="m-0 mt-3 flex list-none flex-col gap-2.5 p-0">
-              {detail.seatZones.map((z, i) => (
-                <li key={i} className="rounded-card-lg border border-border bg-surface p-4 shadow-card">
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    {z.purposes.map((p) => (
-                      <span
-                        key={p}
-                        className="inline-flex items-center rounded-full border border-accent/40 px-2.5 py-0.5 text-xs font-medium text-accent"
-                      >
-                        {PURPOSE_LABELS[p] ?? p}
-                      </span>
-                    ))}
-                    <span className="font-semibold text-text">
-                      {[z.rowRange, z.colRange].filter(Boolean).join(' ')}
+      {/* 3. 목적별 추천 좌석 구역 */}
+      <section aria-label="목적별 좌석 구역" className="mt-6">
+        <h2 className="text-lg font-bold text-text">목적별 좌석 구역</h2>
+        <p className="mt-1 text-sm text-text-sub">
+          하나의 “명당”이 아니라 목적별 구역으로만 안내해요. 잔여 좌석은 반영되지 않아요.
+        </p>
+        {detail.seatZones.length === 0 ? (
+          <p className="mt-2 text-sm text-text-sub">아직 이 관의 좌석 구역 제보가 없어요.</p>
+        ) : (
+          <ul className="m-0 mt-3 grid grid-cols-1 gap-2.5 p-0 sm:grid-cols-2 lg:grid-cols-3">
+            {detail.seatZones.map((z, i) => (
+              <li key={i} className="rounded-card-lg border border-border bg-surface p-4">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {z.purposes.map((p) => (
+                    <span
+                      key={p}
+                      className="inline-flex items-center rounded-full border border-accent/40 px-2.5 py-0.5 text-xs font-medium text-accent"
+                    >
+                      {PURPOSE_LABELS[p] ?? p}
                     </span>
-                  </div>
-                  {z.rationale ? <p className="mb-0 mt-1.5 text-sm text-text-sub">{z.rationale}</p> : null}
-                  <p className="mb-0 mt-1.5 flex flex-wrap items-center gap-1.5 text-sm text-text-sub">
-                    <TrustBadge status={z.infoStatus} observedAt={z.observedAt} />
-                    <span>{z.sourceName ?? '출처 없음'}</span>
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
-          <p className="mt-2.5">
-            <Link
-              href={`/cinemas/${detail.id}/report`}
-              className="inline-flex items-center gap-1 text-sm font-medium text-primary"
-            >
-              <IconEdit className="h-3.5 w-3.5" /> 좌석 구역 정보가 다르다면 제보해 주세요
-            </Link>
-          </p>
-        </section>
-      </div>
-
-      {/* 사양 이력 */}
-      {history.length > 0 ? (
-        <section aria-label="사양 변경 이력" className="mt-6">
-          <h2 className="text-lg font-bold text-text">사양 변경 이력</h2>
-          <ul className="m-0 mt-3 flex list-none flex-col gap-2 p-0 text-sm">
-            {history.map((h, i) => (
-              <li key={i} className="rounded-card border border-border bg-surface px-4 py-3">
-                <span className="text-text-sub">
-                  {h.validFrom} ~ {h.validTo ?? '현재'}
-                </span>
-                {h.renewalEvent ? <span className="ml-2 text-text">{h.renewalEvent}</span> : null}
-                <TrustBadge status={h.infoStatus} observedAt={h.observedAt} />
+                  ))}
+                </div>
+                <p className="m-0 mt-2 text-sm font-semibold text-text">
+                  추천 구역: {[z.rowRange, z.colRange].filter(Boolean).join(' ') || '전체'}
+                </p>
+                {z.rationale ? <p className="m-0 mt-1 text-sm text-text-sub">이유: {z.rationale}</p> : null}
+                <p className="m-0 mt-2 flex flex-wrap items-center gap-1.5 text-xs text-text-sub">
+                  확신도: {INFO_STATUS_LABELS[z.infoStatus] ?? z.infoStatus}
+                  <TrustBadge status={z.infoStatus} observedAt={z.observedAt} />
+                </p>
+                <p className="m-0 mt-1 text-xs text-text-sub">{z.sourceName ?? '출처 없음'}</p>
               </li>
             ))}
           </ul>
-        </section>
-      ) : null}
+        )}
+        <p className="mt-2.5">
+          <Link
+            href={`/cinemas/${detail.id}/report`}
+            className="inline-flex items-center gap-1 text-sm font-medium text-primary"
+          >
+            <IconEdit className="h-3.5 w-3.5" /> 좌석 구역 정보가 다르다면 제보해 주세요
+          </Link>
+        </p>
+      </section>
 
-      {/* 근거 기록 */}
-      {detail.observations.length > 0 ? (
-        <section aria-label="근거 기록" className="mt-6">
-          <h2 className="text-lg font-bold text-text">근거 기록</h2>
-          <p className="mt-1 text-sm text-text-sub">이 관의 사양 판단에 쓰인 관측 기록이에요.</p>
-          <ul className="m-0 mt-3 flex list-none flex-col gap-1.5 p-0 text-sm">
-            {detail.observations.map((o, i) => (
-              <li key={i} className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                <span className="text-text-sub">{o.field}</span>
-                <span className="font-medium text-text">{String(o.value)}</span>
-                <TrustBadge status={o.infoStatus} observedAt={o.observedAt} />
-                <span className="text-text-sub">{o.sourceName ?? '출처 없음'}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
-      {/* 예정 회차 */}
+      {/* 4~5. 예정 회차 + 예매/선택 CTA */}
       <section aria-label="예정 회차" className="mt-6">
         <h2 className="text-lg font-bold text-text">예정 회차</h2>
         {detail.upcomingShowtimes.length === 0 ? (
@@ -262,31 +182,134 @@ export default async function AuditoriumDetailPage({
               {detail.upcomingShowtimes.map((s) => (
                 <li
                   key={s.id}
-                  className="flex flex-wrap items-center gap-x-2.5 gap-y-1 rounded-card border border-border bg-surface px-4 py-3"
+                  className="flex flex-col gap-1.5 rounded-card border border-border bg-surface px-4 py-3"
                 >
-                  <span className="font-semibold text-text">{dtFmt.format(new Date(s.startsAt))}</span>
-                  <Link className="text-primary" href={`/recommend/${s.movieId}`}>
+                  <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                    <span className="font-semibold text-text">{dtFmt.format(new Date(s.startsAt))}</span>
+                    <FormatTag format={s.format} />
+                    <ShowtimeStatusBadge kind={s.isSynthetic ? 'synthetic' : 'verified'} variant="compact" />
+                  </div>
+                  <Link href={`/recommend/${s.movieId}`} className="font-medium text-text hover:text-primary">
                     {s.movieTitle}
                   </Link>
-                  <FormatTag format={s.format} />
-                  <span className="font-medium text-text-sub">{s.priceAdult.toLocaleString('ko-KR')}원</span>
-                  <ShowtimeStatusBadge kind={s.isSynthetic ? 'synthetic' : 'verified'} variant="compact" />
-                  {s.bookingUrl && !s.isSynthetic ? (
-                    <a
-                      className="text-primary"
-                      href={s.bookingUrl}
-                      target="_blank"
-                      rel="noopener noreferrer nofollow"
-                    >
-                      예매 ↗
-                    </a>
-                  ) : null}
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium text-text-sub">{s.priceAdult.toLocaleString('ko-KR')}원</span>
+                    {s.bookingUrl && !s.isSynthetic ? (
+                      <a
+                        className="inline-flex min-h-9 items-center font-semibold text-primary"
+                        href={s.bookingUrl}
+                        target="_blank"
+                        rel="noopener noreferrer nofollow"
+                      >
+                        예매 ↗
+                      </a>
+                    ) : null}
+                  </div>
                 </li>
               ))}
             </ul>
           </>
         )}
       </section>
+
+      {/* 6. 상세 사양 — 접이식으로 격하(더 이상 예정 회차보다 먼저 보이지 않는다) */}
+      <details className="mt-6 rounded-card-lg border border-border bg-surface p-4">
+        <summary className="flex min-h-11 cursor-pointer items-center text-lg font-bold text-text">
+          상영관 사양
+        </summary>
+
+        {current ? (
+          <div className="mt-3">
+            <div className="flex flex-col gap-1.5">
+              <SpecRow
+                label="영사기"
+                value={[
+                  LIGHT_LABELS[current.projector?.lightSource ?? ''] ?? current.projector?.lightSource,
+                  current.projector?.resolution?.toUpperCase(),
+                  current.projector?.dual ? '듀얼' : null,
+                  current.projector?.imaxGrade ? `IMAX ${current.projector.imaxGrade}` : null,
+                  current.projector?.dolbyVision ? '돌비 비전' : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ') || null}
+              />
+              <SpecRow
+                label="스크린"
+                value={[
+                  current.screen?.widthM ? `폭 ${current.screen.widthM}m` : null,
+                  current.screen?.heightM ? `높이 ${current.screen.heightM}m` : null,
+                  current.screen?.aspect ? `비율 ${current.screen.aspect}:1` : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ') || '실측 정보 없음'}
+              />
+              <SpecRow label="사운드" value={current.sound?.format ?? null} />
+              <SpecRow
+                label="표시 가능한 최대 확장비"
+                value={current.supportedAr ? `${current.supportedAr}:1` : '확인 안 됨'}
+              />
+              <SpecRow label="마스킹" value={MASKING_LABELS[current.masking ?? 'unknown']} />
+            </div>
+            {current.renewalEvent ? (
+              <p className="mb-0 mt-2.5 flex items-start gap-1.5 text-sm text-text-sub">
+                <IconWrench className="mt-0.5 h-4 w-4 shrink-0" /> {current.renewalEvent}
+              </p>
+            ) : null}
+            {current.notes ? (
+              <p className="mb-0 mt-1 flex items-start gap-1.5 text-sm text-text-sub">
+                <IconNote className="mt-0.5 h-4 w-4 shrink-0" /> {current.notes}
+              </p>
+            ) : null}
+            <p className="mb-0 mt-2.5 flex flex-wrap items-center gap-1.5 text-sm text-text-sub">
+              <TrustBadge status={current.infoStatus} observedAt={current.observedAt} />
+              {current.sourceUrl ? (
+                <a className="text-primary" href={current.sourceUrl} target="_blank" rel="noopener noreferrer">
+                  {current.sourceName ?? '출처'}
+                </a>
+              ) : (
+                <span>{current.sourceName ?? '출처 없음'}</span>
+              )}
+            </p>
+          </div>
+        ) : (
+          <p className="mt-2 text-sm text-text-sub">등록된 사양이 없어요.</p>
+        )}
+
+        {history.length > 0 ? (
+          <div className="mt-4 border-t border-border pt-4">
+            <h3 className="m-0 text-sm font-bold text-text">사양 변경 이력</h3>
+            <ul className="m-0 mt-2 flex list-none flex-col gap-2 p-0 text-sm">
+              {history.map((h, i) => (
+                <li key={i} className="rounded-card border border-border bg-bg px-4 py-3">
+                  <span className="text-text-sub">
+                    {h.validFrom} ~ {h.validTo ?? '현재'}
+                  </span>
+                  {h.renewalEvent ? <span className="ml-2 text-text">{h.renewalEvent}</span> : null}
+                  <TrustBadge status={h.infoStatus} observedAt={h.observedAt} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </details>
+
+      {/* 7. 출처·근거 기록 */}
+      {detail.observations.length > 0 ? (
+        <section aria-label="근거 기록" className="mt-6">
+          <h2 className="text-lg font-bold text-text">근거 기록</h2>
+          <p className="mt-1 text-sm text-text-sub">이 관의 사양 판단에 쓰인 관측 기록이에요.</p>
+          <ul className="m-0 mt-3 flex list-none flex-col gap-1.5 p-0 text-sm">
+            {detail.observations.map((o, i) => (
+              <li key={i} className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span className="text-text-sub">{o.field}</span>
+                <span className="font-medium text-text">{String(o.value)}</span>
+                <TrustBadge status={o.infoStatus} observedAt={o.observedAt} />
+                <span className="text-text-sub">{o.sourceName ?? '출처 없음'}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <p className="mt-6">
         <Link className="text-primary" href="/sources">

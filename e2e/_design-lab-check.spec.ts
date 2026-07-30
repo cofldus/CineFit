@@ -11,6 +11,7 @@ const CONCEPTS = [
   { id: 'b', path: '/design-lab/b' },
   { id: 'c', path: '/design-lab/c' },
   { id: 'd', path: '/design-lab/d' },
+  { id: 'e', path: '/design-lab/e' },
 ] as const;
 
 const SIZES = [
@@ -25,13 +26,23 @@ for (const concept of CONCEPTS) {
       await page.setViewportSize({ width: size.width, height: size.height });
       await page.goto(concept.path);
       await page.waitForLoadState('networkidle');
-      // Reveal(scroll-reveal)은 IntersectionObserver로 뷰포트 진입을 감지한다 — 뷰포트
-      // 아래쪽 콘텐츠는 실제로 스크롤해서 지나가야 관찰자가 발화한다. fullPage 스크린샷은
-      // 문서 전체를 한 번에 렌더링하지만 opacity/transform 같은 JS 상태는 그대로 남아 있어서,
-      // 스크롤 없이 바로 캡처하면 아래쪽 섹션이 opacity:0인 채로 찍힌다(실제로 콘셉트 B에서
-      // 이 버그로 영화 패널 전체가 빈 화면으로 캡처됨). 끝까지 스크롤해 모든 reveal을
-      // 발화시키고 전환이 끝날 때까지 기다린 뒤 캡처한다.
-      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+      // Reveal(scroll-reveal)은 IntersectionObserver로 뷰포트 진입을 감지한다 — 실제로
+      // 뷰포트를 "지나가야" 관찰자가 발화한다. 맨 위→맨 아래로 한 번에 점프하는 방식은
+      // (이전 버전에서 썼던 방식) 문서 높이가 뷰포트의 2배를 넘으면 중간 구간이 단 한
+      // 번도 뷰포트에 걸치지 않아 그 구간의 reveal이 영원히 opacity:0로 남는다 — 실제로
+      // 콘셉트 E의 390px 캡처에서 이 버그로 1관·2관 전체가 빈 화면으로 찍혔다(문서 높이가
+      // 뷰포트의 3배 이상). 뷰포트 높이 단위로 한 칸씩 내려가며 전체 문서를 훑어야 모든
+      // 구간이 한 번은 뷰포트에 걸친다.
+      await page.evaluate(async () => {
+        const step = window.innerHeight;
+        const total = document.body.scrollHeight;
+        for (let y = 0; y < total; y += step) {
+          window.scrollTo(0, y);
+          await new Promise((r) => setTimeout(r, 60));
+        }
+        window.scrollTo(0, total);
+        await new Promise((r) => setTimeout(r, 60));
+      });
       await page.waitForTimeout(900);
       await page.evaluate(() => window.scrollTo(0, 0));
       await page.waitForTimeout(100);

@@ -10,6 +10,7 @@ const CONCEPTS = [
   { id: 'a', path: '/design-lab/a' },
   { id: 'b', path: '/design-lab/b' },
   { id: 'c', path: '/design-lab/c' },
+  { id: 'd', path: '/design-lab/d' },
 ] as const;
 
 const SIZES = [

@@ -23,7 +23,7 @@ test.describe('반응형 뷰포트 점검 — 홈/결과/상영관 상세', () =
       await page.setViewportSize(vp);
       await page.goto('/');
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-      await expect(page.getByRole('link', { name: '지금 비교 시작' })).toBeVisible();
+      await expect(page.getByRole('link', { name: '어디서 볼지 찾아보기' }).first()).toBeVisible();
       await expect(page.getByRole('heading', { name: '지금 볼 수 있는 영화' })).toBeVisible();
       await expectNoHorizontalScroll(page);
     });

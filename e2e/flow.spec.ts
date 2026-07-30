@@ -4,7 +4,7 @@ test('홈 → 영화 선택 → 조건 입력 → 추천 3종 → 상세 확인'
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('어디서 봐야 할까요');
 
-  await page.getByRole('link', { name: '지금 비교 시작' }).click();
+  await page.getByRole('link', { name: '어디서 볼지 찾아보기' }).first().click();
   await expect(page).toHaveURL(/\/movies/);
 
   await page.getByRole('link', { name: '이 영화로 추천받기' }).first().click();

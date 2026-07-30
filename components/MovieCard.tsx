@@ -32,9 +32,7 @@ export function MovieCard({ movie, variant = 'detailed' }: { movie: MovieWithSpe
   if (variant === 'compact') {
     const nativeAr = movie.specs.native_ar?.value ? Number(movie.specs.native_ar.value) : null;
     const ratioLabel = nativeAr ? `${nativeAr.toFixed(2)}:1` : null;
-    const barPct = nativeAr
-      ? 20 + ((Math.min(RATIO_MAX, Math.max(RATIO_MIN, nativeAr)) - RATIO_MIN) / (RATIO_MAX - RATIO_MIN)) * 80
-      : 50;
+    const clampedAr = Math.min(RATIO_MAX, Math.max(RATIO_MIN, nativeAr ?? 1.85));
     const formats = topFormats(movie, 2);
 
     return (
@@ -44,20 +42,25 @@ export function MovieCard({ movie, variant = 'detailed' }: { movie: MovieWithSpe
         href={`/recommend/${movie.id}`}
         className="group block w-[220px] shrink-0 snap-start rounded-lg border border-border bg-surface p-4 transition-colors hover:border-primary-strong/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-strong sm:w-auto"
       >
-        <div aria-hidden className="h-1 w-full overflow-hidden rounded-full bg-border">
-          <div className="h-full rounded-full bg-accent" style={{ width: `${barPct}%` }} />
-        </div>
+        {/* 화면비를 실제 프레임 모양으로 시각화 — 이전의 채움 막대는 "로딩 진행률"처럼
+            읽혀서 무슨 뜻인지 알기 어렵다는 피드백이 있었다. 이 사각형 자체가 화면비를
+            나타내는 도형이라 의미가 바로 드러난다(장식이 아니라 데이터 표현). */}
+        <div
+          aria-hidden
+          className="flex items-center justify-center rounded-[3px] border border-accent/50 bg-bg"
+          style={{ height: '28px', width: 'auto', aspectRatio: `${clampedAr} / 1` }}
+        />
         <h3 className="font-wanted m-0 mt-3 line-clamp-2 text-base font-bold tracking-[-0.01em] text-text">
           {movie.title}
         </h3>
         <p className="m-0 mt-1 text-sm font-medium text-text-sub">
           {movie.releaseYear ? `${movie.releaseYear} · ` : ''}
-          {movie.runtimeMin}분{ratioLabel ? ` · ${ratioLabel}` : ''}
+          {movie.runtimeMin}분{ratioLabel ? ` · 화면비 ${ratioLabel}` : ''}
         </p>
         {formats.length > 0 ? (
-          <p className="m-0 mt-1.5 text-xs font-semibold text-accent">{formats.join(' · ')}</p>
+          <p className="m-0 mt-1.5 text-[13px] font-semibold text-accent">{formats.join(' · ')}</p>
         ) : null}
-        <p className="m-0 mt-2 text-xs font-medium text-text-sub">{verificationSummary(movie)}</p>
+        <p className="m-0 mt-2 text-[13px] font-medium text-text-sub">{verificationSummary(movie)}</p>
       </TrackedLink>
     );
   }

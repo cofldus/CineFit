@@ -83,7 +83,7 @@ export default async function ResultsPage({
   return (
     <main className="mx-auto max-w-wide px-4 pb-24 pt-6">
       <h1 className="font-wanted m-0 text-3xl font-bold tracking-[-0.01em] text-text">추천 결과</h1>
-      <p className="mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm text-text-sub">
+      <p className="mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[15px] text-text-sub">
         <IconFilm className="h-4 w-4 shrink-0" />
         {result.movie.title} ({result.movie.runtimeMin}분) · {result.request.date} ·{' '}
         {origin.label ?? '지정 위치'} 출발 · 이동 ≤ {result.request.maxTravelMinutes}분 · 가격 ≤{' '}
@@ -92,9 +92,9 @@ export default async function ResultsPage({
       </p>
       <div className="mt-3 max-w-content">
         {result.dataMode?.usedSynthetic ? (
-          <Notice>
-            이 결과의 회차·가격은 <strong className="font-semibold">검증용 합성 데이터</strong>예요(실제
-            예매는 안 돼요). 각 카드의 출처·확인일·상태 배지를 확인해 주세요.
+          <Notice detail="각 카드의 상세 보기에서 출처·확인일·상태를 확인할 수 있어요.">
+            현재 회차·가격은 <strong className="font-semibold">검증용 합성 데이터</strong>예요. 실제
+            예매는 지원하지 않아요.
           </Notice>
         ) : (
           <Notice tone="success">
@@ -182,7 +182,10 @@ export default async function ResultsPage({
 
           {result.runId ? (
             <p className="mt-4 max-w-content text-sm">
-              <Link href={`/feedback/${result.runId}/post-watch`} className="font-medium text-primary">
+              <Link
+                href={`/feedback/${result.runId}/post-watch`}
+                className="font-medium text-text underline decoration-border underline-offset-2 hover:decoration-primary-strong"
+              >
                 관람하고 오셨다면 여기서 만족도를 남겨주세요 →
               </Link>
             </p>
@@ -190,7 +193,7 @@ export default async function ResultsPage({
 
           {result.excluded.length > 0 ? (
             <details className="mt-5 max-w-content rounded-card-lg border border-border bg-surface p-4">
-              <summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium text-primary">
+              <summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium text-text underline decoration-border underline-offset-2 hover:decoration-primary-strong">
                 조건에 안 맞아 제외된 회차 {result.excluded.length}건 보기
               </summary>
               <ul className="m-0 mt-2 flex list-none flex-col gap-1 p-0 text-sm text-text-sub">
@@ -206,7 +209,10 @@ export default async function ResultsPage({
       )}
 
       <p className="mt-5">
-        <Link href="/sources" className="text-sm font-medium text-primary">
+        <Link
+          href="/sources"
+          className="text-sm font-medium text-text underline decoration-border underline-offset-2 hover:decoration-primary-strong"
+        >
           이 추천에 쓰인 정보 출처·신뢰도 기준 보기 →
         </Link>
       </p>

@@ -12,32 +12,35 @@ const CRITERIA = [
 // — 홈에서만 다른 문구를 쓰면 나중에 /sources 등 다른 화면과 말이 어긋난다.
 const TRUST_KEYS = ['official', 'multi_source', 'user_report', 'estimated'] as const;
 
-// 판단 기준 + 신뢰도 + 마지막 CTA — 복도 발밑 조명처럼 작은 점 하나가 각 항목을 표시한다.
+// "CineFit이 무엇을 비교하는지" 요약 + 마지막 CTA. 사이트 전역 토큰을 그대로 쓴다.
 export function HomeClosing() {
   return (
-    <section className="border-t border-white/10 bg-cinema-black px-5 py-16 sm:px-10 sm:py-20">
-      <div className="mx-auto grid max-w-4xl grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-4">
+    <section className="border-t border-border bg-bg px-5 py-14 sm:px-10 sm:py-16">
+      <h2 className="font-wanted m-0 text-center text-lg font-bold tracking-[-0.01em] text-text">
+        CineFit이 비교하는 것
+      </h2>
+      <div className="mx-auto mt-8 grid max-w-4xl grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-4">
         {CRITERIA.map((c) => (
           <div key={c.label} className="flex gap-3 sm:flex-col sm:gap-0">
-            <span aria-hidden className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-cinema-red sm:mb-3" />
+            <span aria-hidden className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent sm:mb-3" />
             <div>
-              <p className="text-sm font-bold text-cinema-ink">{c.label}</p>
-              <p className="mt-1 break-keep text-xs text-cinema-ink-muted">{c.detail}</p>
+              <p className="m-0 text-sm font-bold text-text">{c.label}</p>
+              <p className="m-0 mt-1 break-keep text-xs text-text-sub">{c.detail}</p>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="mx-auto mt-14 flex max-w-3xl flex-wrap items-center justify-center gap-x-8 gap-y-2 text-xs text-cinema-ink-muted">
+      <div className="mx-auto mt-12 flex max-w-3xl flex-wrap items-center justify-center gap-x-8 gap-y-2 text-xs text-text-sub">
         {TRUST_KEYS.map((k) => (
           <span key={k}>{INFO_STATUS_LABELS[k]}</span>
         ))}
       </div>
 
-      <div className="mt-12 text-center">
+      <div className="mt-10 text-center">
         <Link
           href="/movies"
-          className="inline-flex min-h-12 items-center justify-center rounded-sm bg-cinema-red px-8 text-base font-semibold text-white transition-colors hover:bg-cinema-red-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cinema-ink"
+          className="inline-flex min-h-12 items-center justify-center rounded-card bg-primary-strong px-8 text-base font-semibold text-white transition-colors hover:bg-primary-strong-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary-strong"
         >
           보고 싶은 영화를 선택해 보세요
         </Link>

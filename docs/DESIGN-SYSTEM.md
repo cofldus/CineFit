@@ -51,7 +51,7 @@ TrustBadge의 상태 글리프(✔ ◑ ◔ ≈ ? ⏳ ⚠)는 의도적으로 SVG
 | TrustBadge | `components/TrustBadge.tsx` | info_status 8단계 — 기존 컴포넌트 유지 |
 | SegmentedControl | `components/SegmentedControl.tsx` | 네이티브 radio 그룹 기반 — 폼 제출(FormData)·키보드 이동·스크린리더 별도 처리 불필요 |
 | Skeleton / SkeletonCard | `components/Skeleton.tsx` | 로딩 상태 공용 블록. `aria-hidden` — 안내 문구는 부모의 `aria-busy`+텍스트가 담당 |
-| ScreenArt (AspectFrame·HeroVisual) | `components/ScreenArt.tsx` | 포스터 대체 자체 비주얼. AspectFrame은 영화의 실제 화면비를 그대로 시각화(장식이 아닌 데이터 표현), HeroVisual은 홈 히어로용 정적 SVG(스크린 빛+좌석 열 추상화) |
+| ScreenArt (AspectFrame) | `components/ScreenArt.tsx` | 포스터 대체 자체 비주얼. 영화의 실제 화면비를 그대로 시각화(장식이 아닌 데이터 표현) — `/movies` 목록의 MovieCard(`variant="detailed"`)에서 사용 |
 | Notice | `components/Notice.tsx` | info/success 톤, IconWarning/IconCheckCircle 사용 |
 
 ## 4. 색 대비 정책

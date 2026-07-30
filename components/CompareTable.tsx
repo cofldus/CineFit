@@ -1,5 +1,6 @@
 import { FORMAT_LABELS } from '../src/domain/recommendation/presets';
 import type { PickLabel, ScoredCandidate } from '../src/domain/recommendation/types';
+import { pct } from '../src/lib/display';
 
 const timeFmt = new Intl.DateTimeFormat('ko-KR', {
   hour: '2-digit',
@@ -8,29 +9,30 @@ const timeFmt = new Intl.DateTimeFormat('ko-KR', {
   timeZone: 'Asia/Seoul',
 });
 
-const pct = (x: number) => `${Math.round(Math.min(1, Math.max(0, x)) * 100)}%`;
+type Row = { name: string; render: (s: ScoredCandidate) => string };
 
-// 최대 3회차 × 축 비교 — 가로 스크롤 컨테이너 (docs/09 §3 CompareTable)
-export function CompareTable({ picks }: { picks: { label: PickLabel; scored: ScoredCandidate }[] }) {
-  if (picks.length < 2) return null;
-  const rows: { name: string; render: (s: ScoredCandidate) => string }[] = [
-    { name: '상영관', render: (s) => `${s.candidate.location.name} ${s.candidate.auditorium.no}` },
-    { name: '포맷', render: (s) => FORMAT_LABELS[s.candidate.format] ?? s.candidate.format },
-    { name: '시작', render: (s) => timeFmt.format(new Date(s.candidate.startsAt)) },
-    { name: '종료 예정', render: (s) => timeFmt.format(new Date(s.candidate.endsAtEst)) },
-    { name: '종합 점수', render: (s) => pct(s.final) },
-    { name: '포맷 만족도', render: (s) => pct(s.axes.ffm) },
-    { name: '상영관 품질', render: (s) => pct(s.axes.audQ) },
-    { name: '이동(추정)', render: (s) => `${s.travelMinutes}분` },
-    { name: '가격', render: (s) => `${s.candidate.priceAdult.toLocaleString('ko-KR')}원` },
-    { name: '정보 신뢰도', render: (s) => pct(s.axes.dc) },
-    { name: '확신도', render: (s) => s.confidenceLabel },
-  ];
+// 기본 노출은 5개 핵심 축(이동/가격/포맷/상영관 품질/정보 신뢰도)만 — 나머지는
+// "전체 비교 보기" 안에 남긴다. 처음 화면이 데이터 비교표처럼 보이지 않게 하려는 목적.
+const CORE_ROWS: Row[] = [
+  { name: '포맷', render: (s) => FORMAT_LABELS[s.candidate.format] ?? s.candidate.format },
+  { name: '이동(추정)', render: (s) => `${s.travelMinutes}분` },
+  { name: '가격', render: (s) => `${s.candidate.priceAdult.toLocaleString('ko-KR')}원` },
+  { name: '상영관 품질', render: (s) => pct(s.axes.audQ) },
+  { name: '정보 신뢰도', render: (s) => pct(s.axes.dc) },
+];
 
+const EXTRA_ROWS: Row[] = [
+  { name: '상영관', render: (s) => `${s.candidate.location.name} ${s.candidate.auditorium.no}` },
+  { name: '시작', render: (s) => timeFmt.format(new Date(s.candidate.startsAt)) },
+  { name: '종료 예정', render: (s) => timeFmt.format(new Date(s.candidate.endsAtEst)) },
+  { name: '종합 점수', render: (s) => pct(s.final) },
+  { name: '포맷 만족도', render: (s) => pct(s.axes.ffm) },
+  { name: '확신도', render: (s) => s.confidenceLabel },
+];
+
+function RowGroup({ rows, picks }: { rows: Row[]; picks: { label: PickLabel; scored: ScoredCandidate }[] }) {
   return (
-    <section aria-label="추천 상영관 비교">
-      <h2 className="font-wanted text-lg font-bold tracking-[-0.01em] text-text">한눈에 비교</h2>
-
+    <>
       {/* 모바일: 속성 우선 카드형 — 좁은 화면에서 가로 스크롤 표보다 읽기 쉽다 */}
       <div className="mt-2 flex flex-col gap-2 sm:hidden">
         {rows.map((row) => (
@@ -82,6 +84,26 @@ export function CompareTable({ picks }: { picks: { label: PickLabel; scored: Sco
           </tbody>
         </table>
       </div>
+    </>
+  );
+}
+
+// 조건 비교 — 기본은 5개 핵심 축만, 전체 축은 "전체 비교 보기" 안에 (docs/09 §3 CompareTable)
+export function CompareTable({ picks }: { picks: { label: PickLabel; scored: ScoredCandidate }[] }) {
+  if (picks.length < 2) return null;
+
+  return (
+    <section aria-label="추천 상영관 비교">
+      <h2 className="font-wanted text-lg font-bold tracking-[-0.01em] text-text">한눈에 비교</h2>
+
+      <RowGroup rows={CORE_ROWS} picks={picks} />
+
+      <details className="mt-3">
+        <summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium text-primary">
+          전체 비교 보기
+        </summary>
+        <RowGroup rows={EXTRA_ROWS} picks={picks} />
+      </details>
     </section>
   );
 }

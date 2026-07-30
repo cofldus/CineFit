@@ -1,4 +1,25 @@
-import type { MovieSpecKey, MovieWithSpecs, SpecValue } from '../domain/recommendation/types';
+import { VERIFIED_STATUSES } from '../domain/recommendation/presets';
+import type { Citation, MovieSpecKey, MovieWithSpecs, SpecValue } from '../domain/recommendation/types';
+
+export const pct = (x: number) => `${Math.round(Math.min(1, Math.max(0, x)) * 100)}%`;
+
+// 종합 점수(0~1) 자체는 그대로 보여주되, 옆에 해석 문구를 함께 표시해 "58%가 좋은 건지
+// 나쁜 건지" 바로 판단할 수 있게 한다 — 점수 계산 로직(src/domain/recommendation/engine.ts)은
+// 건드리지 않고, 이미 나온 숫자를 사람이 읽는 말로 옮기기만 한다.
+export function scoreInterpretation(final: number): string {
+  if (final >= 0.8) return '핵심 조건을 대부분 충족';
+  if (final >= 0.6) return '조건에 잘 맞음';
+  if (final >= 0.4) return '적합도 보통';
+  return '일부 조건만 충족';
+}
+
+// 카드 하나에 개별 출처 배지를 여러 번 반복하는 대신, 요약 상태 하나만 기본 노출하기 위한
+// 헬퍼 — 상세 출처 목록은 그대로 details 패널에 남긴다.
+export function citationsTrustSummary(citations: Citation[]): string {
+  if (citations.length === 0) return '확인 중';
+  const verified = citations.filter((c) => VERIFIED_STATUSES.has(c.infoStatus)).length;
+  return verified === citations.length ? '확인됨' : '일부 추정';
+}
 
 export const SPEC_KEY_LABELS: Record<MovieSpecKey, string> = {
   native_ar: '기본 화면비',

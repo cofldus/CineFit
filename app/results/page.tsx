@@ -140,10 +140,29 @@ export default async function ResultsPage({
         </div>
       ) : (
         <>
-          <div className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-3">
-            {result.picks.map((p, i) => (
-              <RecommendCard key={p.scored.candidate.showtimeId} rank={i + 1} label={p.label} scored={p.scored} runId={result.runId} />
-            ))}
+          <div className="mt-6 flex flex-col gap-5">
+            {result.picks[0] ? (
+              <RecommendCard
+                key={result.picks[0].scored.candidate.showtimeId}
+                rank={1}
+                label={result.picks[0].label}
+                scored={result.picks[0].scored}
+                runId={result.runId}
+              />
+            ) : null}
+            {result.picks.length > 1 ? (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {result.picks.slice(1).map((p, i) => (
+                  <RecommendCard
+                    key={p.scored.candidate.showtimeId}
+                    rank={i + 2}
+                    label={p.label}
+                    scored={p.scored}
+                    runId={result.runId}
+                  />
+                ))}
+              </div>
+            ) : null}
           </div>
 
           <div className="mt-6">

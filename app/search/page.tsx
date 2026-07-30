@@ -20,7 +20,7 @@ export default async function SearchPage({
 
   return (
     <main className="mx-auto max-w-wide px-4 pb-24 pt-6">
-      <h1 className="text-2xl font-extrabold text-text">검색</h1>
+      <h1 className="font-wanted text-2xl font-bold tracking-[-0.01em] text-text">검색</h1>
       <form method="get" className="mt-3 max-w-content" role="search">
         <label className="block text-sm font-medium text-text-sub" htmlFor="q">
           영화 제목·원제·별칭 또는 상영관 이름으로 찾아보세요

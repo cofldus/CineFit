@@ -69,7 +69,7 @@ export default async function AuditoriumDetailPage({
   return (
     <main className="mx-auto max-w-wide px-4 pb-24 pt-6">
       <p className="m-0 text-sm text-text-sub">{detail.location.chain}</p>
-      <h1 className="m-0 text-2xl font-extrabold text-text">
+      <h1 className="font-wanted m-0 text-2xl font-bold tracking-[-0.01em] text-text">
         {detail.location.name} {detail.no}
       </h1>
       <div className="mt-2 flex flex-wrap items-center gap-1.5">

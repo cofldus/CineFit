@@ -34,7 +34,7 @@ export default async function SourcesPage() {
 
   return (
     <main className="mx-auto max-w-content px-4 pb-24 pt-6">
-      <h1 className="text-2xl font-extrabold text-text">정보 출처·신뢰도 기준</h1>
+      <h1 className="font-wanted text-2xl font-bold tracking-[-0.01em] text-text">정보 출처·신뢰도 기준</h1>
       <p className="mt-2 leading-relaxed text-text-sub">
         CineFit의 모든 사양 값에는 출처·정보 상태·확인일이 함께 붙어요. 근거가 약한 정보일수록
         추천 점수가 자동으로 낮아져요.

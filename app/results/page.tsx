@@ -82,8 +82,8 @@ export default async function ResultsPage({
 
   return (
     <main className="mx-auto max-w-wide px-4 pb-24 pt-6">
-      <h1 className="text-2xl font-extrabold text-text">추천 결과</h1>
-      <p className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm text-text-sub">
+      <h1 className="font-wanted m-0 text-3xl font-bold tracking-[-0.01em] text-text">추천 결과</h1>
+      <p className="mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm text-text-sub">
         <IconFilm className="h-4 w-4 shrink-0" />
         {result.movie.title} ({result.movie.runtimeMin}분) · {result.request.date} ·{' '}
         {origin.label ?? '지정 위치'} 출발 · 이동 ≤ {result.request.maxTravelMinutes}분 · 가격 ≤{' '}
@@ -140,7 +140,7 @@ export default async function ResultsPage({
         </div>
       ) : (
         <>
-          <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <div className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-3">
             {result.picks.map((p, i) => (
               <RecommendCard key={p.scored.candidate.showtimeId} rank={i + 1} label={p.label} scored={p.scored} runId={result.runId} />
             ))}

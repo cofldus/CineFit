@@ -15,7 +15,11 @@ interface PickOption {
   pickLabel: string;
 }
 
-/** 추천을 "봤다"는 사실과 실제 "선택"을 구분해 기록한다 — 예매 링크 클릭만으로는 알 수 없다. */
+/**
+ * 추천을 "봤다"는 사실과 실제 "선택"을 구분해 기록한다 — 예매 링크 클릭만으로는 알 수 없다.
+ * 라디오 7개 + 이유 칩이 항상 펼쳐져 있으면 결과 페이지 맨 아래가 설문지처럼 보인다("선택도
+ * 더 안귀찮게" 피드백) — details로 접어 기본은 질문 한 줄만 보이게 한다.
+ */
 export function SelectionWidget({ runId, picks }: { runId: number; picks: PickOption[] }) {
   const [phase, setPhase] = useState<Phase>('idle');
   const [choice, setChoice] = useState<string>('');
@@ -38,19 +42,23 @@ export function SelectionWidget({ runId, picks }: { runId: number; picks: PickOp
 
   if (phase === 'done') {
     return (
-      <div className="mt-6 max-w-content rounded-card-lg border border-border bg-surface p-4" role="status">
+      <div className="mt-6 max-w-content rounded-card-lg border border-border bg-surface p-5" role="status">
         <p className="m-0 text-sm text-text-sub">알려주셔서 감사합니다 — 실제 선택 결과는 추천 품질 검증에 쓰여요.</p>
       </div>
     );
   }
 
   return (
-    <div className="mt-6 max-w-content rounded-card-lg border border-border bg-surface p-4">
-      <h2 className="m-0 text-base font-bold text-text">실제로 어떤 상영관을 선택하셨나요?</h2>
-      <p className="mt-1 text-sm text-text-sub">예매 페이지로 이동했는지와 별개로, 실제 선택을 알려주시면 추천이 맞았는지 확인하는 데 도움이 돼요.</p>
-      <div className="mt-3 flex flex-col gap-1.5" role="radiogroup" aria-label="실제 선택">
+    <details className="mt-6 max-w-content rounded-card-lg border border-border bg-surface p-5">
+      <summary className="font-wanted -m-5 flex min-h-11 cursor-pointer items-center rounded-card-lg p-5 text-base font-bold tracking-[-0.01em] text-text">
+        실제로 어떤 상영관을 선택하셨나요?
+      </summary>
+      <p className="mt-2 text-sm text-text-sub">
+        예매 페이지로 이동했는지와 별개로, 실제 선택을 알려주시면 추천이 맞았는지 확인하는 데 도움이 돼요.
+      </p>
+      <div className="mt-4 flex flex-col gap-2" role="radiogroup" aria-label="실제 선택">
         {picks.map((p) => (
-          <label key={p.auditoriumId} className="flex min-h-10 cursor-pointer items-center gap-2 text-sm text-text">
+          <label key={p.auditoriumId} className="flex min-h-10 cursor-pointer items-center gap-2.5 text-sm text-text">
             <input
               type="radio"
               name="selection"
@@ -63,7 +71,7 @@ export function SelectionWidget({ runId, picks }: { runId: number; picks: PickOp
           </label>
         ))}
         {(['picked_other_candidate', 'picked_outside', 'undecided', 'cancelled'] as const).map((t) => (
-          <label key={t} className="flex min-h-10 cursor-pointer items-center gap-2 text-sm text-text">
+          <label key={t} className="flex min-h-10 cursor-pointer items-center gap-2.5 text-sm text-text">
             <input
               type="radio"
               name="selection"
@@ -78,7 +86,7 @@ export function SelectionWidget({ runId, picks }: { runId: number; picks: PickOp
       </div>
 
       {choice ? (
-        <div className="mt-3">
+        <div className="mt-4">
           <p className="m-0 text-xs text-text-sub">선택한 이유가 있으면 골라주세요 (선택)</p>
           <div className="mt-1.5 flex flex-wrap gap-1.5" role="group" aria-label="선택 이유">
             {SELECTION_REASONS.map((r) => (
@@ -105,12 +113,12 @@ export function SelectionWidget({ runId, picks }: { runId: number; picks: PickOp
             type="button"
             onClick={submit}
             disabled={phase === 'submitting'}
-            className="mt-2.5 flex min-h-10 items-center justify-center rounded-card bg-primary-strong px-4 text-sm font-semibold text-white disabled:opacity-60"
+            className="mt-3 flex min-h-10 items-center justify-center rounded-card bg-primary-strong px-4 text-sm font-semibold text-white disabled:opacity-60"
           >
             {phase === 'submitting' ? '제출 중…' : '알려주기'}
           </button>
         </div>
       ) : null}
-    </div>
+    </details>
   );
 }

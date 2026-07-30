@@ -11,7 +11,7 @@ export default async function MoviesPage() {
 
   return (
     <main className="mx-auto max-w-wide px-4 pb-24 pt-6">
-      <h1 className="text-2xl font-extrabold text-text">어떤 영화를 보러 가세요?</h1>
+      <h1 className="font-wanted text-2xl font-bold tracking-[-0.01em] text-text">어떤 영화를 보러 가세요?</h1>
       <div className="mt-3 max-w-content">
         <Notice>
           지금은 테스트용으로 준비한 영화 {movies.length}편이에요. 사양 값마다 출처와 확인 날짜를

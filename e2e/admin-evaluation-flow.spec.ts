@@ -7,6 +7,9 @@ test('사용자 피드백 제출이 관리자 데이터 품질 대시보드의 �
   const balancePick = page.getByTestId('pick-균형');
   await expect(balancePick).toBeVisible();
 
+  // 결과 페이지 정보 밀도 축소(phase: Screening Room 정리)로 피드백 버튼이 기본으로
+  // 접혀 있다("이 추천, 어땠나요?" summary) — 펼친 뒤에 눌러야 한다.
+  await balancePick.getByText('이 추천, 어땠나요?').click();
   await balancePick.getByRole('button', { name: '별로 도움 안 됨' }).click();
   await balancePick.getByText('실제 상영 회차가 없음', { exact: true }).click();
   await balancePick.getByRole('button', { name: '피드백 보내기' }).click();

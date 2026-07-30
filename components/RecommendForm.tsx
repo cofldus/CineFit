@@ -9,7 +9,8 @@ import { SegmentedControl } from './SegmentedControl';
 const inputCls =
   'min-h-11 w-full rounded-card border border-border bg-bg px-3 text-base text-text outline-none focus-visible:ring-[3px] focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface';
 const labelCls = 'block text-sm font-semibold text-text';
-const sectionCls = 'rounded-card-lg border border-border bg-surface p-4';
+const sectionCls = 'rounded-card-xl border border-border bg-surface p-5';
+const sectionHeadingCls = 'font-wanted m-0 mb-4 flex items-center gap-2.5 text-base font-bold tracking-[-0.01em] text-text';
 const checkRowCls = 'flex min-h-11 items-center gap-2.5 text-[15px] text-text';
 const checkboxCls = 'h-5 w-5 accent-primary';
 
@@ -51,15 +52,15 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
   }
 
   return (
-    <form onSubmit={onSubmit} aria-label="추천 조건 입력" className="flex flex-col gap-4 pb-4">
+    <form onSubmit={onSubmit} aria-label="추천 조건 입력" className="flex flex-col gap-5 pb-4">
       <div className={sectionCls}>
-        <h2 className="m-0 mb-3 flex items-center gap-2 text-sm font-bold text-text-sub">
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-strong text-[11px] font-bold text-white">
+        <h2 className={sectionHeadingCls}>
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-strong text-xs font-bold text-white">
             1
           </span>
           언제, 어디서 볼까요?
         </h2>
-        <div className="flex flex-col gap-3.5">
+        <div className="flex flex-col gap-4">
           <label className="block">
             <span className={labelCls}>관람 날짜</span>
             <input className={`${inputCls} mt-1.5`} type="date" name="date" defaultValue={defaultDate} required />
@@ -102,13 +103,13 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
       </div>
 
       <div className={sectionCls}>
-        <h2 className="m-0 mb-3 flex items-center gap-2 text-sm font-bold text-text-sub">
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-strong text-[11px] font-bold text-white">
+        <h2 className={sectionHeadingCls}>
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-strong text-xs font-bold text-white">
             2
           </span>
           무엇을 가장 중요하게 보나요?
         </h2>
-        <div className="flex flex-col gap-3.5">
+        <div className="flex flex-col gap-4">
           <SegmentedControl
             key={prefillKey}
             name="priority"
@@ -135,13 +136,13 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
       </div>
 
       <div className={sectionCls}>
-        <h2 className="m-0 mb-3 flex items-center gap-2 text-sm font-bold text-text-sub">
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-strong text-[11px] font-bold text-white">
+        <h2 className={sectionHeadingCls}>
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-strong text-xs font-bold text-white">
             3
           </span>
           피하고 싶은 조건이 있나요?
         </h2>
-        <div className="flex flex-col gap-3.5">
+        <div className="flex flex-col gap-4">
           <SegmentedControl
             key={prefillKey}
             name="motionSickness"

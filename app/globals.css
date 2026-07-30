@@ -14,9 +14,12 @@
    지역적으로 원래 블루 팔레트로 되돌린다 — 아래 :root 블록 바로 다음에 있다. */
 :root {
   --bg: #0d0a09;
-  --surface: #181310;
-  --surface-raised: #221a16;
-  --border: #332822;
+  /* surface/surface-raised를 --bg보다 눈에 띄게 밝혀서 층위가 또렷하게 읽히게 했다("색배합·
+     미적감각 더 수준높게" 피드백) — 이전 값(#181310/#221a16)은 --bg와 명도차가 작아 카드가
+     배경에서 잘 안 떨어져 보였다. */
+  --surface: #1c1613;
+  --surface-raised: #251d18;
+  --border: #3d2f27;
   --text: #f2ece4;
   /* 불투명도 대신 고정 hex — 이 값은 --bg·--surface 둘 다에서 6:1 이상 나오도록 미리 계산해
      고정했다(Design Lab 라운드에서 opacity 값이 배경마다 대비가 달라져 여러 번 기준 미달을
@@ -26,10 +29,11 @@
      시네마 레드(--primary-strong)를 그대로 링크색으로 쓰면 3.6:1로 AA 미달이라 별도로
      계산했다(직접 검증). */
   --primary: #e8425c;
-  /* 흰 글자를 얹는 채워진 배경 전용(버튼·배지) — WCAG AA 4.5:1을 만족하도록 고정
-     (axe-core color-contrast 자동 검사로 확인, docs/ACCESSIBILITY.md). */
-  --primary-strong: #c81e3d;
-  --primary-strong-hover: #d4304e;
+  /* 흰 글자를 얹는 채워진 배경 전용(버튼·배지) — 이전의 밝은 레드(#c81e3d)는 "경고/에러"에
+     가까운 원색으로 읽혀서, 더 깊은 와인/버건디 톤으로 낮췄다 — WCAG AA 4.5:1은 여전히
+     넉넉히 만족한다(흰 텍스트 기준 8.0:1, 직접 계산). */
+  --primary-strong: #9c1a35;
+  --primary-strong-hover: #b22242;
   --accent: #d4a24e;
   --trust-high: #3dbe7b;
   --trust-mid: #e0a83c;
@@ -38,10 +42,10 @@
   --radius-lg: 16px;
   --radius-xl: 20px;
   /* elevation-1..4 = 기본 카드 / 떠 있는 컨트롤 / 모달 / 강조 결과 (docs/DESIGN-SYSTEM.md §그림자) */
-  --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 1px rgba(0, 0, 0, 0.2);
-  --elevation-2: 0 8px 20px rgba(0, 0, 0, 0.35);
-  --elevation-3: 0 16px 40px rgba(0, 0, 0, 0.45);
-  --elevation-4: 0 0 0 1px var(--primary), 0 8px 24px rgba(200, 30, 61, 0.25);
+  --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --elevation-2: 0 10px 24px rgba(0, 0, 0, 0.4);
+  --elevation-3: 0 20px 48px rgba(0, 0, 0, 0.5);
+  --elevation-4: 0 0 0 1px var(--primary), 0 8px 24px rgba(156, 26, 53, 0.3);
 }
 
 /* 관리자 전용 — 사이트 전역이 시네마 레드로 바뀌기 전, 원래 쓰던 블루 팔레트를 그대로

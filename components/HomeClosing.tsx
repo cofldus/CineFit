@@ -18,7 +18,7 @@ const TRUST_KEYS = ['official', 'multi_source', 'user_report', 'estimated'] as c
 // "CineFit이 무엇을 비교하는지" 요약 + 마지막 CTA. 사이트 전역 토큰을 그대로 쓴다.
 export function HomeClosing() {
   return (
-    <section className="enter-3 border-t border-border bg-bg px-5 py-14 sm:px-10 sm:py-16">
+    <section className="enter-3 border-t border-border px-5 py-14 sm:px-10 sm:py-16">
       <h2 className="font-wanted m-0 text-center text-xl font-bold tracking-[-0.01em] text-text">
         CineFit이 비교하는 것
       </h2>

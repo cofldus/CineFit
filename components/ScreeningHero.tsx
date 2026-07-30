@@ -14,22 +14,14 @@ const FLOW = [
 /**
  * 홈 히어로 — 데스크톱에서 헤드라인 하나만 중앙에 덩그러니 있고 위아래 여백이 과도하다는
  * 피드백. 오른쪽에 화면비→포맷→좌석→이동시간으로 이어지는 예시 흐름을 배치해 "무엇을
- * 비교하는 서비스인지"를 첫 화면에서 그래픽으로 보여준다. 아주 옅은 크림슨/아이시블루
- * 광원을 배경에 깔아 완전한 단색 검정처럼 보이지 않게 했다(네온처럼 보이지 않도록 넓고
- * 흐리게). 모바일에서는 기존과 동일하게 헤드라인·CTA만 보인다.
+ * 비교하는 서비스인지"를 첫 화면에서 그래픽으로 보여준다. 배경 광원은 이 섹션에 따로
+ * 두지 않는다 — body에 뷰포트 고정 광원을 깔아뒀고(app/globals.css), 여기서 불투명한
+ * bg-bg를 칠하면 그 광원을 그대로 가려버리기 때문에 배경은 투명하게 둔다.
+ * 모바일에서는 기존과 동일하게 헤드라인·CTA만 보인다.
  */
 export function ScreeningHero() {
   return (
-    <section className="enter-1 relative overflow-hidden bg-bg px-5 pb-6 pt-8 sm:px-10 sm:pb-10 sm:pt-14">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10"
-        style={{
-          background:
-            'radial-gradient(60% 50% at 50% 0%, rgba(240,68,100,0.10) 0%, transparent 70%), ' +
-            'radial-gradient(55% 55% at 100% 100%, rgba(124,167,255,0.09) 0%, transparent 70%)',
-        }}
-      />
+    <section className="enter-1 px-5 pb-6 pt-8 sm:px-10 sm:pb-10 sm:pt-14">
       <div className="mx-auto max-w-wide sm:grid sm:grid-cols-2 sm:items-center sm:gap-12 lg:gap-20">
         <div className="text-center sm:text-left">
           <h1 className="m-0 break-keep font-wanted text-[8vw] font-extrabold leading-[1.2] tracking-[-0.02em] text-text sm:text-4xl lg:text-5xl">
@@ -59,7 +51,7 @@ export function ScreeningHero() {
                   {step.kind === 'frame' ? (
                     <div
                       aria-hidden
-                      className="rounded-[3px] border border-accent/50 bg-bg"
+                      className="rounded-[3px] bg-gradient-to-b from-accent/30 to-accent/5"
                       style={{ height: '28px', width: 'auto', aspectRatio: `${step.ratio} / 1` }}
                     />
                   ) : step.kind === 'text' ? (

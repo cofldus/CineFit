@@ -161,7 +161,15 @@
   body {
     margin: 0;
     padding: 0;
-    background: var(--bg);
+    /* 완전한 단색 검정 배경 대신 아주 옅은 크림슨(좌상단)·아이시 블루(우측) 광원을 뷰포트에
+       고정해 깐다 — 스크롤해도 항상 같은 자리에 있어서 페이지 전체가 밋밋한 검은 덩어리로
+       보이지 않는다(네온처럼 보이지 않게 반경을 넓고 흐리게 잡았다). */
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(70% 55% at 12% 0%, rgba(240, 68, 100, 0.13) 0%, transparent 62%),
+      radial-gradient(65% 50% at 100% 25%, rgba(124, 167, 255, 0.11) 0%, transparent 62%);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     color: var(--text);
     font-family:
       'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',

@@ -43,11 +43,12 @@ export function MovieCard({ movie, variant = 'detailed' }: { movie: MovieWithSpe
         className="group block w-[220px] shrink-0 snap-start rounded-lg border border-border bg-surface p-4 transition-all duration-200 hover:-translate-y-1 hover:border-border-strong hover:bg-surface-raised hover:shadow-float focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-strong active:translate-y-0 sm:w-auto"
       >
         {/* 화면비를 실제 프레임 모양으로 시각화 — 이전의 채움 막대는 "로딩 진행률"처럼
-            읽혀서 무슨 뜻인지 알기 어렵다는 피드백이 있었다. 이 사각형 자체가 화면비를
-            나타내는 도형이라 의미가 바로 드러난다(장식이 아니라 데이터 표현). */}
+            읽혀서 무슨 뜻인지 알기 어렵다는 피드백이 있었다. 테두리만 있는 빈 상자는 또
+            "깨진 이미지"처럼 보여서, 은은한 스크린 광원 그러데이션으로 채웠다 — 사각형
+            자체가 화면비를 나타내는 도형이라 의미가 바로 드러난다(장식이 아니라 데이터 표현). */}
         <div
           aria-hidden
-          className="flex items-center justify-center rounded-[3px] border border-accent/50 bg-bg"
+          className="rounded-[3px] bg-gradient-to-b from-accent/30 to-accent/5"
           style={{ height: '28px', width: 'auto', aspectRatio: `${clampedAr} / 1` }}
         />
         <h3 className="font-wanted m-0 mt-3 line-clamp-2 text-base font-bold tracking-[-0.01em] text-text">

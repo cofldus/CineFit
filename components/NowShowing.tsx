@@ -11,7 +11,7 @@ export function NowShowing({ movies }: { movies: MovieWithSpecs[] }) {
   if (movies.length === 0) return null;
 
   return (
-    <section aria-labelledby="now-showing-heading" className="enter-2 bg-bg px-5 py-10 sm:px-10 sm:py-14">
+    <section aria-labelledby="now-showing-heading" className="enter-2 px-5 py-10 sm:px-10 sm:py-14">
       <h2 id="now-showing-heading" className="font-wanted m-0 text-lg font-bold tracking-[-0.01em] text-text">
         지금 볼 수 있는 영화
       </h2>

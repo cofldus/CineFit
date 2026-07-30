@@ -26,7 +26,7 @@ export default async function HomePage() {
     <main className="max-w-none p-0">
       <ScreeningHero />
       {dbMissing ? (
-        <section className="bg-bg px-5 py-16 sm:px-10">
+        <section className="px-5 py-16 sm:px-10">
           <div className="mx-auto max-w-md text-center">
             <h2 className="m-0 font-wanted text-xl font-bold text-text">아직 준비된 데이터가 없어요</h2>
             <p className="mt-2 text-sm text-text-sub">

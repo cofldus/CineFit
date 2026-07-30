@@ -15,7 +15,8 @@ const ITEMS = [
 export function MobileNav() {
   const pathname = usePathname() ?? '/';
   // /admin: 관리자 전용 화면. /recommend: 폼 자체의 sticky 제출 바와 겹치므로 숨긴다.
-  if (pathname.startsWith('/admin') || pathname.startsWith('/recommend')) return null;
+  // /design-lab: 시안이 자기 화면을 온전히 소유해야 한다(components/AppHeader.tsx 참고).
+  if (pathname.startsWith('/admin') || pathname.startsWith('/recommend') || pathname.startsWith('/design-lab')) return null;
 
   return (
     <nav

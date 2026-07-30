@@ -1,5 +1,12 @@
 import { VERIFIED_STATUSES } from '../domain/recommendation/presets';
-import type { Citation, MovieSpecKey, MovieWithSpecs, SpecValue } from '../domain/recommendation/types';
+import type {
+  Citation,
+  MovieSpecKey,
+  MovieWithSpecs,
+  RecommendationRequest,
+  ScoredCandidate,
+  SpecValue,
+} from '../domain/recommendation/types';
 
 export const pct = (x: number) => `${Math.round(Math.min(1, Math.max(0, x)) * 100)}%`;
 
@@ -19,6 +26,42 @@ export function citationsTrustSummary(citations: Citation[]): string {
   if (citations.length === 0) return '확인 중';
   const verified = citations.filter((c) => VERIFIED_STATUSES.has(c.infoStatus)).length;
   return verified === citations.length ? '확인됨' : '일부 추정';
+}
+
+// "적합도 58%"처럼 근거 없어 보이는 숫자 대신, 실제 계산된 축 값·사용자가 입력한 조건을
+// 그대로 검사해 "핵심 조건 5개 중 N개 충족"을 만든다 — 숫자를 새로 지어내지 않고, 이미
+// CompareTable의 5개 핵심 축(포맷·이동·가격·상영관 품질·정보 신뢰도)과 같은 기준으로
+// 통과 여부만 판정한다. 이동·가격은 애초에 하드 필터를 통과한 후보만 여기 오므로 항상
+// 충족이지만, 그 자체로도 실제 사실이다(허수가 아니다).
+export function coreConditionsSummary(scored: ScoredCandidate, request: RecommendationRequest): string {
+  const checks = [
+    scored.axes.ffm >= 0.6,
+    scored.travelMinutes <= request.maxTravelMinutes,
+    scored.candidate.priceAdult <= request.maxPrice,
+    scored.axes.audQ >= 0.6,
+    scored.axes.dc >= 0.5,
+  ];
+  const met = checks.filter(Boolean).length;
+  return `핵심 조건 ${checks.length}개 중 ${met}개 충족`;
+}
+
+type ReasonCategory = 'screen' | 'auditorium' | 'seat' | 'travel';
+
+export const REASON_CATEGORY_LABEL: Record<ReasonCategory, string> = {
+  screen: '화면',
+  auditorium: '상영관',
+  seat: '좌석',
+  travel: '이동',
+};
+
+// 추천 이유 문장을 의미별로 묶어 보여주기 위한 분류 — 실제 문장 내용(화면비/설비/좌석/이동)에
+// 기반한 키워드 매칭이며, 새 사실을 지어내지 않고 이미 있는 문장에 라벨만 붙인다. 매칭되지
+// 않으면 "상영관"(설비 일반)으로 분류한다.
+export function categorizeReason(reason: string): ReasonCategory {
+  if (/화면비|확장비|AR\b|스크린 비율/.test(reason)) return 'screen';
+  if (/좌석|구역/.test(reason)) return 'seat';
+  if (/이동|거리/.test(reason)) return 'travel';
+  return 'auditorium';
 }
 
 export const SPEC_KEY_LABELS: Record<MovieSpecKey, string> = {

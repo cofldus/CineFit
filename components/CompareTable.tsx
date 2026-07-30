@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import { FORMAT_LABELS } from '../src/domain/recommendation/presets';
 import type { PickLabel, ScoredCandidate } from '../src/domain/recommendation/types';
 import { pct } from '../src/lib/display';
@@ -17,6 +20,8 @@ type Row = {
   numeric?: (s: ScoredCandidate) => number;
   winnerDir?: 'min' | 'max';
   winnerLabel?: string;
+  /** 필터 탭에서 선택됐을 때 보여줄 판단 문장 — "숫자만 보여주지 말고 번역해 달라"는 피드백. */
+  judgment?: (pickLabel: PickLabel, value: string) => string;
 };
 
 // 기본 노출은 5개 핵심 축(이동/가격/포맷/상영관 품질/정보 신뢰도)만 — 나머지는
@@ -29,6 +34,7 @@ const CORE_ROWS: Row[] = [
     numeric: (s) => s.travelMinutes,
     winnerDir: 'min',
     winnerLabel: '가장 가까움',
+    judgment: (label, value) => `${label} 추천이 ${value}으로 가장 가깝습니다.`,
   },
   {
     name: '가격',
@@ -36,6 +42,7 @@ const CORE_ROWS: Row[] = [
     numeric: (s) => s.candidate.priceAdult,
     winnerDir: 'min',
     winnerLabel: '최저가',
+    judgment: (label, value) => `${label} 추천이 ${value}으로 가장 저렴합니다.`,
   },
   {
     name: '상영관 품질',
@@ -43,6 +50,7 @@ const CORE_ROWS: Row[] = [
     numeric: (s) => s.axes.audQ,
     winnerDir: 'max',
     winnerLabel: '가장 높음',
+    judgment: (label, value) => `${label} 추천의 상영관 품질이 ${value}로 가장 높습니다.`,
   },
   {
     name: '정보 신뢰도',
@@ -50,6 +58,7 @@ const CORE_ROWS: Row[] = [
     numeric: (s) => s.axes.dc,
     winnerDir: 'max',
     winnerLabel: '가장 높음',
+    judgment: (label, value) => `${label} 추천의 정보 신뢰도가 ${value}로 가장 높습니다.`,
   },
 ];
 
@@ -74,7 +83,19 @@ const EXTRA_ROWS: Row[] = [
   { name: '확신도', render: (s) => s.confidenceLabel },
 ];
 
-function winnerIndex(row: Row, picks: { scored: ScoredCandidate }[]): number | null {
+// 화질과 사운드는 도메인 모델에 별도 축이 없다(auditorium quality 하나로 계산됨) — 실제
+// 데이터에 없는 숫자를 새로 만들 수 없으므로 두 필터를 "화질·사운드" 하나로 합쳤다.
+const FILTERS: { key: string; label: string; rowName?: string }[] = [
+  { key: 'all', label: '전체' },
+  { key: 'quality', label: '화질·사운드', rowName: '상영관 품질' },
+  { key: 'travel', label: '이동', rowName: '이동' },
+  { key: 'price', label: '가격', rowName: '가격' },
+  { key: 'trust', label: '신뢰도', rowName: '정보 신뢰도' },
+];
+
+type Pick = { label: PickLabel; scored: ScoredCandidate };
+
+function winnerIndex(row: Row, picks: Pick[]): number | null {
   if (!row.numeric || !row.winnerDir) return null;
   const values = picks.map((p) => row.numeric!(p.scored));
   const best = row.winnerDir === 'min' ? Math.min(...values) : Math.max(...values);
@@ -83,7 +104,28 @@ function winnerIndex(row: Row, picks: { scored: ScoredCandidate }[]): number | n
   return values.every((v) => v === best) ? null : idx;
 }
 
-function RowGroup({ rows, picks }: { rows: Row[]; picks: { label: PickLabel; scored: ScoredCandidate }[] }) {
+function VerticalCompare({ row, picks }: { row: Row; picks: Pick[] }) {
+  const winIdx = winnerIndex(row, picks);
+  return (
+    <div className="mt-2 flex flex-col gap-2 sm:hidden">
+      {picks.map((p, i) => (
+        <div
+          key={p.label}
+          className={`flex items-center justify-between rounded-card border p-3 transition-colors ${
+            i === winIdx ? 'border-trust-high/50 bg-trust-high/5' : 'border-border bg-surface'
+          }`}
+        >
+          <span className="text-sm font-semibold text-text-sub">{p.label}</span>
+          <span className={`text-base font-bold ${i === winIdx ? 'text-trust-high' : 'text-text'}`}>
+            {row.render(p.scored)}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function RowGroup({ rows, picks, dimRowName }: { rows: Row[]; picks: Pick[]; dimRowName?: string }) {
   return (
     <>
       {/* 모바일: 속성 우선 카드형 — 좁은 화면에서 가로 스크롤 표보다 읽기 쉽다 */}
@@ -128,9 +170,13 @@ function RowGroup({ rows, picks }: { rows: Row[]; picks: { label: PickLabel; sco
           <tbody>
             {rows.map((row) => {
               const winIdx = winnerIndex(row, picks);
+              const dimmed = dimRowName ? row.name !== dimRowName : false;
               return (
-                <tr key={row.name}>
-                  <th scope="row" className="whitespace-nowrap border-b border-border p-3 text-left font-medium text-text-sub">
+                <tr key={row.name} className={`transition-opacity duration-200 ${dimmed ? 'opacity-40' : ''}`}>
+                  <th
+                    scope="row"
+                    className={`whitespace-nowrap border-b border-border p-3 text-left font-medium ${dimmed ? 'text-text-sub' : 'text-text'}`}
+                  >
                     {row.name}
                   </th>
                   {picks.map((p, i) => (
@@ -152,19 +198,69 @@ function RowGroup({ rows, picks }: { rows: Row[]; picks: { label: PickLabel; sco
   );
 }
 
-// 조건 비교 — 기본은 5개 핵심 축만, 전체 축은 "전체 비교 보기" 안에 (docs/09 §3 CompareTable)
-export function CompareTable({ picks }: { picks: { label: PickLabel; scored: ScoredCandidate }[] }) {
+// 조건 비교 — 판단 중심 UI로 개편: 필터 탭을 고르면 해당 기준의 승자를 강조하고 판단
+// 문장으로 번역해서 보여준다(그냥 숫자 나열이 아니라). 기본은 5개 핵심 축, 나머지는
+// "전체 비교 보기" 안에 (docs/09 §3 CompareTable).
+export function CompareTable({ picks }: { picks: Pick[] }) {
+  const [filterIdx, setFilterIdx] = useState(0);
   if (picks.length < 2) return null;
+
+  const active = FILTERS[filterIdx];
+  const activeRow = active.rowName ? (CORE_ROWS.find((r) => r.name === active.rowName) ?? null) : null;
+  const activeWinIdx = activeRow ? winnerIndex(activeRow, picks) : null;
+  const sentence =
+    activeRow && activeRow.judgment && activeWinIdx !== null
+      ? activeRow.judgment(picks[activeWinIdx].label, activeRow.render(picks[activeWinIdx].scored))
+      : null;
 
   return (
     <section aria-label="추천 상영관 비교">
       <h2 className="font-wanted text-lg font-bold tracking-[-0.01em] text-text">한눈에 비교</h2>
       <p className="m-0 mt-1 text-[13px] text-text-sub">이동 시간은 추정치, 가격은 선택한 회차 기준이에요.</p>
 
-      <RowGroup rows={CORE_ROWS} picks={picks} />
+      <div
+        role="tablist"
+        aria-label="비교 기준"
+        className="relative mt-3 grid rounded-card border border-border bg-surface"
+        style={{ gridTemplateColumns: `repeat(${FILTERS.length}, minmax(0, 1fr))` }}
+      >
+        <div
+          aria-hidden
+          className="absolute inset-y-1 left-1 rounded-[8px] bg-surface-strong transition-transform duration-[250ms] ease-out"
+          style={{
+            width: `calc((100% - 8px) / ${FILTERS.length})`,
+            transform: `translateX(${filterIdx * 100}%)`,
+          }}
+        />
+        {FILTERS.map((f, i) => (
+          <button
+            key={f.key}
+            type="button"
+            role="tab"
+            aria-selected={filterIdx === i}
+            onClick={() => setFilterIdx(i)}
+            className={`relative z-10 min-h-11 rounded-[8px] px-2 text-[13.5px] font-semibold transition-colors ${
+              filterIdx === i ? 'text-text' : 'text-text-sub hover:text-text'
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      {sentence ? (
+        <p className="m-0 mt-3 rounded-card border border-border bg-surface-raised px-4 py-3 text-[15px] font-medium text-text">
+          {sentence}
+        </p>
+      ) : null}
+
+      {activeRow ? <VerticalCompare row={activeRow} picks={picks} /> : null}
+      <div className={activeRow ? 'hidden sm:block' : ''}>
+        <RowGroup rows={CORE_ROWS} picks={picks} dimRowName={activeRow?.name} />
+      </div>
 
       <details className="mt-3">
-        <summary className="flex min-h-11 cursor-pointer items-center text-[13px] font-medium text-text underline decoration-border underline-offset-2 hover:decoration-primary-strong">
+        <summary className="flex min-h-11 cursor-pointer items-center text-[13.5px] font-medium text-text underline decoration-border underline-offset-2 hover:decoration-primary-strong">
           전체 비교 보기
         </summary>
         <RowGroup rows={EXTRA_ROWS} picks={picks} />

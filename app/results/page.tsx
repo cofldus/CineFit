@@ -37,7 +37,7 @@ export default async function ResultsPage({
           </ul>
           <Link
             href="/movies"
-            className="mt-4 inline-flex min-h-11 items-center rounded-card bg-primary-strong px-5 text-[15px] font-semibold text-white hover:bg-primary-strong-hover"
+            className="mt-4 inline-flex min-h-11 items-center rounded-card bg-primary-strong px-5 text-[15px] font-semibold text-white transition-all hover:bg-primary-strong-hover active:scale-[0.98]"
           >
             영화 선택으로 돌아가기
           </Link>
@@ -82,15 +82,15 @@ export default async function ResultsPage({
 
   return (
     <main className="mx-auto max-w-wide px-4 pb-24 pt-6">
-      <h1 className="font-wanted m-0 text-3xl font-bold tracking-[-0.01em] text-text">추천 결과</h1>
-      <p className="mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[15px] text-text-sub">
+      <h1 className="enter-1 font-wanted m-0 text-3xl font-bold tracking-[-0.01em] text-text">추천 결과</h1>
+      <p className="enter-2 mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[15px] text-text-sub">
         <IconFilm className="h-4 w-4 shrink-0" />
         {result.movie.title} ({result.movie.runtimeMin}분) · {result.request.date} ·{' '}
         {origin.label ?? '지정 위치'} 출발 · 이동 ≤ {result.request.maxTravelMinutes}분 · 가격 ≤{' '}
         {result.request.maxPrice.toLocaleString('ko-KR')}원 — 조건에 맞는 회차 {result.scored.length}개
         (전체 {result.totalCandidates}개 중)
       </p>
-      <div className="mt-3 max-w-content">
+      <div className="enter-2 mt-3 max-w-content">
         {result.dataMode?.usedSynthetic ? (
           <Notice detail="각 카드의 상세 보기에서 출처·확인일·상태를 확인할 수 있어요.">
             현재 회차·가격은 <strong className="font-semibold">검증용 합성 데이터</strong>예요. 실제
@@ -133,7 +133,7 @@ export default async function ResultsPage({
           )}
           <Link
             href={`/recommend/${result.movie.id}`}
-            className="mt-4 inline-flex min-h-11 items-center rounded-card bg-primary-strong px-5 text-[15px] font-semibold text-white hover:bg-primary-strong-hover"
+            className="mt-4 inline-flex min-h-11 items-center rounded-card bg-primary-strong px-5 text-[15px] font-semibold text-white transition-all hover:bg-primary-strong-hover active:scale-[0.98]"
           >
             조건 다시 입력
           </Link>
@@ -142,22 +142,26 @@ export default async function ResultsPage({
         <>
           <div className="mt-6 flex flex-col gap-5">
             {result.picks[0] ? (
-              <RecommendCard
-                key={result.picks[0].scored.candidate.showtimeId}
-                rank={1}
-                label={result.picks[0].label}
-                scored={result.picks[0].scored}
-                runId={result.runId}
-              />
+              <div className="enter-3">
+                <RecommendCard
+                  key={result.picks[0].scored.candidate.showtimeId}
+                  rank={1}
+                  label={result.picks[0].label}
+                  scored={result.picks[0].scored}
+                  request={result.request}
+                  runId={result.runId}
+                />
+              </div>
             ) : null}
             {result.picks.length > 1 ? (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="enter-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {result.picks.slice(1).map((p, i) => (
                   <RecommendCard
                     key={p.scored.candidate.showtimeId}
                     rank={i + 2}
                     label={p.label}
                     scored={p.scored}
+                    request={result.request}
                     runId={result.runId}
                   />
                 ))}
@@ -165,7 +169,7 @@ export default async function ResultsPage({
             ) : null}
           </div>
 
-          <div className="mt-6">
+          <div className="enter-5 mt-6">
             <CompareTable picks={result.picks} />
           </div>
 

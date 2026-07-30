@@ -15,7 +15,8 @@ const ITEMS = [
 export function MobileNav() {
   const pathname = usePathname() ?? '/';
   // /admin: 관리자 전용 화면. /recommend: 폼 자체의 sticky 제출 바와 겹치므로 숨긴다.
-  if (pathname.startsWith('/admin') || pathname.startsWith('/recommend')) return null;
+  // 홈('/'): 스크리닝 룸 콘셉트가 자기 헤더·CTA를 쓰므로 기존 하단 내비와 겹치지 않게 숨긴다.
+  if (pathname.startsWith('/admin') || pathname.startsWith('/recommend') || pathname === '/') return null;
 
   return (
     <nav

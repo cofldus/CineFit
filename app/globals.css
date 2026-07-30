@@ -78,6 +78,30 @@
   --font-sans:
     'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
     'Malgun Gothic', system-ui, sans-serif;
+
+  /* "The Screening Room" 홈 전용 토큰(2026-07-30). 시스템 라이트/다크와 무관하게 홈만
+     고정 팔레트를 쓴다 — 어두운 상영관 안에 있다는 물리적 감각이 핵심이라, 사용자의 라이트
+     모드 설정에 따라 배경이 밝아지면 그 감각 자체가 깨진다. 다른 화면은 기존
+     prefers-color-scheme 기반 토큰을 그대로 쓴다(이 블록과 무관).
+     --font-wanted 하나만 테마 키로 등록한다 — 이전 라운드에서 font-display를 그대로 테마
+     키 이름으로 재선언했다가, next/font/local이 이미 html 요소에 정의해 둔 같은 이름의
+     CSS 변수와 순환 참조가 되어 폰트가 깨진 적이 있다(직접 겪은 버그). 반드시 다른 이름의
+     테마 키를 거쳐서만 연결한다. */
+  --color-cinema-black: #0d0a09;
+  --color-cinema-black-raised: #181310;
+  --color-cinema-ink: #f2ece4;
+  /* 불투명도(text-cinema-ink/60 같은) 대신 고정 hex 하나로 둔다 — 이전 세 라운드에서 같은
+     opacity 값이 배경마다 실제 대비가 달라져 여러 번 기준 미달을 냈다(직접 계산해서 확인).
+     이 값은 --color-cinema-black·--color-cinema-black-raised 둘 다에서 6.4:1 이상 나오도록
+     미리 계산해 고정했다 — 어디에 써도 다시 계산할 필요가 없다. */
+  --color-cinema-ink-muted: #a89a8a;
+  /* 작은 글자색으로 다크 배경 위에 직접 쓰면 3.6:1로 AA(4.5:1) 미달(계산 확인) — 채워진
+     배경 위 흰 텍스트(뱃지·버튼)나 큰 헤드라인 강조 단어(3:1 기준)에만 쓴다. */
+  --color-cinema-red: #c81e3d;
+  /* hover 상태 — 그냥 더 밝은 빨강을 고르면(#d93a56) 흰 텍스트 대비가 4.48:1로 다시
+     미달이 된다(계산 확인) — 4.5:1을 넘도록 재조정한 값. */
+  --color-cinema-red-hover: #d4304e;
+  --font-wanted: var(--font-display), 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
 }
 
 /*

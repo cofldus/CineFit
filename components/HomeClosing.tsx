@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { INFO_STATUS_LABELS } from '../src/domain/recommendation/presets';
+import { IconArrowRight } from './Icon';
 
 // 사용자 입장에서 비슷하게 느껴지는 "영화-포맷 궁합"과 "상영관 실제 설비"를 하나로
 // 합치고(화질과 사운드), 나머지도 3개 그룹으로 정리했다 — 4개 항목을 전부 같은 무게로
@@ -17,7 +18,7 @@ const TRUST_KEYS = ['official', 'multi_source', 'user_report', 'estimated'] as c
 // "CineFit이 무엇을 비교하는지" 요약 + 마지막 CTA. 사이트 전역 토큰을 그대로 쓴다.
 export function HomeClosing() {
   return (
-    <section className="border-t border-border bg-bg px-5 py-14 sm:px-10 sm:py-16">
+    <section className="enter-3 border-t border-border bg-bg px-5 py-14 sm:px-10 sm:py-16">
       <h2 className="font-wanted m-0 text-center text-xl font-bold tracking-[-0.01em] text-text">
         CineFit이 비교하는 것
       </h2>
@@ -39,9 +40,10 @@ export function HomeClosing() {
       <div className="mt-10 text-center">
         <Link
           href="/movies"
-          className="inline-flex min-h-12 items-center justify-center rounded-card bg-primary-strong px-8 text-base font-semibold text-white transition-colors hover:bg-primary-strong-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary-strong"
+          className="group inline-flex min-h-12 items-center justify-center gap-1.5 rounded-card bg-primary-strong px-8 text-base font-semibold text-white transition-all hover:bg-primary-strong-hover hover:shadow-glow-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary-strong active:scale-[0.98]"
         >
           어디서 볼지 찾아보기
+          <IconArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
         </Link>
       </div>
     </section>

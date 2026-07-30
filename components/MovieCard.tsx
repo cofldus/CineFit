@@ -40,7 +40,7 @@ export function MovieCard({ movie, variant = 'detailed' }: { movie: MovieWithSpe
         event="movie_selected"
         eventProperties={{ movieId: movie.id }}
         href={`/recommend/${movie.id}`}
-        className="group block w-[220px] shrink-0 snap-start rounded-lg border border-border bg-surface p-4 transition-colors hover:border-primary-strong/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-strong sm:w-auto"
+        className="group block w-[220px] shrink-0 snap-start rounded-lg border border-border bg-surface p-4 transition-all duration-200 hover:-translate-y-1 hover:border-border-strong hover:bg-surface-raised hover:shadow-float focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-strong active:translate-y-0 sm:w-auto"
       >
         {/* 화면비를 실제 프레임 모양으로 시각화 — 이전의 채움 막대는 "로딩 진행률"처럼
             읽혀서 무슨 뜻인지 알기 어렵다는 피드백이 있었다. 이 사각형 자체가 화면비를
@@ -67,7 +67,7 @@ export function MovieCard({ movie, variant = 'detailed' }: { movie: MovieWithSpe
 
   return (
     <article
-      className="flex h-full flex-col rounded-card-lg border border-border bg-surface p-4 transition-colors hover:border-primary-strong/50"
+      className="flex h-full flex-col rounded-card-lg border border-border bg-surface p-4 transition-all duration-200 hover:-translate-y-1 hover:border-border-strong hover:bg-surface-raised hover:shadow-float"
       aria-labelledby={`movie-${movie.id}-title`}
     >
       <AspectFrame aspect={movie.specs.native_ar?.value ? String(movie.specs.native_ar.value) : null} className="mb-3" />
@@ -92,7 +92,7 @@ export function MovieCard({ movie, variant = 'detailed' }: { movie: MovieWithSpe
           event="movie_selected"
           eventProperties={{ movieId: movie.id }}
           href={`/recommend/${movie.id}`}
-          className="flex min-h-11 w-full items-center justify-center rounded-card bg-primary-strong px-5 text-[15px] font-semibold text-white transition-colors hover:bg-primary-strong-hover"
+          className="flex min-h-11 w-full items-center justify-center rounded-card bg-primary-strong px-5 text-[15px] font-semibold text-white transition-all hover:bg-primary-strong-hover active:scale-[0.98]"
         >
           이 영화로 추천받기
         </TrackedLink>

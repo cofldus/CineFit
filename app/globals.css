@@ -1,60 +1,47 @@
 @import 'tailwindcss';
 
-/* CineFit 디자인 토큰 — "The Screening Room" 사이트 전역 확장(2026-07-30).
-   기존에는 다크 기본 + 라이트 모드 지원(prefers-color-scheme)이었지만, 홈에서 이미 "실제
-   어두운 상영관에 있다"는 물리적 감각을 사이트 정체성으로 삼았고(app/globals.css 하단
-   --color-cinema-* 토큰 도입 당시 결정), 그 논리는 홈만이 아니라 추천 플로우 전체에 똑같이
-   적용된다 — 라이트 모드로 바뀐다고 실제 극장이 밝아지지 않는 것과 같은 이유다. 그래서
-   라이트 모드 오버라이드를 아예 없애고, 다크 팔레트를 유일한 테마로 고정한다. 값 자체는
-   home 전용으로 먼저 검증했던 --color-cinema-black/ink/red와 동일하게 맞춰 두 토큰 세트가
-   실제로는 하나의 팔레트를 가리키게 한다.
-   관리자 화면은 예외다 — 처음에는 이 토큰들을 그대로 물려받게 뒀다가, 관리자를 사용자
-   브랜드 경험과 구분한다는 원래 원칙(§12)에 맞지 않는다는 걸 뒤늦게 알아차려 되돌렸다.
-   .admin-scope 클래스(app/admin/layout.tsx, components/AppHeader.tsx)가 이 토큰들을
-   지역적으로 원래 블루 팔레트로 되돌린다 — 아래 :root 블록 바로 다음에 있다. */
+/* CineFit 디자인 토큰 — "Cinematic Decision Companion" 전면 개편(2026-07-30).
+   이전 라운드들(Screening Room)이 남긴 실제 문제를 직접 진단해서 고쳤다:
+   1) --border(#3d2f27)·--surface(#1c1613)에 갈색 기가 섞여 있어 화면 전체가 탁했다 — 이번
+      값은 전부 채도 0에 가까운 중성 회색(neutral near-black)으로 다시 잡았다.
+   2) --primary가 CTA·링크·순위 배지에 동시에 쓰여 "이게 지금 눌러야 하는 버튼인지, 그냥
+      참고 링크인지, 순위 표시인지" 구분이 안 됐다 — 이제 --primary(밝은 톤)는 텍스트
+      링크·보조 강조 전용, --primary-strong(진한 톤)은 오직 페이지당 하나뿐인 주 CTA
+      버튼 전용으로 역할을 나눴다. 일반 정보 링크(출처, 목록 항목)는 링크에서도 아예
+      브랜드 레드를 쓰지 않고 중성색+밑줄로 바꿨다(각 컴포넌트에서 처리).
+   3) --accent(포맷 배지)가 --trust-mid(경고 앰버)와 색이 겹쳐서 "그냥 포맷 표시"와 "확인
+      필요 경고"가 헷갈렸다 — accent를 차가운 스틸블루로 바꿔 앰버 계열과 완전히 분리했다.
+   모든 값은 배경 위 직접 텍스트 기준 4.5:1 이상을 계산해서 확정했다(주석에 실측치 기록). */
 :root {
-  --bg: #0d0a09;
-  /* surface/surface-raised를 --bg보다 눈에 띄게 밝혀서 층위가 또렷하게 읽히게 했다("색배합·
-     미적감각 더 수준높게" 피드백) — 이전 값(#181310/#221a16)은 --bg와 명도차가 작아 카드가
-     배경에서 잘 안 떨어져 보였다. */
-  --surface: #1c1613;
-  --surface-raised: #251d18;
-  --border: #3d2f27;
-  --text: #f2ece4;
-  /* 불투명도 대신 고정 hex — 이 값은 --bg·--surface 둘 다에서 6:1 이상 나오도록 미리 계산해
-     고정했다(Design Lab 라운드에서 opacity 값이 배경마다 대비가 달라져 여러 번 기준 미달을
-     냈던 것과 같은 실수를 피하기 위함). */
-  --text-sub: #a89a8a;
-  /* 링크·테두리용 — --primary-strong과 같은 와인/로즈 색상(H≈347°) 계열로 맞췄다. 이전 값
-     (#e8425c)은 --trust-low(#e05c5c)와 색상이 거의 구분이 안 될 만큼 가까워서, "이건 링크"와
-     "이건 주의가 필요하다는 상태 표시"를 색만으로는 구별하기 어려웠다("색상 전체 페이지 더
-     일관되고 위계있되 조화롭게" 피드백) — 브랜드 레드 계열은 이 두 톤(진한 --primary-strong /
-     밝은 --primary)으로만 통일하고, 상태색(trust-*)은 아래에서 이 계열과 겹치지 않게 옮겼다.
-     배경 위 직접 텍스트로도 5:1 이상 나오도록 계산했다(직접 검증). */
-  --primary: #e2536b;
-  /* 흰 글자를 얹는 채워진 배경 전용(버튼·배지) — 이전의 밝은 레드(#c81e3d)는 "경고/에러"에
-     가까운 원색으로 읽혀서, 더 깊은 와인/버건디 톤으로 낮췄다 — WCAG AA 4.5:1은 여전히
-     넉넉히 만족한다(흰 텍스트 기준 8.0:1, 직접 계산). */
-  --primary-strong: #9c1a35;
-  --primary-strong-hover: #b22242;
-  /* 포맷 태그 등 장식적 강조색 — --trust-mid(경고성 앰버)와 너무 비슷한 톤이면 "이건 그냥
-     정보 태그"와 "이건 주의가 필요한 상태"가 헷갈린다. 더 차분한 황동(brass) 톤으로 내려서
-     trust-mid의 더 선명한 금색과 구분되게 했다(직접 계산, 7.9:1). */
-  --accent: #c9955a;
+  --bg: #0a0a0c;
+  --surface: #18181b;
+  --surface-raised: #232328;
+  --border: #2c2c30;
+  --text: #f5f5f7;
+  --text-sub: #9b9ba3;
+  /* 텍스트 링크·보조 강조 전용 — --primary-strong과 같은 로즈/와인 색상 계열(H≈349°)이지만
+     작은 글자로 배경 위에 직접 써도 6.0:1이 나오도록 밝혔다(직접 계산). */
+  --primary: #db6177;
+  /* 페이지당 하나뿐인 주 CTA 버튼 전용 — "선명하지만 과도하지 않은" 시네마 레드. 흰 텍스트
+     기준 5.4:1(직접 계산) — 너무 어두워 칙칙해 보이지도, 네온처럼 튀지도 않는 지점을 찾았다. */
+  --primary-strong: #c62d49;
+  --primary-strong-hover: #cf3552;
+  /* 포맷 배지 전용(IMAX·Dolby Cinema 등) — 따뜻한 상태색(경고 앰버·성공 그린)과 확실히
+     구분되는 차가운 스틸블루로 바꿨다. 배경 위 텍스트 6.3:1(직접 계산). */
+  --accent: #6f8fb3;
   --trust-high: #3dbe7b;
   --trust-mid: #e0a83c;
-  /* 브랜드 레드 계열(--primary/--primary-strong)과 구분되도록 주황 쪽으로 옮겼다 — 이전 값
-     (#e05c5c)은 --primary와 색상이 거의 같아 "링크"와 "상태 경고"가 잘 안 구별됐다(직접
-     계산, 6.3:1). */
   --trust-low: #e2683f;
-  --radius: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  /* elevation-1..4 = 기본 카드 / 떠 있는 컨트롤 / 모달 / 강조 결과 (docs/DESIGN-SYSTEM.md §그림자) */
-  --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
-  --elevation-2: 0 10px 24px rgba(0, 0, 0, 0.4);
-  --elevation-3: 0 20px 48px rgba(0, 0, 0, 0.5);
-  --elevation-4: 0 0 0 1px var(--primary), 0 8px 24px rgba(156, 26, 53, 0.3);
+  --radius: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  /* elevation-1..4 = 기본 카드 / 떠 있는 컨트롤 / 모달 / 강조 결과 (docs/DESIGN-SYSTEM.md §그림자).
+     그림자를 최소화하고(요청사항) 대신 --border 한 겹으로 켜켜이 쌓인 층을 구분한다 — 카드는
+     테두리+배경차만으로 구분되고, elevation은 진짜 떠 있는 요소(모달·sticky bar)에만 쓴다. */
+  --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --elevation-2: 0 8px 20px rgba(0, 0, 0, 0.35);
+  --elevation-3: 0 16px 40px rgba(0, 0, 0, 0.45);
+  --elevation-4: 0 0 0 1px var(--primary-strong), 0 8px 24px rgba(198, 45, 73, 0.25);
 }
 
 /* 관리자 전용 — 사이트 전역이 시네마 레드로 바뀌기 전, 원래 쓰던 블루 팔레트를 그대로
@@ -129,29 +116,15 @@
     'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
     'Malgun Gothic', system-ui, sans-serif;
 
-  /* "The Screening Room" 홈 전용 토큰(2026-07-30). 시스템 라이트/다크와 무관하게 홈만
-     고정 팔레트를 쓴다 — 어두운 상영관 안에 있다는 물리적 감각이 핵심이라, 사용자의 라이트
-     모드 설정에 따라 배경이 밝아지면 그 감각 자체가 깨진다. 다른 화면은 기존
-     prefers-color-scheme 기반 토큰을 그대로 쓴다(이 블록과 무관).
-     --font-wanted 하나만 테마 키로 등록한다 — 이전 라운드에서 font-display를 그대로 테마
+  /* --font-wanted 하나만 테마 키로 등록한다 — 이전 라운드에서 font-display를 그대로 테마
      키 이름으로 재선언했다가, next/font/local이 이미 html 요소에 정의해 둔 같은 이름의
      CSS 변수와 순환 참조가 되어 폰트가 깨진 적이 있다(직접 겪은 버그). 반드시 다른 이름의
      테마 키를 거쳐서만 연결한다. */
-  --color-cinema-black: #0d0a09;
-  --color-cinema-black-raised: #181310;
-  --color-cinema-ink: #f2ece4;
-  /* 불투명도(text-cinema-ink/60 같은) 대신 고정 hex 하나로 둔다 — 이전 세 라운드에서 같은
-     opacity 값이 배경마다 실제 대비가 달라져 여러 번 기준 미달을 냈다(직접 계산해서 확인).
-     이 값은 --color-cinema-black·--color-cinema-black-raised 둘 다에서 6.4:1 이상 나오도록
-     미리 계산해 고정했다 — 어디에 써도 다시 계산할 필요가 없다. */
-  --color-cinema-ink-muted: #a89a8a;
-  /* 작은 글자색으로 다크 배경 위에 직접 쓰면 3.6:1로 AA(4.5:1) 미달(계산 확인) — 채워진
-     배경 위 흰 텍스트(뱃지·버튼)나 큰 헤드라인 강조 단어(3:1 기준)에만 쓴다. */
-  --color-cinema-red: #c81e3d;
-  /* hover 상태 — 그냥 더 밝은 빨강을 고르면(#d93a56) 흰 텍스트 대비가 4.48:1로 다시
-     미달이 된다(계산 확인) — 4.5:1을 넘도록 재조정한 값. */
-  --color-cinema-red-hover: #d4304e;
   --font-wanted: var(--font-display), 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
+  /* 홈 전용 --color-cinema-* 토큰은 이번 개편에서 없앴다 — 이제 홈도 사이트 전역 토큰
+     (--bg/--surface/--primary 등)을 그대로 쓴다. 예전엔 "홈만 다른 팔레트"였는데, 지금은
+     처음부터 팔레트 자체가 사이트 전체 기준이라 별도 토큰을 유지할 이유가 없어졌다
+     (일관성 요구사항과도 맞다). */
 }
 
 /*

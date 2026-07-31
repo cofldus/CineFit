@@ -40,7 +40,7 @@ export function MovieCard({ movie, variant = 'detailed' }: { movie: MovieWithSpe
         event="movie_selected"
         eventProperties={{ movieId: movie.id }}
         href={`/recommend/${movie.id}`}
-        className="group block w-[85%] shrink-0 snap-start rounded-card-lg border border-border bg-surface p-4 transition-all duration-200 hover:-translate-y-[3px] hover:shadow-float focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-strong active:translate-y-0 sm:w-auto"
+        className="group block w-[90%] shrink-0 snap-start rounded-card-lg border border-border bg-surface p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-float focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-strong active:translate-y-0 sm:w-auto"
       >
         {/* 영화마다 실제 화면비로 프레임 자체의 모양이 달라진다(2.39:1은 낮고 넓게, 1.85:1은
             상대적으로 높게) — 그 위에 비율 숫자를 크게 얹어 "이 영화의 스크린 모양"임을
@@ -79,7 +79,7 @@ export function MovieCard({ movie, variant = 'detailed' }: { movie: MovieWithSpe
 
   return (
     <article
-      className="group flex h-full flex-col overflow-hidden rounded-card-lg border border-border bg-surface transition-all duration-200 hover:-translate-y-1 hover:border-border-strong hover:bg-surface-raised hover:shadow-float"
+      className="group flex h-full flex-col overflow-hidden rounded-card-lg border border-border bg-surface transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:bg-surface-raised hover:shadow-float"
       aria-labelledby={`movie-${movie.id}-title`}
     >
       {/* 영화마다 실제 화면비로 모양이 달라지는 프레임 — compact 카드와 같은 원칙(화면비 자체가

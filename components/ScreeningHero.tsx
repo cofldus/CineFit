@@ -16,11 +16,11 @@ const STAGE_FRAMES = [
 const ROTATE_MS = 3800;
 
 /**
- * 홈 히어로 — "Cinema Selection Desk". 헤드라인 아래에 화면 전체 폭의 어두운(night) 스테이지
- * 하나를 두고, 그 안에서만 화면비→포맷→좌석→이동시간 예시가 3~4초 간격으로 자동 전환된다
- * (하나의 인터랙티브 무대 — 이전처럼 오른쪽에 작은 흐름 그래픽을 따로 두지 않는다). 히어로
- * 전체를 어둡게 하지 않고 이 스테이지 영역만 어둡다("프로젝터가 켜진 순간"). 마우스를 올리면
- * 자동 전환이 멈춘다. prefers-reduced-motion에서는 자동 전환 자체를 하지 않는다.
+ * 홈 히어로 — "Graphite Cinema" 개편(3차). 이전 버전은 2.4:1 고정 비율의 큰 사각형 안에
+ * 작은 정보만 중앙에 떠 있어 "텅 빈 화면"으로 보인다는 피드백 — 그 자리를 실제 비교 과정
+ * (화면비 → 포맷 → 좌석 → 이동시간)을 4단계로 나란히 보여주는, 내용 크기에 맞는 카드로
+ * 바꿨다. 예시 값 세트는 3~4초 간격으로 자동 전환되고, 마우스를 올리면 멈춘다.
+ * prefers-reduced-motion에서는 자동 전환 자체를 하지 않는다.
  */
 export function ScreeningHero() {
   const [frame, setFrame] = useState(0);
@@ -62,36 +62,56 @@ export function ScreeningHero() {
       </div>
 
       <div
-        className="relative mx-auto mt-10 max-w-wide overflow-hidden rounded-card-xl bg-hero shadow-glow-primary sm:mt-12"
-        style={{ aspectRatio: '2.4 / 1' }}
+        className="relative mx-auto mt-10 max-w-wide rounded-card-xl bg-hero px-5 py-6 shadow-glow-primary sm:mt-12 sm:px-8 sm:py-7"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
       >
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-6 sm:gap-6">
-          <div key={frame} className="stage-enter flex flex-col items-center gap-4 sm:flex-row sm:gap-8">
-            <div className="flex flex-col items-center gap-1.5">
-              <div
-                aria-hidden
-                className="rounded-[4px] border border-hero-border bg-hero-soft"
-                style={{ height: '44px', width: 'auto', aspectRatio: `${current.ratio} / 1` }}
-              />
-              <span className="font-mono text-sm text-hero-text-sub">{current.ratio.toFixed(2)}:1</span>
+        <p className="m-0 text-[12px] font-semibold uppercase tracking-wide text-hero-text-sub">CineFit이 비교하는 흐름</p>
+        <div key={frame} className="stage-enter mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-0">
+          <div className="flex flex-1 items-center gap-3 sm:flex-col sm:items-start sm:gap-2">
+            <div
+              aria-hidden
+              className="shrink-0 rounded-[4px] border border-hero-border bg-hero-soft"
+              style={{ height: '32px', width: 'auto', aspectRatio: `${current.ratio} / 1` }}
+            />
+            <div className="min-w-0">
+              <p className="m-0 text-[11px] font-semibold uppercase tracking-wide text-hero-text-sub">화면비</p>
+              <p className="m-0 font-mono text-[15px] font-semibold text-hero-text">{current.ratio.toFixed(2)}:1</p>
             </div>
-            <div className="hidden h-10 w-px bg-hero-border sm:block" />
-            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm font-medium text-hero-text-sub sm:text-base">
-              <span className="inline-flex items-center gap-1.5">
-                <span className="rounded-full border border-hero-border px-2.5 py-0.5 text-hero-text">{current.format}</span>
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <IconSeat className="h-4 w-4" /> {current.seat}
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <IconTransit className="h-4 w-4" /> 이동 {current.travel}
-              </span>
+          </div>
+          <IconArrowRight aria-hidden className="hidden h-4 w-4 shrink-0 text-hero-text-sub sm:mx-4 sm:block" />
+          <IconArrowRight aria-hidden className="h-4 w-4 shrink-0 rotate-90 text-hero-text-sub sm:hidden" />
+          <div className="flex flex-1 items-center gap-3 sm:flex-col sm:items-start sm:gap-2">
+            <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-hero-border" />
+            <div className="min-w-0">
+              <p className="m-0 text-[11px] font-semibold uppercase tracking-wide text-hero-text-sub">포맷</p>
+              <p className="m-0 truncate text-[15px] font-semibold text-hero-text">{current.format}</p>
+            </div>
+          </div>
+          <IconArrowRight aria-hidden className="hidden h-4 w-4 shrink-0 text-hero-text-sub sm:mx-4 sm:block" />
+          <IconArrowRight aria-hidden className="h-4 w-4 shrink-0 rotate-90 text-hero-text-sub sm:hidden" />
+          <div className="flex flex-1 items-center gap-3 sm:flex-col sm:items-start sm:gap-2">
+            <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-hero-border">
+              <IconSeat className="h-4 w-4 text-hero-text-sub" />
+            </span>
+            <div className="min-w-0">
+              <p className="m-0 text-[11px] font-semibold uppercase tracking-wide text-hero-text-sub">좌석 구역</p>
+              <p className="m-0 truncate text-[15px] font-semibold text-hero-text">{current.seat}</p>
+            </div>
+          </div>
+          <IconArrowRight aria-hidden className="hidden h-4 w-4 shrink-0 text-hero-text-sub sm:mx-4 sm:block" />
+          <IconArrowRight aria-hidden className="h-4 w-4 shrink-0 rotate-90 text-hero-text-sub sm:hidden" />
+          <div className="flex flex-1 items-center gap-3 sm:flex-col sm:items-start sm:gap-2">
+            <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-hero-border">
+              <IconTransit className="h-4 w-4 text-hero-text-sub" />
+            </span>
+            <div className="min-w-0">
+              <p className="m-0 text-[11px] font-semibold uppercase tracking-wide text-hero-text-sub">이동 시간</p>
+              <p className="m-0 truncate text-[15px] font-semibold text-hero-text">{current.travel}</p>
             </div>
           </div>
         </div>
-        <div className="absolute inset-x-0 bottom-3 flex justify-center gap-1.5 sm:bottom-4">
+        <div className="mt-5 flex justify-center gap-1.5">
           {STAGE_FRAMES.map((f, i) => (
             <span
               key={f.ratio}

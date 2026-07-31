@@ -26,11 +26,9 @@ export function HomeClosing() {
           {STEPS.map((s, i) => (
             <div key={s.n} className="flex flex-col gap-8 sm:flex-1 sm:flex-row sm:items-start sm:gap-6">
               <div className="flex items-start gap-4 sm:flex-col sm:gap-2">
-                {/* text-primary-strong 자체는 이 어두운 --bg 위에서 대비가 부족해(axe 실측 2.51:1),
-                    큰 굵은 숫자 전용으로 코랄을 밝힌 값을 쓴다(RecommendCard 히어로 라벨과 같은 예외). */}
-                <span className="font-wanted shrink-0 text-3xl font-extrabold text-[#ff8aa8] sm:text-4xl">
-                  {s.n}
-                </span>
+                {/* 순서 번호는 색이 아니라 크기·굵기로만 강조한다 — 파랑은 CTA·선택·포커스·활성
+                    내비게이션 전용이라 장식적 강조에는 쓰지 않는다. */}
+                <span className="font-wanted shrink-0 text-3xl font-bold text-text-tertiary sm:text-4xl">{s.n}</span>
                 <div className="min-w-0">
                   <p className="m-0 text-base font-bold text-text">{s.label}</p>
                   <p className="m-0 mt-1 max-w-[220px] break-keep text-[14.5px] leading-relaxed text-text-sub">

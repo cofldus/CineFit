@@ -29,15 +29,23 @@ export function NowShowing({ movies }: { movies: MovieWithSpecs[] }) {
         <h2 id="now-showing-heading" className="font-wanted m-0 text-lg font-bold tracking-[-0.01em] text-text">
           지금 볼 수 있는 영화
         </h2>
-        <div
-          ref={scrollRef}
-          onScroll={onScroll}
-          className="mt-4 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 sm:grid sm:gap-5 sm:overflow-visible sm:pb-0"
-          style={{ gridTemplateColumns: `repeat(${movies.length}, minmax(0, 1fr))` }}
-        >
-          {movies.map((m) => (
-            <MovieCard key={m.id} movie={m} variant="compact" />
-          ))}
+        <div className="relative">
+          <div
+            ref={scrollRef}
+            onScroll={onScroll}
+            className="mt-4 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 sm:grid sm:gap-5 sm:overflow-visible sm:pb-0"
+            style={{ gridTemplateColumns: `repeat(${movies.length}, minmax(0, 1fr))` }}
+          >
+            {movies.map((m) => (
+              <MovieCard key={m.id} movie={m} variant="compact" />
+            ))}
+          </div>
+          {/* 다음 카드의 바깥 테두리만 살짝 보이게 하고, 넘어간 글자는 배경색으로 페이드아웃해서
+              가려지지 않게 한다("잘린 글자가 보이면 안 된다" 요구사항) — 데스크톱 그리드에서는 뺀다. */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-bg to-transparent sm:hidden"
+          />
         </div>
         {movies.length > 1 ? (
           <div className="mt-3 flex justify-center gap-1.5 sm:hidden">

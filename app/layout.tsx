@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next';
-import localFont from 'next/font/local';
 import { AppHeader } from '../components/AppHeader';
 import { AppOpenedTracker } from '../components/AppOpenedTracker';
 import { MarketingHeader } from '../components/MarketingHeader';
@@ -7,15 +6,9 @@ import { MobileNav } from '../components/MobileNav';
 import { ServiceWorkerRegister } from '../components/ServiceWorkerRegister';
 import './globals.css';
 
-// Wanted Sans Variable(한글 글리프 포함, Pretendard 폴백) — font-wanted 유틸리티를 실제로
-// 쓰는 헤딩류에만 적용된다. 본문 기본 폰트(--font-sans/Pretendard)는 그대로 둔다 — 폼·표가
-// 많은 기존 화면들의 줄바꿈·자간 가정을 흔들지 않기 위해 의도적으로 범위를 좁혔다.
-const wantedSans = localFont({
-  src: '../node_modules/wanted-sans/fonts/variable/WantedSansVariable.ttf',
-  variable: '--font-display',
-  weight: '400 900',
-  display: 'swap',
-});
+// 폰트는 Pretendard Variable 하나로 통일한다(브리프: "외국 SaaS 느낌의 기하학적 서체를
+// 줄이고 Pretendard 하나로"). 이전에 헤딩류에만 얹었던 별도 디스플레이 서체(Wanted Sans)는
+// 완전히 뺐다 — --font-sans(전역 기본값)가 모든 텍스트에 그대로 적용된다.
 
 export const metadata: Metadata = {
   title: { default: 'CineFit — 시네핏', template: '%s | CineFit' },
@@ -25,14 +18,14 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#0d0a09',
+  themeColor: '#191714',
   width: 'device-width',
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className={wantedSans.variable}>
+    <html lang="ko">
       <body>
         <a href="#main-content" className="skip-link">
           본문으로 바로가기

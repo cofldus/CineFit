@@ -1,116 +1,108 @@
 @import 'tailwindcss';
 
-/* CineFit 디자인 토큰 (6) — "Graphite Cinema"(2026-08-01, 3차). 이전 라운드의 코랄+네이비
-   조합이 "핀테크/오래된 스타트업 앱" 같다는 피드백으로 팔레트를 전면 교체한다. 다크(코랄)와
-   라이트(아이보리)가 서로 다른 브랜드처럼 보이던 문제를 없애기 위해, 이번엔 그레이스케일
-   축(캔버스/잉크/그래파이트)과 단일 액센트(블루) 하나로 라이트·다크 두 스코프를 관통시킨다
-   — 색이 라운드마다 바뀌어도 토큰 "이름"(--bg/--text/--primary 등)과 이를 쓰는 컴포넌트
-   클래스는 그대로 두고 값만 갈아끼운다(§.admin-scope와 동일한 원리, 여러 라운드째 유지).
+/* CineFit 디자인 토큰 (8) — "Warm Cinema Charcoal"(2026-08-01, 5차). 직전 라운드의 다크
+   표면이 남색 계열로 보이고 버건디가 선명한 빨강처럼 대비가 강하다는 피드백 — 다크를
+   차가운 네이비 대신 따뜻한 차콜·브라운 블랙으로, 버건디를 더 차분한 톤으로 낮췄다. 브론즈를
+   보조 포인트로 유지한다(이전 라운드의 샴페인과 같은 역할 — 다크 스코프의 장식 텍스트 전용).
+   토큰 "이름"은 그대로 두고 값만 갈아끼운다.
 
-   색 사용 규칙(브리프 그대로): 블루(accent)는 CTA·선택·포커스·활성 내비게이션에만.
-   초록(success)은 검증됨에만, 호박(warning)은 추정·주의에만, 빨강(danger)은 파괴적·오류에만.
-   추천 순위별 색 코딩 없음, 큰 색 테두리 없음, 네온 글로우 없음(그래서 --glow-primary는
-   더 이상 색 있는 글로우가 아니라 일반 elevation과 같은 중립 그림자로 낮췄다).
+   색 사용 규칙: 버건디(#7A3042)는 버튼·선택 상태에만 제한적으로. 브론즈(#A98655)는 주의·
+   프리미엄 디테일 전용. 코발트 블루·밝은 빨강·남색 다크 금지.
 
-   기존에 있던 --accent(포맷/정보 뱃지용 파랑)는 이번에 "정보성 뱃지에는 색을 쓰지 않는다"는
-   규칙과 충돌해 중립 잉크 톤으로 다시 정의했다 — 파랑은 오직 --primary(CTA)에만 남는다.
-   --hero는 계속 스코프별로 다른 값을 갖지만 의미가 바뀌었다: 라이트(:root)에서는 결과
-   페이지의 유일한 어두운 대표 추천 카드 색(고정된 그래파이트), .cinema-scope 안에서는
-   반대로 이미 어두운 페이지에서 한 단계 더 밝은 "하이라이트" 표면(홈 스테이지·영화 카드
-   프레임)이다 — 같은 이름, 스코프마다 다른 역할이라는 점은 이전 라운드와 동일하다.
-   --paper-* 토큰은 없앴다: 결과 페이지가 더 이상 전체 다크 스코프가 아니라 라이트 캔버스 +
-   대표 카드 하나만 어둡게 하는 구조로 바뀌어서, 대안 카드는 그냥 페이지 기본 surface를
-   쓰면 "같은 환경의 카드"가 된다.
-
-   대비 검증(직접 계산, 4.5:1 이상 목표 — axe 실측이 보통 hand-calc보다 낮게 나오는 경향이
-   있어 여유를 둠. 실제 값은 Docker/axe 재검증 후 필요하면 미세 조정):
-   - primary-strong(블루 채움, 흰 텍스트): 브리프의 --accent(#526FFF)는 흰 텍스트 대비
-     4.14:1로 부족 → --accent-hover(#405CE8, 5.37:1)를 채움 색으로 쓰고, 밝은 --primary는
-     텍스트가 아니라 아이콘/포커스링/소프트 배경 전용으로 남긴다.
-   - ink-muted(#858C99, 브리프 원본)는 라이트 캔버스 위에서 3.13:1로 작은 텍스트엔 부족 —
-     장식/아이콘/큰 텍스트 전용으로 쓰고, 실제로 읽어야 하는 13.5px 안팎의 메타데이터는
-     ink-secondary(6.8:1)를 쓴다.
-   - success/warning/danger 원색 그대로는 라이트 배경 텍스트로 4.1~4.43:1(부족), 다크
-     배경 텍스트로는 그보다 더 낮아 각각 텍스트 전용 변형을 스코프별로 따로 뒀다(라이트는
-     어둡게, 다크는 밝게) — 브리프가 준 원색 자체는 배지 배경/아이콘 칠 등에는 그대로 쓴다.
-   - 다크 스코프 --text-tertiary는 가장 밝은 다크 표면(surface-strong)에서도 4.5:1을
-     넘기도록 브리프보다 살짝 밝혔다. */
+   대비 검증(직접 계산, 4.5:1 이상 목표):
+   - burgundy(#7A3042)는 이 라이트 캔버스 위 텍스트(8.07:1)·흰 텍스트 채움 버튼(9.00:1)
+     모두 안전하지만, 새 다크 표면(가장 밝은 카드 다크 #24211D 기준) 위에서는 1.78:1로
+     역시 안 보인다 — 다크 스코프 전용으로 밝힌 로즈 톤(#C97D8D, 5.19:1)을 별도로 둔다.
+   - bronze(#A98655)는 라이트 캔버스 위 작은 텍스트로 3.02:1 부족 — 배경 틴트·테두리
+     전용으로 라이트에 남기고, 다크 스코프에서는 텍스트로도 안전하다(4.75:1, 카드 다크
+     기준) — 포맷·목적 라벨 같은 시네마 장식 텍스트는 여기로.
+   - 라이트 스코프 ink 계열(브리프에 없어 새로 도출): text #201D19(15.04:1), text-sub
+     #4A443B(8.63:1), text-tertiary #6E6659(5.07:1) — 전부 따뜻한 브라운 계열로 통일.
+   - 다크 스코프 text-sub/tertiary: 브리프의 #AAA39A(secondary, 카드 다크 기준 6.42:1)를
+     그대로 쓰고, 더 옅은 tertiary는 #938C7F(카드 다크 기준 4.81:1)로 새로 도출.
+   - --hero(결과 페이지 유일한 어두운 카드)는 새 버건디 계열을 어둡힌 #4A1D28로(흰 텍스트
+     전용, 매우 높은 대비) — hero-soft는 더 깊은 #35141C. 시네마 스코프 안의 hero(이미
+     어두운 페이지의 하이라이트 표면)는 따뜻한 차콜에 버건디를 살짝 섞은 #3A2E2C. */
 :root {
-  --bg: #f5f6f8;
+  --bg: #f5f2ec;
   --surface: #ffffff;
   --surface-raised: #ffffff;
-  --surface-strong: #eceef2;
-  --border: rgba(22, 24, 29, 0.1);
-  --border-strong: rgba(22, 24, 29, 0.2);
-  --text: #16181d;
-  --text-sub: #505662;
-  /* 브리프 원본 ink-muted(#858C99)는 이 라이트 캔버스에서 13px 안팎 텍스트에 3.1~3.4:1
-     밖에 안 나와(axe 실측) 4.5:1 미달 — 실제로 읽어야 하는 메타데이터에도 쓰이므로
-     장식용으로만 남기지 않고 토큰 자체를 5:1 이상 나오도록 낮췄다. */
-  --text-tertiary: #626873;
-  --primary: #526fff;
-  --primary-strong: #405ce8;
-  --primary-strong-hover: #3450c7;
-  --primary-soft: #ebefff;
-  /* 예전엔 "정보성 파랑"이었지만, 이제 파랑은 CTA·선택 전용이라 뱃지/포맷 표시는 중립
-     잉크 톤으로 뺐다 — 텍스트 클래스 이름(text-accent 등)은 그대로 두고 색만 중립화. */
-  --accent: #505662;
-  --accent-soft: #eceef2;
+  --surface-strong: #eee9e1;
+  --border: rgba(32, 29, 25, 0.1);
+  --border-strong: rgba(32, 29, 25, 0.2);
+  --text: #201d19;
+  --text-sub: #4a443b;
+  --text-tertiary: #6e6659;
+  --primary: #7a3042;
+  --primary-strong: #7a3042;
+  --primary-strong-hover: #672536;
+  --primary-soft: #f3e7ea;
+  /* 라이트 유틸리티 화면(검색·폼 등)에서는 포맷/목적 라벨을 여전히 중립 잉크로 — 브론즈는
+     라이트 배경 위 작은 텍스트로 못 쓰고(3.02:1), 시네마 스코프(다크)에서만 텍스트로 쓴다. */
+  --accent: #4a443b;
+  --accent-soft: #eee9e1;
   --trust-high: #1d6b56;
   --trust-mid: #8a570d;
-  --trust-low: #a83737;
-  --warning-bg: #fbf1de;
+  --trust-low: #b44747;
+  --warning-bg: #f5ebdd;
   --warning-text: #8a570d;
-  /* 결과 페이지의 유일한 어두운 카드 — 스코프와 무관하게 항상 이 값(라이트 페이지 위의
-     고정된 그래파이트 카드). .cinema-scope 안에서는 아래에서 다른 값으로 재정의된다. */
-  --hero: #1d2027;
-  --hero-soft: #272b34;
-  --hero-text: #f5f6f8;
-  --hero-text-sub: #a7adba;
-  --hero-border: rgba(245, 246, 248, 0.14);
+  /* 결과 페이지의 유일한 어두운 카드 — 스코프와 무관하게 항상 이 값(어둡힌 버건디 카드).
+     .cinema-scope 안에서는 아래에서 다른 값으로 재정의된다. */
+  --hero: #4a1d28;
+  --hero-soft: #35141c;
+  --hero-text: #f4f1eb;
+  --hero-text-sub: #aaa39a;
+  --hero-border: rgba(244, 241, 235, 0.14);
   --radius: 12px;
   --radius-lg: 18px;
   --radius-xl: 24px;
-  --elevation-1: 0 1px 2px rgba(22, 24, 29, 0.06);
-  --elevation-2: 0 10px 28px rgba(22, 24, 29, 0.1);
-  --elevation-3: 0 20px 48px rgba(22, 24, 29, 0.16);
-  --elevation-4: 0 1px 3px rgba(22, 24, 29, 0.07);
-  /* 네온 글로우 금지 — 색 있는 광원 대신 중립 elevation과 동일하게 낮췄다(기존 클래스명은
-     유지해 컴포넌트 쪽 수정 없이 효과만 사라지게 함). */
+  --elevation-1: 0 1px 2px rgba(32, 29, 25, 0.06);
+  --elevation-2: 0 10px 28px rgba(32, 29, 25, 0.1);
+  --elevation-3: 0 20px 48px rgba(32, 29, 25, 0.16);
+  --elevation-4: 0 1px 3px rgba(32, 29, 25, 0.07);
+  /* 화려한 글로우·재밌는 확대 금지(모션 절제 요구) — 색 있는 광원 대신 중립 elevation. */
   --glow-primary: var(--elevation-3);
 }
 
-/* 시네마 스코프 — 홈·영화 선택·상영관 상세의 <main>에 적용(결과 페이지는 더 이상 여기 속하지
-   않는다 — 결과는 라이트 캔버스 + 대표 카드 하나만 어둡다). .admin-scope와 동일한 원리. */
+/* 시네마 스코프 — 홈·영화 선택·상영관 상세의 <main>에 적용(결과 페이지는 여기 속하지 않는다
+   — 결과는 라이트 캔버스 + 대표 카드 하나만 어둡다). .admin-scope와 동일한 원리. */
 .cinema-scope {
-  --bg: #15171c;
-  --surface: #1d2027;
-  --surface-raised: #272b34;
-  --surface-strong: #272b34;
+  /* 기본 다크·카드 다크 — 차가운 네이비가 아니라 따뜻한 차콜·브라운 블랙(브리프 원본 값). */
+  --bg: #191714;
+  --surface: #24211d;
+  --surface-raised: #2e2a25;
+  --surface-strong: #2e2a25;
   --border: rgba(255, 255, 255, 0.1);
   --border-strong: rgba(255, 255, 255, 0.18);
-  --text: #f0f1f4;
-  --text-sub: #a7adba;
-  --text-tertiary: #9199a8;
-  --primary: #8da0ff;
-  --primary-strong: #405ce8;
-  --primary-strong-hover: #3450c7;
-  --primary-soft: rgba(82, 111, 255, 0.18);
-  --accent: #a7adba;
-  --accent-soft: rgba(255, 255, 255, 0.08);
+  --text: #f4f1eb;
+  --text-sub: #aaa39a;
+  --text-tertiary: #938c7f;
+  /* 라이트 스코프의 진한 버건디(#7A3042)는 이 다크 배경 위에서 1.78:1까지 떨어져 안
+     보인다 — 텍스트/아이콘/포커스 용도로만 밝힌 로즈 톤을 쓴다(채움 버튼은 아래
+     --primary-strong처럼 스코프 무관하게 원래 버건디 그대로 — 흰 텍스트와 짝지어지므로
+     배경색과 무관하게 안전하다). */
+  --primary: #c97d8d;
+  --primary-strong: #7a3042;
+  --primary-strong-hover: #672536;
+  --primary-soft: rgba(201, 125, 141, 0.18);
+  /* 시네마 스코프에서는 브론즈를 장식적 텍스트("은은한 시네마 액센트")에 쓴다 — 브리프
+     원본 #A98655는 surface-strong(#2E2A25, 가장 밝은 다크 표면) 위에서 4.22:1로 부족해
+     (axe 실측) 한 단계 밝힌 값을 쓴다. */
+  --accent: #bc9668;
+  --accent-soft: rgba(188, 150, 104, 0.16);
   --trust-high: #5fcbae;
   --trust-mid: #e3b15c;
   --trust-low: #e8836b;
   --warning-bg: rgba(227, 177, 92, 0.16);
   --warning-text: #e3b15c;
-  /* 시네마 스코프 안의 hero는 반대로 "이미 어두운 페이지에서 한 단계 밝은 하이라이트"
-     표면이다(bg < surface/surface-strong < hero 순으로 밝아짐) — 홈 스테이지, 영화 카드의
-     화면비 프레임에 쓴다. */
-  --hero: #323847;
-  --hero-soft: #3c4354;
-  --hero-text: #f5f6f8;
-  --hero-text-sub: #b7bdc9;
-  --hero-border: rgba(245, 246, 248, 0.16);
+  /* 시네마 스코프 안의 hero는 "이미 어두운 페이지에서 한 단계 밝은 하이라이트" 표면이다
+     — 순수 회색이 아니라 차콜에 버건디를 살짝 섞은 톤을 써서 홈 스테이지·영화 카드
+     프레임이 중립적인 테크 UI가 아니라 극장 느낌을 유지하게 한다. */
+  --hero: #3a2e2c;
+  --hero-soft: #473a37;
+  --hero-text: #f4f1eb;
+  --hero-text-sub: #aaa39a;
+  --hero-border: rgba(244, 241, 235, 0.16);
   --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.3);
   --elevation-2: 0 10px 28px rgba(0, 0, 0, 0.35);
   --elevation-3: 0 20px 48px rgba(0, 0, 0, 0.45);
@@ -200,11 +192,6 @@
   --font-sans:
     'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
     'Malgun Gothic', system-ui, sans-serif;
-
-  /* --font-wanted 하나만 테마 키로 등록한다 — next/font/local이 html에 이미 정의한 같은
-     이름의 CSS 변수와 겹치면 순환 참조로 폰트가 깨진 적이 있어(직접 겪은 버그), 반드시
-     다른 이름의 테마 키를 거쳐서만 연결한다. */
-  --font-wanted: var(--font-display), 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
 }
 
 @layer base {
@@ -240,9 +227,9 @@
     padding: 16px 16px 96px;
   }
 
-  /* 타이포 굵기 규칙(브리프): 히어로 750-800·페이지 타이틀 700-750·섹션 650-700·카드
-     타이틀 600-650·본문 400-450, 900은 쓰지 않는다. 긴 한글 제목이 이상한 지점에서
-     줄바꿈되지 않도록 keep-all을 기본으로 깐다. */
+  /* 타이포 굵기 규칙(브리프 정확한 값 그대로): 페이지 제목 28px/700, 질문·라벨류
+     15-16px/600, 본문 15px/400. 800~900 같은 과한 굵기와 지나친 음수 자간은 쓰지 않는다.
+     긴 한글 제목이 이상한 지점에서 줄바꿈되지 않도록 keep-all을 기본으로 깐다. */
   h1,
   h2,
   h3,
@@ -252,17 +239,17 @@
   }
   h1 {
     font-size: 28px;
-    font-weight: 750;
-    line-height: 1.3;
+    font-weight: 700;
+    line-height: 1.35;
   }
   h2 {
-    font-size: 22px;
-    font-weight: 700;
-    line-height: 1.3;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.35;
   }
   h3 {
-    font-size: 18px;
-    font-weight: 650;
+    font-size: 16px;
+    font-weight: 600;
   }
 
   /* 시간·가격·점수처럼 자릿수가 바뀌는 숫자가 나열될 때 자릿수 폭이 흔들리지 않게 표 형태

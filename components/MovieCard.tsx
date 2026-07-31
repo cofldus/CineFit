@@ -51,9 +51,12 @@ export function MovieCard({ movie, variant = 'detailed' }: { movie: MovieWithSpe
         <div
           aria-hidden
           className="relative flex items-center justify-center rounded-card border-x border-t border-hero-border border-b-2 border-b-accent/60 bg-hero transition-shadow group-hover:shadow-glow-primary"
-          style={{ aspectRatio: `${clampedAr} / 1` }}
+          style={{
+            aspectRatio: `${clampedAr} / 1`,
+            background: 'radial-gradient(ellipse 85% 95% at 50% 100%, var(--hero-soft), var(--hero) 78%)',
+          }}
         >
-          <span className="font-mono text-lg font-bold text-hero-text sm:text-xl">
+          <span className="font-mono text-lg font-bold tracking-[0.08em] text-hero-text sm:text-xl">
             {ratioLabel ?? `${clampedAr.toFixed(2)}:1`}
           </span>
           {formats.length > 0 ? (
@@ -106,9 +109,12 @@ export function MovieCard({ movie, variant = 'detailed' }: { movie: MovieWithSpe
       <div
         aria-hidden
         className="relative flex items-center justify-center border-b-2 border-b-accent/60 bg-hero px-4 transition-shadow group-hover:shadow-glow-primary"
-        style={{ aspectRatio: `${clampedAr} / 1` }}
+        style={{
+          aspectRatio: `${clampedAr} / 1`,
+          background: 'radial-gradient(ellipse 85% 95% at 50% 100%, var(--hero-soft), var(--hero) 78%)',
+        }}
       >
-        <span className="font-mono text-2xl font-bold text-hero-text sm:text-[28px]">
+        <span className="font-mono text-2xl font-bold tracking-[0.08em] text-hero-text sm:text-[28px]">
           {ratioLabel ?? `${clampedAr.toFixed(2)}:1`}
         </span>
         {formats.length > 0 ? (

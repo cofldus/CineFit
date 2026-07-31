@@ -14,7 +14,7 @@ const resultRowCls =
 const movieIconTileCls = 'flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-surface-strong text-text-sub';
 // 상영관 결과는 은은한 버건디 틴트로 — "관공서 디렉터리"가 아니라 극장을 찾는 화면이라는
 // 인상을 더한다(burgundy-soft는 배경 틴트로만 쓰고, 작은 텍스트로는 쓰지 않는다).
-const cinemaIconTileCls = 'flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-primary-soft text-primary-strong';
+const cinemaIconTileCls = 'flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-primary-soft text-primary';
 
 /** 검색어와 일치하는 부분만 옅게 강조 — 결과가 왜 이 항목인지 바로 보이게 한다. */
 function Highlighted({ text, query }: { text: string; query: string }) {

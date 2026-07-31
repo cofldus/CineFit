@@ -279,12 +279,13 @@ export function RecommendCard({
         aria-labelledby={`pick-${rank}-title`}
         data-testid={`pick-${label}`}
       >
-        {/* 카드 상단의 얇은 브론즈 트림 — 프리미엄 티켓/프로그램 카드 같은 디테일. 텍스트가
-            아니라 장식 선이라 대비 요건과 무관. */}
-        <span aria-hidden className="absolute inset-x-0 top-0 h-[3px] bg-[#c49a6c]" />
-        {/* 이 레이블은 --hero 위에서 --accent(라이트 스코프에서는 중립 잉크)를 쓰면 거의
-            안 보여 이 카드 전용으로 밝힌 브론즈를 직접 쓴다(--hero 배경 대비 5.47:1). */}
-        <p className="m-0 text-[13px] font-bold uppercase tracking-[0.08em] text-[#c49a6c]">가장 잘 맞는 선택</p>
+        {/* 카드 상단의 얇은 와인→로즈 트림 — 텍스트가 아니라 장식 선이라 대비 요건과 무관. */}
+        <span
+          aria-hidden
+          className="absolute inset-x-0 top-0 h-[3px]"
+          style={{ background: 'linear-gradient(90deg, #872b42, #bc6076)' }}
+        />
+        <p className="m-0 text-[13px] font-bold uppercase tracking-[0.08em] text-accent">가장 잘 맞는 선택</p>
         <h2
           id={`pick-${rank}-title`}
           className="m-0 mt-2.5 text-balance font-headline text-[27px] font-extrabold leading-[1.15] tracking-[-0.02em] text-hero-text sm:text-[36px]"

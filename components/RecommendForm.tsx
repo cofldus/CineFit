@@ -9,14 +9,72 @@ import { SegmentedControl } from './SegmentedControl';
 import { StepSection } from './StepSection';
 import { ToggleCard } from './ToggleCard';
 
-// 채움형 필드 — 검은 배경 위 테두리 박스 대신, 라벨이 안에 들어간 raised 서피스.
-// 포커스 시 얇은 와인 인셋 라인(선택 컨트롤과 같은 언어). [color-scheme:dark]로 네이티브
-// 달력·스피너 아이콘도 다크로 맞춘다.
+// 채움형 필드 — 검은 배경 위 테두리 박스 대신, 아이콘 타일 + 라벨이 안에 들어간 raised
+// 서피스. 포커스 시 얇은 와인 인셋 라인이 켜지고 아이콘 타일도 로즈로 점등된다(선택
+// 컨트롤과 같은 언어). [color-scheme:dark]로 네이티브 달력·스피너 아이콘도 다크로 맞춘다.
 const fieldCls =
-  'group flex min-h-[64px] w-full flex-col justify-center rounded-card bg-surface-raised px-4 py-2.5 transition-shadow focus-within:shadow-[inset_0_0_0_1px_rgba(188,96,118,0.5)]';
+  'group flex min-h-[64px] w-full items-center gap-3 rounded-card bg-surface-raised px-3.5 py-2.5 transition-shadow focus-within:shadow-[inset_0_0_0_1px_rgba(188,96,118,0.5)]';
 const fieldLabelCls = 'text-[12px] font-semibold text-text-sub';
 const fieldInputCls =
   'm-0 w-full border-0 bg-transparent p-0 text-[15.5px] font-medium text-text outline-none [color-scheme:dark] placeholder:text-text-tertiary';
+
+// 필드 왼쪽 아이콘 타일 — 기본은 차분한 회색, 포커스 시 로즈 점등(아이콘 배경 발광 반복
+// 금지 원칙에 맞춰 아주 옅은 틴트만).
+function FieldIcon({ children }: { children: React.ReactNode }) {
+  return (
+    <span
+      aria-hidden
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-white/[0.04] text-text-tertiary transition-colors group-focus-within:bg-primary-soft group-focus-within:text-primary"
+    >
+      {children}
+    </span>
+  );
+}
+
+const glyphProps = {
+  viewBox: '0 0 20 20',
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 1.75,
+  strokeLinecap: 'round',
+  strokeLinejoin: 'round',
+} as const;
+
+function CalendarGlyph() {
+  return (
+    <svg {...glyphProps} className="h-[18px] w-[18px]">
+      <rect x="3" y="4.5" width="14" height="12" rx="2" />
+      <path d="M3 8.5h14M7 2.5v3M13 2.5v3" />
+    </svg>
+  );
+}
+
+function PinGlyph() {
+  return (
+    <svg {...glyphProps} className="h-[18px] w-[18px]">
+      <path d="M10 17.5s-5.5-4.6-5.5-8.6a5.5 5.5 0 1 1 11 0c0 4-5.5 8.6-5.5 8.6Z" />
+      <circle cx="10" cy="8.7" r="1.9" />
+    </svg>
+  );
+}
+
+function ClockGlyph() {
+  return (
+    <svg {...glyphProps} className="h-[18px] w-[18px]">
+      <circle cx="10" cy="10" r="7" />
+      <path d="M10 6.2V10l2.6 1.8" />
+    </svg>
+  );
+}
+
+function WonGlyph() {
+  return (
+    <svg {...glyphProps} className="h-[18px] w-[18px]">
+      <path d="M3 6.5l2.4 7 2.3-7 2.3 7 2.3-7 2.3 7 2.4-7" />
+      <path d="M2.5 10.5h15" />
+    </svg>
+  );
+}
 
 function SelectChevron() {
   return (
@@ -146,43 +204,63 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
       <StepSection step={1} title="언제, 어디서 볼까요?" first>
         <div className="grid gap-2.5 sm:grid-cols-2">
           <label className={fieldCls}>
-            <span className={fieldLabelCls}>관람 날짜</span>
-            <input className={`${fieldInputCls} mt-1`} type="date" name="date" defaultValue={defaultDate} required />
+            <FieldIcon>
+              <CalendarGlyph />
+            </FieldIcon>
+            <span className="min-w-0 flex-1">
+              <span className={fieldLabelCls}>관람 날짜</span>
+              <input className={`${fieldInputCls} mt-0.5`} type="date" name="date" defaultValue={defaultDate} required />
+            </span>
           </label>
           <label className={`${fieldCls} relative`}>
-            <span className={fieldLabelCls}>출발 위치</span>
-            <select className={`${fieldInputCls} mt-1 appearance-none pr-8`} name="originId" defaultValue="cityhall">
-              {ORIGIN_PRESETS.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
+            <FieldIcon>
+              <PinGlyph />
+            </FieldIcon>
+            <span className="min-w-0 flex-1">
+              <span className={fieldLabelCls}>출발 위치</span>
+              <select className={`${fieldInputCls} mt-0.5 appearance-none pr-8`} name="originId" defaultValue="cityhall">
+                {ORIGIN_PRESETS.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </span>
             <SelectChevron />
           </label>
           <label className={fieldCls}>
-            <span className={fieldLabelCls}>최대 이동 시간 (분)</span>
-            <input
-              className={`${fieldInputCls} mt-1`}
-              type="number"
-              name="maxTravelMinutes"
-              defaultValue={60}
-              min={5}
-              max={240}
-              step={5}
-            />
+            <FieldIcon>
+              <ClockGlyph />
+            </FieldIcon>
+            <span className="min-w-0 flex-1">
+              <span className={fieldLabelCls}>최대 이동 시간 (분)</span>
+              <input
+                className={`${fieldInputCls} mt-0.5`}
+                type="number"
+                name="maxTravelMinutes"
+                defaultValue={60}
+                min={5}
+                max={240}
+                step={5}
+              />
+            </span>
           </label>
           <label className={fieldCls}>
-            <span className={fieldLabelCls}>최대 가격 (원)</span>
-            <input
-              className={`${fieldInputCls} mt-1`}
-              type="number"
-              name="maxPrice"
-              defaultValue={40000}
-              min={1000}
-              max={200000}
-              step={1000}
-            />
+            <FieldIcon>
+              <WonGlyph />
+            </FieldIcon>
+            <span className="min-w-0 flex-1">
+              <span className={fieldLabelCls}>최대 가격 (원)</span>
+              <input
+                className={`${fieldInputCls} mt-0.5`}
+                type="number"
+                name="maxPrice"
+                defaultValue={40000}
+                min={1000}
+                max={200000}
+                step={1000}
+              />
+            </span>
           </label>
         </div>
       </StepSection>

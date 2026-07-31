@@ -4,16 +4,15 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { MOTION_OPTIONS, ORIGIN_PRESETS, PRIORITY_OPTIONS } from '../src/data/constants';
 import { readOnboardingState, type OnboardingAnswers } from '../src/lib/onboarding';
-import { Checkbox } from './Checkbox';
 import { IconChevronRight } from './Icon';
 import { SegmentedControl } from './SegmentedControl';
 import { StepSection } from './StepSection';
+import { ToggleCard } from './ToggleCard';
 
 const inputCls =
   'min-h-[52px] w-full rounded-card border border-border bg-bg px-3.5 text-base text-text outline-none transition-shadow focus-visible:border-primary-strong focus-visible:ring-[3px] focus-visible:ring-primary-soft';
 const selectCls = `${inputCls} appearance-none pr-10`;
 const labelCls = 'block text-[15px] font-semibold text-text';
-const checkRowCls = 'flex min-h-12 cursor-pointer items-center gap-2.5 text-[15px] text-text';
 
 function SelectChevron() {
   return (
@@ -113,17 +112,11 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
           defaultValue={prefill?.priority ?? 'balance'}
         />
         <fieldset className="m-0 border-0 p-0">
-          <legend className="mb-1.5 block text-sm font-semibold text-text">허용할 상영 방식</legend>
-          <div className="flex flex-col gap-1">
-            <label className={checkRowCls}>
-              <Checkbox name="allowImax" defaultChecked /> IMAX 허용
-            </label>
-            <label className={checkRowCls}>
-              <Checkbox name="allowDolby" defaultChecked /> Dolby Cinema 허용
-            </label>
-            <label className={checkRowCls}>
-              <Checkbox name="allowStandard" defaultChecked /> 일반관(대형관 포함) 허용
-            </label>
+          <legend className="mb-2 block text-sm font-semibold text-text">허용할 상영 방식</legend>
+          <div className="grid gap-2.5 sm:grid-cols-3">
+            <ToggleCard name="allowImax" defaultChecked title="IMAX" description="더 큰 화면과 확장 화면비" />
+            <ToggleCard name="allowDolby" defaultChecked title="Dolby Cinema" description="돌비 비전·애트모스 사운드" />
+            <ToggleCard name="allowStandard" defaultChecked title="일반관" description="대형관 포함 일반 상영관" />
           </div>
         </fieldset>
       </StepSection>
@@ -137,18 +130,17 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
           defaultValue={prefill?.motionSickness ?? '0'}
         />
         <fieldset className="m-0 border-0 p-0">
-          <legend className="mb-1.5 block text-sm font-semibold text-text">좌석·편의 선호</legend>
-          <div className="flex flex-col gap-1">
-            <label className={checkRowCls} key={prefillKey}>
-              <Checkbox name="subtitleReadability" defaultChecked={prefill?.subtitleReadability ?? false} />
-              자막이 잘 보이는 좌석 우선
-            </label>
-            <label className={checkRowCls}>
-              <Checkbox name="neckComfort" /> 목 덜 아픈 좌석 우선
-            </label>
-            <label className={checkRowCls}>
-              <Checkbox name="wheelchair" /> 휠체어 접근 필수 (확인 안 된 상영관은 제외돼요)
-            </label>
+          <legend className="mb-2 block text-sm font-semibold text-text">좌석·편의 선호</legend>
+          <div className="grid gap-2.5 sm:grid-cols-3">
+            <ToggleCard
+              key={prefillKey}
+              name="subtitleReadability"
+              defaultChecked={prefill?.subtitleReadability ?? false}
+              title="자막 가독 우선"
+              description="자막이 잘 보이는 구역을 먼저 추천"
+            />
+            <ToggleCard name="neckComfort" title="목 편한 좌석 우선" description="고개를 덜 들어도 되는 구역 우선" />
+            <ToggleCard name="wheelchair" title="휠체어 접근 필수" description="확인 안 된 상영관은 제외돼요" />
           </div>
         </fieldset>
       </StepSection>

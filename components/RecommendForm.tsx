@@ -496,7 +496,11 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
             </button>
           ) : null}
           {step < 2 ? (
+            // key를 분리해 React가 '다음'과 '추천 받기'를 같은 DOM 노드로 재사용하지 못하게
+            // 한다 — 재사용되면 클릭 처리 도중 type이 submit으로 바뀌어, 마지막 '다음' 클릭의
+            // 기본 동작이 폼 제출로 이어지는 버그가 있었다(단계 이동과 제출이 동시에 발생).
             <button
+              key="next"
               type="button"
               onClick={() => setStep((s) => s + 1)}
               className="flex min-h-12 flex-1 items-center justify-center rounded-card bg-primary-strong text-base font-semibold text-white transition-colors hover:bg-primary-strong-hover"
@@ -505,6 +509,7 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
             </button>
           ) : (
             <button
+              key="submit"
               type="submit"
               className="flex min-h-12 flex-1 items-center justify-center rounded-card bg-primary-strong text-base font-semibold text-white transition-colors hover:bg-primary-strong-hover disabled:opacity-60"
               disabled={submitting}

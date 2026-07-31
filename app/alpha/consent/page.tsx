@@ -19,7 +19,7 @@ const POINTS = [
 export default function AlphaConsentPage() {
   return (
     <main className="mx-auto max-w-xl px-4 pb-24 pt-6">
-      <h1 className="font-wanted m-0 text-[28px] font-bold tracking-[-0.02em] text-text sm:text-[32px]">
+      <h1 className="m-0 text-[28px] font-bold text-text sm:text-[32px]">
         알파 참여 전에 알아두세요
       </h1>
       <ul className="m-0 mt-5 flex list-none flex-col gap-3 p-0">

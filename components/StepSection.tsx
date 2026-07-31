@@ -15,7 +15,7 @@ export function StepSection({
 }) {
   return (
     <section className={first ? 'pt-0' : 'mt-6 border-t border-border pt-6'}>
-      <h2 className="font-wanted m-0 mb-4 flex items-center gap-2.5 text-base font-bold tracking-[-0.01em] text-text">
+      <h2 className="m-0 mb-4 flex items-center gap-2.5 text-base font-bold text-text">
         <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-strong text-xs font-bold text-white">
           {step}
         </span>

@@ -50,7 +50,7 @@ export function SelectionWidget({ runId, picks }: { runId: number; picks: PickOp
 
   return (
     <div className="border-t border-border pt-6">
-      <h2 className="font-wanted m-0 text-xl font-bold tracking-[-0.01em] text-text">선택을 도와드렸나요?</h2>
+      <h2 className="m-0 text-xl font-bold text-text">선택을 도와드렸나요?</h2>
       <p className="mt-2 text-sm text-text-sub">
         실제로 고른 상영관을 알려주시면 추천 품질 개선에 활용됩니다. 예매 페이지로 이동했는지와는 별개예요.
       </p>

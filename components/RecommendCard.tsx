@@ -184,14 +184,22 @@ export function RecommendCard({
 
     return (
       <article
-        className="rounded-card-xl bg-hero p-6 shadow-glow-primary transition-shadow duration-300 sm:p-8"
+        className="relative overflow-hidden rounded-card-xl bg-hero p-6 shadow-glow-primary transition-shadow duration-300 sm:p-8"
         aria-labelledby={`pick-${rank}-title`}
         data-testid={`pick-${label}`}
       >
-        <p className="m-0 text-[13px] font-bold uppercase tracking-[0.08em] text-hero-text-sub">가장 잘 맞는 선택</p>
+        {/* 카드 상단의 얇은 브론즈 트림 — 프리미엄 티켓/프로그램 카드 같은 디테일. 텍스트가
+            아니라 장식 선이라 대비 요건과 무관. */}
+        <span aria-hidden className="absolute inset-x-0 top-0 h-[3px] bg-[#c49a6c]" />
+        {/* 이 레이블은 --hero 위에서 --accent(라이트 스코프에서는 중립 잉크)를 쓰면 거의
+            안 보여 이 카드 전용으로 밝힌 브론즈를 직접 쓴다(--hero #4A1D28 배경 대비
+            5.47:1 — 토큰의 기본 브론즈 #A98655는 이 배경에서 4.16:1로 부족해 한 단계
+            밝혔다. 전역 토큰으로 올리지 않은 이유는 이 카드 하나에서만 쓰는 단발성
+            강조이기 때문). */}
+        <p className="m-0 text-[13px] font-bold uppercase tracking-[0.08em] text-[#c49a6c]">가장 잘 맞는 선택</p>
         <h2
           id={`pick-${rank}-title`}
-          className="font-wanted m-0 mt-2.5 text-balance text-[26px] font-bold tracking-[-0.02em] text-hero-text sm:text-[30px]"
+          className="m-0 mt-2.5 text-balance text-[26px] font-bold text-hero-text sm:text-[30px]"
         >
           {c.location.name} {c.auditorium.no} · {timeFmt.format(new Date(c.startsAt))}
         </h2>
@@ -263,10 +271,12 @@ export function RecommendCard({
       data-testid={`pick-${label}`}
     >
       <div className="flex items-start justify-between gap-3">
-        <p className="m-0 text-sm text-text-sub">{PICK_SCENARIO[label]}</p>
+        <span className="inline-flex items-center rounded-full bg-primary-soft px-2.5 py-1 text-[12.5px] font-semibold text-primary-strong">
+          {PICK_SCENARIO[label]}
+        </span>
         <span className="shrink-0 text-[12px] font-medium text-text-tertiary">{rank}순위</span>
       </div>
-      <h3 id={`pick-${rank}-title`} className="font-wanted m-0 mb-3 mt-1 text-balance text-lg font-bold tracking-[-0.01em] text-text">
+      <h3 id={`pick-${rank}-title`} className="m-0 mb-3 mt-1 text-balance text-lg font-bold text-text">
         {c.location.name} {c.auditorium.no} · {timeFmt.format(new Date(c.startsAt))}
       </h3>
 

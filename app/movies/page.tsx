@@ -11,11 +11,14 @@ export default async function MoviesPage() {
 
   return (
     <main className="cinema-scope mx-auto min-h-dvh max-w-wide bg-bg px-4 pb-24 pt-10 sm:pt-14">
-      <p className="m-0 text-[13px] font-bold uppercase tracking-[0.08em] text-text-sub">영화 선택</p>
-      <h1 className="font-wanted m-0 mt-2 text-[32px] font-bold tracking-[-0.02em] text-text sm:text-[38px]">
+      <p className="m-0 text-[13px] font-bold uppercase tracking-[0.08em] text-accent">영화 선택</p>
+      <h1 className="m-0 mt-2 text-[32px] font-bold text-text sm:text-[38px]">
         어떤 영화를 보러 가세요?
       </h1>
-      <div className="mt-3 max-w-content">
+      <p className="m-0 mt-2 max-w-content text-[15px] text-text-sub">
+        오늘 상영 중인 작품 중 하나를 고르면, 그 영화에 가장 잘 맞는 상영관을 찾아드릴게요.
+      </p>
+      <div className="mt-4 max-w-content">
         <Notice>
           지금은 테스트용으로 준비한 영화 {movies.length}편이에요. 사양 값마다 출처와 확인 날짜를
           같이 보여드리고, 확인되지 않은 항목은 추천 점수에 그만큼 반영돼요.

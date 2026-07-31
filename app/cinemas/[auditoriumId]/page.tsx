@@ -80,28 +80,31 @@ export default async function AuditoriumDetailPage({
 
   return (
     <main className="cinema-scope mx-auto min-h-dvh max-w-wide bg-bg px-4 pb-24 pt-6">
-      {/* 1. 상영관 이름·위치·핵심 특징 — 상단 요약을 더 강하게 */}
-      <p className="m-0 text-[13px] font-bold uppercase tracking-[0.08em] text-text-sub">{detail.location.chain}</p>
-      <h1 className="font-wanted m-0 mt-2 text-[32px] font-bold tracking-[-0.02em] text-text sm:text-[38px]">
-        {detail.location.name} {detail.no}
+      {/* 1. 상영관 이름·위치·핵심 특징 — 상단 요약을 더 강하게, 줄바꿈이 어색한 지점에서
+          끊기지 않도록 관 이름은 통째로 줄바꿈되게 한다. */}
+      <p className="m-0 text-[13px] font-bold uppercase tracking-[0.08em] text-accent">{detail.location.chain}</p>
+      <h1 className="m-0 mt-2 text-balance text-[32px] font-bold text-text sm:text-[38px]">
+        {detail.location.name} <span className="whitespace-nowrap">{detail.no}</span>
       </h1>
-      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+      <div className="mt-3 flex flex-wrap items-center gap-2">
         <FormatTag format={detail.brand} />
-        {detail.seatCount ? (
-          <span className="inline-flex items-center rounded-full border border-border px-2.5 py-0.5 text-xs font-medium text-text-sub">
-            {detail.seatCount}석
-          </span>
-        ) : null}
         {detail.location.status !== 'operating' || detail.status !== 'operating' ? (
           <span className="inline-flex items-center rounded-full border border-trust-low/40 px-2.5 py-0.5 text-xs font-medium text-trust-low">
             운영 상태 확인 필요
           </span>
         ) : null}
       </div>
-      {detail.location.transitNote ? (
-        <p className="mt-2 flex items-start gap-1.5 text-sm text-text-sub">
-          <IconTransit className="mt-0.5 h-4 w-4 shrink-0" />
-          {detail.location.transitNote}
+      {/* 좌석수·이동 정보를 뱃지가 아니라 하나의 보조 정보 행으로 묶어 포맷 태그와의 위계를
+          분명히 한다(포맷이 1순위, 좌석·이동은 2순위 보조 정보). */}
+      {detail.seatCount || detail.location.transitNote ? (
+        <p className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-sub">
+          {detail.seatCount ? <span className="tabular-nums">{detail.seatCount}석</span> : null}
+          {detail.location.transitNote ? (
+            <span className="inline-flex items-center gap-1.5">
+              <IconTransit className="h-4 w-4 shrink-0" />
+              {detail.location.transitNote}
+            </span>
+          ) : null}
         </p>
       ) : null}
       <p className="mt-3">
@@ -129,7 +132,7 @@ export default async function AuditoriumDetailPage({
         ) : (
           <ul className="m-0 mt-3 grid grid-cols-1 gap-3 p-0 sm:grid-cols-2 lg:grid-cols-3">
             {detail.seatZones.map((z, i) => (
-              <li key={i} className="rounded-card-lg bg-surface-strong p-5">
+              <li key={i} className="rounded-card-lg border-t-2 border-t-accent/50 bg-surface-strong p-5">
                 <div className="flex flex-wrap items-center gap-1.5">
                   {z.purposes.map((p) => (
                     <span key={p} className="text-[13px] font-semibold uppercase tracking-wide text-accent">
@@ -137,7 +140,7 @@ export default async function AuditoriumDetailPage({
                     </span>
                   ))}
                 </div>
-                <p className="m-0 mt-2 text-xl font-bold tracking-[-0.01em] text-text">
+                <p className="m-0 mt-2 text-xl font-bold text-text">
                   {[z.rowRange, z.colRange].filter(Boolean).join(' ') || '전체'}
                 </p>
                 {z.rationale ? <p className="m-0 mt-2 text-sm leading-relaxed text-text-sub">{z.rationale}</p> : null}
@@ -180,9 +183,10 @@ export default async function AuditoriumDetailPage({
             <ul className="m-0 mt-3 flex list-none flex-col divide-y divide-border p-0 text-sm">
               {detail.upcomingShowtimes.map((s) => (
                 <li key={s.id} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 py-3.5">
-                  <span className="w-[92px] shrink-0 font-semibold tabular-nums text-text">
+                  <span className="w-[76px] shrink-0 text-[15px] font-semibold tabular-nums text-text">
                     {dtFmt.format(new Date(s.startsAt))}
                   </span>
+                  <span aria-hidden className="hidden h-4 w-px shrink-0 bg-border-strong sm:block" />
                   <Link
                     href={`/recommend/${s.movieId}`}
                     className="min-w-0 flex-1 truncate font-medium text-text hover:underline decoration-border-strong underline-offset-2"

@@ -16,7 +16,7 @@ export default async function PostWatchPage({ params }: { params: Promise<{ runI
 
   return (
     <main className="mx-auto max-w-xl px-4 pb-24 pt-6">
-      <h1 className="font-wanted m-0 text-[28px] font-bold tracking-[-0.02em] text-text sm:text-[32px]">관람은 어떠셨나요?</h1>
+      <h1 className="m-0 text-[28px] font-bold text-text sm:text-[32px]">관람은 어떠셨나요?</h1>
       {movie ? (
         <p className="mt-1 text-sm text-text-sub">
           <strong className="font-semibold text-text">{movie.title}</strong> 추천에 대한 평가예요.

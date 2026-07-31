@@ -44,8 +44,8 @@ export function ScreeningHero() {
   return (
     <section className="enter-1 px-5 pb-10 pt-10 sm:px-10 sm:pb-14 sm:pt-16">
       <div className="mx-auto max-w-wide text-center">
-        <h1 className="m-0 break-keep font-wanted text-[9vw] font-extrabold leading-[1.15] tracking-[-0.02em] text-text sm:text-5xl lg:text-6xl">
-          이 영화, <span className="text-primary-strong">어디서</span> 봐야 할까요?
+        <h1 className="m-0 break-keep text-[9vw] font-bold leading-[1.3] tracking-normal text-text sm:text-5xl lg:text-6xl">
+          이 영화, <span className="text-primary">어디서</span> 봐야 할까요?
         </h1>
         <p className="mx-auto mt-4 max-w-lg break-keep text-[15.5px] leading-[1.6] text-text-sub sm:text-base">
           영화의 화면비부터 좌석, 이동시간, 가격까지 한 번에 비교해 가장 잘 맞는 상영관을 찾습니다.
@@ -66,12 +66,22 @@ export function ScreeningHero() {
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
       >
-        <p className="m-0 text-[12px] font-semibold uppercase tracking-wide text-hero-text-sub">CineFit이 비교하는 흐름</p>
+        {/* 프로그램 노트처럼 좌우 룰선 + 라벨 — SaaS 다이어그램이 아니라 극장 프로그램 안내
+            같은 인상을 주는 최소한의 장식(브리프: "cinema guide / program summary"). */}
+        <div className="flex items-center gap-3">
+          <span aria-hidden className="h-px flex-1 bg-accent/25" />
+          <p className="m-0 shrink-0 text-[12px] font-semibold uppercase tracking-wide text-hero-text-sub">
+            오늘의 상영 비교 기준
+          </p>
+          <span aria-hidden className="h-px flex-1 bg-accent/25" />
+        </div>
         <div key={frame} className="stage-enter mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-0">
           <div className="flex flex-1 items-center gap-3 sm:flex-col sm:items-start sm:gap-2">
+            {/* 화면비 스와치 — 아래쪽에 얇은 브론즈 트림을 둬서 "스크린 하단 조명" 느낌을
+                준다(장식이되 네온 글로우는 아님). */}
             <div
               aria-hidden
-              className="shrink-0 rounded-[4px] border border-hero-border bg-hero-soft"
+              className="shrink-0 rounded-t-[3px] border-x border-t border-hero-border border-b-2 border-b-accent/60 bg-hero-soft"
               style={{ height: '32px', width: 'auto', aspectRatio: `${current.ratio} / 1` }}
             />
             <div className="min-w-0">
@@ -82,7 +92,7 @@ export function ScreeningHero() {
           <IconArrowRight aria-hidden className="hidden h-4 w-4 shrink-0 text-hero-text-sub sm:mx-4 sm:block" />
           <IconArrowRight aria-hidden className="h-4 w-4 shrink-0 rotate-90 text-hero-text-sub sm:hidden" />
           <div className="flex flex-1 items-center gap-3 sm:flex-col sm:items-start sm:gap-2">
-            <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-hero-border" />
+            <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-accent/50" />
             <div className="min-w-0">
               <p className="m-0 text-[11px] font-semibold uppercase tracking-wide text-hero-text-sub">포맷</p>
               <p className="m-0 truncate text-[15px] font-semibold text-hero-text">{current.format}</p>
@@ -91,7 +101,7 @@ export function ScreeningHero() {
           <IconArrowRight aria-hidden className="hidden h-4 w-4 shrink-0 text-hero-text-sub sm:mx-4 sm:block" />
           <IconArrowRight aria-hidden className="h-4 w-4 shrink-0 rotate-90 text-hero-text-sub sm:hidden" />
           <div className="flex flex-1 items-center gap-3 sm:flex-col sm:items-start sm:gap-2">
-            <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-hero-border">
+            <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-accent/50">
               <IconSeat className="h-4 w-4 text-hero-text-sub" />
             </span>
             <div className="min-w-0">
@@ -102,7 +112,7 @@ export function ScreeningHero() {
           <IconArrowRight aria-hidden className="hidden h-4 w-4 shrink-0 text-hero-text-sub sm:mx-4 sm:block" />
           <IconArrowRight aria-hidden className="h-4 w-4 shrink-0 rotate-90 text-hero-text-sub sm:hidden" />
           <div className="flex flex-1 items-center gap-3 sm:flex-col sm:items-start sm:gap-2">
-            <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-hero-border">
+            <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-accent/50">
               <IconTransit className="h-4 w-4 text-hero-text-sub" />
             </span>
             <div className="min-w-0">

@@ -12,7 +12,7 @@ import { StepSection } from './StepSection';
 const inputCls =
   'min-h-[52px] w-full rounded-card border border-border bg-bg px-3.5 text-base text-text outline-none transition-shadow focus-visible:border-primary-strong focus-visible:ring-[3px] focus-visible:ring-primary-soft';
 const selectCls = `${inputCls} appearance-none pr-10`;
-const labelCls = 'block text-sm font-semibold text-text';
+const labelCls = 'block text-[15px] font-semibold text-text';
 const checkRowCls = 'flex min-h-12 cursor-pointer items-center gap-2.5 text-[15px] text-text';
 
 function SelectChevron() {

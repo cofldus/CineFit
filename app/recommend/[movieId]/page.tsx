@@ -24,7 +24,7 @@ export default async function RecommendPage({ params }: { params: Promise<{ movi
 
   return (
     <main className="mx-auto max-w-xl px-4 pb-24 pt-6">
-      <h1 className="font-wanted m-0 text-[28px] font-bold tracking-[-0.02em] text-text sm:text-[32px]">
+      <h1 className="m-0 text-[28px] font-bold text-text sm:text-[32px]">
         어떤 조건을 원하세요?
       </h1>
       <p className="m-0 mt-1.5 text-[15px] text-text-sub">아래 조건에 맞는 상영관을 찾아드릴게요.</p>

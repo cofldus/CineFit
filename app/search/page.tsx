@@ -11,7 +11,10 @@ export const dynamic = 'force-dynamic';
 const resultRowCls =
   'group flex items-center gap-3 rounded-card-lg border border-border bg-surface p-4 transition-all duration-150 hover:-translate-y-0.5 hover:border-border-strong hover:bg-surface-raised hover:shadow-float focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-strong active:translate-y-0 active:shadow-none';
 
-const iconTileCls = 'flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-surface-strong text-text-sub';
+const movieIconTileCls = 'flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-surface-strong text-text-sub';
+// 상영관 결과는 은은한 버건디 틴트로 — "관공서 디렉터리"가 아니라 극장을 찾는 화면이라는
+// 인상을 더한다(burgundy-soft는 배경 틴트로만 쓰고, 작은 텍스트로는 쓰지 않는다).
+const cinemaIconTileCls = 'flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-primary-soft text-primary-strong';
 
 /** 검색어와 일치하는 부분만 옅게 강조 — 결과가 왜 이 항목인지 바로 보이게 한다. */
 function Highlighted({ text, query }: { text: string; query: string }) {
@@ -38,7 +41,7 @@ export default async function SearchPage({
 
   return (
     <main className="mx-auto max-w-wide px-4 pb-24 pt-10 sm:pt-14">
-      <h1 className="font-wanted m-0 text-[28px] font-bold tracking-[-0.02em] text-text sm:text-[32px]">검색</h1>
+      <h1 className="m-0 text-[28px] font-bold text-text sm:text-[32px]">검색</h1>
 
       <form method="get" className="mt-5 max-w-content" role="search">
         <label className="block text-[15px] text-text-sub" htmlFor="q">
@@ -80,7 +83,7 @@ export default async function SearchPage({
             {results.movies.map((m) => (
               <li key={m.id}>
                 <Link href={`/recommend/${m.id}`} className={resultRowCls}>
-                  <span aria-hidden className={iconTileCls}>
+                  <span aria-hidden className={movieIconTileCls}>
                     <IconFilm className="h-[18px] w-[18px]" />
                   </span>
                   <span className="min-w-0 flex-1">
@@ -109,7 +112,7 @@ export default async function SearchPage({
             {results.cinemas.map((c) => (
               <li key={c.auditoriumId}>
                 <Link href={`/cinemas/${c.auditoriumId}`} className={resultRowCls}>
-                  <span aria-hidden className={iconTileCls}>
+                  <span aria-hidden className={cinemaIconTileCls}>
                     <IconSeat className="h-[18px] w-[18px]" />
                   </span>
                   <span className="min-w-0 flex-1">

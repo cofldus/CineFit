@@ -28,7 +28,7 @@ export default async function HomePage() {
       {dbMissing ? (
         <section className="px-5 py-16 sm:px-10">
           <div className="mx-auto max-w-md text-center">
-            <h2 className="m-0 font-wanted text-xl font-bold text-text">아직 준비된 데이터가 없어요</h2>
+            <h2 className="m-0 text-xl font-bold text-text">아직 준비된 데이터가 없어요</h2>
             <p className="mt-2 text-sm text-text-sub">
               터미널에서{' '}
               <code className="bg-surface px-1.5 py-0.5 font-mono text-[13px] text-text">npm run db:seed</code>를

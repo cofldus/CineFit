@@ -46,21 +46,37 @@ export function MovieCard({ movie, variant = 'detailed' }: { movie: MovieWithSpe
             상대적으로 높게) — 그 위에 비율 숫자를 크게 얹어 "이 영화의 스크린 모양"임을
             바로 읽히게 한다. 회색 빈 상자 대신 화면비 자체가 카드의 정체성이 되게 하는
             의도다(장식이 아니라 데이터 표현). */}
+        {/* 화면비 프레임 — 아래쪽 브론즈 트림으로 "스크린 하단 조명"을 흉내내 중립적인
+            placeholder 상자가 아니라 의도된 시네마 프레임처럼 보이게 한다. */}
         <div
           aria-hidden
-          className="flex items-center justify-center rounded-card border border-hero-border bg-hero transition-shadow group-hover:shadow-glow-primary"
+          className="relative flex items-center justify-center rounded-card border-x border-t border-hero-border border-b-2 border-b-accent/60 bg-hero transition-shadow group-hover:shadow-glow-primary"
           style={{ aspectRatio: `${clampedAr} / 1` }}
         >
           <span className="font-mono text-lg font-bold text-hero-text sm:text-xl">
             {ratioLabel ?? `${clampedAr.toFixed(2)}:1`}
           </span>
+          {formats.length > 0 ? (
+            <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1">
+              {formats.map((f) => (
+                <span
+                  key={f}
+                  className="rounded-full border border-hero-border bg-bg/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-hero-text-sub backdrop-blur-sm"
+                >
+                  {f}
+                </span>
+              ))}
+            </div>
+          ) : null}
         </div>
-        <h3 className="font-wanted m-0 mt-4 line-clamp-2 text-lg font-bold tracking-[-0.01em] text-text">
+        {/* 제목과 연도·러닝타임을 한 문장으로 붙이지 않고 별도 줄로 나눈다 — 편집된 영화
+            정보처럼 보이게 하는 최소 구조(브리프 §영화 정보 구조). */}
+        <h3 className="m-0 mt-4 line-clamp-2 text-lg font-bold text-text">
           {movie.title}
         </h3>
-        <p className="m-0 mt-1 text-[15px] font-medium text-text-sub">
+        <p className="m-0 mt-1 tabular-nums text-[14px] font-medium text-text-sub">
           {movie.releaseYear ? `${movie.releaseYear} · ` : ''}
-          {movie.runtimeMin}분{formats.length > 0 ? ` · ${formats.join(' · ')}` : ''}
+          {movie.runtimeMin}분
         </p>
         <p className="m-0 mt-3 flex items-center justify-between gap-2 border-t border-border pt-3 text-[13.5px] font-medium text-text-sub">
           상영 정보 {verificationSummary(movie)}
@@ -85,9 +101,11 @@ export function MovieCard({ movie, variant = 'detailed' }: { movie: MovieWithSpe
       {/* 영화마다 실제 화면비로 모양이 달라지는 프레임 — compact 카드와 같은 원칙(화면비 자체가
           카드의 정체성). 상단에 배급 포맷 뱃지를 얹어 한눈에 "이 영화가 어떤 버전으로 상영되는지"
           보이게 한다. */}
+      {/* 화면비 프레임 — 아래쪽 브론즈 트림으로 "스크린 하단 조명"을 흉내내 의도된 시네마
+          프레임처럼 보이게 한다(브리프: "the top frame should feel like a screen"). */}
       <div
         aria-hidden
-        className="relative flex items-center justify-center border-b border-hero-border bg-hero px-4 transition-shadow group-hover:shadow-glow-primary"
+        className="relative flex items-center justify-center border-b-2 border-b-accent/60 bg-hero px-4 transition-shadow group-hover:shadow-glow-primary"
         style={{ aspectRatio: `${clampedAr} / 1` }}
       >
         <span className="font-mono text-2xl font-bold text-hero-text sm:text-[28px]">
@@ -107,14 +125,21 @@ export function MovieCard({ movie, variant = 'detailed' }: { movie: MovieWithSpe
         ) : null}
       </div>
       <div className="flex flex-1 flex-col p-5">
-        <h3 id={`movie-${movie.id}-title`} className="font-wanted m-0 text-lg font-bold tracking-[-0.01em] text-text">
+        {/* 영화 정보를 한 문장으로 붙이지 않고 편집된 블록으로 나눈다: 제목 → 연도·러닝타임 →
+            원제 → 감독·장르 (브리프 §영화 정보 구조). 포맷·검증 정보는 아래 별도 행으로. */}
+        <h3 id={`movie-${movie.id}-title`} className="m-0 text-lg font-bold text-text">
           {movie.title}
-          {movie.releaseYear ? <span className="font-normal text-text-sub"> · {movie.releaseYear}</span> : null}
         </h3>
-        <p className="m-0 mt-1 text-[13.5px] text-text-sub">
-          {movie.originalTitle} · {movie.runtimeMin}분 · {movie.director}
+        <p className="m-0 mt-1 tabular-nums text-[13.5px] font-medium text-text-sub">
+          {movie.releaseYear ? `${movie.releaseYear} · ` : ''}
+          {movie.runtimeMin}분
         </p>
-        <p className="m-0 mt-0.5 text-[13px] text-text-tertiary">{movie.genres.join(' · ')}</p>
+        {movie.originalTitle ? (
+          <p className="m-0 mt-2.5 text-[13px] italic text-text-tertiary">{movie.originalTitle}</p>
+        ) : null}
+        <p className="m-0 mt-0.5 text-[13px] text-text-tertiary">
+          {[movie.director, movie.genres.join('·')].filter(Boolean).join(' · ')}
+        </p>
         {restSpecs.length > 0 ? (
           <ul className="m-0 mt-3.5 flex list-none flex-col gap-1.5 border-t border-border p-0 pt-3.5">
             {restSpecs.map(({ key, spec }) => (

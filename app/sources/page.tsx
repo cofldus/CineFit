@@ -63,7 +63,7 @@ export default async function SourcesPage() {
 
   return (
     <main className="mx-auto max-w-content px-4 pb-24 pt-10 sm:pt-14">
-      <h1 className="font-wanted m-0 text-[28px] font-bold tracking-[-0.02em] text-text sm:text-[32px]">
+      <h1 className="m-0 text-[28px] font-bold text-text sm:text-[32px]">
         정보 출처·신뢰도 기준
       </h1>
       <p className="m-0 mt-2.5 leading-relaxed text-text-sub">

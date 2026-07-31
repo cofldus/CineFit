@@ -85,15 +85,12 @@ export default async function ResultsPage({
     <main className="mx-auto min-h-dvh max-w-wide bg-bg px-5 pb-24 pt-8 sm:px-8 sm:pt-12">
       {/* 1. 결과 제목과 검색 조건 — 박스 밖, 텍스트 중심 */}
       <header>
-        <h1 className="enter-1 font-wanted m-0 text-[32px] font-bold tracking-[-0.01em] text-text sm:text-[36px]">
+        <h1 className="enter-1 m-0 text-[32px] font-bold text-text sm:text-[36px]">
           추천 결과
         </h1>
-        <p className="enter-2 m-0 mt-4 text-lg font-semibold text-text">
-          {result.movie.title}
-          <span className="font-normal text-text-sub">
-            {' '}
-            · {result.movie.runtimeMin}분 · {result.request.date}
-          </span>
+        <p className="enter-2 m-0 mt-4 text-lg font-bold text-text">{result.movie.title}</p>
+        <p className="enter-2 m-0 mt-0.5 tabular-nums text-[13.5px] text-text-sub">
+          {result.movie.runtimeMin}분 · {result.request.date}
         </p>
         <p className="enter-2 m-0 mt-1.5 text-[15px] text-text-sub">
           {origin.label ?? '지정 위치'} 출발 · 이동 {result.request.maxTravelMinutes}분 이내 ·{' '}
@@ -168,7 +165,7 @@ export default async function ResultsPage({
 
           {/* 5. 추천 차이 요약 */}
           <section className="enter-5 mt-10 max-w-content">
-            <h2 className="font-wanted m-0 text-[21px] font-bold tracking-[-0.01em] text-text">추천 차이 한눈에</h2>
+            <h2 className="m-0 text-[21px] font-bold text-text">추천 차이 한눈에</h2>
             <div className="mt-3">
               <DifferenceSummary picks={result.picks} />
             </div>

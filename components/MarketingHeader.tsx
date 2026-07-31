@@ -62,14 +62,14 @@ export function MarketingHeader() {
               내비게이션 전용이라 상시 노출되는 장식 요소에는 어울리지 않는다(브리프 "코랄
               로고 점 제거" 요구를 색이 바뀐 지금도 같은 원칙으로 적용: 중립 톤으로). */}
           <span aria-hidden className="h-2.5 w-2.5 rounded-full bg-text" />
-          <span className="font-wanted text-xl font-bold tracking-[-0.02em] text-text sm:text-2xl">CineFit</span>
+          <span className="text-xl font-bold text-text sm:text-2xl">CineFit</span>
         </Link>
 
         <nav ref={navRef} className="relative hidden items-center gap-2 sm:flex" aria-label="주요 메뉴">
           {indicator ? (
             <span
               aria-hidden
-              className="absolute bottom-1 h-[2px] rounded-full bg-primary-strong transition-all duration-[250ms] ease-out"
+              className="absolute bottom-1 h-[2px] rounded-full bg-primary transition-all duration-[250ms] ease-out"
               style={{ left: indicator.left, width: indicator.width }}
             />
           ) : null}

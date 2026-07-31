@@ -26,7 +26,7 @@ export function NowShowing({ movies }: { movies: MovieWithSpecs[] }) {
   return (
     <section aria-labelledby="now-showing-heading" className="enter-2 px-5 py-10 sm:px-10 sm:py-14">
       <div className="mx-auto max-w-wide">
-        <h2 id="now-showing-heading" className="font-wanted m-0 text-lg font-bold tracking-[-0.01em] text-text">
+        <h2 id="now-showing-heading" className="m-0 text-lg font-bold text-text">
           지금 볼 수 있는 영화
         </h2>
         <div className="relative">
@@ -53,7 +53,7 @@ export function NowShowing({ movies }: { movies: MovieWithSpecs[] }) {
               <span
                 key={m.id}
                 aria-hidden
-                className={`h-1.5 rounded-full transition-all ${i === active ? 'w-4 bg-primary-strong' : 'w-1.5 bg-border-strong'}`}
+                className={`h-1.5 rounded-full transition-all ${i === active ? 'w-4 bg-primary' : 'w-1.5 bg-border-strong'}`}
               />
             ))}
           </div>

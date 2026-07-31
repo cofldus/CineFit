@@ -21,14 +21,14 @@ export function HomeClosing() {
   return (
     <section className="enter-3 px-5 py-14 sm:px-10 sm:py-16">
       <div className="mx-auto max-w-wide">
-        <h2 className="font-wanted m-0 text-xl font-bold tracking-[-0.01em] text-text">CineFit이 비교하는 것</h2>
+        <h2 className="m-0 text-xl font-bold text-text">CineFit이 비교하는 것</h2>
         <div className="mt-8 flex flex-col gap-8 sm:flex-row sm:items-start sm:gap-6">
           {STEPS.map((s, i) => (
             <div key={s.n} className="flex flex-col gap-8 sm:flex-1 sm:flex-row sm:items-start sm:gap-6">
               <div className="flex items-start gap-4 sm:flex-col sm:gap-2">
                 {/* 순서 번호는 색이 아니라 크기·굵기로만 강조한다 — 파랑은 CTA·선택·포커스·활성
                     내비게이션 전용이라 장식적 강조에는 쓰지 않는다. */}
-                <span className="font-wanted shrink-0 text-3xl font-bold text-text-tertiary sm:text-4xl">{s.n}</span>
+                <span className="shrink-0 text-3xl font-bold text-text-tertiary sm:text-4xl">{s.n}</span>
                 <div className="min-w-0">
                   <p className="m-0 text-base font-bold text-text">{s.label}</p>
                   <p className="m-0 mt-1 max-w-[220px] break-keep text-[14.5px] leading-relaxed text-text-sub">

@@ -27,7 +27,7 @@ export default async function ResultsPage({
 
   if (!parsed.ok) {
     return (
-      <main className="mx-auto max-w-content px-4 pb-24 pt-6">
+      <main className="cinema-scope mx-auto min-h-dvh max-w-content bg-bg px-4 pb-24 pt-6">
         <h1 className="text-2xl font-extrabold text-text">추천 결과</h1>
         <div className="mt-4 rounded-card-lg border border-trust-low/40 bg-trust-low/5 p-5" role="alert">
           <h3 className="m-0 text-lg font-bold text-text">입력값을 확인해 주세요</h3>
@@ -82,7 +82,7 @@ export default async function ResultsPage({
   }
 
   return (
-    <main className="mx-auto max-w-wide px-5 pb-24 pt-8 sm:px-8 sm:pt-12">
+    <main className="cinema-scope mx-auto min-h-dvh max-w-wide bg-bg px-5 pb-24 pt-8 sm:px-8 sm:pt-12">
       {/* 1. 결과 제목과 검색 조건 — 박스 밖, 텍스트 중심 */}
       <header>
         <h1 className="enter-1 font-wanted m-0 text-[32px] font-bold tracking-[-0.01em] text-text sm:text-[36px]">

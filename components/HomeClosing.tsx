@@ -26,7 +26,9 @@ export function HomeClosing() {
           {STEPS.map((s, i) => (
             <div key={s.n} className="flex flex-col gap-8 sm:flex-1 sm:flex-row sm:items-start sm:gap-6">
               <div className="flex items-start gap-4 sm:flex-col sm:gap-2">
-                <span className="font-wanted shrink-0 text-3xl font-extrabold text-primary-strong/80 sm:text-4xl">
+                {/* text-primary-strong 자체는 이 어두운 --bg 위에서 대비가 부족해(axe 실측 2.51:1),
+                    큰 굵은 숫자 전용으로 코랄을 밝힌 값을 쓴다(RecommendCard 히어로 라벨과 같은 예외). */}
+                <span className="font-wanted shrink-0 text-3xl font-extrabold text-[#ff8aa8] sm:text-4xl">
                   {s.n}
                 </span>
                 <div className="min-w-0">

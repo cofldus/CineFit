@@ -23,7 +23,7 @@ export default async function HomePage() {
   }
 
   return (
-    <main className="max-w-none p-0">
+    <main className="cinema-scope min-h-dvh max-w-none bg-bg p-0">
       <ScreeningHero />
       {dbMissing ? (
         <section className="px-5 py-16 sm:px-10">

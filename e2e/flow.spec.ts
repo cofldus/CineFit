@@ -18,8 +18,7 @@ test('홈 → 영화 선택 → 조건 입력 → 추천 3종 → 상세 확인'
   await expect(page.getByTestId('pick-품질')).toBeVisible();
   await expect(page.getByTestId('pick-근접·가성비')).toBeVisible();
 
-  // 카드 상세 펼치기 → 점수 분해·근거 출처 확인. 카드 안에 summary가 두 개다(점수 상세 +
-  // 피드백 위젯) — 항상 "점수"라는 단어를 포함하는 쪽으로 특정한다.
+  // 카드 상세 펼치기 → 점수 분해·근거 출처 확인.
   await page.getByTestId('pick-균형').locator('summary').filter({ hasText: '점수' }).click();
   await expect(page.getByTestId('pick-균형').getByText('이 추천에 사용된 출처')).toBeVisible();
   await expect(page.getByTestId('pick-균형').getByText(/신뢰 보정/)).toBeVisible();

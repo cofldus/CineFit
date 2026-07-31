@@ -69,7 +69,7 @@ test('추천 반영 흐름: 승격된 좌석 존이 상영관 상세와 추천 �
   await expect(card.getByText('좌석 존 데이터 없음')).toHaveCount(0);
 
   // 결과 페이지 정보 밀도 축소로 이유 목록 중 첫 줄만 기본 노출되고 나머지는 "자세히 보기"
-  // 안에 있다 — 카드 안 summary가 두 개(점수 상세 + 피드백)라 "점수"로 특정해서 펼친다.
+  // 안에 있다.
   await card.locator('summary').filter({ hasText: '점수' }).click();
   await expect(card.getByText('좌석 존은 제보·추정 기반')).toBeVisible();
   await expect(card.getByText('좌석 존 (immersive)')).toBeVisible();

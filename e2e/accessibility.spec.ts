@@ -16,6 +16,10 @@ interface Violation {
 }
 
 async function scan(page: Page) {
+  // 페이지 진입 애니메이션(opacity 0→1 페이드) 도중 스캔하면 중간 프레임의 낮은 불투명도가
+  // "대비 부족"으로 오탐된다 — reduced-motion을 강제해 전역 CSS(globals.css)가 모든
+  // animation/transition을 즉시 끄게 한다(실제로 모션 축소 사용자가 보는 화면과 동일).
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   return new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
 }
 

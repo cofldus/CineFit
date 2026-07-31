@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { AlphaConsentForm } from '../../../components/AlphaConsentForm';
+import { IconCheckCircle } from '../../../components/Icon';
 
 export const metadata: Metadata = { title: '알파 참여 안내' };
 export const dynamic = 'force-dynamic';
@@ -18,16 +19,18 @@ const POINTS = [
 export default function AlphaConsentPage() {
   return (
     <main className="mx-auto max-w-xl px-4 pb-24 pt-6">
-      <h1 className="text-2xl font-extrabold text-text">알파 참여 전에 알아두세요</h1>
-      <ul className="mt-4 flex list-none flex-col gap-2 p-0">
+      <h1 className="font-wanted m-0 text-[28px] font-bold tracking-[-0.02em] text-text sm:text-[32px]">
+        알파 참여 전에 알아두세요
+      </h1>
+      <ul className="m-0 mt-5 flex list-none flex-col gap-3 p-0">
         {POINTS.map((p) => (
-          <li key={p} className="flex items-start gap-2 text-sm text-text-sub">
-            <span aria-hidden className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+          <li key={p} className="flex items-start gap-2.5 text-[15px] leading-relaxed text-text-sub">
+            <IconCheckCircle aria-hidden className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
             {p}
           </li>
         ))}
-        <li className="flex items-start gap-2 text-sm text-text-sub">
-          <span aria-hidden className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+        <li className="flex items-start gap-2.5 text-[15px] leading-relaxed text-text-sub">
+          <IconCheckCircle aria-hidden className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
           <span>
             남기신 데이터의 삭제를{' '}
             <Link href="/privacy" className="font-semibold text-text hover:underline decoration-border-strong underline-offset-2">

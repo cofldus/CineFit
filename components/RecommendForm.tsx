@@ -4,15 +4,22 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { MOTION_OPTIONS, ORIGIN_PRESETS, PRIORITY_OPTIONS } from '../src/data/constants';
 import { readOnboardingState, type OnboardingAnswers } from '../src/lib/onboarding';
+import { IconChevronRight } from './Icon';
 import { SegmentedControl } from './SegmentedControl';
+import { StepSection } from './StepSection';
 
 const inputCls =
-  'min-h-11 w-full rounded-card border border-border bg-bg px-3 text-base text-text outline-none focus-visible:ring-[3px] focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface';
+  'min-h-12 w-full rounded-card-lg border border-border bg-bg px-3.5 text-base text-text outline-none transition-shadow focus-visible:border-primary-strong focus-visible:ring-[3px] focus-visible:ring-primary-soft';
+const selectCls = `${inputCls} appearance-none pr-10`;
 const labelCls = 'block text-sm font-semibold text-text';
-const sectionCls = 'rounded-card-xl border border-border bg-surface p-5';
-const sectionHeadingCls = 'font-wanted m-0 mb-4 flex items-center gap-2.5 text-base font-bold tracking-[-0.01em] text-text';
-const checkRowCls = 'flex min-h-11 items-center gap-2.5 text-[15px] text-text';
+const checkRowCls = 'flex min-h-12 items-center gap-2.5 text-[15px] text-text';
 const checkboxCls = 'h-5 w-5 accent-primary';
+
+function SelectChevron() {
+  return (
+    <IconChevronRight aria-hidden className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 rotate-90 text-text-tertiary" />
+  );
+}
 
 // 기본값이 채워져 있어 그대로 제출해도 추천을 받을 수 있다 (요구사항: 전부 입력 불필요)
 export function RecommendForm({ movieId, defaultDate }: { movieId: number; defaultDate: string }) {
@@ -52,127 +59,106 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
   }
 
   return (
-    <form onSubmit={onSubmit} aria-label="추천 조건 입력" className="flex flex-col gap-5 pb-4">
-      <div className={sectionCls}>
-        <h2 className={sectionHeadingCls}>
-          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-strong text-xs font-bold text-white">
-            1
-          </span>
-          언제, 어디서 볼까요?
-        </h2>
-        <div className="flex flex-col gap-4">
-          <label className="block">
-            <span className={labelCls}>관람 날짜</span>
-            <input className={`${inputCls} mt-1.5`} type="date" name="date" defaultValue={defaultDate} required />
-          </label>
-          <label className="block">
-            <span className={labelCls}>출발 위치</span>
-            <select className={`${inputCls} mt-1.5`} name="originId" defaultValue="cityhall">
+    <form onSubmit={onSubmit} aria-label="추천 조건 입력" className="flex flex-col pb-4">
+      <StepSection step={1} title="언제, 어디서 볼까요?" first>
+        <label className="block">
+          <span className={labelCls}>관람 날짜</span>
+          <input className={`${inputCls} mt-1.5`} type="date" name="date" defaultValue={defaultDate} required />
+        </label>
+        <label className="block">
+          <span className={labelCls}>출발 위치</span>
+          <div className="relative mt-1.5">
+            <select className={selectCls} name="originId" defaultValue="cityhall">
               {ORIGIN_PRESETS.map((o) => (
                 <option key={o.id} value={o.id}>
                   {o.label}
                 </option>
               ))}
             </select>
-          </label>
-          <label className="block">
-            <span className={labelCls}>최대 이동 시간 (분)</span>
-            <input
-              className={`${inputCls} mt-1.5`}
-              type="number"
-              name="maxTravelMinutes"
-              defaultValue={60}
-              min={5}
-              max={240}
-              step={5}
-            />
-          </label>
-          <label className="block">
-            <span className={labelCls}>최대 가격 (원)</span>
-            <input
-              className={`${inputCls} mt-1.5`}
-              type="number"
-              name="maxPrice"
-              defaultValue={40000}
-              min={1000}
-              max={200000}
-              step={1000}
-            />
-          </label>
-        </div>
-      </div>
-
-      <div className={sectionCls}>
-        <h2 className={sectionHeadingCls}>
-          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-strong text-xs font-bold text-white">
-            2
-          </span>
-          무엇을 가장 중요하게 보나요?
-        </h2>
-        <div className="flex flex-col gap-4">
-          <SegmentedControl
-            key={prefillKey}
-            name="priority"
-            legend="가장 중요한 것"
-            options={PRIORITY_OPTIONS}
-            defaultValue={prefill?.priority ?? 'balance'}
+            <SelectChevron />
+          </div>
+        </label>
+        <label className="block">
+          <span className={labelCls}>최대 이동 시간 (분)</span>
+          <input
+            className={`${inputCls} mt-1.5`}
+            type="number"
+            name="maxTravelMinutes"
+            defaultValue={60}
+            min={5}
+            max={240}
+            step={5}
           />
-          <fieldset className="m-0 border-0 p-0">
-            <legend className="mb-1.5 block text-sm font-semibold text-text">허용할 상영 방식</legend>
-            <div className="flex flex-col gap-1">
-              <label className={checkRowCls}>
-                <input className={checkboxCls} type="checkbox" name="allowImax" defaultChecked /> IMAX 허용
-              </label>
-              <label className={checkRowCls}>
-                <input className={checkboxCls} type="checkbox" name="allowDolby" defaultChecked /> Dolby Cinema 허용
-              </label>
-              <label className={checkRowCls}>
-                <input className={checkboxCls} type="checkbox" name="allowStandard" defaultChecked /> 일반관(대형관
-                포함) 허용
-              </label>
-            </div>
-          </fieldset>
-        </div>
-      </div>
-
-      <div className={sectionCls}>
-        <h2 className={sectionHeadingCls}>
-          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-strong text-xs font-bold text-white">
-            3
-          </span>
-          피하고 싶은 조건이 있나요?
-        </h2>
-        <div className="flex flex-col gap-4">
-          <SegmentedControl
-            key={prefillKey}
-            name="motionSickness"
-            legend="4DX 멀미, 얼마나 신경 쓰이세요?"
-            options={MOTION_OPTIONS}
-            defaultValue={prefill?.motionSickness ?? '0'}
+        </label>
+        <label className="block">
+          <span className={labelCls}>최대 가격 (원)</span>
+          <input
+            className={`${inputCls} mt-1.5`}
+            type="number"
+            name="maxPrice"
+            defaultValue={40000}
+            min={1000}
+            max={200000}
+            step={1000}
           />
-          <fieldset className="m-0 border-0 p-0">
-            <legend className="mb-1.5 block text-sm font-semibold text-text">좌석·편의 선호</legend>
-            <div className="flex flex-col gap-1">
-              <label className={checkRowCls} key={prefillKey}>
-                <input
-                  className={checkboxCls}
-                  type="checkbox"
-                  name="subtitleReadability"
-                  defaultChecked={prefill?.subtitleReadability ?? false}
-                />{' '}
-                자막이 잘 보이는 좌석 우선
-              </label>
-              <label className={checkRowCls}>
-                <input className={checkboxCls} type="checkbox" name="neckComfort" /> 목 덜 아픈 좌석 우선
-              </label>
-              <label className={checkRowCls}>
-                <input className={checkboxCls} type="checkbox" name="wheelchair" /> 휠체어 접근 필수 (확인 안 된
-                상영관은 제외돼요)
-              </label>
-            </div>
-          </fieldset>
-        </div>
-      </div>
+        </label>
+      </StepSection>
+
+      <StepSection step={2} title="무엇을 가장 중요하게 보나요?">
+        <SegmentedControl
+          key={prefillKey}
+          name="priority"
+          legend="가장 중요한 것"
+          options={PRIORITY_OPTIONS}
+          defaultValue={prefill?.priority ?? 'balance'}
+        />
+        <fieldset className="m-0 border-0 p-0">
+          <legend className="mb-1.5 block text-sm font-semibold text-text">허용할 상영 방식</legend>
+          <div className="flex flex-col gap-1">
+            <label className={checkRowCls}>
+              <input className={checkboxCls} type="checkbox" name="allowImax" defaultChecked /> IMAX 허용
+            </label>
+            <label className={checkRowCls}>
+              <input className={checkboxCls} type="checkbox" name="allowDolby" defaultChecked /> Dolby Cinema 허용
+            </label>
+            <label className={checkRowCls}>
+              <input className={checkboxCls} type="checkbox" name="allowStandard" defaultChecked /> 일반관(대형관
+              포함) 허용
+            </label>
+          </div>
+        </fieldset>
+      </StepSection>
+
+      <StepSection step={3} title="피하고 싶은 조건이 있나요?">
+        <SegmentedControl
+          key={prefillKey}
+          name="motionSickness"
+          legend="4DX 멀미, 얼마나 신경 쓰이세요?"
+          options={MOTION_OPTIONS}
+          defaultValue={prefill?.motionSickness ?? '0'}
+        />
+        <fieldset className="m-0 border-0 p-0">
+          <legend className="mb-1.5 block text-sm font-semibold text-text">좌석·편의 선호</legend>
+          <div className="flex flex-col gap-1">
+            <label className={checkRowCls} key={prefillKey}>
+              <input
+                className={checkboxCls}
+                type="checkbox"
+                name="subtitleReadability"
+                defaultChecked={prefill?.subtitleReadability ?? false}
+              />{' '}
+              자막이 잘 보이는 좌석 우선
+            </label>
+            <label className={checkRowCls}>
+              <input className={checkboxCls} type="checkbox" name="neckComfort" /> 목 덜 아픈 좌석 우선
+            </label>
+            <label className={checkRowCls}>
+              <input className={checkboxCls} type="checkbox" name="wheelchair" /> 휠체어 접근 필수 (확인 안 된
+              상영관은 제외돼요)
+            </label>
+          </div>
+        </fieldset>
+      </StepSection>
 
       <div
         className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/95 px-4 py-3 backdrop-blur-md"

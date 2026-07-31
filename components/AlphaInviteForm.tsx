@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
 const inputCls =
-  'min-h-11 w-full rounded-card border border-border bg-bg px-3 text-base text-text outline-none focus-visible:ring-[3px] focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface';
+  'min-h-12 w-full rounded-card-lg border border-border bg-bg px-3.5 text-base tracking-[0.04em] text-text outline-none transition-shadow focus-visible:border-primary-strong focus-visible:ring-[3px] focus-visible:ring-primary-soft';
 
 export function AlphaInviteForm() {
   const router = useRouter();
@@ -36,16 +36,16 @@ export function AlphaInviteForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="mt-4 max-w-content" aria-label="초대 코드 입력">
-      <label className="block text-sm font-medium text-text-sub" htmlFor="code">
+    <form onSubmit={onSubmit} className="mt-6 max-w-content" aria-label="초대 코드 입력">
+      <label className="block text-sm font-semibold text-text" htmlFor="code">
         초대 코드
       </label>
-      <div className="mt-1.5 flex gap-2">
-        <input id="code" name="code" type="text" required autoComplete="off" className={inputCls} />
+      <div className="mt-2 flex flex-col gap-2.5 sm:flex-row">
+        <input id="code" name="code" type="text" required autoComplete="off" placeholder="예: CINEFIT-XXXX" className={inputCls} />
         <button
           type="submit"
           disabled={busy}
-          className="min-h-11 shrink-0 rounded-card bg-primary-strong px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-strong-hover disabled:opacity-60"
+          className="min-h-12 shrink-0 rounded-card-lg bg-primary-strong px-6 text-sm font-semibold text-white transition-colors hover:bg-primary-strong-hover disabled:opacity-60"
         >
           {busy ? '확인 중…' : '입장하기'}
         </button>

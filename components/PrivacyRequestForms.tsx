@@ -3,8 +3,8 @@
 import { useState } from 'react';
 
 const inputCls =
-  'min-h-11 w-full rounded-card border border-border bg-bg px-3 text-base text-text outline-none focus-visible:ring-[3px] focus-visible:ring-primary';
-const sectionCls = 'rounded-card-lg border border-border bg-surface p-4';
+  'min-h-12 w-full rounded-card-lg border border-border bg-bg px-3.5 text-base text-text outline-none transition-shadow focus-visible:border-primary-strong focus-visible:ring-[3px] focus-visible:ring-primary-soft';
+const sectionCls = 'rounded-card-lg border border-border bg-surface p-5';
 
 type Phase = { kind: 'editing' } | { kind: 'submitting' } | { kind: 'done' } | { kind: 'error'; message: string };
 
@@ -13,7 +13,7 @@ function SubmitButton({ busy, label }: { busy: boolean; label: string }) {
     <button
       type="submit"
       disabled={busy}
-      className="mt-3 flex min-h-11 w-full items-center justify-center rounded-card bg-primary-strong text-sm font-semibold text-white transition-colors hover:bg-primary-strong-hover disabled:opacity-60"
+      className="mt-4 flex min-h-12 w-full items-center justify-center rounded-card bg-primary-strong text-sm font-semibold text-white transition-colors hover:bg-primary-strong-hover disabled:opacity-60"
     >
       {busy ? '요청 중…' : label}
     </button>

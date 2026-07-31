@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import localFont from 'next/font/local';
 import { AppHeader } from '../components/AppHeader';
 import { AppOpenedTracker } from '../components/AppOpenedTracker';
 import { MarketingHeader } from '../components/MarketingHeader';
@@ -6,9 +7,16 @@ import { MobileNav } from '../components/MobileNav';
 import { ServiceWorkerRegister } from '../components/ServiceWorkerRegister';
 import './globals.css';
 
-// 폰트는 Pretendard Variable 하나로 통일한다(브리프: "외국 SaaS 느낌의 기하학적 서체를
-// 줄이고 Pretendard 하나로"). 이전에 헤딩류에만 얹었던 별도 디스플레이 서체(Wanted Sans)는
-// 완전히 뺐다 — --font-sans(전역 기본값)가 모든 텍스트에 그대로 적용된다.
+// 본문·버튼·데이터는 Pretendard Variable(전역 기본값, --font-sans)로 계속 통일한다. 큰
+// 헤드라인만 Paperlogy 대신(패키지로 배포되지 않아 설치 불가) 사용자가 대안으로 지목한
+// Wanted Sans ExtraBold를 별도 --font-display 변수로 얹는다 — font-headline 유틸리티를
+// 실제로 쓰는 헤드라인 자리에만 적용되고, 본문 폰트는 이 변수와 무관하다.
+const wantedSans = localFont({
+  src: '../node_modules/wanted-sans/fonts/variable/WantedSansVariable.ttf',
+  variable: '--font-display',
+  weight: '400 900',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: { default: 'CineFit — 시네핏', template: '%s | CineFit' },
@@ -25,7 +33,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko">
+    <html lang="ko" className={wantedSans.variable}>
       <body>
         <a href="#main-content" className="skip-link">
           본문으로 바로가기

@@ -192,6 +192,11 @@
   --font-sans:
     'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
     'Malgun Gothic', system-ui, sans-serif;
+
+  /* 헤드라인 전용 디스플레이 서체(Wanted Sans) — --font-headline 하나만 테마 키로 등록한다.
+     next/font/local이 html에 이미 정의한 같은 이름의 CSS 변수와 겹치면 순환 참조로 폰트가
+     깨진 적이 있어(직접 겪은 버그), 반드시 다른 이름의 테마 키를 거쳐서만 연결한다. */
+  --font-headline: var(--font-display), 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
 }
 
 @layer base {
@@ -552,6 +557,38 @@
   }
   .list-enter {
     animation: list-cross-fade 220ms ease-out both;
+  }
+
+  /* 홈 헤드라인 — 줄마다 시작 위치·크기를 다르게 두고, 단어(줄)별로 40~60px 아래에서
+     떠오르며 등장한다("포멀한 기업 홈페이지가 아니라 캠페인 헤드라인처럼" 요구). */
+  @keyframes hero-word-rise {
+    from {
+      opacity: 0;
+      transform: translateY(48px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .hero-word {
+    animation: hero-word-rise 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* 돌비 포맷 선택 시 스크린 주변에 은은하게 퍼지는 음파 링 — 화려한 글로우가 아니라
+     테두리 하나가 옅게 확장·소멸하는 정도로 절제. */
+  @keyframes dolby-pulse {
+    from {
+      opacity: 0.5;
+      transform: scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: scale(1.12);
+    }
+  }
+  .dolby-pulse {
+    animation: dolby-pulse 1800ms ease-out infinite;
   }
 }
 

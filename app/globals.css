@@ -1,113 +1,124 @@
 @import 'tailwindcss';
 
-/* CineFit 디자인 토큰 (5) — "Midnight Cinema + Modern Screening Tool"(2026-08-01, 2차).
-   직전 라운드는 링크 밑줄 버그는 고쳤지만 사이트 전체가 결국 하나의 밋밋한 라이트 테마로
-   수렴해 "정리된 베타 도구" 인상을 벗지 못했다는 피드백 — 이번에는 아예 팔레트를 둘로
-   나눈다. 기본(:root)은 실용적인 라이트 "paper" 톤(검색·폼·출처 등 앱형 화면), 그리고
-   .cinema-scope 클래스가 어두운 "night" 톤으로 완전히 갈아끼운다(홈·추천 결과·상영관
-   상세·영화 선택 — 결정을 내리는 시네마 화면들). 이미 있던 .admin-scope와 정확히 같은
-   패턴(같은 변수 이름을 지역적으로 재정의)이라 컴포넌트 쪽 클래스는 그대로 두고 토큰 값만
-   스코프에 따라 달라진다. 헤더·하단 내비는 페이지와 무관하게 항상 어두운 시네마 톤을
-   써서 두 영역을 하나의 브랜드로 잇는다.
-   대비 검증(직접 계산 + axe 실측 기준 4.5:1 이상, 라이트/다크 각각 별도로 재계산 —
-   같은 색이라도 배경 밝기가 반대라 두 스코프에서 통과하는 값이 다르다):
-   - primary-strong(코랄 채움, 흰 텍스트): 라이트·다크 공통으로 #C22E4C 사용(5.54:1,
-     지난 라운드에 axe로 실측 검증된 값 그대로 재사용 — 브리프의 #E63E66/#D12F57은
-     각각 3.x대·4.93대로 여유가 부족했다).
-   - text-tertiary(라이트): 브리프의 #697386은 4.31:1로 미달 → #5E6879로 낮춰 5.08:1.
-   - accent/trust-*(라이트, 텍스트용): 브리프의 파랑·초록·노랑 원색은 전부 라이트 배경에서
-     3:1 미만 — 각각 어둡게 낮춘 별도 텍스트 색을 쓰고, 브리프의 밝은 원색은 다크 스코프
-     전용(그 위에서는 반대로 원색이 밝아서 잘 보인다)으로 나눠 썼다. */
+/* CineFit 디자인 토큰 (6) — "Graphite Cinema"(2026-08-01, 3차). 이전 라운드의 코랄+네이비
+   조합이 "핀테크/오래된 스타트업 앱" 같다는 피드백으로 팔레트를 전면 교체한다. 다크(코랄)와
+   라이트(아이보리)가 서로 다른 브랜드처럼 보이던 문제를 없애기 위해, 이번엔 그레이스케일
+   축(캔버스/잉크/그래파이트)과 단일 액센트(블루) 하나로 라이트·다크 두 스코프를 관통시킨다
+   — 색이 라운드마다 바뀌어도 토큰 "이름"(--bg/--text/--primary 등)과 이를 쓰는 컴포넌트
+   클래스는 그대로 두고 값만 갈아끼운다(§.admin-scope와 동일한 원리, 여러 라운드째 유지).
+
+   색 사용 규칙(브리프 그대로): 블루(accent)는 CTA·선택·포커스·활성 내비게이션에만.
+   초록(success)은 검증됨에만, 호박(warning)은 추정·주의에만, 빨강(danger)은 파괴적·오류에만.
+   추천 순위별 색 코딩 없음, 큰 색 테두리 없음, 네온 글로우 없음(그래서 --glow-primary는
+   더 이상 색 있는 글로우가 아니라 일반 elevation과 같은 중립 그림자로 낮췄다).
+
+   기존에 있던 --accent(포맷/정보 뱃지용 파랑)는 이번에 "정보성 뱃지에는 색을 쓰지 않는다"는
+   규칙과 충돌해 중립 잉크 톤으로 다시 정의했다 — 파랑은 오직 --primary(CTA)에만 남는다.
+   --hero는 계속 스코프별로 다른 값을 갖지만 의미가 바뀌었다: 라이트(:root)에서는 결과
+   페이지의 유일한 어두운 대표 추천 카드 색(고정된 그래파이트), .cinema-scope 안에서는
+   반대로 이미 어두운 페이지에서 한 단계 더 밝은 "하이라이트" 표면(홈 스테이지·영화 카드
+   프레임)이다 — 같은 이름, 스코프마다 다른 역할이라는 점은 이전 라운드와 동일하다.
+   --paper-* 토큰은 없앴다: 결과 페이지가 더 이상 전체 다크 스코프가 아니라 라이트 캔버스 +
+   대표 카드 하나만 어둡게 하는 구조로 바뀌어서, 대안 카드는 그냥 페이지 기본 surface를
+   쓰면 "같은 환경의 카드"가 된다.
+
+   대비 검증(직접 계산, 4.5:1 이상 목표 — axe 실측이 보통 hand-calc보다 낮게 나오는 경향이
+   있어 여유를 둠. 실제 값은 Docker/axe 재검증 후 필요하면 미세 조정):
+   - primary-strong(블루 채움, 흰 텍스트): 브리프의 --accent(#526FFF)는 흰 텍스트 대비
+     4.14:1로 부족 → --accent-hover(#405CE8, 5.37:1)를 채움 색으로 쓰고, 밝은 --primary는
+     텍스트가 아니라 아이콘/포커스링/소프트 배경 전용으로 남긴다.
+   - ink-muted(#858C99, 브리프 원본)는 라이트 캔버스 위에서 3.13:1로 작은 텍스트엔 부족 —
+     장식/아이콘/큰 텍스트 전용으로 쓰고, 실제로 읽어야 하는 13.5px 안팎의 메타데이터는
+     ink-secondary(6.8:1)를 쓴다.
+   - success/warning/danger 원색 그대로는 라이트 배경 텍스트로 4.1~4.43:1(부족), 다크
+     배경 텍스트로는 그보다 더 낮아 각각 텍스트 전용 변형을 스코프별로 따로 뒀다(라이트는
+     어둡게, 다크는 밝게) — 브리프가 준 원색 자체는 배지 배경/아이콘 칠 등에는 그대로 쓴다.
+   - 다크 스코프 --text-tertiary는 가장 밝은 다크 표면(surface-strong)에서도 4.5:1을
+     넘기도록 브리프보다 살짝 밝혔다. */
 :root {
-  --bg: #f6f3ee;
-  --bg-deep: #ece7df;
+  --bg: #f5f6f8;
   --surface: #ffffff;
   --surface-raised: #ffffff;
-  --surface-strong: #ece7df;
-  --border: rgba(17, 24, 39, 0.1);
-  --border-strong: rgba(17, 24, 39, 0.2);
-  --text: #111827;
-  --text-sub: #2c3445;
-  --text-tertiary: #5e6879;
-  --primary: #e63e66;
-  --primary-strong: #c22e4c;
-  --primary-strong-hover: #ad2841;
-  --primary-soft: rgba(230, 62, 102, 0.12);
-  --accent: #3f5fd1;
-  --accent-soft: #e8edff;
-  --trust-high: #256b5a;
-  --trust-mid: #765a11;
-  --trust-low: #b33f1f;
-  --warning-bg: #fff6dc;
-  --warning-text: #765a11;
-  /* 대표 추천 카드(라이트 스코프 안에서도 유일하게 어두운 표면으로 남는 부분) 전용. */
-  --hero: #171d2a;
-  --hero-soft: #222a39;
-  --hero-text: #f6f3ee;
-  --hero-text-sub: #a9b2c3;
-  --hero-border: rgba(246, 243, 238, 0.14);
-  /* "종이" 톤 — .cinema-scope 안에서도 절대 어두워지지 않는다(.cinema-scope 블록에서 이
-     변수들을 재정의하지 않음). 어두운 배경 위에 가볍게 떠 있어야 하는 대안 추천 카드
-     전용 — 카드 자체는 항상 밝은 종이처럼 보이고, 페이지가 라이트/다크 어느 쪽이든
-     동일하게 "종이 카드"로 읽힌다. */
-  --paper: #fbfaf7;
-  --paper-raised: #ffffff;
-  --paper-text: #171d2a;
-  --paper-text-sub: #4e5868;
-  --paper-border: rgba(17, 24, 39, 0.12);
-  --radius: 10px;
-  --radius-lg: 19px;
+  --surface-strong: #eceef2;
+  --border: rgba(22, 24, 29, 0.1);
+  --border-strong: rgba(22, 24, 29, 0.2);
+  --text: #16181d;
+  --text-sub: #505662;
+  /* 브리프 원본 ink-muted(#858C99)는 이 라이트 캔버스에서 13px 안팎 텍스트에 3.1~3.4:1
+     밖에 안 나와(axe 실측) 4.5:1 미달 — 실제로 읽어야 하는 메타데이터에도 쓰이므로
+     장식용으로만 남기지 않고 토큰 자체를 5:1 이상 나오도록 낮췄다. */
+  --text-tertiary: #626873;
+  --primary: #526fff;
+  --primary-strong: #405ce8;
+  --primary-strong-hover: #3450c7;
+  --primary-soft: #ebefff;
+  /* 예전엔 "정보성 파랑"이었지만, 이제 파랑은 CTA·선택 전용이라 뱃지/포맷 표시는 중립
+     잉크 톤으로 뺐다 — 텍스트 클래스 이름(text-accent 등)은 그대로 두고 색만 중립화. */
+  --accent: #505662;
+  --accent-soft: #eceef2;
+  --trust-high: #1d6b56;
+  --trust-mid: #8a570d;
+  --trust-low: #a83737;
+  --warning-bg: #fbf1de;
+  --warning-text: #8a570d;
+  /* 결과 페이지의 유일한 어두운 카드 — 스코프와 무관하게 항상 이 값(라이트 페이지 위의
+     고정된 그래파이트 카드). .cinema-scope 안에서는 아래에서 다른 값으로 재정의된다. */
+  --hero: #1d2027;
+  --hero-soft: #272b34;
+  --hero-text: #f5f6f8;
+  --hero-text-sub: #a7adba;
+  --hero-border: rgba(245, 246, 248, 0.14);
+  --radius: 12px;
+  --radius-lg: 18px;
   --radius-xl: 24px;
-  --elevation-1: 0 1px 2px rgba(17, 24, 39, 0.06);
-  --elevation-2: 0 10px 28px rgba(17, 24, 39, 0.1);
-  --elevation-3: 0 20px 48px rgba(17, 24, 39, 0.16);
-  --elevation-4: 0 1px 3px rgba(17, 24, 39, 0.07);
-  --glow-primary: 0 0 60px rgba(246, 243, 238, 0.45), 0 24px 56px rgba(17, 24, 39, 0.22);
+  --elevation-1: 0 1px 2px rgba(22, 24, 29, 0.06);
+  --elevation-2: 0 10px 28px rgba(22, 24, 29, 0.1);
+  --elevation-3: 0 20px 48px rgba(22, 24, 29, 0.16);
+  --elevation-4: 0 1px 3px rgba(22, 24, 29, 0.07);
+  /* 네온 글로우 금지 — 색 있는 광원 대신 중립 elevation과 동일하게 낮췄다(기존 클래스명은
+     유지해 컴포넌트 쪽 수정 없이 효과만 사라지게 함). */
+  --glow-primary: var(--elevation-3);
 }
 
-/* 시네마 스코프 — 홈·추천 결과·상영관 상세·영화 선택 페이지의 <main>에 이 클래스를 준다.
-   .admin-scope와 동일한 원리: 같은 변수 이름을 지역적으로 다시 정의하고, 이 스코프의
-   루트 요소가 실제로 bg-bg 등을 칠해야 위(: root)의 라이트 배경을 가린다. */
+/* 시네마 스코프 — 홈·영화 선택·상영관 상세의 <main>에 적용(결과 페이지는 더 이상 여기 속하지
+   않는다 — 결과는 라이트 캔버스 + 대표 카드 하나만 어둡다). .admin-scope와 동일한 원리. */
 .cinema-scope {
-  --bg: #0f1320;
-  --bg-deep: #0a0d16;
-  --surface: #171d2b;
-  --surface-raised: #1d2433;
-  --surface-strong: #242d3f;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.16);
-  --text: #f6f3ee;
-  --text-sub: #a9b2c3;
-  --text-tertiary: #7e88a0;
-  --primary: #e63e66;
-  --primary-strong: #c22e4c;
-  --primary-strong-hover: #ad2841;
-  --primary-soft: rgba(230, 62, 102, 0.16);
-  --accent: #8fa3f5;
-  --accent-soft: rgba(109, 135, 245, 0.16);
-  --trust-high: #6fc7a8;
-  --trust-mid: #e8bc6e;
-  --trust-low: #e77a54;
-  --warning-bg: rgba(216, 167, 74, 0.14);
-  --warning-text: #e8bc6e;
-  /* 시네마 스코프 안에서 hero는 대표 추천 카드 전용 — 페이지 전체가 이미 어둡기 때문에
-     bg/surface보다 오히려 밝게 잡아서 "하이라이트"로 떠 보이게 한다(bg < surface <
-     surface-strong < hero 순으로 밝아지는 layering). */
-  --hero: #2f3a52;
-  --hero-soft: #3a4763;
-  --hero-text: #f6f3ee;
-  --hero-text-sub: #a9b2c3;
-  --hero-border: rgba(246, 243, 238, 0.14);
+  --bg: #15171c;
+  --surface: #1d2027;
+  --surface-raised: #272b34;
+  --surface-strong: #272b34;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --text: #f0f1f4;
+  --text-sub: #a7adba;
+  --text-tertiary: #9199a8;
+  --primary: #8da0ff;
+  --primary-strong: #405ce8;
+  --primary-strong-hover: #3450c7;
+  --primary-soft: rgba(82, 111, 255, 0.18);
+  --accent: #a7adba;
+  --accent-soft: rgba(255, 255, 255, 0.08);
+  --trust-high: #5fcbae;
+  --trust-mid: #e3b15c;
+  --trust-low: #e8836b;
+  --warning-bg: rgba(227, 177, 92, 0.16);
+  --warning-text: #e3b15c;
+  /* 시네마 스코프 안의 hero는 반대로 "이미 어두운 페이지에서 한 단계 밝은 하이라이트"
+     표면이다(bg < surface/surface-strong < hero 순으로 밝아짐) — 홈 스테이지, 영화 카드의
+     화면비 프레임에 쓴다. */
+  --hero: #323847;
+  --hero-soft: #3c4354;
+  --hero-text: #f5f6f8;
+  --hero-text-sub: #b7bdc9;
+  --hero-border: rgba(245, 246, 248, 0.16);
   --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.3);
   --elevation-2: 0 10px 28px rgba(0, 0, 0, 0.35);
   --elevation-3: 0 20px 48px rgba(0, 0, 0, 0.45);
   --elevation-4: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --glow-primary: 0 0 60px rgba(230, 62, 102, 0.12), 0 24px 56px rgba(0, 0, 0, 0.4);
+  --glow-primary: var(--elevation-3);
 }
 
-/* 관리자 전용 — 사이트 전역이 시네마 레드로 바뀌기 전, 원래 쓰던 블루 팔레트를 그대로
-   복원한다(§12 "사용자 화면과 관리자 화면은 구분"). 라이트 모드 지원도 관리자에서만
-   유지한다 — 내부 운영 도구라 실제 극장 감각을 강제할 이유가 없다. */
+/* 관리자 전용 — 사용자 화면 팔레트 개편과 무관하게 독립적으로 유지(§ 여러 라운드째 확정). */
 .admin-scope {
   --bg: #0e1116;
   --surface: #171c24;
@@ -151,7 +162,6 @@
 /* 기존 CSS 커스텀 프로퍼티를 Tailwind 유틸리티(bg-bg, text-primary, rounded-card 등)로 노출 */
 @theme inline {
   --color-bg: var(--bg);
-  --color-bg-deep: var(--bg-deep);
   --color-surface: var(--surface);
   --color-surface-raised: var(--surface-raised);
   --color-surface-strong: var(--surface-strong);
@@ -176,11 +186,6 @@
   --color-hero-text: var(--hero-text);
   --color-hero-text-sub: var(--hero-text-sub);
   --color-hero-border: var(--hero-border);
-  --color-paper: var(--paper);
-  --color-paper-raised: var(--paper-raised);
-  --color-paper-text: var(--paper-text);
-  --color-paper-text-sub: var(--paper-text-sub);
-  --color-paper-border: var(--paper-border);
   --radius-card: var(--radius);
   --radius-card-lg: var(--radius-lg);
   --radius-card-xl: var(--radius-xl);
@@ -196,23 +201,12 @@
     'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
     'Malgun Gothic', system-ui, sans-serif;
 
-  /* --font-wanted 하나만 테마 키로 등록한다 — 이전 라운드에서 font-display를 그대로 테마
-     키 이름으로 재선언했다가, next/font/local이 이미 html 요소에 정의해 둔 같은 이름의
-     CSS 변수와 순환 참조가 되어 폰트가 깨진 적이 있다(직접 겪은 버그). 반드시 다른 이름의
-     테마 키를 거쳐서만 연결한다. */
+  /* --font-wanted 하나만 테마 키로 등록한다 — next/font/local이 html에 이미 정의한 같은
+     이름의 CSS 변수와 겹치면 순환 참조로 폰트가 깨진 적이 있어(직접 겪은 버그), 반드시
+     다른 이름의 테마 키를 거쳐서만 연결한다. */
   --font-wanted: var(--font-display), 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
-  /* 홈 전용 --color-cinema-* 토큰은 이번 개편에서 없앴다 — 이제 홈도 사이트 전역 토큰
-     (--bg/--surface/--primary 등)을 그대로 쓴다. 예전엔 "홈만 다른 팔레트"였는데, 지금은
-     처음부터 팔레트 자체가 사이트 전체 기준이라 별도 토큰을 유지할 이유가 없어졌다
-     (일관성 요구사항과도 맞다). */
 }
 
-/*
- * Tailwind v4는 @import로 들어온 리셋·유틸리티를 자체 캐스케이드 레이어(base/components/utilities)
- * 안에 넣는다. 아래 레거시 규칙들을 레이어 밖(전역)에 그대로 두면, 특정성과 무관하게 "레이어 없는
- * 규칙이 레이어 안 규칙을 항상 이긴다"는 캐스케이드 규칙 때문에 새로 추가한 Tailwind 유틸리티
- * 클래스(text-white 등)가 이 규칙들에 가려진다. 그래서 동일한 레이어 구조로 감싼다.
- */
 @layer base {
   * {
     box-sizing: border-box;
@@ -222,8 +216,6 @@
   body {
     margin: 0;
     padding: 0;
-    /* 따뜻한 아이보리 배경 — 광원은 대표 추천 카드(hero) 하나에만 둔다. 페이지 전체에
-       암전을 깔던 이전 다크 테마의 반대 방향: 여기서는 빛이 어두운 카드 쪽에 있다. */
     background: var(--bg);
     color: var(--text);
     font-family:
@@ -231,15 +223,12 @@
       'Malgun Gothic', system-ui, sans-serif;
     font-size: 16px;
     line-height: 1.65;
-    /* 타이포 스펙: 본문 자간 -0.01em, 행간 1.6 이상 */
     letter-spacing: -0.01em;
   }
 
-  /* 링크는 기본 상태에서 색·밑줄이 전혀 없다(부모 텍스트 색을 그대로 물려받는다) — 이전
-     라운드에서 모든 링크에 기본 밑줄을 걸었더니 로고·메뉴·카드 전체 링크(TrackedLink가
-     카드 전체를 감쌈)까지 밑줄이 생겨 "꾸미지 않은 기본 HTML"처럼 보인다는 피드백이 있었다.
-     실제로 링크임을 알려야 하는 자리는 각 컴포넌트에서 hover:underline/focus-visible로만
-     반응하게 한다. */
+  /* 링크는 기본 상태에서 색·밑줄이 없다(부모 텍스트 색 상속) — 모든 링크에 밑줄을 걸면
+     로고·메뉴·카드 전체 링크까지 밑줄이 생겨 "꾸미지 않은 기본 HTML"처럼 보인다는 피드백이
+     있었다. 링크임을 알려야 하는 자리는 각 컴포넌트에서 hover:underline/focus-visible로만. */
   a {
     color: inherit;
     text-decoration: none;
@@ -251,21 +240,40 @@
     padding: 16px 16px 96px;
   }
 
+  /* 타이포 굵기 규칙(브리프): 히어로 750-800·페이지 타이틀 700-750·섹션 650-700·카드
+     타이틀 600-650·본문 400-450, 900은 쓰지 않는다. 긴 한글 제목이 이상한 지점에서
+     줄바꿈되지 않도록 keep-all을 기본으로 깐다. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
   h1 {
     font-size: 28px;
+    font-weight: 750;
     line-height: 1.3;
   }
   h2 {
     font-size: 22px;
+    font-weight: 700;
     line-height: 1.3;
   }
   h3 {
     font-size: 18px;
+    font-weight: 650;
+  }
+
+  /* 시간·가격·점수처럼 자릿수가 바뀌는 숫자가 나열될 때 자릿수 폭이 흔들리지 않게 표 형태
+     숫자를 기본값으로 켜 둔다 — 컴포넌트마다 tabular-nums를 반복해서 붙이지 않아도 된다. */
+  time,
+  .tabular {
+    font-variant-numeric: tabular-nums;
   }
 }
 
 @layer components {
-  /* ── 공통 컴포넌트 (CSS Modules 대신 시맨틱 전역 클래스 — 단순성 우선) ── */
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -278,7 +286,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 44px; /* 터치 타깃 최소 44px */
+    min-height: 44px;
     padding: 10px 20px;
     border-radius: var(--radius);
     border: 1px solid var(--border);
@@ -304,7 +312,6 @@
     width: 100%;
   }
 
-  /* TrustBadge — 색+아이콘+텍스트 병기 (색 단독 구분 금지, docs/09 §3) */
   .badge {
     display: inline-flex;
     align-items: center;
@@ -355,7 +362,6 @@
     align-items: center;
   }
 
-  /* 폼 */
   label.field {
     display: block;
     margin-bottom: 14px;
@@ -392,7 +398,6 @@
     height: 20px;
   }
 
-  /* 헤더·내비 */
   .site-header {
     border-bottom: 1px solid var(--border);
     background: var(--surface);
@@ -406,13 +411,13 @@
     justify-content: space-between;
   }
   .brand {
-    font-weight: 800;
+    font-weight: 750;
     font-size: 18px;
     color: var(--text);
     letter-spacing: 0.02em;
   }
   .brand em {
-    color: var(--primary);
+    color: var(--primary-strong);
     font-style: normal;
   }
   .site-nav {
@@ -433,7 +438,6 @@
     background: var(--bg);
   }
 
-  /* 비교 테이블 — 가로 스크롤 컨테이너 (docs/09 §3 CompareTable) */
   .table-scroll {
     overflow-x: auto;
     border: 1px solid var(--border);
@@ -458,7 +462,6 @@
     white-space: nowrap;
   }
 
-  /* 목록 */
   ul.plain {
     list-style: none;
     padding: 0;
@@ -475,7 +478,7 @@
   }
   details.expand summary {
     cursor: pointer;
-    color: var(--primary);
+    color: var(--primary-strong);
     font-size: 14px;
     min-height: 44px;
     display: flex;
@@ -484,7 +487,6 @@
 }
 
 @layer components {
-  /* 키보드 사용자를 위한 스킵 링크 — 평소엔 화면 밖, 포커스 시에만 나타난다 (docs/ACCESSIBILITY.md) */
   .skip-link {
     position: fixed;
     top: 8px;
@@ -506,14 +508,12 @@
   }
 }
 
-/* 페이지 진입 스태거 애니메이션 — 섹션이 순서대로 살짝 떠오르며 나타난다(제목 → 조건 요약 →
-   대표 추천 → 대안 추천 → 비교 영역 순). prefers-reduced-motion에서는 아래 미디어 쿼리가
-   모든 animation을 강제로 끄므로 별도 분기 없이 자동으로 대응된다. */
+/* 페이지 진입 스태거 애니메이션 — 브리프 모션 스펙(220-360ms, translateY 6-10px). */
 @layer utilities {
   @keyframes fade-in-up {
     from {
       opacity: 0;
-      transform: translateY(14px);
+      transform: translateY(8px);
     }
     to {
       opacity: 1;
@@ -521,22 +521,22 @@
     }
   }
   .enter-1 {
-    animation: fade-in-up 420ms ease-out both;
+    animation: fade-in-up 260ms ease-out both;
   }
   .enter-2 {
-    animation: fade-in-up 420ms ease-out 60ms both;
+    animation: fade-in-up 260ms ease-out 50ms both;
   }
   .enter-3 {
-    animation: fade-in-up 420ms ease-out 120ms both;
+    animation: fade-in-up 260ms ease-out 100ms both;
   }
   .enter-4 {
-    animation: fade-in-up 420ms ease-out 180ms both;
+    animation: fade-in-up 260ms ease-out 150ms both;
   }
   .enter-5 {
-    animation: fade-in-up 420ms ease-out 240ms both;
+    animation: fade-in-up 260ms ease-out 200ms both;
   }
 
-  /* 히어로 셀렉션 스테이지 — 예시 정보가 자동으로 넘어갈 때 크로스페이드 + 가로 6px 이동 */
+  /* 히어로 프로세스 스트립 — 예시 값이 자동 전환될 때 크로스페이드 + 가로 6px 이동. */
   @keyframes stage-cross-fade {
     from {
       opacity: 0;
@@ -548,7 +548,23 @@
     }
   }
   .stage-enter {
-    animation: stage-cross-fade 280ms ease-out both;
+    animation: stage-cross-fade 240ms ease-out both;
+  }
+
+  /* 검색 결과 목록이 바뀔 때(입력 변화) 살짝 크로스페이드 — 레이아웃이 통째로 점프하지
+     않도록 짧게만. */
+  @keyframes list-cross-fade {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .list-enter {
+    animation: list-cross-fade 220ms ease-out both;
   }
 }
 

@@ -156,7 +156,7 @@ export default async function AuditoriumDetailPage({
         <p className="mt-2.5">
           <Link
             href={`/cinemas/${detail.id}/report`}
-            className="inline-flex items-center gap-1 text-sm font-medium text-primary"
+            className="inline-flex items-center gap-1 text-sm font-medium text-text underline decoration-border-strong underline-offset-2"
           >
             <IconEdit className="h-3.5 w-3.5" /> 좌석 구역 정보가 다르다면 제보해 주세요
           </Link>
@@ -189,14 +189,17 @@ export default async function AuditoriumDetailPage({
                     <FormatTag format={s.format} />
                     <ShowtimeStatusBadge kind={s.isSynthetic ? 'synthetic' : 'verified'} variant="compact" />
                   </div>
-                  <Link href={`/recommend/${s.movieId}`} className="font-medium text-text hover:text-primary">
+                  <Link
+                    href={`/recommend/${s.movieId}`}
+                    className="font-medium text-text underline decoration-border-strong underline-offset-2"
+                  >
                     {s.movieTitle}
                   </Link>
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-medium text-text-sub">{s.priceAdult.toLocaleString('ko-KR')}원</span>
                     {s.bookingUrl && !s.isSynthetic ? (
                       <a
-                        className="inline-flex min-h-9 items-center font-semibold text-primary"
+                        className="inline-flex min-h-9 items-center font-semibold text-text underline decoration-border-strong underline-offset-2"
                         href={s.bookingUrl}
                         target="_blank"
                         rel="noopener noreferrer nofollow"
@@ -263,7 +266,12 @@ export default async function AuditoriumDetailPage({
             <p className="mb-0 mt-2.5 flex flex-wrap items-center gap-1.5 text-sm text-text-sub">
               <TrustBadge status={current.infoStatus} observedAt={current.observedAt} />
               {current.sourceUrl ? (
-                <a className="text-primary" href={current.sourceUrl} target="_blank" rel="noopener noreferrer">
+                <a
+                  className="text-text underline decoration-border-strong underline-offset-2"
+                  href={current.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   {current.sourceName ?? '출처'}
                 </a>
               ) : (
@@ -312,7 +320,7 @@ export default async function AuditoriumDetailPage({
       ) : null}
 
       <p className="mt-6">
-        <Link className="text-primary" href="/sources">
+        <Link className="text-text underline decoration-border-strong underline-offset-2" href="/sources">
           정보 출처·신뢰도 기준 →
         </Link>
       </p>

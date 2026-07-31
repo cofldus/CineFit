@@ -62,7 +62,7 @@ export default async function SearchPage({
                   <span className="font-semibold text-text">{m.title}</span>
                   {m.originalTitle && <span className="ml-2 text-sm text-text-sub">{m.originalTitle}</span>}
                   {m.matchedAlias && (
-                    <span className="ml-2 text-sm text-primary">별칭 &ldquo;{m.matchedAlias}&rdquo; 일치</span>
+                    <span className="ml-2 text-sm font-medium text-text-sub">별칭 &ldquo;{m.matchedAlias}&rdquo; 일치</span>
                   )}
                 </Link>
               </li>
@@ -84,7 +84,7 @@ export default async function SearchPage({
                   <span className="font-semibold text-text">{c.label}</span>
                   <span className="ml-2 text-sm text-text-sub">{c.brand}</span>
                   {c.matchedAlias && (
-                    <span className="ml-2 text-sm text-primary">별칭 &ldquo;{c.matchedAlias}&rdquo; 일치</span>
+                    <span className="ml-2 text-sm font-medium text-text-sub">별칭 &ldquo;{c.matchedAlias}&rdquo; 일치</span>
                   )}
                 </Link>
               </li>

@@ -30,7 +30,7 @@ export default function AlphaConsentPage() {
           <span aria-hidden className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
           <span>
             남기신 데이터의 삭제를{' '}
-            <Link href="/privacy" className="font-semibold text-primary underline underline-offset-2">
+            <Link href="/privacy" className="font-semibold text-text underline decoration-border-strong underline-offset-2">
               요청
             </Link>
             할 수 있어요.

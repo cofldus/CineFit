@@ -61,7 +61,7 @@ export default async function SourcesPage() {
           <li key={s.id} className="rounded-card-lg border border-border bg-surface p-4 shadow-card">
             <p className="m-0 font-semibold text-text">
               {s.url ? (
-                <a className="text-primary" href={s.url} target="_blank" rel="noopener noreferrer">
+                <a className="text-text underline decoration-border-strong underline-offset-2" href={s.url} target="_blank" rel="noopener noreferrer">
                   {s.name}
                 </a>
               ) : (
@@ -107,7 +107,7 @@ export default async function SourcesPage() {
               <tr key={s.id}>
                 <td className="border-b border-border p-3 text-text">
                   {s.url ? (
-                    <a className="text-primary" href={s.url} target="_blank" rel="noopener noreferrer">
+                    <a className="text-text underline decoration-border-strong underline-offset-2" href={s.url} target="_blank" rel="noopener noreferrer">
                       {s.name}
                     </a>
                   ) : (
@@ -128,7 +128,7 @@ export default async function SourcesPage() {
       <p className="mt-5 text-sm text-text-sub">
         검증 대기 항목 관리:{' '}
         <a
-          className="text-primary"
+          className="text-text underline decoration-border-strong underline-offset-2"
           href="https://github.com/cofldus/CineFit/blob/main/docs/90-verification-register.md"
           target="_blank"
           rel="noopener noreferrer"

@@ -56,8 +56,6 @@ export function PostWatchForm({ runId }: { runId: number }) {
         </p>
       ) : null}
 
-      <p className="m-0 text-xs text-text-tertiary">1 — 매우 낮음 · 5 — 매우 높음</p>
-
       <div className="border-b border-border pb-1">
         <RatingSelector
           name="overallSatisfaction"

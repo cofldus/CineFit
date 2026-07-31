@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
 const inputCls =
-  'min-h-12 w-full rounded-card-lg border border-border bg-bg px-3.5 text-base tracking-[0.04em] text-text outline-none transition-shadow focus-visible:border-primary-strong focus-visible:ring-[3px] focus-visible:ring-primary-soft';
+  'min-h-[52px] w-full rounded-card border border-border bg-bg px-3.5 text-base tracking-[0.04em] text-text outline-none transition-shadow focus-visible:border-primary-strong focus-visible:ring-[3px] focus-visible:ring-primary-soft';
 
 export function AlphaInviteForm() {
   const router = useRouter();
@@ -45,7 +45,7 @@ export function AlphaInviteForm() {
         <button
           type="submit"
           disabled={busy}
-          className="min-h-12 shrink-0 rounded-card-lg bg-primary-strong px-6 text-sm font-semibold text-white transition-colors hover:bg-primary-strong-hover disabled:opacity-60"
+          className="min-h-[52px] shrink-0 rounded-card bg-primary-strong px-6 text-sm font-semibold text-white transition-colors hover:bg-primary-strong-hover disabled:opacity-60"
         >
           {busy ? '확인 중…' : '입장하기'}
         </button>

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 const inputCls =
-  'min-h-12 w-full rounded-card-lg border border-border bg-bg px-3.5 text-base text-text outline-none transition-shadow focus-visible:border-primary-strong focus-visible:ring-[3px] focus-visible:ring-primary-soft';
+  'min-h-[52px] w-full rounded-card border border-border bg-bg px-3.5 text-base text-text outline-none transition-shadow focus-visible:border-primary-strong focus-visible:ring-[3px] focus-visible:ring-primary-soft';
 const sectionCls = 'rounded-card-lg border border-border bg-surface p-5';
 
 type Phase = { kind: 'editing' } | { kind: 'submitting' } | { kind: 'done' } | { kind: 'error'; message: string };

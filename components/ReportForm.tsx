@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import { REPORT_TYPES, REPORT_TYPE_LABELS } from '../src/lib/reportValidation';
+import { Checkbox } from './Checkbox';
 import { IconChevronRight } from './Icon';
 import { StepSection } from './StepSection';
 
 const inputCls =
-  'min-h-12 w-full rounded-card-lg border border-border bg-bg px-3.5 text-base text-text outline-none transition-shadow focus-visible:border-primary-strong focus-visible:ring-[3px] focus-visible:ring-primary-soft';
+  'min-h-[52px] w-full rounded-card border border-border bg-bg px-3.5 text-base text-text outline-none transition-shadow focus-visible:border-primary-strong focus-visible:ring-[3px] focus-visible:ring-primary-soft';
 const selectCls = `${inputCls} appearance-none pr-10`;
 const labelCls = 'block text-sm font-semibold text-text';
 
@@ -167,8 +168,8 @@ export function ReportForm({
               <span className={labelCls}>어떤 목적의 좌석인가요? (복수 선택)</span>
               <div className="mt-2 grid grid-cols-2 gap-1">
                 {PURPOSES.map(([v, label]) => (
-                  <label key={v} className="flex min-h-11 items-center gap-2 text-[15px] text-text">
-                    <input className="h-5 w-5 accent-primary" type="checkbox" name={`purpose_${v}`} /> {label}
+                  <label key={v} className="flex min-h-11 cursor-pointer items-center gap-2 text-[15px] text-text">
+                    <Checkbox name={`purpose_${v}`} /> {label}
                   </label>
                 ))}
               </div>

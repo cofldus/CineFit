@@ -34,16 +34,20 @@ export function MobileNav() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // /admin: 관리자 전용 화면. /recommend: 폼 자체의 sticky 제출 바와 겹치므로 숨긴다.
-  // 홈('/'): 자기 헤더·CTA를 쓰므로 기존 하단 내비와 겹치지 않게 숨긴다.
-  // /results: 고정 내비가 스크롤 중 대표 추천 카드의 CTA를 가린다는 피드백 — 추천 결정에
-  // 집중해야 하는 화면이라 다른 화면 이동(홈/영화/검색/출처)보다 지금 보고 있는 추천에
-  // 머무는 게 맞다고 판단해 이 화면에서도 숨긴다.
+  // /admin: 관리자 전용 화면. /recommend·/results: 폼 자체의 sticky 제출 바 및 대표 추천
+  // CTA와 겹친다. 홈('/'): 자기 헤더·CTA를 쓴다. 그 외 브리프가 명시한 폼형 진입/이탈
+  // 화면(피드백·제보·개인정보 요청·알파 동의·초대)도 각자의 CTA에 집중해야 하는 단일 목적
+  // 화면이라 전역 내비를 숨긴다 — 상영관 상세 자체(비-제보 경로)는 계속 노출한다.
+  const isReportForm = pathname.startsWith('/cinemas') && pathname.endsWith('/report');
   if (
+    pathname === '/' ||
     pathname.startsWith('/admin') ||
     pathname.startsWith('/recommend') ||
     pathname.startsWith('/results') ||
-    pathname === '/'
+    pathname.startsWith('/feedback') ||
+    pathname.startsWith('/privacy') ||
+    pathname.startsWith('/alpha') ||
+    isReportForm
   )
     return null;
 

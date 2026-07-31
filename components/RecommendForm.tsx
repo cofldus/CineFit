@@ -4,16 +4,16 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { MOTION_OPTIONS, ORIGIN_PRESETS, PRIORITY_OPTIONS } from '../src/data/constants';
 import { readOnboardingState, type OnboardingAnswers } from '../src/lib/onboarding';
+import { Checkbox } from './Checkbox';
 import { IconChevronRight } from './Icon';
 import { SegmentedControl } from './SegmentedControl';
 import { StepSection } from './StepSection';
 
 const inputCls =
-  'min-h-12 w-full rounded-card-lg border border-border bg-bg px-3.5 text-base text-text outline-none transition-shadow focus-visible:border-primary-strong focus-visible:ring-[3px] focus-visible:ring-primary-soft';
+  'min-h-[52px] w-full rounded-card border border-border bg-bg px-3.5 text-base text-text outline-none transition-shadow focus-visible:border-primary-strong focus-visible:ring-[3px] focus-visible:ring-primary-soft';
 const selectCls = `${inputCls} appearance-none pr-10`;
 const labelCls = 'block text-sm font-semibold text-text';
-const checkRowCls = 'flex min-h-12 items-center gap-2.5 text-[15px] text-text';
-const checkboxCls = 'h-5 w-5 accent-primary';
+const checkRowCls = 'flex min-h-12 cursor-pointer items-center gap-2.5 text-[15px] text-text';
 
 function SelectChevron() {
   return (
@@ -116,14 +116,13 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
           <legend className="mb-1.5 block text-sm font-semibold text-text">허용할 상영 방식</legend>
           <div className="flex flex-col gap-1">
             <label className={checkRowCls}>
-              <input className={checkboxCls} type="checkbox" name="allowImax" defaultChecked /> IMAX 허용
+              <Checkbox name="allowImax" defaultChecked /> IMAX 허용
             </label>
             <label className={checkRowCls}>
-              <input className={checkboxCls} type="checkbox" name="allowDolby" defaultChecked /> Dolby Cinema 허용
+              <Checkbox name="allowDolby" defaultChecked /> Dolby Cinema 허용
             </label>
             <label className={checkRowCls}>
-              <input className={checkboxCls} type="checkbox" name="allowStandard" defaultChecked /> 일반관(대형관
-              포함) 허용
+              <Checkbox name="allowStandard" defaultChecked /> 일반관(대형관 포함) 허용
             </label>
           </div>
         </fieldset>
@@ -141,20 +140,14 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
           <legend className="mb-1.5 block text-sm font-semibold text-text">좌석·편의 선호</legend>
           <div className="flex flex-col gap-1">
             <label className={checkRowCls} key={prefillKey}>
-              <input
-                className={checkboxCls}
-                type="checkbox"
-                name="subtitleReadability"
-                defaultChecked={prefill?.subtitleReadability ?? false}
-              />{' '}
+              <Checkbox name="subtitleReadability" defaultChecked={prefill?.subtitleReadability ?? false} />
               자막이 잘 보이는 좌석 우선
             </label>
             <label className={checkRowCls}>
-              <input className={checkboxCls} type="checkbox" name="neckComfort" /> 목 덜 아픈 좌석 우선
+              <Checkbox name="neckComfort" /> 목 덜 아픈 좌석 우선
             </label>
             <label className={checkRowCls}>
-              <input className={checkboxCls} type="checkbox" name="wheelchair" /> 휠체어 접근 필수 (확인 안 된
-              상영관은 제외돼요)
+              <Checkbox name="wheelchair" /> 휠체어 접근 필수 (확인 안 된 상영관은 제외돼요)
             </label>
           </div>
         </fieldset>

@@ -58,8 +58,11 @@ export function MarketingHeader() {
     >
       <div className="mx-auto flex h-[76px] max-w-wide items-center justify-between px-5 sm:px-8">
         <Link href="/" className="inline-flex items-center gap-2" aria-label="CineFit 홈">
-          <span aria-hidden className="h-2.5 w-2.5 rounded-full bg-primary-strong" />
-          <span className="font-wanted text-xl font-extrabold tracking-[-0.02em] text-text sm:text-2xl">CineFit</span>
+          {/* 로고 점은 더 이상 액센트 컬러를 쓰지 않는다 — 파랑은 CTA·선택·포커스·활성
+              내비게이션 전용이라 상시 노출되는 장식 요소에는 어울리지 않는다(브리프 "코랄
+              로고 점 제거" 요구를 색이 바뀐 지금도 같은 원칙으로 적용: 중립 톤으로). */}
+          <span aria-hidden className="h-2.5 w-2.5 rounded-full bg-text" />
+          <span className="font-wanted text-xl font-bold tracking-[-0.02em] text-text sm:text-2xl">CineFit</span>
         </Link>
 
         <nav ref={navRef} className="relative hidden items-center gap-2 sm:flex" aria-label="주요 메뉴">

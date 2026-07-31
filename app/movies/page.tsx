@@ -11,7 +11,7 @@ export default async function MoviesPage() {
 
   return (
     <main className="cinema-scope mx-auto min-h-dvh max-w-wide bg-bg px-4 pb-24 pt-10 sm:pt-14">
-      <p className="m-0 text-[13px] font-bold uppercase tracking-[0.08em] text-primary">영화 선택</p>
+      <p className="m-0 text-[13px] font-bold uppercase tracking-[0.08em] text-text-sub">영화 선택</p>
       <h1 className="font-wanted m-0 mt-2 text-[32px] font-bold tracking-[-0.02em] text-text sm:text-[38px]">
         어떤 영화를 보러 가세요?
       </h1>

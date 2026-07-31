@@ -81,7 +81,7 @@ export default async function AuditoriumDetailPage({
   return (
     <main className="cinema-scope mx-auto min-h-dvh max-w-wide bg-bg px-4 pb-24 pt-6">
       {/* 1. 상영관 이름·위치·핵심 특징 — 상단 요약을 더 강하게 */}
-      <p className="m-0 text-[13px] font-bold uppercase tracking-[0.08em] text-primary">{detail.location.chain}</p>
+      <p className="m-0 text-[13px] font-bold uppercase tracking-[0.08em] text-text-sub">{detail.location.chain}</p>
       <h1 className="font-wanted m-0 mt-2 text-[32px] font-bold tracking-[-0.02em] text-text sm:text-[38px]">
         {detail.location.name} {detail.no}
       </h1>

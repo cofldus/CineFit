@@ -1,40 +1,38 @@
 @import 'tailwindcss';
 
-/* CineFit 디자인 토큰 (4) — "Cinema Selection Desk"(2026-08-01).
-   직전 "Projector Editorial"은 다크→라이트로 반전만 했을 뿐 디자인 언어가 없다는 피드백
-   (공공기관 안내 페이지·금융 랜딩 페이지처럼 보임) — 문제는 아이보리 자체가 아니라 카드가
-   배경과 거의 같은 명도라 화면 전체가 뿌옇게 보인 것과, 링크에 밑줄이 기본으로 걸려 있어
-   로고·메뉴·카드 전체가 브라우저 기본 스타일처럼 보인 것 두 가지였다. 이번에는:
-   1) surface를 캔버스보다 확실히 밝은 순백에 가깝게 잡아 카드가 배경에서 분리되게 했다.
-   2) 딥 네이비(night)를 대표 카드뿐 아니라 히어로 스테이지에도 써서 "중간 명도"를 만든다.
-   3) 링크 기본 스타일은 별도 규칙으로 완전히 제거하고(color:inherit, no underline),
-      각 컴포넌트가 hover/focus에서만 반응하게 한다.
-   대비 검증(직접 계산 + axe 실측 기준 4.5:1 이상, 지난 라운드에서 손계산과 실측이
-   0.1~0.3 정도 벌어진 전례가 있어 여유를 더 뒀다):
-   - coral 채움색(흰 텍스트용): 브리프의 #F03E61은 3.77:1, hover색 #DA304F도 4.65:1로
-     여유가 부족 → #C22E4C(5.54:1, 지난 라운드에 axe로 검증된 값 재사용)를 기본 채움에 쓰고
-     원래의 #F03E61은 텍스트를 얹지 않는 강조(얇은 선·soft 배경)에만 쓴다.
-   - ink-muted: 브리프의 #7A8492는 3.36:1 미달 → #63697A로 낮춰 4.86:1.
-   - blue(텍스트로 쓰는 경우): 브리프의 #5577EA는 3.57:1 미달 → #3F5FD1로 낮춰 4.94:1. */
+/* CineFit 디자인 토큰 (5) — "Midnight Cinema + Modern Screening Tool"(2026-08-01, 2차).
+   직전 라운드는 링크 밑줄 버그는 고쳤지만 사이트 전체가 결국 하나의 밋밋한 라이트 테마로
+   수렴해 "정리된 베타 도구" 인상을 벗지 못했다는 피드백 — 이번에는 아예 팔레트를 둘로
+   나눈다. 기본(:root)은 실용적인 라이트 "paper" 톤(검색·폼·출처 등 앱형 화면), 그리고
+   .cinema-scope 클래스가 어두운 "night" 톤으로 완전히 갈아끼운다(홈·추천 결과·상영관
+   상세·영화 선택 — 결정을 내리는 시네마 화면들). 이미 있던 .admin-scope와 정확히 같은
+   패턴(같은 변수 이름을 지역적으로 재정의)이라 컴포넌트 쪽 클래스는 그대로 두고 토큰 값만
+   스코프에 따라 달라진다. 헤더·하단 내비는 페이지와 무관하게 항상 어두운 시네마 톤을
+   써서 두 영역을 하나의 브랜드로 잇는다.
+   대비 검증(직접 계산 + axe 실측 기준 4.5:1 이상, 라이트/다크 각각 별도로 재계산 —
+   같은 색이라도 배경 밝기가 반대라 두 스코프에서 통과하는 값이 다르다):
+   - primary-strong(코랄 채움, 흰 텍스트): 라이트·다크 공통으로 #C22E4C 사용(5.54:1,
+     지난 라운드에 axe로 실측 검증된 값 그대로 재사용 — 브리프의 #E63E66/#D12F57은
+     각각 3.x대·4.93대로 여유가 부족했다).
+   - text-tertiary(라이트): 브리프의 #697386은 4.31:1로 미달 → #5E6879로 낮춰 5.08:1.
+   - accent/trust-*(라이트, 텍스트용): 브리프의 파랑·초록·노랑 원색은 전부 라이트 배경에서
+     3:1 미만 — 각각 어둡게 낮춘 별도 텍스트 색을 쓰고, 브리프의 밝은 원색은 다크 스코프
+     전용(그 위에서는 반대로 원색이 밝아서 잘 보인다)으로 나눠 썼다. */
 :root {
-  --bg: #f4f1eb;
-  --bg-deep: #ece8e0;
-  --surface: #fbfaf7;
+  --bg: #f6f3ee;
+  --bg-deep: #ece7df;
+  --surface: #ffffff;
   --surface-raised: #ffffff;
-  --surface-strong: #ece8e0;
-  --border: rgba(18, 23, 34, 0.12);
-  --border-strong: rgba(18, 23, 34, 0.22);
-  --text: #121722;
-  --text-sub: #4e5868;
-  --text-tertiary: #63697a;
-  /* 일반 링크·보조 요소 전용 — 채도 있는 색이 아니라 중성 잉크 톤. 링크는 색이 아니라
-     hover/focus 시 밑줄로만 표시한다(기본 상태는 본문과 같은 색+밑줄 없음). */
-  --primary: #f03e61;
-  /* 페이지당 하나뿐인 주 CTA·현재 선택·대표 추천 전용 — 흰 텍스트를 얹는 채움색이라
-     브리프 원안보다 낮췄다(위 대비 검증 참고). */
+  --surface-strong: #ece7df;
+  --border: rgba(17, 24, 39, 0.1);
+  --border-strong: rgba(17, 24, 39, 0.2);
+  --text: #111827;
+  --text-sub: #2c3445;
+  --text-tertiary: #5e6879;
+  --primary: #e63e66;
   --primary-strong: #c22e4c;
   --primary-strong-hover: #ad2841;
-  --primary-soft: #fbe3e7;
+  --primary-soft: rgba(230, 62, 102, 0.12);
   --accent: #3f5fd1;
   --accent-soft: #e8edff;
   --trust-high: #256b5a;
@@ -42,23 +40,69 @@
   --trust-low: #b33f1f;
   --warning-bg: #fff6dc;
   --warning-text: #765a11;
-  /* 대표 추천 카드 + 홈 히어로 스테이지 전용 — 페이지에서 유일하게 어두운 표면. */
+  /* 대표 추천 카드(라이트 스코프 안에서도 유일하게 어두운 표면으로 남는 부분) 전용. */
   --hero: #171d2a;
   --hero-soft: #222a39;
-  --hero-text: #fbfaf7;
-  --hero-text-sub: #b7bfce;
-  --hero-border: rgba(251, 250, 247, 0.14);
+  --hero-text: #f6f3ee;
+  --hero-text-sub: #a9b2c3;
+  --hero-border: rgba(246, 243, 238, 0.14);
+  /* "종이" 톤 — .cinema-scope 안에서도 절대 어두워지지 않는다(.cinema-scope 블록에서 이
+     변수들을 재정의하지 않음). 어두운 배경 위에 가볍게 떠 있어야 하는 대안 추천 카드
+     전용 — 카드 자체는 항상 밝은 종이처럼 보이고, 페이지가 라이트/다크 어느 쪽이든
+     동일하게 "종이 카드"로 읽힌다. */
+  --paper: #fbfaf7;
+  --paper-raised: #ffffff;
+  --paper-text: #171d2a;
+  --paper-text-sub: #4e5868;
+  --paper-border: rgba(17, 24, 39, 0.12);
   --radius: 10px;
   --radius-lg: 19px;
   --radius-xl: 24px;
-  /* elevation-1..4 = 기본 카드 / 떠 있는 컨트롤 / 모달 / 강조 결과. surface가 캔버스보다
-     확실히 밝기 때문에 그림자는 카드를 "띄우는" 용도로만 옅게 쓴다. */
-  --elevation-1: 0 1px 2px rgba(18, 23, 34, 0.06);
-  --elevation-2: 0 10px 28px rgba(18, 23, 34, 0.1);
-  --elevation-3: 0 20px 48px rgba(18, 23, 34, 0.16);
-  --elevation-4: 0 1px 3px rgba(18, 23, 34, 0.07);
-  /* 대표 추천 카드 + 히어로 스테이지 전용 — 프로젝터 빛이 새어 나오는 듯한 은은한 웜톤 글로우. */
-  --glow-primary: 0 0 60px rgba(251, 250, 247, 0.45), 0 24px 56px rgba(18, 23, 34, 0.22);
+  --elevation-1: 0 1px 2px rgba(17, 24, 39, 0.06);
+  --elevation-2: 0 10px 28px rgba(17, 24, 39, 0.1);
+  --elevation-3: 0 20px 48px rgba(17, 24, 39, 0.16);
+  --elevation-4: 0 1px 3px rgba(17, 24, 39, 0.07);
+  --glow-primary: 0 0 60px rgba(246, 243, 238, 0.45), 0 24px 56px rgba(17, 24, 39, 0.22);
+}
+
+/* 시네마 스코프 — 홈·추천 결과·상영관 상세·영화 선택 페이지의 <main>에 이 클래스를 준다.
+   .admin-scope와 동일한 원리: 같은 변수 이름을 지역적으로 다시 정의하고, 이 스코프의
+   루트 요소가 실제로 bg-bg 등을 칠해야 위(: root)의 라이트 배경을 가린다. */
+.cinema-scope {
+  --bg: #0f1320;
+  --bg-deep: #0a0d16;
+  --surface: #171d2b;
+  --surface-raised: #1d2433;
+  --surface-strong: #242d3f;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --text: #f6f3ee;
+  --text-sub: #a9b2c3;
+  --text-tertiary: #7e88a0;
+  --primary: #e63e66;
+  --primary-strong: #c22e4c;
+  --primary-strong-hover: #ad2841;
+  --primary-soft: rgba(230, 62, 102, 0.16);
+  --accent: #8fa3f5;
+  --accent-soft: rgba(109, 135, 245, 0.16);
+  --trust-high: #6fc7a8;
+  --trust-mid: #e8bc6e;
+  --trust-low: #e77a54;
+  --warning-bg: rgba(216, 167, 74, 0.14);
+  --warning-text: #e8bc6e;
+  /* 시네마 스코프 안에서 hero는 대표 추천 카드 전용 — 페이지 전체가 이미 어둡기 때문에
+     bg/surface보다 오히려 밝게 잡아서 "하이라이트"로 떠 보이게 한다(bg < surface <
+     surface-strong < hero 순으로 밝아지는 layering). */
+  --hero: #2f3a52;
+  --hero-soft: #3a4763;
+  --hero-text: #f6f3ee;
+  --hero-text-sub: #a9b2c3;
+  --hero-border: rgba(246, 243, 238, 0.14);
+  --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --elevation-2: 0 10px 28px rgba(0, 0, 0, 0.35);
+  --elevation-3: 0 20px 48px rgba(0, 0, 0, 0.45);
+  --elevation-4: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --glow-primary: 0 0 60px rgba(230, 62, 102, 0.12), 0 24px 56px rgba(0, 0, 0, 0.4);
 }
 
 /* 관리자 전용 — 사이트 전역이 시네마 레드로 바뀌기 전, 원래 쓰던 블루 팔레트를 그대로
@@ -132,6 +176,11 @@
   --color-hero-text: var(--hero-text);
   --color-hero-text-sub: var(--hero-text-sub);
   --color-hero-border: var(--hero-border);
+  --color-paper: var(--paper);
+  --color-paper-raised: var(--paper-raised);
+  --color-paper-text: var(--paper-text);
+  --color-paper-text-sub: var(--paper-text-sub);
+  --color-paper-border: var(--paper-border);
   --radius-card: var(--radius);
   --radius-card-lg: var(--radius-lg);
   --radius-card-xl: var(--radius-xl);

@@ -50,7 +50,7 @@ export function MobileNav() {
   return (
     <nav
       aria-label="하단 메뉴"
-      className={`fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/90 backdrop-blur-md transition-transform duration-300 sm:hidden ${
+      className={`cinema-scope fixed inset-x-0 bottom-0 z-40 border-t border-border bg-bg/92 backdrop-blur-md transition-transform duration-300 sm:hidden ${
         hidden ? 'translate-y-full' : 'translate-y-0'
       }`}
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}

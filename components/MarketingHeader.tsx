@@ -13,10 +13,13 @@ const NAV_LINKS = [
 
 /**
  * 사용자 화면 전체의 헤더 — /admin만 제외한다(components/AppHeader.tsx가 그쪽을 맡는다).
- * 초기에는 투명(히어로 배경이 그대로 비침)하다가 스크롤하면 blur+반투명 배경으로 전환된다
- * — 항상 불투명한 다크 바가 떠 있는 것보다 첫 화면이 덜 답답해 보인다. 활성 메뉴는 빨간
- * 글자 반복 대신 밑줄 하나가 링크 위치로 미끄러지듯 이동한다(실제 DOM 위치를 측정해서
- * 이동시킨다 — Framer Motion 없이 순수 CSS transition + ref 측정만으로 구현).
+ * 페이지가 라이트(검색·폼·출처)든 다크(홈·추천·상영관 상세)든 헤더 자체는 항상
+ * cinema-scope(어두운 톤)로 고정한다 — 두 팔레트를 하나의 브랜드로 잇는 공통 요소다.
+ * 투명하게 시작해 스크롤하면 배경이 나타나던 이전 방식은 라이트 페이지 위에서 흰 페이지
+ * 배경에 흰 텍스트가 그대로 노출되는 문제가 있어(헤더 텍스트는 cinema-scope라 항상
+ * 밝은색) 그만두고, 처음부터 항상 불투명하게 보인다. 활성 메뉴는 빨간 글자 반복 대신
+ * 밑줄 하나가 링크 위치로 미끄러지듯 이동한다(실제 DOM 위치를 측정해서 이동시킨다 —
+ * Framer Motion 없이 순수 CSS transition + ref 측정만으로 구현).
  */
 export function MarketingHeader() {
   const pathname = usePathname() ?? '/';
@@ -49,8 +52,8 @@ export function MarketingHeader() {
 
   return (
     <header
-      className={`sticky top-0 z-40 transition-colors duration-300 ${
-        scrolled ? 'bg-bg/85 backdrop-blur-md' : 'bg-transparent'
+      className={`cinema-scope sticky top-0 z-40 border-b border-border bg-bg/95 backdrop-blur-md transition-shadow duration-300 ${
+        scrolled ? 'shadow-modal' : ''
       }`}
     >
       <div className="mx-auto flex h-[76px] max-w-wide items-center justify-between px-5 sm:px-8">

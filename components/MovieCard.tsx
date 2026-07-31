@@ -1,6 +1,7 @@
 import { FORMAT_LABELS } from '../src/domain/recommendation/presets';
 import type { MovieWithSpecs } from '../src/domain/recommendation/types';
 import { formatSpecValue, keySpecEntries, SPEC_KEY_LABELS } from '../src/lib/display';
+import { IconArrowRight } from './Icon';
 import { AspectFrame } from './ScreenArt';
 import { TrackedLink } from './TrackedLink';
 import { TrustBadge } from './TrustBadge';
@@ -40,28 +41,32 @@ export function MovieCard({ movie, variant = 'detailed' }: { movie: MovieWithSpe
         event="movie_selected"
         eventProperties={{ movieId: movie.id }}
         href={`/recommend/${movie.id}`}
-        className="group block w-[220px] shrink-0 snap-start rounded-lg border border-border bg-surface p-4 transition-all duration-200 hover:-translate-y-1 hover:border-border-strong hover:bg-surface-raised hover:shadow-float focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-strong active:translate-y-0 sm:w-auto"
+        className="group block w-[85%] shrink-0 snap-start rounded-card-lg border border-border bg-surface p-4 transition-all duration-200 hover:-translate-y-[3px] hover:shadow-float focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-strong active:translate-y-0 sm:w-auto"
       >
-        {/* 화면비를 실제 프레임 모양으로 시각화 — 이전의 채움 막대는 "로딩 진행률"처럼
-            읽혀서 무슨 뜻인지 알기 어렵다는 피드백이 있었다. 테두리만 있는 빈 상자는 또
-            "깨진 이미지"처럼 보여서, 은은한 스크린 광원 그러데이션으로 채웠다 — 사각형
-            자체가 화면비를 나타내는 도형이라 의미가 바로 드러난다(장식이 아니라 데이터 표현). */}
+        {/* 영화마다 실제 화면비로 프레임 자체의 모양이 달라진다(2.39:1은 낮고 넓게, 1.85:1은
+            상대적으로 높게) — 그 위에 비율 숫자를 크게 얹어 "이 영화의 스크린 모양"임을
+            바로 읽히게 한다. 회색 빈 상자 대신 화면비 자체가 카드의 정체성이 되게 하는
+            의도다(장식이 아니라 데이터 표현). */}
         <div
           aria-hidden
-          className="rounded-[3px] bg-gradient-to-b from-accent/30 to-accent/5"
-          style={{ height: '28px', width: 'auto', aspectRatio: `${clampedAr} / 1` }}
-        />
-        <h3 className="font-wanted m-0 mt-3 line-clamp-2 text-base font-bold tracking-[-0.01em] text-text">
+          className="flex items-center justify-center rounded-card border border-hero-border bg-hero transition-shadow group-hover:shadow-glow-primary"
+          style={{ aspectRatio: `${clampedAr} / 1` }}
+        >
+          <span className="font-mono text-lg font-bold text-hero-text sm:text-xl">
+            {ratioLabel ?? `${clampedAr.toFixed(2)}:1`}
+          </span>
+        </div>
+        <h3 className="font-wanted m-0 mt-4 line-clamp-2 text-lg font-bold tracking-[-0.01em] text-text">
           {movie.title}
         </h3>
-        <p className="m-0 mt-1 text-sm font-medium text-text-sub">
+        <p className="m-0 mt-1 text-[15px] font-medium text-text-sub">
           {movie.releaseYear ? `${movie.releaseYear} · ` : ''}
-          {movie.runtimeMin}분{ratioLabel ? ` · 화면비 ${ratioLabel}` : ''}
+          {movie.runtimeMin}분{formats.length > 0 ? ` · ${formats.join(' · ')}` : ''}
         </p>
-        {formats.length > 0 ? (
-          <p className="m-0 mt-1.5 text-[13px] font-semibold text-accent">{formats.join(' · ')}</p>
-        ) : null}
-        <p className="m-0 mt-2 text-[13px] font-medium text-text-sub">{verificationSummary(movie)}</p>
+        <p className="m-0 mt-3 flex items-center justify-between gap-2 border-t border-border pt-3 text-[13.5px] font-medium text-text-sub">
+          상영 정보 {verificationSummary(movie)}
+          <IconArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" />
+        </p>
       </TrackedLink>
     );
   }

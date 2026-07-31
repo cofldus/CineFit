@@ -49,24 +49,21 @@ export function MarketingHeader() {
 
   return (
     <header
-      className={`sticky top-0 z-40 border-b transition-colors duration-300 ${
-        scrolled ? 'border-border bg-bg/90 backdrop-blur-md' : 'border-transparent bg-transparent'
+      className={`sticky top-0 z-40 transition-colors duration-300 ${
+        scrolled ? 'bg-bg/85 backdrop-blur-md' : 'bg-transparent'
       }`}
     >
-      <div className="mx-auto flex max-w-wide items-center justify-between px-5 py-4 sm:px-8">
-        <Link
-          href="/"
-          className="font-wanted text-lg font-extrabold tracking-[-0.02em] text-text"
-          aria-label="CineFit 홈"
-        >
-          CineFit
+      <div className="mx-auto flex h-[76px] max-w-wide items-center justify-between px-5 sm:px-8">
+        <Link href="/" className="inline-flex items-center gap-2" aria-label="CineFit 홈">
+          <span aria-hidden className="h-2.5 w-2.5 rounded-full bg-primary-strong" />
+          <span className="font-wanted text-xl font-extrabold tracking-[-0.02em] text-text sm:text-2xl">CineFit</span>
         </Link>
 
-        <nav ref={navRef} className="relative hidden items-center gap-1 sm:flex" aria-label="주요 메뉴">
+        <nav ref={navRef} className="relative hidden items-center gap-2 sm:flex" aria-label="주요 메뉴">
           {indicator ? (
             <span
               aria-hidden
-              className="absolute bottom-0 h-0.5 rounded-full bg-primary-strong transition-all duration-[250ms] ease-out"
+              className="absolute bottom-1 h-[2px] rounded-full bg-primary-strong transition-all duration-[250ms] ease-out"
               style={{ left: indicator.left, width: indicator.width }}
             />
           ) : null}
@@ -80,7 +77,7 @@ export function MarketingHeader() {
                 }}
                 href={l.href}
                 aria-current={active ? 'page' : undefined}
-                className={`inline-flex min-h-11 items-center px-3 text-sm font-medium transition-colors ${
+                className={`inline-flex min-h-11 items-center px-4 text-[15px] font-medium transition-colors ${
                   active ? 'text-text' : 'text-text-sub hover:text-text'
                 }`}
               >
@@ -90,7 +87,7 @@ export function MarketingHeader() {
           })}
           <Link
             href="/movies"
-            className="ml-2 inline-flex min-h-11 items-center rounded-card bg-primary-strong px-5 text-sm font-semibold text-white transition-all hover:bg-primary-strong-hover active:scale-[0.98]"
+            className="ml-3 inline-flex min-h-11 items-center rounded-card bg-primary-strong px-4 text-sm font-semibold text-white transition-all hover:bg-primary-strong-hover active:scale-[0.98]"
           >
             영화 선택하기
           </Link>

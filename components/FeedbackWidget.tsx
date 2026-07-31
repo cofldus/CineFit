@@ -11,10 +11,11 @@ import {
 type Phase = 'idle' | 'reasons' | 'submitting' | 'done' | 'error';
 
 /**
- * 추천 카드 하나에 대한 즉시 피드백 — 도움 됨 5단계 선택 후에만 이유 칩이 펼쳐진다.
- * 카드마다 5개 버튼이 항상 펼쳐져 있으면 결과 페이지(카드 3장)가 그것만으로 버튼 15개를
- * 항상 보여주게 된다("너무 글자 개많아서 읽기 힘들어" 피드백) — details로 접어 기본은
- * 한 줄만 보이게 하고, 실제로 평가하려는 사람만 펼친다.
+ * 대표 추천에 대한 도움 정도 피드백 — 예전에는 카드 3개마다 반복해서 물었지만("이 추천,
+ * 어땠나요?"가 셋), 지금은 결과 페이지 전체에서 대표 추천 하나에 대해서만, 페이지 하단
+ * 피드백 섹션 안에서 한 번만 묻는다(실제 선택 여부를 묻는 SelectionWidget과 같은 섹션에
+ * 나란히 둔다). 관리자 데이터 품질 대시보드의 "실패 원인 분류" 집계가 이 데이터를 그대로
+ * 쓰므로 기능 자체는 유지하고, 반복되던 UI 자리만 없앴다.
  */
 export function FeedbackWidget({ runId, showtimeId }: { runId: number; showtimeId: number }) {
   const [phase, setPhase] = useState<Phase>('idle');
@@ -39,21 +40,20 @@ export function FeedbackWidget({ runId, showtimeId }: { runId: number; showtimeI
 
   if (phase === 'done') {
     return (
-      <p role="status" className="mt-3 border-t border-border pt-3 text-sm text-text-sub">
+      <p role="status" className="m-0 text-sm text-text-sub">
         피드백 감사합니다 — 추천 품질 개선에 반영할게요.
       </p>
     );
   }
 
   return (
-    <details className="mt-3 border-t border-border pt-3">
+    <details>
       <summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium text-text-sub">
-        이 추천, 어땠나요?
+        대표 추천이 도움이 되었나요?
       </summary>
 
       <div className="mt-2.5">
-        <p className="m-0 text-sm font-semibold text-text">이 추천이 선택에 도움이 되었나요?</p>
-        <div className="mt-2 flex flex-wrap gap-1.5" role="group" aria-label="도움 정도">
+        <div className="flex flex-wrap gap-1.5" role="group" aria-label="도움 정도">
           {HELPFULNESS_LEVELS.map((level) => (
             <button
               key={level}
@@ -63,7 +63,7 @@ export function FeedbackWidget({ runId, showtimeId }: { runId: number; showtimeI
               className={`min-h-9 rounded-full border px-3 text-xs font-medium transition-colors ${
                 helpfulness === level
                   ? 'border-primary-strong bg-primary-strong text-white'
-                  : 'border-border bg-bg text-text-sub hover:text-text'
+                  : 'border-border text-text-sub hover:text-text'
               }`}
             >
               {HELPFULNESS_LABELS[level]}
@@ -78,7 +78,7 @@ export function FeedbackWidget({ runId, showtimeId }: { runId: number; showtimeI
               {FEEDBACK_REASONS.map((r) => (
                 <label
                   key={r}
-                  className="flex min-h-8 cursor-pointer items-center gap-1 rounded-full border border-border px-2.5 text-xs text-text-sub has-[:checked]:border-accent has-[:checked]:text-accent"
+                  className="flex min-h-8 cursor-pointer items-center gap-1 rounded-full border border-border px-2.5 text-xs text-text-sub has-[:checked]:border-text has-[:checked]:text-text"
                 >
                   <input
                     type="checkbox"

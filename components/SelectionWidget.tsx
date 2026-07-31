@@ -17,8 +17,8 @@ interface PickOption {
 
 /**
  * 추천을 "봤다"는 사실과 실제 "선택"을 구분해 기록한다 — 예매 링크 클릭만으로는 알 수 없다.
- * 라디오 7개 + 이유 칩이 항상 펼쳐져 있으면 결과 페이지 맨 아래가 설문지처럼 보인다("선택도
- * 더 안귀찮게" 피드백) — details로 접어 기본은 질문 한 줄만 보이게 한다.
+ * 결과 페이지 전체에서 사용자에게 묻는 질문은 이것 하나뿐이다 — 카드마다 반복하던
+ * "이 추천, 어땠나요?"는 없앴고, 페이지 맨 아래 이 질문 하나로 통합했다.
  */
 export function SelectionWidget({ runId, picks }: { runId: number; picks: PickOption[] }) {
   const [phase, setPhase] = useState<Phase>('idle');
@@ -42,19 +42,17 @@ export function SelectionWidget({ runId, picks }: { runId: number; picks: PickOp
 
   if (phase === 'done') {
     return (
-      <div className="mt-6 max-w-content rounded-card-lg border border-border bg-surface p-5" role="status">
-        <p className="m-0 text-sm text-text-sub">알려주셔서 감사합니다 — 실제 선택 결과는 추천 품질 검증에 쓰여요.</p>
+      <div className="border-t border-border pt-6" role="status">
+        <p className="m-0 text-sm text-text-sub">알려주셔서 감사합니다 — 실제 선택 결과는 추천 품질 개선에 활용됩니다.</p>
       </div>
     );
   }
 
   return (
-    <details className="mt-6 max-w-content rounded-card-lg border border-border bg-surface p-5">
-      <summary className="font-wanted -m-5 flex min-h-11 cursor-pointer items-center rounded-card-lg p-5 text-base font-bold tracking-[-0.01em] text-text">
-        실제로 어떤 상영관을 선택하셨나요?
-      </summary>
+    <div className="border-t border-border pt-6">
+      <h2 className="font-wanted m-0 text-xl font-bold tracking-[-0.01em] text-text">선택을 도와드렸나요?</h2>
       <p className="mt-2 text-sm text-text-sub">
-        예매 페이지로 이동했는지와 별개로, 실제 선택을 알려주시면 추천이 맞았는지 확인하는 데 도움이 돼요.
+        실제로 고른 상영관을 알려주시면 추천 품질 개선에 활용됩니다. 예매 페이지로 이동했는지와는 별개예요.
       </p>
       <div className="mt-4 flex flex-col gap-2" role="radiogroup" aria-label="실제 선택">
         {picks.map((p) => (
@@ -115,10 +113,10 @@ export function SelectionWidget({ runId, picks }: { runId: number; picks: PickOp
             disabled={phase === 'submitting'}
             className="mt-3 flex min-h-10 items-center justify-center rounded-card bg-primary-strong px-4 text-sm font-semibold text-white disabled:opacity-60"
           >
-            {phase === 'submitting' ? '제출 중…' : '알려주기'}
+            {phase === 'submitting' ? '제출 중…' : '선택 결과 남기기'}
           </button>
         </div>
       ) : null}
-    </details>
+    </div>
   );
 }

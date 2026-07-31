@@ -55,32 +55,61 @@ export function SelectionWidget({ runId, picks }: { runId: number; picks: PickOp
         실제로 고른 상영관을 알려주시면 추천 품질 개선에 활용됩니다. 예매 페이지로 이동했는지와는 별개예요.
       </p>
       <div className="mt-4 flex flex-col gap-2" role="radiogroup" aria-label="실제 선택">
-        {picks.map((p) => (
-          <label key={p.auditoriumId} className="flex min-h-10 cursor-pointer items-center gap-2.5 text-sm text-text">
-            <input
-              type="radio"
-              name="selection"
-              value={`picked:${p.auditoriumId}`}
-              checked={choice === `picked:${p.auditoriumId}`}
-              onChange={(e) => setChoice(e.target.value)}
-              className="h-4 w-4 accent-primary"
-            />
-            {SELECTION_TYPE_LABELS.picked_recommended} — {p.auditoriumLabel} ({p.pickLabel})
-          </label>
-        ))}
-        {(['picked_other_candidate', 'picked_outside', 'undecided', 'cancelled'] as const).map((t) => (
-          <label key={t} className="flex min-h-10 cursor-pointer items-center gap-2.5 text-sm text-text">
-            <input
-              type="radio"
-              name="selection"
-              value={t}
-              checked={choice === t}
-              onChange={(e) => setChoice(e.target.value)}
-              className="h-4 w-4 accent-primary"
-            />
-            {SELECTION_TYPE_LABELS[t]}
-          </label>
-        ))}
+        {picks.map((p) => {
+          const value = `picked:${p.auditoriumId}`;
+          const selected = choice === value;
+          return (
+            <label
+              key={p.auditoriumId}
+              className={`flex min-h-12 cursor-pointer items-center gap-3 rounded-card-lg border px-4 text-sm transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-surface ${
+                selected ? 'border-primary-strong bg-primary-soft text-text' : 'border-border text-text hover:border-border-strong'
+              }`}
+            >
+              <input
+                type="radio"
+                name="selection"
+                value={value}
+                checked={selected}
+                onChange={(e) => setChoice(e.target.value)}
+                className="sr-only"
+              />
+              <span
+                aria-hidden
+                className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-2 ${selected ? 'border-primary-strong' : 'border-border-strong'}`}
+              >
+                {selected ? <span className="h-2 w-2 rounded-full bg-primary-strong" /> : null}
+              </span>
+              {SELECTION_TYPE_LABELS.picked_recommended} — {p.auditoriumLabel} ({p.pickLabel})
+            </label>
+          );
+        })}
+        {(['picked_other_candidate', 'picked_outside', 'undecided', 'cancelled'] as const).map((t) => {
+          const selected = choice === t;
+          return (
+            <label
+              key={t}
+              className={`flex min-h-12 cursor-pointer items-center gap-3 rounded-card-lg border px-4 text-sm transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-surface ${
+                selected ? 'border-primary-strong bg-primary-soft text-text' : 'border-border text-text hover:border-border-strong'
+              }`}
+            >
+              <input
+                type="radio"
+                name="selection"
+                value={t}
+                checked={selected}
+                onChange={(e) => setChoice(e.target.value)}
+                className="sr-only"
+              />
+              <span
+                aria-hidden
+                className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-2 ${selected ? 'border-primary-strong' : 'border-border-strong'}`}
+              >
+                {selected ? <span className="h-2 w-2 rounded-full bg-primary-strong" /> : null}
+              </span>
+              {SELECTION_TYPE_LABELS[t]}
+            </label>
+          );
+        })}
       </div>
 
       {choice ? (
@@ -90,7 +119,7 @@ export function SelectionWidget({ runId, picks }: { runId: number; picks: PickOp
             {SELECTION_REASONS.map((r) => (
               <label
                 key={r}
-                className="flex min-h-8 cursor-pointer items-center gap-1 rounded-full border border-border px-2.5 text-xs text-text-sub has-[:checked]:border-accent has-[:checked]:text-accent"
+                className="flex min-h-8 cursor-pointer items-center gap-1 rounded-full border border-border px-2.5 text-xs text-text-sub has-[:checked]:border-primary-strong has-[:checked]:text-primary-strong"
               >
                 <input
                   type="checkbox"

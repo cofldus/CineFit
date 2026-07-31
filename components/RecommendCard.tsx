@@ -21,14 +21,14 @@ const PICK_SCENARIO: Record<PickLabel, string> = {
   '근접·가성비': '거리와 가격을 더 중요하게 본다면',
 };
 
-function ReasonBlock({ reason, tone }: { reason: string; tone: 'hero' | 'paper' }) {
+function ReasonBlock({ reason, tone }: { reason: string; tone: 'hero' | 'plain' }) {
   const label = REASON_CATEGORY_LABEL[categorizeReason(reason)];
   return (
     <div>
-      <p className={`m-0 text-[12.5px] font-semibold uppercase tracking-wide ${tone === 'hero' ? 'text-hero-text-sub' : 'text-paper-text-sub'}`}>
+      <p className={`m-0 text-[12.5px] font-semibold uppercase tracking-wide ${tone === 'hero' ? 'text-hero-text-sub' : 'text-text-sub'}`}>
         {label}
       </p>
-      <p className={`m-0 mt-1 text-[15.5px] leading-relaxed ${tone === 'hero' ? 'text-hero-text' : 'text-paper-text'}`}>{reason}</p>
+      <p className={`m-0 mt-1 text-[15.5px] leading-relaxed ${tone === 'hero' ? 'text-hero-text' : 'text-text'}`}>{reason}</p>
     </div>
   );
 }
@@ -40,13 +40,13 @@ function DetailPanel({
 }: {
   scored: ScoredCandidate;
   restPros: string[];
-  tone: 'hero' | 'paper';
+  tone: 'hero' | 'plain';
 }) {
   const hasMore = restPros.length > 0 || scored.cons.length > 0 || scored.uncertainties.length > 0;
-  const sub = tone === 'hero' ? 'text-hero-text-sub' : 'text-paper-text-sub';
-  const strong = tone === 'hero' ? 'text-hero-text' : 'text-paper-text';
-  const border = tone === 'hero' ? 'border-hero-border' : 'border-paper-border';
-  const linkCls = tone === 'hero' ? 'text-hero-text decoration-hero-border' : 'text-paper-text decoration-paper-border';
+  const sub = tone === 'hero' ? 'text-hero-text-sub' : 'text-text-sub';
+  const strong = tone === 'hero' ? 'text-hero-text' : 'text-text';
+  const border = tone === 'hero' ? 'border-hero-border' : 'border-border';
+  const linkCls = tone === 'hero' ? 'text-hero-text decoration-hero-border' : 'text-text decoration-border-strong';
 
   return (
     <details className={`mt-5 border-t pt-4 ${border}`}>
@@ -153,11 +153,12 @@ function DetailPanel({
 }
 
 /**
- * 결과 페이지 — "Midnight Cinema" 개편(2차). 페이지 전체가 이제 cinema-scope(어두운 톤)라,
- * 대표 추천(hero)은 surface보다 오히려 밝은 --hero 표면 + 코랄 글로우로 "하이라이트"처럼
- * 떠 보이게 한다. 대안 카드 2개는 반대로 --paper 토큰(스코프와 무관하게 항상 밝음)을 써서
- * 어두운 페이지 위에 놓인 흰 종이 카드처럼 가볍게 보이도록 한다 — 순위별 색 코딩은 여전히
- * 쓰지 않는다(둘 다 같은 종이 스타일, 목적 문장으로만 구분).
+ * 결과 페이지 — "Graphite Cinema" 개편(3차). 페이지 전체는 이제 라이트 캔버스이고, 대표
+ * 추천(hero)만 고정된 --hero 그래파이트 카드로 남는다("최종 결정의 순간"이 되도록 유일하게
+ * 어둡게). 대안 카드 2개는 페이지와 같은 라이트 surface를 써서 "같은 환경의 카드"로
+ * 보이게 한다(다크 배경 위 흰 모달처럼 붕 뜨지 않음). 순위별 색 코딩은 쓰지 않는다(둘 다
+ * 같은 스타일, 목적 문장으로만 구분). 대표 카드는 이전보다 낮은 높이를 목표로
+ * 이유 2개만 인라인 노출하고 나머지는 상세 패널로 보낸다.
  */
 export function RecommendCard({
   rank,
@@ -178,46 +179,58 @@ export function RecommendCard({
   const formatLabel = FORMAT_LABELS[c.format] ?? c.format;
 
   if (isTop) {
-    const [reason1, reason2, reason3, ...restPros] = scored.pros;
-    const reasons = [reason1, reason2, reason3].filter((r): r is string => Boolean(r));
+    const [reason1, reason2, ...restPros] = scored.pros;
+    const reasons = [reason1, reason2].filter((r): r is string => Boolean(r));
 
     return (
       <article
-        className="rounded-card-xl bg-hero p-6 shadow-glow-primary transition-shadow duration-300 sm:p-10"
+        className="rounded-card-xl bg-hero p-6 shadow-glow-primary transition-shadow duration-300 sm:p-8"
         aria-labelledby={`pick-${rank}-title`}
         data-testid={`pick-${label}`}
       >
-        {/* 코랄 원색(--primary)은 어두운 hero 표면 위에서 대비가 부족해(2.84:1) 조금 더
-            밝힌 값을 이 자리에만 직접 쓴다(hero 카드 라벨 전용, 다른 곳엔 재사용하지 않음). */}
-        <p className="m-0 text-[13px] font-bold uppercase tracking-[0.08em] text-[#ff8aa8]">가장 잘 맞는 선택</p>
+        <p className="m-0 text-[13px] font-bold uppercase tracking-[0.08em] text-hero-text-sub">가장 잘 맞는 선택</p>
         <h2
           id={`pick-${rank}-title`}
-          className="font-wanted m-0 mt-3 text-[28px] font-bold tracking-[-0.02em] text-hero-text sm:text-[34px]"
+          className="font-wanted m-0 mt-2.5 text-balance text-[26px] font-bold tracking-[-0.02em] text-hero-text sm:text-[30px]"
         >
           {c.location.name} {c.auditorium.no} · {timeFmt.format(new Date(c.startsAt))}
         </h2>
 
         {reasons.length > 0 ? (
-          <div className="mt-7 flex flex-col gap-4">
+          <div className="mt-5 flex flex-col gap-3">
             {reasons.map((r) => (
               <ReasonBlock key={r} reason={r} tone="hero" />
             ))}
           </div>
         ) : null}
 
-        <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-hero-border pt-6 text-[14.5px] font-medium text-hero-text-sub">
-          <span>추천 좌석 {scored.seatZone.zone}</span>
-          <span>이동 {scored.travelMinutes}분(추정)</span>
-          <span className="tabular-nums">{c.priceAdult.toLocaleString('ko-KR')}원</span>
-          <span>{formatLabel}</span>
-          <span>{conditionsLine}</span>
-          <span>정보 {trustSummary}</span>
+        {/* 이동시간·가격·포맷·충족 조건 — 줄바꿈되는 문장 나열 대신 그리드 스탯으로 강조 */}
+        <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-hero-border pt-5 sm:grid-cols-4">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-hero-text-sub">이동 시간</span>
+            <span className="tabular-nums text-[15px] font-semibold text-hero-text">{scored.travelMinutes}분(추정)</span>
+          </div>
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-hero-text-sub">가격</span>
+            <span className="tabular-nums text-[15px] font-semibold text-hero-text">{c.priceAdult.toLocaleString('ko-KR')}원</span>
+          </div>
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-hero-text-sub">포맷</span>
+            <span className="text-[15px] font-semibold text-hero-text">{formatLabel}</span>
+          </div>
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-hero-text-sub">충족 조건</span>
+            <span className="text-[15px] font-semibold text-hero-text">{conditionsLine}</span>
+          </div>
         </div>
+        <p className="m-0 mt-3 text-[13px] text-hero-text-sub">
+          추천 좌석 {scored.seatZone.zone} · 정보 {trustSummary}
+        </p>
 
-        <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
           <Link
             href={`/cinemas/${c.auditorium.id}`}
-            className="group/cta flex min-h-12 items-center justify-center gap-1.5 rounded-card bg-primary-strong px-8 text-base font-semibold text-white transition-all hover:bg-primary-strong-hover hover:shadow-glow-primary active:scale-[0.99]"
+            className="group/cta flex min-h-12 items-center justify-center gap-1.5 rounded-card bg-primary-strong px-8 text-base font-semibold text-white transition-all hover:bg-primary-strong-hover active:scale-[0.99]"
           >
             상영관 상세 보기
             <IconArrowRight className="h-4 w-4 transition-transform group-hover/cta:translate-x-0.5" />
@@ -245,33 +258,33 @@ export function RecommendCard({
 
   return (
     <article
-      className="rounded-card-lg border border-paper-border bg-paper p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-float"
+      className="rounded-card-lg border border-border bg-surface p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-float"
       aria-labelledby={`pick-${rank}-title`}
       data-testid={`pick-${label}`}
     >
       <div className="flex items-start justify-between gap-3">
-        <p className="m-0 text-sm text-paper-text-sub">{PICK_SCENARIO[label]}</p>
-        <span className="shrink-0 text-[12px] font-medium text-paper-text-sub">{rank}순위</span>
+        <p className="m-0 text-sm text-text-sub">{PICK_SCENARIO[label]}</p>
+        <span className="shrink-0 text-[12px] font-medium text-text-tertiary">{rank}순위</span>
       </div>
-      <h3 id={`pick-${rank}-title`} className="font-wanted m-0 mb-3 mt-1 text-lg font-bold tracking-[-0.01em] text-paper-text">
+      <h3 id={`pick-${rank}-title`} className="font-wanted m-0 mb-3 mt-1 text-balance text-lg font-bold tracking-[-0.01em] text-text">
         {c.location.name} {c.auditorium.no} · {timeFmt.format(new Date(c.startsAt))}
       </h3>
 
-      {topPro ? <ReasonBlock reason={topPro} tone="paper" /> : null}
+      {topPro ? <ReasonBlock reason={topPro} tone="plain" /> : null}
 
-      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13.5px] font-medium text-paper-text-sub">
+      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13.5px] font-medium text-text-sub">
         <span>이동 {scored.travelMinutes}분</span>
         <span className="tabular-nums">{c.priceAdult.toLocaleString('ko-KR')}원</span>
       </div>
 
       <Link
         href={`/cinemas/${c.auditorium.id}`}
-        className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-paper-text decoration-paper-border hover:underline underline-offset-2"
+        className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-primary-strong decoration-primary-strong hover:underline underline-offset-2"
       >
         상세 보기 →
       </Link>
 
-      <DetailPanel scored={scored} restPros={restPros} tone="paper" />
+      <DetailPanel scored={scored} restPros={restPros} tone="plain" />
     </article>
   );
 }

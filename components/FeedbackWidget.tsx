@@ -78,7 +78,7 @@ export function FeedbackWidget({ runId, showtimeId }: { runId: number; showtimeI
               {FEEDBACK_REASONS.map((r) => (
                 <label
                   key={r}
-                  className="flex min-h-8 cursor-pointer items-center gap-1 rounded-full border border-border px-2.5 text-xs text-text-sub has-[:checked]:border-text has-[:checked]:text-text"
+                  className="flex min-h-8 cursor-pointer items-center gap-1 rounded-full border border-border px-2.5 text-xs text-text-sub has-[:checked]:border-primary-strong has-[:checked]:text-primary-strong"
                 >
                   <input
                     type="checkbox"

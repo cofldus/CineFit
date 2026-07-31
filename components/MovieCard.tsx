@@ -42,12 +42,12 @@ export function MovieCard({ movie, variant = 'detailed' }: { movie: MovieWithSpe
         href={`/recommend/${movie.id}`}
         className="group block w-[90%] shrink-0 snap-start rounded-card-lg border border-border bg-surface p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-float focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-strong active:translate-y-0 sm:w-auto"
       >
-        {/* 화면비 프레임 무대 — 카드마다 무대 높이는 동일하게 고정하고(카드 행 정렬 유지),
-            영화의 실제 화면비는 프레임의 폭·비율 차이로만 나타난다(실제 극장 스크린 원리).
-            프레임은 얇은 전체 테두리 + 중앙에서 사라지는 와인 하이라이트 라인. */}
-        <div aria-hidden className="relative flex h-[112px] items-center justify-center">
+        {/* 화면비 프레임 — 실제 극장의 마스킹 원리: 외곽 프레임(스크린 벽)은 모든 카드에서
+            동일한 2.39:1로 고정되고(행 정렬 유지), 영화의 실제 화면비만큼만 안쪽 화면이
+            켜진다. 남는 좌우는 어두운 마스킹으로 남아 비율 차이가 즉각 체감된다. */}
+        <div aria-hidden>
           {formats.length > 0 ? (
-            <div className="absolute left-0 top-0 flex flex-wrap gap-1">
+            <div className="mb-2 flex flex-wrap gap-1">
               {formats.map((f) => (
                 <span
                   key={f}
@@ -59,21 +59,25 @@ export function MovieCard({ movie, variant = 'detailed' }: { movie: MovieWithSpe
             </div>
           ) : null}
           <div
-            className="relative flex h-[72px] items-center justify-center overflow-hidden rounded-[8px] border border-white/10 transition-shadow group-hover:shadow-glow-primary"
-            style={{
-              aspectRatio: `${clampedAr} / 1`,
-              background:
-                'linear-gradient(180deg, rgba(93, 24, 40, 0.35) 0%, rgba(36, 28, 31, 0.92) 60%, rgba(26, 22, 24, 0.96) 100%)',
-              boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.07)',
-            }}
+            className="relative flex w-full items-center justify-center overflow-hidden rounded-[8px] border border-white/10 bg-[#0d0b0c] transition-shadow group-hover:shadow-glow-primary"
+            style={{ aspectRatio: `${RATIO_MAX} / 1` }}
           >
-            <span
-              className="absolute inset-x-2 top-0 h-px"
-              style={{ background: 'linear-gradient(90deg, transparent, rgba(201, 111, 132, 0.85), transparent)' }}
-            />
-            <span className="whitespace-nowrap text-base font-light tracking-[0.14em] tabular-nums text-hero-text">
-              {ratioLabel ?? `${clampedAr.toFixed(2)}:1`}
-            </span>
+            <div
+              className="relative flex h-full items-center justify-center overflow-hidden"
+              style={{
+                width: `${(clampedAr / RATIO_MAX) * 100}%`,
+                background:
+                  'linear-gradient(180deg, rgba(93, 24, 40, 0.45) 0%, rgba(46, 33, 37, 0.95) 60%, rgba(30, 24, 26, 0.98) 100%)',
+              }}
+            >
+              <span
+                className="absolute inset-x-2 top-0 h-px"
+                style={{ background: 'linear-gradient(90deg, transparent, rgba(201, 111, 132, 0.85), transparent)' }}
+              />
+              <span className="whitespace-nowrap text-base font-light tracking-[0.14em] tabular-nums text-hero-text">
+                {ratioLabel ?? `${clampedAr.toFixed(2)}:1`}
+              </span>
+            </div>
           </div>
         </div>
         {/* 제목과 연도·러닝타임을 한 문장으로 붙이지 않고 별도 줄로 나눈다 — 편집된 영화

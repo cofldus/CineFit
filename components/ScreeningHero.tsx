@@ -16,7 +16,6 @@ const STAGE_FRAMES = [
 ] as const;
 
 const RATIOS = STAGE_FRAMES.map((f) => f.ratio);
-const MIN_RATIO = Math.min(...RATIOS);
 const MAX_RATIO = Math.max(...RATIOS);
 
 const SEAT_ROWS = 5;
@@ -63,7 +62,6 @@ export function ScreeningHero() {
   const current = STAGE_FRAMES[frame];
   const isImax = current.format === 'IMAX';
   const isDolby = current.format === '돌비시네마';
-  const screenWidthPct = 55 + ((current.ratio - MIN_RATIO) / (MAX_RATIO - MIN_RATIO || 1)) * 35;
   const { rows: hlRows, cols: hlCols } = current.seatHighlight;
 
   return (
@@ -145,47 +143,47 @@ export function ScreeningHero() {
           </div>
 
           <div key={frame} className="stage-enter relative mt-8 flex flex-col items-center">
-            {/* 스크린 무대 — 포맷이 바뀌어도 무대 높이는 고정(min-h)해 레이아웃이 출렁이지
-                않게 하고, 그 안에서 스크린이 세로 중앙 정렬된 채 폭·비율만 변한다. */}
-            <div className="flex min-h-[190px] w-full items-center justify-center sm:min-h-[225px]">
-            <div
-              className="relative flex w-full max-w-[560px] flex-col items-center transition-[width] duration-[550ms] ease-out"
-              style={{ width: `${screenWidthPct}%` }}
-            >
+            {/* 스크린 외곽 프레임 — 실제 극장의 마스킹 원리: 프레임(스크린 벽)은 가장 넓은
+                2.39:1 크기로 고정돼 있고, 포맷의 실제 화면비만큼만 안쪽 화면이 켜진다.
+                남는 좌우 영역은 어두운 마스킹으로 남아 비율 차이가 즉각 체감된다. */}
+            <div className="relative w-full max-w-[560px]">
               {isDolby ? (
                 <>
+                  <span aria-hidden className="dolby-pulse pointer-events-none absolute inset-0 rounded-[10px] border border-primary/30" />
                   <span
                     aria-hidden
-                    className="dolby-pulse pointer-events-none absolute inset-x-0 top-0 rounded-[10px] border border-primary/30"
-                    style={{ aspectRatio: `${current.ratio} / 1` }}
-                  />
-                  <span
-                    aria-hidden
-                    className="dolby-pulse pointer-events-none absolute inset-x-0 top-0 rounded-[10px] border border-primary/30"
-                    style={{ aspectRatio: `${current.ratio} / 1`, animationDelay: '700ms' }}
+                    className="dolby-pulse pointer-events-none absolute inset-0 rounded-[10px] border border-primary/30"
+                    style={{ animationDelay: '700ms' }}
                   />
                 </>
               ) : null}
               <div
-                className="relative flex w-full items-center justify-center overflow-hidden rounded-[10px] border border-white/10"
+                className="relative flex w-full items-center justify-center overflow-hidden rounded-[10px] border border-white/10 bg-[#0d0b0c]"
                 style={{
-                  aspectRatio: `${current.ratio} / 1`,
-                  background:
-                    'linear-gradient(180deg, rgba(93, 24, 40, 0.32) 0%, rgba(36, 28, 31, 0.92) 55%, rgba(26, 22, 24, 0.96) 100%)',
+                  aspectRatio: `${MAX_RATIO} / 1`,
                   boxShadow: isImax
-                    ? 'inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 0 1px rgba(201, 111, 132, 0.35), 0 22px 70px -22px rgba(135, 43, 66, 0.6)'
-                    : 'inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 22px 70px -22px rgba(135, 43, 66, 0.45)',
+                    ? '0 0 0 1px rgba(201, 111, 132, 0.35), 0 22px 70px -22px rgba(135, 43, 66, 0.6)'
+                    : '0 22px 70px -22px rgba(135, 43, 66, 0.45)',
                 }}
               >
-                {/* 상단 하이라이트 — 중앙이 밝고 가장자리로 사라지는 와인 라인(단선 테두리 대체). */}
-                <span
-                  aria-hidden
-                  className="absolute inset-x-4 top-0 h-px"
-                  style={{ background: 'linear-gradient(90deg, transparent, rgba(201, 111, 132, 0.85), transparent)' }}
-                />
-                <span className="whitespace-nowrap text-[21px] font-light tracking-[0.16em] tabular-nums text-hero-text sm:text-[25px]">
-                  {current.ratio.toFixed(2)}:1
-                </span>
+                {/* 켜진 화면 — 실제 화면비만큼만 점등. 폭 전환은 부드럽게 애니메이션. */}
+                <div
+                  className="relative flex h-full items-center justify-center overflow-hidden transition-[width] duration-[550ms] ease-out"
+                  style={{
+                    width: `${(current.ratio / MAX_RATIO) * 100}%`,
+                    background:
+                      'linear-gradient(180deg, rgba(93, 24, 40, 0.45) 0%, rgba(46, 33, 37, 0.95) 55%, rgba(30, 24, 26, 0.98) 100%)',
+                  }}
+                >
+                  <span
+                    aria-hidden
+                    className="absolute inset-x-3 top-0 h-px"
+                    style={{ background: 'linear-gradient(90deg, transparent, rgba(201, 111, 132, 0.85), transparent)' }}
+                  />
+                  <span className="whitespace-nowrap text-[21px] font-light tracking-[0.16em] tabular-nums text-hero-text sm:text-[25px]">
+                    {current.ratio.toFixed(2)}:1
+                  </span>
+                </div>
                 {isImax ? (
                   <span className="absolute right-2.5 top-2 rounded-full border border-primary px-2 py-px text-[10px] font-bold uppercase tracking-wide text-primary">
                     확장
@@ -198,7 +196,6 @@ export function ScreeningHero() {
                 className="pointer-events-none absolute inset-x-[-8%] top-full h-20 opacity-50"
                 style={{ background: 'radial-gradient(ellipse 60% 90% at 50% 0%, rgba(93, 24, 40, 0.5), transparent 70%)' }}
               />
-            </div>
             </div>
 
             {/* 객석 — 실루엣 수준의 좌석 점. 추천 구역의 좁은 핵심 블록만 은은하게 점등. */}

@@ -101,21 +101,24 @@ export function MovieList({ movies }: { movies: MovieWithSpecs[] }) {
                   href={`/recommend/${movie.id}`}
                   className="group flex items-center gap-4 rounded-card-lg bg-surface-raised p-4 transition-all duration-200 hover:-translate-y-0.5 hover:bg-surface-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 >
-                  {/* 미니 스크린 썸네일 — 높이는 모든 카드에서 동일하게 고정하고(행 정렬 유지),
-                      영화의 실제 화면비는 폭 차이로만 나타난다(실제 극장 스크린과 같은 원리). */}
-                  <div className="flex h-[46px] w-28 shrink-0 items-center justify-center">
+                  {/* 미니 스크린 썸네일 — 실제 극장의 마스킹 원리: 외곽 프레임은 모든 행에서
+                      동일한 2.39:1이고, 영화의 실제 화면비만큼만 안쪽이 켜진다. 남는 좌우는
+                      어두운 마스킹으로 남아 비율 차이가 한눈에 보인다. */}
+                  <div
+                    aria-hidden
+                    className="relative flex w-28 shrink-0 items-center justify-center overflow-hidden rounded-[7px] border border-white/10 bg-[#0d0b0c]"
+                    style={{ aspectRatio: `${RATIO_MAX} / 1` }}
+                  >
                     <div
-                      aria-hidden
-                      className="relative flex h-full items-center justify-center overflow-hidden rounded-[7px] border border-white/10"
+                      className="relative flex h-full items-center justify-center overflow-hidden"
                       style={{
-                        aspectRatio: `${clampedAr} / 1`,
+                        width: `${(clampedAr / RATIO_MAX) * 100}%`,
                         background:
-                          'linear-gradient(180deg, rgba(93, 24, 40, 0.35) 0%, rgba(36, 28, 31, 0.92) 60%, rgba(26, 22, 24, 0.96) 100%)',
-                        boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.07)',
+                          'linear-gradient(180deg, rgba(93, 24, 40, 0.45) 0%, rgba(46, 33, 37, 0.95) 60%, rgba(30, 24, 26, 0.98) 100%)',
                       }}
                     >
                       <span
-                        className="absolute inset-x-2 top-0 h-px"
+                        className="absolute inset-x-1.5 top-0 h-px"
                         style={{ background: 'linear-gradient(90deg, transparent, rgba(201, 111, 132, 0.8), transparent)' }}
                       />
                       <span className="whitespace-nowrap text-[10.5px] font-normal tracking-[0.1em] tabular-nums text-hero-text">

@@ -56,7 +56,11 @@ export function PostWatchForm({ runId }: { runId: number }) {
         </p>
       ) : null}
 
-      <div className="border-b border-border pb-1">
+      {/* 양 끝 설명은 문항마다 반복하지 않고 여기서 한 번만 안내한다. */}
+      <p className="m-0 text-[13.5px] text-text-tertiary">1 매우 낮음 — 5 매우 높음</p>
+
+      {/* 필수 문항은 배경 명도 차이로만 구분한다(구분선 대신 그룹화). */}
+      <div className="mt-2 rounded-card-lg bg-surface-strong px-4">
         <RatingSelector
           name="overallSatisfaction"
           label="실제 관람 만족도"
@@ -67,7 +71,7 @@ export function PostWatchForm({ runId }: { runId: number }) {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-x-8 sm:grid-cols-2">
+      <div className="mt-1 flex flex-col sm:grid sm:grid-cols-2 sm:gap-x-8">
         {OPTIONAL_QUESTIONS.map((q) => (
           <RatingSelector
             key={q.key}

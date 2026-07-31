@@ -496,7 +496,13 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
             </button>
           ) : null}
           {step < 2 ? (
+            // key로 '다음'(type=button)과 '추천 받기'(type=submit)를 서로 다른 노드로 강제한다 —
+            // 같은 위치의 삼항이라 key가 없으면 React가 DOM 노드를 재사용하며 type만 button→submit으로
+            // 패치하고, 마지막 단계로 넘기는 '다음' 클릭이 그 순간 submit으로 바뀐 노드에서 폼 제출을
+            // 유발해 3단계를 건너뛰고 바로 제출된다(진단으로 재현 확인). key를 분리하면 언마운트·
+            // 재마운트되어 진행 중인 클릭이 새 submit 버튼으로 이어지지 않는다.
             <button
+              key="step-next"
               type="button"
               onClick={() => setStep((s) => s + 1)}
               className="flex min-h-12 flex-1 items-center justify-center rounded-card bg-primary-strong text-base font-semibold text-white transition-colors hover:bg-primary-strong-hover"
@@ -505,6 +511,7 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
             </button>
           ) : (
             <button
+              key="step-submit"
               type="submit"
               className="flex min-h-12 flex-1 items-center justify-center rounded-card bg-primary-strong text-base font-semibold text-white transition-colors hover:bg-primary-strong-hover disabled:opacity-60"
               disabled={submitting}

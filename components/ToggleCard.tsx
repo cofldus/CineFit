@@ -13,13 +13,13 @@ export function ToggleCard({
   ...inputProps
 }: { title: string; description: string } & InputHTMLAttributes<HTMLInputElement>) {
   return (
-    <label className="relative flex min-h-[84px] cursor-pointer flex-col justify-center rounded-card-lg border border-border bg-surface p-4 pr-9 transition-all hover:border-border-strong has-[:checked]:border-primary-strong has-[:checked]:bg-primary-soft has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary-strong has-[:focus-visible]:ring-offset-2">
+    <label className="relative flex min-h-[84px] cursor-pointer flex-col justify-center rounded-card-lg bg-surface-raised p-4 pr-9 transition-all hover:bg-surface-strong has-[:checked]:bg-surface-strong has-[:checked]:shadow-[inset_0_0_0_1px_rgba(188,96,118,0.45),0_2px_10px_rgba(0,0,0,0.35)] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary has-[:focus-visible]:ring-offset-2">
       <input type="checkbox" {...inputProps} className="peer absolute inset-0 h-full w-full cursor-pointer opacity-0" />
       {/* peer-checked는 형제 요소에만 적용되므로 내부 svg 대신 배지 자신의 text 색으로
           체크 표시를 제어한다(svg는 currentColor 상속). */}
       <span
         aria-hidden
-        className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full border-2 border-border-strong bg-surface text-transparent opacity-70 transition-all peer-checked:border-primary-strong peer-checked:bg-primary-strong peer-checked:text-white peer-checked:opacity-100"
+        className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full border border-border-strong bg-surface text-transparent opacity-60 transition-all peer-checked:border-primary-strong peer-checked:bg-primary-strong peer-checked:text-white peer-checked:opacity-100"
       >
         <svg viewBox="0 0 16 16" fill="none" className="h-3 w-3">
           <path d="M3 8.2l3.2 3.2L13 4.6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

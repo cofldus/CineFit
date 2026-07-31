@@ -10,7 +10,8 @@ export function SegmentedControl({
 }: {
   name: string;
   legend: string;
-  options: readonly { value: string; label: string }[];
+  /** intensity(0~3)가 있으면 라벨 위에 강도 도트 미터를 그린다(예: 멀미 민감도). */
+  options: readonly { value: string; label: string; intensity?: number }[];
   defaultValue: string;
 }) {
   return (
@@ -20,7 +21,7 @@ export function SegmentedControl({
         {options.map((opt) => (
           <label
             key={opt.value}
-            className="flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-[10px] px-3 text-center text-sm font-medium text-text-sub transition-all has-[:checked]:bg-surface-strong has-[:checked]:font-semibold has-[:checked]:text-text has-[:checked]:shadow-[inset_0_0_0_1px_rgba(188,96,118,0.45),0_2px_10px_rgba(0,0,0,0.35)] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-surface hover:text-text"
+            className="flex min-h-11 flex-1 cursor-pointer flex-col items-center justify-center gap-1 rounded-[10px] px-3 py-2 text-center text-sm font-medium text-text-sub transition-all has-[:checked]:bg-surface-strong has-[:checked]:font-semibold has-[:checked]:text-text has-[:checked]:shadow-[inset_0_0_0_1px_rgba(188,96,118,0.45),0_2px_10px_rgba(0,0,0,0.35)] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-surface hover:text-text"
           >
             <input
               type="radio"
@@ -29,6 +30,16 @@ export function SegmentedControl({
               defaultChecked={opt.value === defaultValue}
               className="sr-only"
             />
+            {typeof opt.intensity === 'number' ? (
+              <span aria-hidden className="flex gap-[3px]">
+                {[0, 1, 2].map((d) => (
+                  <span
+                    key={d}
+                    className={`h-[4px] w-[10px] rounded-full ${d < (opt.intensity ?? 0) ? 'bg-primary' : 'bg-white/15'}`}
+                  />
+                ))}
+              </span>
+            ) : null}
             {opt.label}
           </label>
         ))}

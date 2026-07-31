@@ -1,13 +1,12 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { MOTION_OPTIONS, ORIGIN_PRESETS, PRIORITY_OPTIONS } from '../src/data/constants';
 import { readOnboardingState, type OnboardingAnswers } from '../src/lib/onboarding';
-import { IconChevronRight } from './Icon';
 import { SegmentedControl } from './SegmentedControl';
 import { StepSection } from './StepSection';
-import { ToggleCard } from './ToggleCard';
+import { RadioCard, ToggleCard } from './ToggleCard';
 
 // 채움형 필드 — 검은 배경 위 테두리 박스 대신, 아이콘 타일 + 라벨이 안에 들어간 raised
 // 서피스. 포커스 시 얇은 와인 인셋 라인이 켜지고 아이콘 타일도 로즈로 점등된다(선택
@@ -76,11 +75,54 @@ function WonGlyph() {
   );
 }
 
-function SelectChevron() {
+// 우선순위 라디오 카드용 글리프 — 균형(같은 높이 막대 3개)은 세 축을 고르게, 나머지는
+// 화면(스크린)·이동/가격(핀+₩)을 각각 나타낸다.
+function BalanceGlyph() {
   return (
-    <IconChevronRight aria-hidden className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 rotate-90 text-text-tertiary" />
+    <span aria-hidden className="flex items-end gap-[4px] text-primary/80">
+      {[0, 1, 2].map((i) => (
+        <span key={i} className="w-[6px] rounded-[2px] bg-current" style={{ height: '16px' }} />
+      ))}
+    </span>
   );
 }
+
+function RouteGlyph() {
+  return (
+    <span aria-hidden className="flex items-center gap-1 text-primary/80">
+      <PinGlyph />
+      <WonGlyph />
+    </span>
+  );
+}
+
+// 커스텀 −/+ 스테퍼 버튼 — 네이티브 숫자 스피너는 스타일이 불가능해 숨기고 이것으로
+// 조절한다(입력 필드에 직접 타이핑도 여전히 가능).
+function StepBtn({ label, onClick, children }: { label: string; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      onClick={onClick}
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-white/[0.04] text-text-sub transition-all hover:text-text active:scale-95"
+    >
+      {children}
+    </button>
+  );
+}
+
+const MinusGlyph = () => (
+  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" className="h-4 w-4">
+    <path d="M3.5 8h9" />
+  </svg>
+);
+const PlusGlyph = () => (
+  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" className="h-4 w-4">
+    <path d="M3.5 8h9M8 3.5v9" />
+  </svg>
+);
+
+const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
 const STEP_TITLES = ['언제, 어디서 볼까요?', '무엇을 가장 중요하게 보나요?', '피하고 싶은 조건이 있나요?'];
 
@@ -140,6 +182,21 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [step, setStep] = useState(0);
+  // 날짜는 퀵 칩(오늘/내일/모레) 선택 상태 표시를 위해 controlled — 값 자체는 여전히
+  // name="date" 입력으로 폼 제출된다. 기준일은 서버가 준 defaultDate(앱 클럭의 오늘).
+  const [dateVal, setDateVal] = useState(defaultDate);
+  // 이동 시간·가격은 네이티브 스피너(스타일 불가) 대신 커스텀 −/+ 스테퍼로 조절한다.
+  const [travelVal, setTravelVal] = useState(60);
+  const [priceVal, setPriceVal] = useState(40000);
+  const quickDates = useMemo(() => {
+    const base = new Date(`${defaultDate}T12:00:00`);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return ['오늘', '내일', '모레'].map((label, i) => {
+      const d = new Date(base);
+      d.setDate(base.getDate() + i);
+      return { label, value: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` };
+    });
+  }, [defaultDate]);
   // 온보딩 답변은 localStorage에만 있어 서버 렌더링 시점엔 알 수 없다 — 마운트 후 읽어와서
   // 적용한다. 이미 그려진 defaultValue/defaultChecked는 React가 재적용하지 않으므로, prefill이
   // 도착하면 key를 바꿔 해당 입력만 다시 마운트한다(초기 렌더와 하이드레이션은 항상 동일하게
@@ -202,79 +259,162 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
 
       <div className={step === 0 ? 'stage-enter' : 'hidden'}>
       <StepSection step={1} title="언제, 어디서 볼까요?" first>
-        <div className="grid gap-2.5 sm:grid-cols-2">
-          <label className={fieldCls}>
-            <FieldIcon>
-              <CalendarGlyph />
-            </FieldIcon>
-            <span className="min-w-0 flex-1">
-              <span className={fieldLabelCls}>관람 날짜</span>
-              <input className={`${fieldInputCls} mt-0.5`} type="date" name="date" defaultValue={defaultDate} required />
-            </span>
-          </label>
-          <label className={`${fieldCls} relative`}>
-            <FieldIcon>
-              <PinGlyph />
-            </FieldIcon>
-            <span className="min-w-0 flex-1">
+        <div className="flex flex-col gap-2.5">
+          {/* 날짜 — 대부분의 선택은 오늘/내일/모레 퀵 칩으로 끝나고, 다른 날짜만 입력 필드를
+              쓴다(네이티브 달력 팝업 의존 최소화). */}
+          <div className="rounded-card bg-surface-raised p-3.5 transition-shadow focus-within:shadow-[inset_0_0_0_1px_rgba(188,96,118,0.5)]">
+            <div className="flex items-center gap-3">
+              <FieldIcon>
+                <CalendarGlyph />
+              </FieldIcon>
+              <label className="min-w-0 flex-1">
+                <span className={fieldLabelCls}>관람 날짜</span>
+                <input
+                  className={`${fieldInputCls} mt-0.5`}
+                  type="date"
+                  name="date"
+                  value={dateVal}
+                  onChange={(e) => setDateVal(e.target.value)}
+                  required
+                />
+              </label>
+            </div>
+            <div className="mt-2.5 flex gap-1.5 pl-12" role="group" aria-label="빠른 날짜 선택">
+              {quickDates.map((q) => (
+                <button
+                  key={q.value}
+                  type="button"
+                  aria-pressed={dateVal === q.value}
+                  onClick={() => setDateVal(q.value)}
+                  className={`min-h-8 rounded-full px-3.5 text-[12.5px] font-semibold transition-colors ${
+                    dateVal === q.value ? 'bg-primary-strong text-white' : 'bg-white/[0.04] text-text-sub hover:text-text'
+                  }`}
+                >
+                  {q.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 출발 위치 — 네이티브 드롭다운(스타일 불가한 흰 팝업) 대신 커스텀 위치 칩 그리드.
+              같은 name의 radio 그룹이라 폼 데이터는 select와 동일하게 하나의 originId. */}
+          <div className="rounded-card bg-surface-raised p-3.5">
+            <div className="flex items-center gap-3">
+              <FieldIcon>
+                <PinGlyph />
+              </FieldIcon>
               <span className={fieldLabelCls}>출발 위치</span>
-              <select className={`${fieldInputCls} mt-0.5 appearance-none pr-8`} name="originId" defaultValue="cityhall">
-                {ORIGIN_PRESETS.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            </span>
-            <SelectChevron />
-          </label>
-          <label className={fieldCls}>
-            <FieldIcon>
-              <ClockGlyph />
-            </FieldIcon>
-            <span className="min-w-0 flex-1">
-              <span className={fieldLabelCls}>최대 이동 시간 (분)</span>
-              <input
-                className={`${fieldInputCls} mt-0.5`}
-                type="number"
-                name="maxTravelMinutes"
-                defaultValue={60}
-                min={5}
-                max={240}
-                step={5}
-              />
-            </span>
-          </label>
-          <label className={fieldCls}>
-            <FieldIcon>
-              <WonGlyph />
-            </FieldIcon>
-            <span className="min-w-0 flex-1">
-              <span className={fieldLabelCls}>최대 가격 (원)</span>
-              <input
-                className={`${fieldInputCls} mt-0.5`}
-                type="number"
-                name="maxPrice"
-                defaultValue={40000}
-                min={1000}
-                max={200000}
-                step={1000}
-              />
-            </span>
-          </label>
+            </div>
+            <div className="mt-2.5 grid grid-cols-2 gap-1.5 pl-12 sm:grid-cols-3 sm:pl-12" role="radiogroup" aria-label="출발 위치">
+              {ORIGIN_PRESETS.map((o) => (
+                <label
+                  key={o.id}
+                  className="flex min-h-10 cursor-pointer items-center justify-center rounded-[10px] bg-white/[0.04] px-2 text-center text-[13px] font-medium text-text-sub transition-colors hover:text-text has-[:checked]:bg-primary-strong has-[:checked]:font-semibold has-[:checked]:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary"
+                >
+                  <input type="radio" name="originId" value={o.id} defaultChecked={o.id === 'cityhall'} className="sr-only" />
+                  {o.label.replace(' 인근', '')}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-2.5 sm:grid-cols-2">
+            <div className={fieldCls}>
+              <FieldIcon>
+                <ClockGlyph />
+              </FieldIcon>
+              <label className="min-w-0 flex-1">
+                <span className={fieldLabelCls}>최대 이동 시간</span>
+                <span className="mt-0.5 flex items-baseline gap-1">
+                  <input
+                    className={`${fieldInputCls} w-14 [appearance:textfield] [&::-webkit-inner-spin-button]:hidden [&::-webkit-outer-spin-button]:hidden`}
+                    type="number"
+                    name="maxTravelMinutes"
+                    value={travelVal}
+                    onChange={(e) => setTravelVal(Number(e.target.value) || 0)}
+                    onBlur={() => setTravelVal((v) => clamp(v, 5, 240))}
+                    min={5}
+                    max={240}
+                    step={5}
+                  />
+                  <span className="text-[13px] text-text-sub">분</span>
+                </span>
+              </label>
+              <div className="flex gap-1">
+                <StepBtn label="이동 시간 5분 줄이기" onClick={() => setTravelVal((v) => clamp(v - 5, 5, 240))}>
+                  <MinusGlyph />
+                </StepBtn>
+                <StepBtn label="이동 시간 5분 늘리기" onClick={() => setTravelVal((v) => clamp(v + 5, 5, 240))}>
+                  <PlusGlyph />
+                </StepBtn>
+              </div>
+            </div>
+            <div className={fieldCls}>
+              <FieldIcon>
+                <WonGlyph />
+              </FieldIcon>
+              <label className="min-w-0 flex-1">
+                <span className={fieldLabelCls}>최대 가격</span>
+                <span className="mt-0.5 flex items-baseline gap-1">
+                  <input
+                    className={`${fieldInputCls} w-20 [appearance:textfield] [&::-webkit-inner-spin-button]:hidden [&::-webkit-outer-spin-button]:hidden`}
+                    type="number"
+                    name="maxPrice"
+                    value={priceVal}
+                    onChange={(e) => setPriceVal(Number(e.target.value) || 0)}
+                    onBlur={() => setPriceVal((v) => clamp(v, 1000, 200000))}
+                    min={1000}
+                    max={200000}
+                    step={1000}
+                  />
+                  <span className="text-[13px] text-text-sub">원</span>
+                </span>
+              </label>
+              <div className="flex gap-1">
+                <StepBtn label="가격 5천 원 줄이기" onClick={() => setPriceVal((v) => clamp(v - 5000, 1000, 200000))}>
+                  <MinusGlyph />
+                </StepBtn>
+                <StepBtn label="가격 5천 원 늘리기" onClick={() => setPriceVal((v) => clamp(v + 5000, 1000, 200000))}>
+                  <PlusGlyph />
+                </StepBtn>
+              </div>
+            </div>
+          </div>
         </div>
       </StepSection>
       </div>
 
       <div className={step === 1 ? 'stage-enter' : 'hidden'}>
       <StepSection step={2} title="무엇을 가장 중요하게 보나요?" first>
-        <SegmentedControl
-          key={prefillKey}
-          name="priority"
-          legend="가장 중요한 것"
-          options={PRIORITY_OPTIONS}
-          defaultValue={prefill?.priority ?? 'balance'}
-        />
+        <fieldset className="m-0 border-0 p-0" key={prefillKey}>
+          <legend className="mb-2 block text-sm font-semibold text-text">가장 중요한 것</legend>
+          <div className="grid gap-2.5 sm:grid-cols-3" role="radiogroup" aria-label="가장 중요한 것">
+            <RadioCard
+              name="priority"
+              value="balance"
+              defaultChecked={(prefill?.priority ?? 'balance') === 'balance'}
+              title="균형 있게"
+              description="화면·이동·가격을 고르게 반영"
+              visual={<BalanceGlyph />}
+            />
+            <RadioCard
+              name="priority"
+              value="quality"
+              defaultChecked={prefill?.priority === 'quality'}
+              title="영상·음향 품질"
+              description="화면과 사운드 가중치를 높여요"
+              visual={<ScreenGlyph ratio={2.2} wave />}
+            />
+            <RadioCard
+              name="priority"
+              value="logistics"
+              defaultChecked={prefill?.priority === 'logistics'}
+              title="가까운 곳·가성비"
+              description="이동시간·가격 가중치를 높여요"
+              visual={<RouteGlyph />}
+            />
+          </div>
+        </fieldset>
         <fieldset className="m-0 border-0 p-0">
           <legend className="mb-2 block text-sm font-semibold text-text">허용할 상영 방식</legend>
           <div className="grid gap-2.5 sm:grid-cols-3">
@@ -310,7 +450,7 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
           key={prefillKey}
           name="motionSickness"
           legend="4DX 멀미, 얼마나 신경 쓰이세요?"
-          options={MOTION_OPTIONS}
+          options={MOTION_OPTIONS.map((o, i) => ({ ...o, intensity: i }))}
           defaultValue={prefill?.motionSickness ?? '0'}
         />
         <fieldset className="m-0 border-0 p-0">

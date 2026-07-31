@@ -4,9 +4,9 @@ import { notFound } from 'next/navigation';
 import { FormatTag } from '../../../components/FormatTag';
 import { IconEdit, IconNote, IconTransit, IconWrench } from '../../../components/Icon';
 import { Notice } from '../../../components/Notice';
+import { SeatMap } from '../../../components/SeatMap';
 import { ShowtimeStatusBadge } from '../../../components/StatusBadge';
 import { TrustBadge } from '../../../components/TrustBadge';
-import { INFO_STATUS_LABELS } from '../../../src/domain/recommendation/presets';
 import { cinemaRepository } from '../../../src/data/cinemaRepository';
 import { getAppClock } from '../../../src/lib/clock';
 
@@ -21,18 +21,6 @@ const dtFmt = new Intl.DateTimeFormat('ko-KR', {
   hour12: false,
   timeZone: 'Asia/Seoul',
 });
-
-const PURPOSE_LABELS: Record<string, string> = {
-  immersive: '몰입',
-  overview: '전체 시야',
-  subtitle: '자막 가독',
-  sound: '사운드',
-  low_motion: '모션 순함',
-  neck_easy: '목 편함',
-  exit_easy: '출입 편함',
-  pair: '둘이 보기',
-  wheelchair: '휠체어',
-};
 
 const LIGHT_LABELS: Record<string, string> = { laser: '레이저', xenon: '제논' };
 const MASKING_LABELS: Record<string, string> = {
@@ -79,11 +67,14 @@ export default async function AuditoriumDetailPage({
   const history = detail.specHistory.filter((s) => s !== current);
 
   return (
-    <main className="cinema-scope mx-auto min-h-dvh max-w-wide bg-bg px-4 pb-24 pt-6">
+    <main className="cinema-scope min-h-dvh max-w-none bg-bg px-4 pb-24 pt-6">
+      {/* 다크 배경은 main이 전폭으로 채우고, 내용만 아래 래퍼로 제한한다(넓은 화면에서
+          밝은 여백이 드러나지 않게). */}
+      <div className="mx-auto max-w-wide">
       {/* 1. 상영관 이름·위치·핵심 특징 — 상단 요약을 더 강하게, 줄바꿈이 어색한 지점에서
           끊기지 않도록 관 이름은 통째로 줄바꿈되게 한다. */}
       <p className="m-0 text-[13px] font-bold uppercase tracking-[0.08em] text-accent">{detail.location.chain}</p>
-      <h1 className="m-0 mt-2 text-balance text-[32px] font-bold text-text sm:text-[38px]">
+      <h1 className="m-0 mt-2 text-balance font-headline text-[32px] font-extrabold tracking-[-0.02em] text-text sm:text-[38px]">
         {detail.location.name} <span className="whitespace-nowrap">{detail.no}</span>
       </h1>
       <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -130,30 +121,9 @@ export default async function AuditoriumDetailPage({
         {detail.seatZones.length === 0 ? (
           <p className="mt-2 text-sm text-text-sub">아직 이 관의 좌석 구역 제보가 없어요.</p>
         ) : (
-          <ul className="m-0 mt-3 grid grid-cols-1 gap-3 p-0 sm:grid-cols-2 lg:grid-cols-3">
-            {detail.seatZones.map((z, i) => (
-              <li key={i} className="rounded-card-lg border-t-2 border-t-accent/50 bg-surface-strong p-5">
-                <div className="flex flex-wrap items-center gap-1.5">
-                  {z.purposes.map((p) => (
-                    <span key={p} className="text-[13px] font-semibold uppercase tracking-wide text-accent">
-                      {PURPOSE_LABELS[p] ?? p}
-                    </span>
-                  ))}
-                </div>
-                <p className="m-0 mt-2 text-xl font-bold text-text">
-                  {[z.rowRange, z.colRange].filter(Boolean).join(' ') || '전체'}
-                </p>
-                {z.rationale ? <p className="m-0 mt-2 text-sm leading-relaxed text-text-sub">{z.rationale}</p> : null}
-                {/* text-text-tertiary는 이 bg-surface-strong 배경에서 대비가 부족해(axe 실측
-                    3.88:1 < 4.5:1) text-text-sub로 올렸다. */}
-                <p className="m-0 mt-3 flex flex-wrap items-center gap-1.5 border-t border-border pt-3 text-xs text-text-sub">
-                  확신도: {INFO_STATUS_LABELS[z.infoStatus] ?? z.infoStatus}
-                  <TrustBadge status={z.infoStatus} observedAt={z.observedAt} />
-                  <span>· {z.sourceName ?? '출처 없음'}</span>
-                </p>
-              </li>
-            ))}
-          </ul>
+          <div className="mt-3">
+            <SeatMap zones={detail.seatZones} />
+          </div>
         )}
         <p className="mt-2.5">
           <Link
@@ -323,6 +293,7 @@ export default async function AuditoriumDetailPage({
           정보 출처·신뢰도 기준 →
         </Link>
       </p>
+      </div>
     </main>
   );
 }

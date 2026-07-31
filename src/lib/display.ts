@@ -94,3 +94,16 @@ export function keySpecEntries(movie: MovieWithSpecs): { key: MovieSpecKey; spec
     return spec ? [{ key, spec }] : [];
   });
 }
+
+// 좌석 존 목적 라벨 — 상영관 상세 페이지와 좌석 맵 일러스트 양쪽에서 같은 라벨을 쓴다.
+export const SEAT_PURPOSE_LABELS: Record<string, string> = {
+  immersive: '몰입',
+  overview: '전체 시야',
+  subtitle: '자막 가독',
+  sound: '사운드',
+  low_motion: '모션 순함',
+  neck_easy: '목 편함',
+  exit_easy: '출입 편함',
+  pair: '둘이 보기',
+  wheelchair: '휠체어',
+};

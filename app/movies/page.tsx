@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { MovieCard } from '../../components/MovieCard';
+import { MovieList } from '../../components/MovieList';
 import { Notice } from '../../components/Notice';
 import { movieRepository } from '../../src/data/movieRepository';
 
@@ -37,10 +37,8 @@ export default async function MoviesPage() {
           </p>
         </div>
       ) : (
-        <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {movies.map((m) => (
-            <MovieCard key={m.id} movie={m} />
-          ))}
+        <div className="mt-6">
+          <MovieList movies={movies} />
         </div>
       )}
       </div>

@@ -92,7 +92,7 @@ export default async function ResultsPage({
           내용만 이 래퍼로 제한한다. */}
       <header>
         <p className="enter-1 m-0 text-[13px] font-bold uppercase tracking-[0.08em] text-accent">추천 결과</p>
-        <h1 className="enter-1 m-0 mt-2 font-headline text-[34px] font-extrabold leading-[1.1] tracking-[-0.04em] text-text sm:text-[46px]">
+        <h1 className="enter-1 type-display m-0 mt-2.5 text-[34px] text-text sm:text-[46px]">
           {result.picks.length > 0 ? '오늘 가장 잘 맞는 선택' : '조건을 조금 넓혀볼까요?'}
         </h1>
         <p className="enter-2 m-0 mt-4 text-lg font-bold text-text">{result.movie.title}</p>
@@ -154,9 +154,12 @@ export default async function ResultsPage({
         </div>
       ) : (
         <>
-          {/* 3. 대표 추천 — 영화의 실제 화면비(native_ar)를 스크린 그래픽에 전달 */}
-          {result.picks[0] ? (
-            <div className="enter-3 mt-8">
+          {/* 3~4. 대표 추천 + 대안 레일 — 데스크톱은 1위 모듈 옆에 2·3위 비교 레일을 세로로
+              배치해 넓은 화면을 실제로 사용한다. 모바일은 1위 아래에 2·3위를 가로 스와이프로
+              (다음 카드가 살짝 잘려 보이게). 영화의 실제 화면비(native_ar)는 1위 스크린
+              그래픽에 전달. */}
+          <div className="enter-3 mt-8 lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,4fr)] lg:items-start lg:gap-6">
+            {result.picks[0] ? (
               <RecommendCard
                 rank={1}
                 label={result.picks[0].label}
@@ -164,26 +167,24 @@ export default async function ResultsPage({
                 request={result.request}
                 nativeAr={result.movie.specs.native_ar ? Number(result.movie.specs.native_ar.value) || null : null}
               />
-            </div>
-          ) : null}
+            ) : null}
 
-          {/* 4. 대안 추천 — 1위와의 차이를 제목에 표기(top 전달). 모바일에서는 가로 스와이프
-              비교, 데스크톱에서는 2열 그리드. */}
-          {result.picks.length > 1 ? (
-            <div className="enter-4 -mx-5 mt-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-1 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0">
-              {result.picks.slice(1).map((p, i) => (
-                <div key={p.scored.candidate.showtimeId} className="w-[86%] shrink-0 snap-start sm:w-auto sm:shrink">
-                  <RecommendCard
-                    rank={i + 2}
-                    label={p.label}
-                    scored={p.scored}
-                    request={result.request}
-                    top={result.picks[0]?.scored}
-                  />
-                </div>
-              ))}
-            </div>
-          ) : null}
+            {result.picks.length > 1 ? (
+              <div className="enter-4 -mx-5 mt-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-1 sm:mx-0 sm:px-0 sm:pb-0 lg:mt-0 lg:flex-col lg:overflow-visible">
+                {result.picks.slice(1).map((p, i) => (
+                  <div key={p.scored.candidate.showtimeId} className="w-[86%] shrink-0 snap-start sm:w-[70%] lg:w-auto lg:shrink">
+                    <RecommendCard
+                      rank={i + 2}
+                      label={p.label}
+                      scored={p.scored}
+                      request={result.request}
+                      top={result.picks[0]?.scored}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </div>
 
           {/* 5. 추천 차이 요약 */}
           <section className="enter-5 mt-10 max-w-content">

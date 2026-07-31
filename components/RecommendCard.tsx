@@ -57,17 +57,34 @@ function diffVsTop(scored: ScoredCandidate, top: ScoredCandidate): string | null
 
 // 대표 카드의 축별 게이지 — 의미가 불분명한 종합 퍼센트 하나 대신, 엔진이 실제로 계산한
 // 축 값(audQ·seatQ·conv·pv)을 각각 라벨과 함께 보여준다. value는 항상 0~1의 실제 축 점수,
-// detail은 그 축의 구체 사실(이동 분·가격 원)이 있으면 대신 표기한다.
+// detail은 그 축의 구체 사실(이동 분·가격 원)이 있으면 대신 표기한다. 막대는 얇고 절제된
+// 와인 레드 단색이고, 점수 축에는 짧은 상태 문구를 붙여 숫자만 반복되지 않게 한다.
+function axisPhrase(value: number): string {
+  if (value >= 0.8) return '우수';
+  if (value >= 0.6) return '좋음';
+  if (value >= 0.4) return '보통';
+  return '낮음';
+}
+
 function AxisBar({ label, value, detail }: { label: string; value: number; detail?: string }) {
   const width = Math.round(Math.min(1, Math.max(0, value)) * 100);
   return (
     <div>
       <div className="flex items-baseline justify-between gap-3">
         <span className="text-[12.5px] font-semibold text-hero-text-sub">{label}</span>
-        <span className="font-mono text-[13px] font-bold tabular-nums text-hero-text">{detail ?? `${width}%`}</span>
+        <span className="text-[13px] tabular-nums text-hero-text">
+          {detail ? (
+            <strong className="font-mono font-semibold">{detail}</strong>
+          ) : (
+            <>
+              <strong className="font-mono font-semibold">{width}%</strong>
+              <span className="ml-1.5 text-[12px] text-hero-text-sub">{axisPhrase(value)}</span>
+            </>
+          )}
+        </span>
       </div>
       <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-hero-soft">
-        <div className="h-full rounded-full bg-gradient-to-r from-primary to-primary-strong" style={{ width: `${width}%` }} />
+        <div className="h-full rounded-full bg-primary-strong" style={{ width: `${width}%` }} />
       </div>
     </div>
   );
@@ -279,6 +296,12 @@ export function RecommendCard({
         aria-labelledby={`pick-${rank}-title`}
         data-testid={`pick-${label}`}
       >
+        {/* 딥 와인 내부 조명 — 카드 위쪽 모서리에서 옅게 번지는 간접광(장식). */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-2/5"
+          style={{ background: 'radial-gradient(ellipse 90% 120% at 20% -20%, rgba(93, 24, 40, 0.5), transparent 70%)' }}
+        />
         {/* 카드 상단의 얇은 와인→로즈 트림 — 텍스트가 아니라 장식 선이라 대비 요건과 무관. */}
         <span
           aria-hidden

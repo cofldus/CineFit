@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Notice } from '../../components/Notice';
-import { IconArrowRight, IconFilm, IconSearch, IconSeat } from '../../components/Icon';
+import { IconArrowRight, IconFilm, IconSeat } from '../../components/Icon';
+import { FORMAT_LABELS } from '../../src/domain/recommendation/presets';
 import { searchRepository } from '../../src/data/searchRepository';
 
 export const metadata: Metadata = { title: '검색' };
@@ -9,6 +10,22 @@ export const dynamic = 'force-dynamic';
 
 const resultRowCls =
   'group flex items-center gap-3 rounded-card-lg border border-border bg-surface p-4 transition-all duration-150 hover:-translate-y-0.5 hover:border-border-strong hover:bg-surface-raised hover:shadow-float focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-strong active:translate-y-0 active:shadow-none';
+
+const iconTileCls = 'flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-surface-strong text-text-sub';
+
+/** 검색어와 일치하는 부분만 옅게 강조 — 결과가 왜 이 항목인지 바로 보이게 한다. */
+function Highlighted({ text, query }: { text: string; query: string }) {
+  if (!query) return <>{text}</>;
+  const idx = text.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) return <>{text}</>;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <mark className="rounded-[3px] bg-primary-soft px-0.5 text-inherit">{text.slice(idx, idx + query.length)}</mark>
+      {text.slice(idx + query.length)}
+    </>
+  );
+}
 
 export default async function SearchPage({
   searchParams,
@@ -27,21 +44,23 @@ export default async function SearchPage({
         <label className="block text-[15px] text-text-sub" htmlFor="q">
           영화 제목·원제·별칭 또는 상영관 이름으로 찾아보세요
         </label>
+        {/* 검색 액션을 필드 자체에 통합 — 옆에 따로 떨어진 버튼 대신 입력창 오른쪽 안쪽에
+            원형 아이콘 버튼 하나만 둔다. */}
         <div className="relative mt-2">
-          <IconSearch aria-hidden className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-text-tertiary" />
           <input
             id="q"
             name="q"
             type="search"
             defaultValue={q}
             placeholder="예: 듄2, 용아맥, 코엑스"
-            className="min-h-[52px] w-full rounded-full border border-border bg-surface pl-11 pr-[92px] text-base text-text outline-none transition-shadow placeholder:text-text-tertiary focus-visible:border-primary-strong focus-visible:ring-[3px] focus-visible:ring-primary-soft"
+            className="min-h-[52px] w-full rounded-full border border-border bg-surface px-5 pr-14 text-base text-text outline-none transition-shadow placeholder:text-text-tertiary focus-visible:border-primary-strong focus-visible:ring-[3px] focus-visible:ring-primary-soft"
           />
           <button
             type="submit"
-            className="absolute right-1.5 top-1/2 min-h-10 -translate-y-1/2 rounded-full bg-primary-strong px-5 text-sm font-semibold text-white transition-colors hover:bg-primary-strong-hover"
+            aria-label="검색"
+            className="absolute right-1.5 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-primary-strong text-white transition-colors hover:bg-primary-strong-hover"
           >
-            검색
+            <IconArrowRight className="h-[18px] w-[18px]" />
           </button>
         </div>
       </form>
@@ -53,7 +72,7 @@ export default async function SearchPage({
       )}
 
       {results.movies.length > 0 && (
-        <section className="mt-8 max-w-content">
+        <section key={`movies-${q}`} className="list-enter mt-8 max-w-content">
           <h2 className="m-0 text-[15px] font-bold uppercase tracking-[0.06em] text-text-sub">
             영화 {results.movies.length}건
           </h2>
@@ -61,12 +80,14 @@ export default async function SearchPage({
             {results.movies.map((m) => (
               <li key={m.id}>
                 <Link href={`/recommend/${m.id}`} className={resultRowCls}>
-                  <span aria-hidden className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary-strong">
+                  <span aria-hidden className={iconTileCls}>
                     <IconFilm className="h-[18px] w-[18px]" />
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate font-semibold text-text">{m.title}</span>
-                    <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[13px] text-text-sub">
+                    <span className="block truncate font-semibold text-text">
+                      <Highlighted text={m.title} query={q} />
+                    </span>
+                    <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[13.5px] text-text-sub">
                       {m.originalTitle && <span>{m.originalTitle}</span>}
                       {m.matchedAlias && <span>별칭 &ldquo;{m.matchedAlias}&rdquo; 일치</span>}
                     </span>
@@ -80,7 +101,7 @@ export default async function SearchPage({
       )}
 
       {results.cinemas.length > 0 && (
-        <section className="mt-8 max-w-content">
+        <section key={`cinemas-${q}`} className="list-enter mt-8 max-w-content">
           <h2 className="m-0 text-[15px] font-bold uppercase tracking-[0.06em] text-text-sub">
             상영관 {results.cinemas.length}건
           </h2>
@@ -88,13 +109,17 @@ export default async function SearchPage({
             {results.cinemas.map((c) => (
               <li key={c.auditoriumId}>
                 <Link href={`/cinemas/${c.auditoriumId}`} className={resultRowCls}>
-                  <span aria-hidden className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent">
+                  <span aria-hidden className={iconTileCls}>
                     <IconSeat className="h-[18px] w-[18px]" />
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate font-semibold text-text">{c.label}</span>
-                    <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[13px] text-text-sub">
-                      <span>{c.brand}</span>
+                    <span className="block truncate font-semibold text-text">
+                      <Highlighted text={c.label} query={q} />
+                    </span>
+                    <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[13.5px] text-text-sub">
+                      <span>{FORMAT_LABELS[c.brand] ?? c.brand}</span>
+                      {c.regionCode ? <span>{c.regionCode}</span> : null}
+                      {c.seatCount ? <span>{c.seatCount}석</span> : null}
                       {c.matchedAlias && <span>별칭 &ldquo;{c.matchedAlias}&rdquo; 일치</span>}
                     </span>
                   </span>

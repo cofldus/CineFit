@@ -15,6 +15,7 @@ export interface CinemaSearchResult {
   brand: string;
   locationName: string;
   regionCode: string | null;
+  seatCount: number | null;
   matchedAlias: string | null;
 }
 
@@ -54,9 +55,10 @@ export function createSearchRepository(getDb: () => DbClient) {
         brand: string;
         location_name: string;
         region_code: string | null;
+        seat_count: number | null;
         matched_alias: string | null;
       }>(
-        `SELECT DISTINCT a.id AS auditorium_id, a.auditorium_no, a.brand,
+        `SELECT DISTINCT a.id AS auditorium_id, a.auditorium_no, a.brand, a.seat_count,
                 l.name AS location_name, l.region_code,
                 (SELECT alias FROM auditorium_aliases WHERE auditorium_id = a.id AND alias LIKE ? LIMIT 1) AS matched_alias
          FROM auditoriums a
@@ -80,6 +82,7 @@ export function createSearchRepository(getDb: () => DbClient) {
           brand: r.brand,
           locationName: r.location_name,
           regionCode: r.region_code,
+          seatCount: r.seat_count,
           matchedAlias: r.matched_alias,
         })),
       };

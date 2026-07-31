@@ -5,15 +5,33 @@ import { RatingSelector } from './RatingSelector';
 
 type Phase = 'editing' | 'submitting' | 'done' | 'error';
 
-const OPTIONAL_QUESTIONS = [
-  { key: 'infoAccuracy', label: '상영관 정보 정확도' },
-  { key: 'seatSatisfaction', label: '좌석 추천 만족도' },
-  { key: 'screenSatisfaction', label: '화면 만족도' },
-  { key: 'soundSatisfaction', label: '사운드 만족도' },
-  { key: 'travelTimeAccuracy', label: '이동 시간 정확도' },
-  { key: 'priceAccuracy', label: '가격 정확도' },
-  { key: 'wouldChooseAgain', label: '다시 이 상영관을 선택할 의향' },
-  { key: 'wouldReuseCinefit', label: 'CineFit 추천을 다시 사용할 의향' },
+// 설문지처럼 8문항을 평평하게 나열하지 않고, 추천 제품의 관점 그대로 세 묶음으로 나눈다:
+// 관람 경험(추천된 좌석·화면·사운드가 실제로 좋았는지) → 정보 정확도(비교에 쓴 데이터가
+// 맞았는지) → 다음 선택(재선택 의향). 문항 key·전송 payload는 그대로다.
+const QUESTION_GROUPS = [
+  {
+    title: '추천받은 관람 경험은 어땠나요',
+    items: [
+      { key: 'seatSatisfaction', label: '좌석 추천 만족도' },
+      { key: 'screenSatisfaction', label: '화면 만족도' },
+      { key: 'soundSatisfaction', label: '사운드 만족도' },
+    ],
+  },
+  {
+    title: '비교에 쓴 정보가 정확했나요',
+    items: [
+      { key: 'infoAccuracy', label: '상영관 정보 정확도' },
+      { key: 'travelTimeAccuracy', label: '이동 시간 정확도' },
+      { key: 'priceAccuracy', label: '가격 정확도' },
+    ],
+  },
+  {
+    title: '다음에도 이렇게 고르실 건가요',
+    items: [
+      { key: 'wouldChooseAgain', label: '다시 이 상영관을 선택할 의향' },
+      { key: 'wouldReuseCinefit', label: 'CineFit 추천을 다시 사용할 의향' },
+    ],
+  },
 ] as const;
 
 export function PostWatchForm({ runId }: { runId: number }) {
@@ -71,17 +89,22 @@ export function PostWatchForm({ runId }: { runId: number }) {
         />
       </div>
 
-      <div className="mt-1 flex flex-col sm:grid sm:grid-cols-2 sm:gap-x-8">
-        {OPTIONAL_QUESTIONS.map((q) => (
-          <RatingSelector
-            key={q.key}
-            name={q.key}
-            label={q.label}
-            value={values[q.key]}
-            onChange={(n) => setValues((prev) => ({ ...prev, [q.key]: n }))}
-          />
-        ))}
-      </div>
+      {QUESTION_GROUPS.map((g) => (
+        <div key={g.title} className="mt-5">
+          <h3 className="m-0 text-[12.5px] font-bold uppercase tracking-wide text-text-sub">{g.title}</h3>
+          <div className="mt-1 flex flex-col sm:grid sm:grid-cols-2 sm:gap-x-8">
+            {g.items.map((q) => (
+              <RatingSelector
+                key={q.key}
+                name={q.key}
+                label={q.label}
+                value={values[q.key]}
+                onChange={(n) => setValues((prev) => ({ ...prev, [q.key]: n }))}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
 
       <button
         type="submit"

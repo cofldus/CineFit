@@ -58,6 +58,25 @@ const GROUP_TONE_CLS: Record<'high' | 'mid' | 'low', string> = {
   low: 'border-trust-low/40 text-trust-low',
 };
 
+const GROUP_METER: Record<'high' | 'mid' | 'low', { filled: number; fillCls: string }> = {
+  high: { filled: 3, fillCls: 'bg-trust-high' },
+  mid: { filled: 2, fillCls: 'bg-trust-mid' },
+  low: { filled: 1, fillCls: 'bg-trust-low' },
+};
+
+// 신뢰 그룹 카드의 3칸 게이지 — 숫자·라벨과 같은 사실(그룹의 상대 신뢰 수준)을 시각으로도
+// 반복해 주는 표시일 뿐, 새 데이터를 만들지 않는다. 장식이 아니라 스캔 가능한 위계 표현.
+function TrustMeter({ tone }: { tone: 'high' | 'mid' | 'low' }) {
+  const { filled, fillCls } = GROUP_METER[tone];
+  return (
+    <span aria-hidden className="flex shrink-0 items-center gap-1">
+      {[0, 1, 2].map((i) => (
+        <span key={i} className={`h-1.5 w-5 rounded-full ${i < filled ? fillCls : 'bg-border'}`} />
+      ))}
+    </span>
+  );
+}
+
 export default async function SourcesPage() {
   const sources = await sourceRepository.list();
 
@@ -80,9 +99,12 @@ export default async function SourcesPage() {
       <h2 className="mt-8 text-lg font-bold text-text">정보를 얼마나 믿을 수 있는지</h2>
       <ul className="m-0 mt-3 flex list-none flex-col gap-2 p-0">
         {TRUST_GROUPS.map((g) => (
-          <li key={g.title} className={`rounded-card-lg border px-4 py-3.5 ${GROUP_TONE_CLS[g.tone]}`}>
-            <p className="m-0 text-[15px] font-semibold">{g.title}</p>
-            <p className="m-0 mt-0.5 text-[13.5px] leading-relaxed text-text-sub">{g.detail}</p>
+          <li key={g.title} className={`rounded-card-lg border bg-surface px-4 py-4 ${GROUP_TONE_CLS[g.tone]}`}>
+            <div className="flex items-center justify-between gap-3">
+              <p className="m-0 text-[15px] font-semibold">{g.title}</p>
+              <TrustMeter tone={g.tone} />
+            </div>
+            <p className="m-0 mt-1 text-[13.5px] leading-relaxed text-text-sub">{g.detail}</p>
           </li>
         ))}
       </ul>
@@ -117,7 +139,17 @@ export default async function SourcesPage() {
             </p>
             <p className="m-0 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13.5px] text-text-sub">
               <span>{KIND_LABELS[s.kind] ?? s.kind}</span>
-              <span className="tabular-nums">· 신뢰 가중치 {s.trust_weight.toFixed(2)}</span>
+              {/* 신뢰 가중치(0~1)를 숫자와 함께 미니 바로도 보여준다 — 실제 추천 점수 계산에
+                  쓰이는 값 그대로다. */}
+              <span className="inline-flex items-center gap-1.5">
+                <span aria-hidden className="h-1.5 w-14 overflow-hidden rounded-full bg-border">
+                  <span
+                    className="block h-full rounded-full bg-primary-strong"
+                    style={{ width: `${Math.round(Math.min(1, Math.max(0, s.trust_weight)) * 100)}%` }}
+                  />
+                </span>
+                <span className="tabular-nums">신뢰 가중치 {s.trust_weight.toFixed(2)}</span>
+              </span>
               {!s.url ? <span>· 출처 URL 없음</span> : null}
             </p>
             {s.terms_note ? <p className="m-0 text-[13.5px] text-text-sub">{s.terms_note}</p> : null}

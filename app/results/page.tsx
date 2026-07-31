@@ -200,7 +200,7 @@ export default async function ResultsPage({
 
           {result.excluded.length > 0 ? (
             <details className="mt-6 max-w-content border-t border-border pt-4">
-              <summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium text-text underline decoration-border-strong underline-offset-2">
+              <summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium text-text hover:underline decoration-border-strong underline-offset-2">
                 조건에 안 맞아 제외된 회차 {result.excluded.length}건 보기
               </summary>
               <ul className="m-0 mt-2 flex list-none flex-col gap-1 p-0 text-sm text-text-sub">
@@ -219,7 +219,7 @@ export default async function ResultsPage({
       <p className="mt-8 max-w-content border-t border-border pt-6">
         <Link
           href="/sources"
-          className="text-sm font-medium text-text underline decoration-border-strong underline-offset-2"
+          className="text-sm font-medium text-text hover:underline decoration-border-strong underline-offset-2"
         >
           이 추천에 쓰인 정보 출처·신뢰도 기준 보기 →
         </Link>
@@ -228,7 +228,7 @@ export default async function ResultsPage({
         <p className="mt-3 max-w-content text-sm">
           <Link
             href={`/feedback/${result.runId}/post-watch`}
-            className="font-medium text-text underline decoration-border-strong underline-offset-2"
+            className="font-medium text-text hover:underline decoration-border-strong underline-offset-2"
           >
             관람하고 오셨다면 여기서 만족도를 남겨주세요 →
           </Link>

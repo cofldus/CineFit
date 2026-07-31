@@ -64,7 +64,7 @@ export function MobileNav() {
               href={href}
               aria-current={active ? 'page' : undefined}
               className={`flex min-h-14 min-w-16 flex-col items-center justify-center gap-0.5 px-2 text-xs font-medium transition-colors ${
-                active ? 'text-primary' : 'text-text-sub hover:text-text'
+                active ? 'text-primary-strong' : 'text-text-sub hover:text-text'
               }`}
             >
               <Icon className="h-5 w-5" />

@@ -46,7 +46,7 @@ function DetailPanel({
   const sub = tone === 'hero' ? 'text-hero-text-sub' : 'text-text-sub';
   const strong = tone === 'hero' ? 'text-hero-text' : 'text-text';
   const border = tone === 'hero' ? 'border-hero-border' : 'border-border';
-  const linkCls = tone === 'hero' ? 'text-hero-text underline decoration-hero-border' : 'text-text underline decoration-border';
+  const linkCls = tone === 'hero' ? 'text-hero-text hover:underline decoration-hero-border' : 'text-text hover:underline decoration-border';
 
   return (
     <details className={`mt-5 border-t pt-4 ${border}`}>
@@ -224,7 +224,7 @@ export function RecommendCard({
             <TrackedExternalLink
               event="booking_link_clicked"
               eventProperties={{ showtimeId: c.showtimeId }}
-              className="inline-flex min-h-9 items-center text-[13.5px] font-medium text-hero-text underline decoration-hero-border underline-offset-2"
+              className="inline-flex min-h-9 items-center text-[13.5px] font-medium text-hero-text hover:underline decoration-hero-border underline-offset-2"
               href={c.bookingUrl}
               target="_blank"
               rel="noopener noreferrer nofollow"
@@ -264,7 +264,7 @@ export function RecommendCard({
 
       <Link
         href={`/cinemas/${c.auditorium.id}`}
-        className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-text underline decoration-border-strong underline-offset-2"
+        className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-text hover:underline decoration-border-strong underline-offset-2"
       >
         상세 보기 →
       </Link>

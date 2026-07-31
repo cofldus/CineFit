@@ -270,7 +270,7 @@ export function ReportForm({
           <input className={`${inputCls} mt-1.5`} type="email" name="contactEmail" />
           <span className="mt-1 block text-xs text-text-sub">
             나중에 이 이메일을 지우고 싶다면{' '}
-            <a href="/privacy" className="font-semibold text-text underline decoration-border-strong underline-offset-2">
+            <a href="/privacy" className="font-semibold text-text hover:underline decoration-border-strong underline-offset-2">
               여기서 요청
             </a>
             할 수 있어요.

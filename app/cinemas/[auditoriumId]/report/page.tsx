@@ -19,7 +19,7 @@ export default async function ReportPage({ params }: { params: Promise<{ auditor
   return (
     <main className="mx-auto max-w-xl px-4 pb-24 pt-6">
       <p className="m-0 text-sm text-text-sub">
-        <Link className="text-text underline decoration-border-strong underline-offset-2" href={`/cinemas/${detail.id}`}>
+        <Link className="text-text hover:underline decoration-border-strong underline-offset-2" href={`/cinemas/${detail.id}`}>
           ← {detail.location.name} {detail.no}
         </Link>
       </p>

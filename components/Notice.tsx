@@ -30,7 +30,7 @@ export function Notice({
         <p className="m-0">{children}</p>
         {detail ? (
           <details className="mt-1">
-            <summary className="inline-flex min-h-6 cursor-pointer items-center text-[12.5px] font-medium underline decoration-current/40 underline-offset-2">
+            <summary className="inline-flex min-h-6 cursor-pointer items-center text-[12.5px] font-medium hover:underline decoration-current/40 underline-offset-2">
               자세히
             </summary>
             <div className="mt-1.5 text-[12.5px] opacity-80">{detail}</div>

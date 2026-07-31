@@ -187,7 +187,7 @@ export function DetailedCompare({ picks }: { picks: Pick[] }) {
 
   return (
     <details>
-      <summary className="flex min-h-11 cursor-pointer items-center text-[13.5px] font-medium text-text underline decoration-border-strong underline-offset-2">
+      <summary className="flex min-h-11 cursor-pointer items-center text-[13.5px] font-medium text-text hover:underline decoration-border-strong underline-offset-2">
         세부 수치 비교
       </summary>
 
@@ -219,7 +219,7 @@ export function DetailedCompare({ picks }: { picks: Pick[] }) {
         </div>
 
         <details className="mt-3">
-          <summary className="flex min-h-11 cursor-pointer items-center text-[13px] font-medium text-text underline decoration-border-strong underline-offset-2">
+          <summary className="flex min-h-11 cursor-pointer items-center text-[13px] font-medium text-text hover:underline decoration-border-strong underline-offset-2">
             전체 축 보기
           </summary>
           <RowList rows={EXTRA_ROWS} picks={picks} />

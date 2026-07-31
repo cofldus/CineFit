@@ -104,7 +104,7 @@ function MiniSeatMap({ zone }: { zone: string }) {
   const { rows, cols } = seatHighlight(zone);
   return (
     <div aria-hidden className="flex w-full flex-col items-center gap-[4px]">
-      <div className="h-px w-[70%] rounded-full bg-accent/60" />
+      <div className="h-px w-[70%] rounded-full bg-[#bc6076]/60" />
       {Array.from({ length: 5 }, (_, r) => (
         <div key={r} className="flex justify-center gap-[4px]" style={{ width: `${72 + r * 7}%` }}>
           {Array.from({ length: 12 }, (_, c) => {

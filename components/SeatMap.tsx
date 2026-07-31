@@ -82,7 +82,7 @@ export function SeatMap({ zones }: { zones: SeatZone[] }) {
           아래로 옅은 스크린 불빛이 좌석 그리드 쪽으로 번진다. */}
       <div aria-hidden className="relative mx-auto w-[86%]">
         <svg viewBox="0 0 100 10" preserveAspectRatio="none" className="block h-[14px] w-full">
-          <path d="M2 9 Q 50 0.5 98 9" stroke="var(--accent)" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+          <path d="M2 9 Q 50 0.5 98 9" stroke="#bc6076" strokeOpacity="0.75" strokeWidth="1.4" fill="none" strokeLinecap="round" />
         </svg>
         <div
           className="pointer-events-none absolute inset-x-[10%] top-full h-10 opacity-50"

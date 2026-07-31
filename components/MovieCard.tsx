@@ -42,35 +42,39 @@ export function MovieCard({ movie, variant = 'detailed' }: { movie: MovieWithSpe
         href={`/recommend/${movie.id}`}
         className="group block w-[90%] shrink-0 snap-start rounded-card-lg border border-border bg-surface p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-float focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-strong active:translate-y-0 sm:w-auto"
       >
-        {/* 영화마다 실제 화면비로 프레임 자체의 모양이 달라진다(2.39:1은 낮고 넓게, 1.85:1은
-            상대적으로 높게) — 그 위에 비율 숫자를 크게 얹어 "이 영화의 스크린 모양"임을
-            바로 읽히게 한다. 회색 빈 상자 대신 화면비 자체가 카드의 정체성이 되게 하는
-            의도다(장식이 아니라 데이터 표현). */}
-        {/* 화면비 프레임 — 아래쪽 브론즈 트림으로 "스크린 하단 조명"을 흉내내 중립적인
-            placeholder 상자가 아니라 의도된 시네마 프레임처럼 보이게 한다. */}
-        <div
-          aria-hidden
-          className="relative flex items-center justify-center rounded-card border-x border-t border-hero-border border-b-2 border-b-accent/60 bg-hero transition-shadow group-hover:shadow-glow-primary"
-          style={{
-            aspectRatio: `${clampedAr} / 1`,
-            background: 'radial-gradient(ellipse 85% 95% at 50% 100%, var(--hero-soft), var(--hero) 78%)',
-          }}
-        >
-          <span className="whitespace-nowrap text-lg font-light tracking-[0.14em] tabular-nums text-hero-text sm:text-xl">
-            {ratioLabel ?? `${clampedAr.toFixed(2)}:1`}
-          </span>
+        {/* 화면비 프레임 무대 — 카드마다 무대 높이는 동일하게 고정하고(카드 행 정렬 유지),
+            영화의 실제 화면비는 프레임의 폭·비율 차이로만 나타난다(실제 극장 스크린 원리).
+            프레임은 얇은 전체 테두리 + 중앙에서 사라지는 와인 하이라이트 라인. */}
+        <div aria-hidden className="relative flex h-[112px] items-center justify-center">
           {formats.length > 0 ? (
-            <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1">
+            <div className="absolute left-0 top-0 flex flex-wrap gap-1">
               {formats.map((f) => (
                 <span
                   key={f}
-                  className="rounded-full border border-hero-border bg-bg/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-hero-text-sub backdrop-blur-sm"
+                  className="rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-text-sub"
                 >
                   {f}
                 </span>
               ))}
             </div>
           ) : null}
+          <div
+            className="relative flex h-[72px] items-center justify-center overflow-hidden rounded-[8px] border border-white/10 transition-shadow group-hover:shadow-glow-primary"
+            style={{
+              aspectRatio: `${clampedAr} / 1`,
+              background:
+                'linear-gradient(180deg, rgba(93, 24, 40, 0.35) 0%, rgba(36, 28, 31, 0.92) 60%, rgba(26, 22, 24, 0.96) 100%)',
+              boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.07)',
+            }}
+          >
+            <span
+              className="absolute inset-x-2 top-0 h-px"
+              style={{ background: 'linear-gradient(90deg, transparent, rgba(201, 111, 132, 0.85), transparent)' }}
+            />
+            <span className="whitespace-nowrap text-base font-light tracking-[0.14em] tabular-nums text-hero-text">
+              {ratioLabel ?? `${clampedAr.toFixed(2)}:1`}
+            </span>
+          </div>
         </div>
         {/* 제목과 연도·러닝타임을 한 문장으로 붙이지 않고 별도 줄로 나눈다 — 편집된 영화
             정보처럼 보이게 하는 최소 구조(브리프 §영화 정보 구조). */}

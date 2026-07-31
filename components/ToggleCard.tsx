@@ -1,32 +1,46 @@
-import type { InputHTMLAttributes } from 'react';
+import type { InputHTMLAttributes, ReactNode } from 'react';
 
 /**
  * 선택형 비주얼 카드 — 설문지형 체크박스 나열 대신, 옵션 하나가 카드 하나로 보이는 토글.
  * Checkbox.tsx와 같은 원칙: 실제 <input type="checkbox">가 카드 전체를 덮는 투명 레이어라
  * 클릭·터치·키보드가 항상 네이티브 입력에 그대로 닿고, 폼 데이터 동작(미체크 시 필드 없음)도
- * 기존 체크박스와 동일하다. 선택 상태는 has-[:checked]로 카드 테두리·배경이 바뀌고,
- * 우상단 체크 배지가 나타난다.
+ * 기존 체크박스와 동일하다. 왼쪽 visual 슬롯에 옵션의 의미를 보여주는 미니 일러스트(화면비
+ * 프레임·좌석 그리드 등 CineFit 시그니처 그래픽)를 받는다. 미선택 상태는 장식 없는 차콜
+ * 서피스, 선택하면 옥스블러드 그라데이션 + 얇은 와인 인셋 라인 + 와인 체크 배지가 스케일
+ * 인으로 나타나고 제목이 로즈로 물든다(중첩 요소 상태 반영은 group-has 사용).
  */
 export function ToggleCard({
   title,
   description,
+  visual,
   ...inputProps
-}: { title: string; description: string } & InputHTMLAttributes<HTMLInputElement>) {
+}: { title: string; description: string; visual?: ReactNode } & InputHTMLAttributes<HTMLInputElement>) {
   return (
-    <label className="relative flex min-h-[84px] cursor-pointer flex-col justify-center rounded-card-lg bg-surface-raised p-4 pr-9 transition-all hover:bg-surface-strong has-[:checked]:bg-surface-strong has-[:checked]:shadow-[inset_0_0_0_1px_rgba(188,96,118,0.45),0_2px_10px_rgba(0,0,0,0.35)] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary has-[:focus-visible]:ring-offset-2">
+    <label className="group relative flex min-h-[88px] cursor-pointer items-center overflow-hidden rounded-card-lg bg-surface-raised p-4 pr-10 transition-all duration-200 hover:-translate-y-0.5 hover:bg-surface-strong has-[:checked]:bg-[linear-gradient(135deg,rgba(93,24,40,0.4),rgba(36,28,31,0.95)_65%)] has-[:checked]:shadow-[inset_0_0_0_1px_rgba(188,96,118,0.5)] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary has-[:focus-visible]:ring-offset-2">
       <input type="checkbox" {...inputProps} className="peer absolute inset-0 h-full w-full cursor-pointer opacity-0" />
-      {/* peer-checked는 형제 요소에만 적용되므로 내부 svg 대신 배지 자신의 text 색으로
-          체크 표시를 제어한다(svg는 currentColor 상속). */}
+      {/* 체크 배지 — 미선택 시 완전히 숨겨져 있다가 선택 시 스케일 인. */}
       <span
         aria-hidden
-        className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full border border-border-strong bg-surface text-transparent opacity-60 transition-all peer-checked:border-primary-strong peer-checked:bg-primary-strong peer-checked:text-white peer-checked:opacity-100"
+        className="absolute right-3.5 top-1/2 flex h-[22px] w-[22px] -translate-y-1/2 scale-75 items-center justify-center rounded-full bg-primary-strong text-white opacity-0 transition-all duration-200 group-has-[:checked]:scale-100 group-has-[:checked]:opacity-100"
       >
         <svg viewBox="0 0 16 16" fill="none" className="h-3 w-3">
           <path d="M3 8.2l3.2 3.2L13 4.6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </span>
-      <span className="text-[15px] font-semibold leading-snug text-text">{title}</span>
-      <span className="mt-1 text-[13px] leading-snug text-text-sub">{description}</span>
+      {visual ? (
+        <span
+          aria-hidden
+          className="mr-3.5 flex h-12 w-14 shrink-0 items-center justify-center opacity-75 transition-opacity group-has-[:checked]:opacity-100"
+        >
+          {visual}
+        </span>
+      ) : null}
+      <span className="flex min-w-0 flex-col">
+        <span className="text-[15px] font-semibold leading-snug text-text transition-colors group-has-[:checked]:text-primary">
+          {title}
+        </span>
+        <span className="mt-1 text-[13px] leading-snug text-text-sub">{description}</span>
+      </span>
     </label>
   );
 }

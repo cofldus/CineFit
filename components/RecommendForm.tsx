@@ -26,6 +26,54 @@ function SelectChevron() {
 
 const STEP_TITLES = ['언제, 어디서 볼까요?', '무엇을 가장 중요하게 보나요?', '피하고 싶은 조건이 있나요?'];
 
+// 토글 카드용 미니 스크린 일러스트 — 포맷마다 실제 화면비 모양(IMAX는 1.43:1로 세로가 큼,
+// 돌비는 음파 링, 일반관은 1.85:1)을 그대로 보여준다. CineFit 시그니처 그래픽 언어를
+// 폼 컨트롤 안까지 일관되게 유지하는 의도.
+function ScreenGlyph({ ratio, wave }: { ratio: number; wave?: boolean }) {
+  return (
+    <span className="relative flex h-full w-full items-center justify-center">
+      {wave ? (
+        <>
+          <span className="absolute h-9 w-12 rounded-[7px] border border-[#bc6076]/25" />
+          <span className="absolute h-11 w-14 rounded-[9px] border border-[#bc6076]/15" />
+        </>
+      ) : null}
+      <span
+        className="relative overflow-hidden rounded-[4px] border border-white/15"
+        style={{
+          width: ratio < 1.6 ? '30px' : '40px',
+          aspectRatio: `${ratio} / 1`,
+          background: 'linear-gradient(180deg, rgba(93, 24, 40, 0.5), rgba(36, 28, 31, 0.95))',
+        }}
+      >
+        <span
+          className="absolute inset-x-0.5 top-0 h-px"
+          style={{ background: 'linear-gradient(90deg, transparent, rgba(201, 111, 132, 0.9), transparent)' }}
+        />
+      </span>
+    </span>
+  );
+}
+
+// 토글 카드용 미니 좌석 그리드 — 옵션이 우선하는 구역만 로즈로 점등된 4×7 좌석 점.
+// 상영관 상세의 좌석 맵과 같은 시각 언어의 축소판이며, 정확한 좌석이 아니라 의미 안내용.
+function SeatGlyph({ lit }: { lit: (r: number, c: number) => boolean }) {
+  return (
+    <span className="flex flex-col gap-[3px]">
+      {Array.from({ length: 4 }, (_, r) => (
+        <span key={r} className="flex justify-center gap-[3px]">
+          {Array.from({ length: 7 }, (_, c) => (
+            <span
+              key={c}
+              className={`h-[5px] w-[5px] rounded-[1.5px] ${lit(r, c) ? 'bg-primary' : 'bg-white/15'}`}
+            />
+          ))}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 // 기본값이 채워져 있어 그대로 제출해도 추천을 받을 수 있다 (요구사항: 전부 입력 불필요).
 // 긴 한 페이지 폼 대신 3단계 guided flow — 단계는 화면에 하나씩만 보이지만 세 단계 입력이
 // 전부 같은 <form> 안에 마운트돼 있어(비활성 단계는 hidden) 최종 제출 페이로드는 이전과
@@ -152,9 +200,27 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
         <fieldset className="m-0 border-0 p-0">
           <legend className="mb-2 block text-sm font-semibold text-text">허용할 상영 방식</legend>
           <div className="grid gap-2.5 sm:grid-cols-3">
-            <ToggleCard name="allowImax" defaultChecked title="IMAX" description="더 큰 화면과 확장 화면비" />
-            <ToggleCard name="allowDolby" defaultChecked title="Dolby Cinema" description="돌비 비전·애트모스 사운드" />
-            <ToggleCard name="allowStandard" defaultChecked title="일반관" description="대형관 포함 일반 상영관" />
+            <ToggleCard
+              name="allowImax"
+              defaultChecked
+              title="IMAX"
+              description="더 큰 화면과 확장 화면비"
+              visual={<ScreenGlyph ratio={1.43} />}
+            />
+            <ToggleCard
+              name="allowDolby"
+              defaultChecked
+              title="Dolby Cinema"
+              description="돌비 비전·애트모스 사운드"
+              visual={<ScreenGlyph ratio={2.2} wave />}
+            />
+            <ToggleCard
+              name="allowStandard"
+              defaultChecked
+              title="일반관"
+              description="대형관 포함 일반 상영관"
+              visual={<ScreenGlyph ratio={1.85} />}
+            />
           </div>
         </fieldset>
       </StepSection>
@@ -178,9 +244,20 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
               defaultChecked={prefill?.subtitleReadability ?? false}
               title="자막 가독 우선"
               description="자막이 잘 보이는 구역을 먼저 추천"
+              visual={<SeatGlyph lit={(r, c) => r === 1 && c >= 2 && c <= 4} />}
             />
-            <ToggleCard name="neckComfort" title="목 편한 좌석 우선" description="고개를 덜 들어도 되는 구역 우선" />
-            <ToggleCard name="wheelchair" title="휠체어 접근 필수" description="확인 안 된 상영관은 제외돼요" />
+            <ToggleCard
+              name="neckComfort"
+              title="목 편한 좌석 우선"
+              description="고개를 덜 들어도 되는 구역 우선"
+              visual={<SeatGlyph lit={(r, c) => r === 3 && c >= 2 && c <= 4} />}
+            />
+            <ToggleCard
+              name="wheelchair"
+              title="휠체어 접근 필수"
+              description="확인 안 된 상영관은 제외돼요"
+              visual={<SeatGlyph lit={(r, c) => r === 3 && c <= 1} />}
+            />
           </div>
         </fieldset>
       </StepSection>

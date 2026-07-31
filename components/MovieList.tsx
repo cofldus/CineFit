@@ -101,11 +101,12 @@ export function MovieList({ movies }: { movies: MovieWithSpecs[] }) {
                   href={`/recommend/${movie.id}`}
                   className="group flex items-center gap-4 rounded-card-lg bg-surface-raised p-4 transition-all duration-200 hover:-translate-y-0.5 hover:bg-surface-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 >
-                  {/* 미니 스크린 썸네일 — 영화의 실제 화면비 모양 그대로, 와인 간접광. */}
-                  <div className="w-24 shrink-0 sm:w-28">
+                  {/* 미니 스크린 썸네일 — 높이는 모든 카드에서 동일하게 고정하고(행 정렬 유지),
+                      영화의 실제 화면비는 폭 차이로만 나타난다(실제 극장 스크린과 같은 원리). */}
+                  <div className="flex h-[46px] w-28 shrink-0 items-center justify-center">
                     <div
                       aria-hidden
-                      className="relative flex items-center justify-center overflow-hidden rounded-[8px] border border-white/10"
+                      className="relative flex h-full items-center justify-center overflow-hidden rounded-[7px] border border-white/10"
                       style={{
                         aspectRatio: `${clampedAr} / 1`,
                         background:
@@ -117,7 +118,7 @@ export function MovieList({ movies }: { movies: MovieWithSpecs[] }) {
                         className="absolute inset-x-2 top-0 h-px"
                         style={{ background: 'linear-gradient(90deg, transparent, rgba(201, 111, 132, 0.8), transparent)' }}
                       />
-                      <span className="tabular-nums text-[11px] font-semibold tracking-[0.03em] text-hero-text">
+                      <span className="whitespace-nowrap text-[10.5px] font-normal tracking-[0.1em] tabular-nums text-hero-text">
                         {nativeAr ? `${nativeAr.toFixed(2)}:1` : `${clampedAr.toFixed(2)}:1`}
                       </span>
                     </div>

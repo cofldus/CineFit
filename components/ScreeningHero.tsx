@@ -145,8 +145,9 @@ export function ScreeningHero() {
           </div>
 
           <div key={frame} className="stage-enter relative mt-8 flex flex-col items-center">
-            {/* 스크린 — 실제 화면비 비율의 사각형. 네온 링 대신 위쪽 얇은 와인 라인과
-                아래로 퍼지는 약한 간접광만. */}
+            {/* 스크린 무대 — 포맷이 바뀌어도 무대 높이는 고정(min-h)해 레이아웃이 출렁이지
+                않게 하고, 그 안에서 스크린이 세로 중앙 정렬된 채 폭·비율만 변한다. */}
+            <div className="flex min-h-[190px] w-full items-center justify-center sm:min-h-[225px]">
             <div
               className="relative flex w-full max-w-[560px] flex-col items-center transition-[width] duration-[550ms] ease-out"
               style={{ width: `${screenWidthPct}%` }}
@@ -182,7 +183,7 @@ export function ScreeningHero() {
                   className="absolute inset-x-4 top-0 h-px"
                   style={{ background: 'linear-gradient(90deg, transparent, rgba(201, 111, 132, 0.85), transparent)' }}
                 />
-                <span className="tabular-nums text-[22px] font-semibold tracking-[0.04em] text-hero-text sm:text-[26px]">
+                <span className="whitespace-nowrap text-[21px] font-light tracking-[0.16em] tabular-nums text-hero-text sm:text-[25px]">
                   {current.ratio.toFixed(2)}:1
                 </span>
                 {isImax ? (
@@ -197,6 +198,7 @@ export function ScreeningHero() {
                 className="pointer-events-none absolute inset-x-[-8%] top-full h-20 opacity-50"
                 style={{ background: 'radial-gradient(ellipse 60% 90% at 50% 0%, rgba(93, 24, 40, 0.5), transparent 70%)' }}
               />
+            </div>
             </div>
 
             {/* 객석 — 실루엣 수준의 좌석 점. 추천 구역의 좁은 핵심 블록만 은은하게 점등. */}

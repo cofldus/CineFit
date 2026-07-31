@@ -336,7 +336,7 @@ export function RecommendCard({
                     className="absolute inset-x-3 top-0 h-px"
                     style={{ background: 'linear-gradient(90deg, transparent, rgba(201, 111, 132, 0.85), transparent)' }}
                   />
-                  <span className="tabular-nums text-[16px] font-semibold tracking-[0.04em] text-hero-text">
+                  <span className="whitespace-nowrap text-[16px] font-light tracking-[0.14em] tabular-nums text-hero-text">
                     {nativeAr.toFixed(2)}:1
                   </span>
                 </div>

@@ -9,14 +9,18 @@ import { SegmentedControl } from './SegmentedControl';
 import { StepSection } from './StepSection';
 import { ToggleCard } from './ToggleCard';
 
-const inputCls =
-  'min-h-[52px] w-full rounded-card border border-border bg-bg px-3.5 text-base text-text outline-none transition-shadow focus-visible:border-primary-strong focus-visible:ring-[3px] focus-visible:ring-primary-soft';
-const selectCls = `${inputCls} appearance-none pr-10`;
-const labelCls = 'block text-[15px] font-semibold text-text';
+// 채움형 필드 — 검은 배경 위 테두리 박스 대신, 라벨이 안에 들어간 raised 서피스.
+// 포커스 시 얇은 와인 인셋 라인(선택 컨트롤과 같은 언어). [color-scheme:dark]로 네이티브
+// 달력·스피너 아이콘도 다크로 맞춘다.
+const fieldCls =
+  'group flex min-h-[64px] w-full flex-col justify-center rounded-card bg-surface-raised px-4 py-2.5 transition-shadow focus-within:shadow-[inset_0_0_0_1px_rgba(188,96,118,0.5)]';
+const fieldLabelCls = 'text-[12px] font-semibold text-text-sub';
+const fieldInputCls =
+  'm-0 w-full border-0 bg-transparent p-0 text-[15.5px] font-medium text-text outline-none [color-scheme:dark] placeholder:text-text-tertiary';
 
 function SelectChevron() {
   return (
-    <IconChevronRight aria-hidden className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 rotate-90 text-text-tertiary" />
+    <IconChevronRight aria-hidden className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 rotate-90 text-text-tertiary" />
   );
 }
 
@@ -92,14 +96,14 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
 
       <div className={step === 0 ? 'stage-enter' : 'hidden'}>
       <StepSection step={1} title="언제, 어디서 볼까요?" first>
-        <label className="block">
-          <span className={labelCls}>관람 날짜</span>
-          <input className={`${inputCls} mt-1.5`} type="date" name="date" defaultValue={defaultDate} required />
-        </label>
-        <label className="block">
-          <span className={labelCls}>출발 위치</span>
-          <div className="relative mt-1.5">
-            <select className={selectCls} name="originId" defaultValue="cityhall">
+        <div className="grid gap-2.5 sm:grid-cols-2">
+          <label className={fieldCls}>
+            <span className={fieldLabelCls}>관람 날짜</span>
+            <input className={`${fieldInputCls} mt-1`} type="date" name="date" defaultValue={defaultDate} required />
+          </label>
+          <label className={`${fieldCls} relative`}>
+            <span className={fieldLabelCls}>출발 위치</span>
+            <select className={`${fieldInputCls} mt-1 appearance-none pr-8`} name="originId" defaultValue="cityhall">
               {ORIGIN_PRESETS.map((o) => (
                 <option key={o.id} value={o.id}>
                   {o.label}
@@ -107,32 +111,32 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
               ))}
             </select>
             <SelectChevron />
-          </div>
-        </label>
-        <label className="block">
-          <span className={labelCls}>최대 이동 시간 (분)</span>
-          <input
-            className={`${inputCls} mt-1.5`}
-            type="number"
-            name="maxTravelMinutes"
-            defaultValue={60}
-            min={5}
-            max={240}
-            step={5}
-          />
-        </label>
-        <label className="block">
-          <span className={labelCls}>최대 가격 (원)</span>
-          <input
-            className={`${inputCls} mt-1.5`}
-            type="number"
-            name="maxPrice"
-            defaultValue={40000}
-            min={1000}
-            max={200000}
-            step={1000}
-          />
-        </label>
+          </label>
+          <label className={fieldCls}>
+            <span className={fieldLabelCls}>최대 이동 시간 (분)</span>
+            <input
+              className={`${fieldInputCls} mt-1`}
+              type="number"
+              name="maxTravelMinutes"
+              defaultValue={60}
+              min={5}
+              max={240}
+              step={5}
+            />
+          </label>
+          <label className={fieldCls}>
+            <span className={fieldLabelCls}>최대 가격 (원)</span>
+            <input
+              className={`${fieldInputCls} mt-1`}
+              type="number"
+              name="maxPrice"
+              defaultValue={40000}
+              min={1000}
+              max={200000}
+              step={1000}
+            />
+          </label>
+        </div>
       </StepSection>
       </div>
 

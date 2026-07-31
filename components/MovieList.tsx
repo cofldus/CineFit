@@ -105,14 +105,19 @@ export function MovieList({ movies }: { movies: MovieWithSpecs[] }) {
                   <div className="w-24 shrink-0 sm:w-28">
                     <div
                       aria-hidden
-                      className="flex items-center justify-center rounded-[8px]"
+                      className="relative flex items-center justify-center overflow-hidden rounded-[8px] border border-white/10"
                       style={{
                         aspectRatio: `${clampedAr} / 1`,
-                        background: 'radial-gradient(ellipse 90% 100% at 50% 110%, rgba(93, 24, 40, 0.65), #241c1f 75%)',
-                        borderTop: '1.5px solid #872b42',
+                        background:
+                          'linear-gradient(180deg, rgba(93, 24, 40, 0.35) 0%, rgba(36, 28, 31, 0.92) 60%, rgba(26, 22, 24, 0.96) 100%)',
+                        boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.07)',
                       }}
                     >
-                      <span className="font-mono text-[11px] font-semibold tracking-[0.06em] text-hero-text">
+                      <span
+                        className="absolute inset-x-2 top-0 h-px"
+                        style={{ background: 'linear-gradient(90deg, transparent, rgba(201, 111, 132, 0.8), transparent)' }}
+                      />
+                      <span className="tabular-nums text-[11px] font-semibold tracking-[0.03em] text-hero-text">
                         {nativeAr ? `${nativeAr.toFixed(2)}:1` : `${clampedAr.toFixed(2)}:1`}
                       </span>
                     </div>

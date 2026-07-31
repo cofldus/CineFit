@@ -20,10 +20,16 @@ function SelectChevron() {
   );
 }
 
-// 기본값이 채워져 있어 그대로 제출해도 추천을 받을 수 있다 (요구사항: 전부 입력 불필요)
+const STEP_TITLES = ['언제, 어디서 볼까요?', '무엇을 가장 중요하게 보나요?', '피하고 싶은 조건이 있나요?'];
+
+// 기본값이 채워져 있어 그대로 제출해도 추천을 받을 수 있다 (요구사항: 전부 입력 불필요).
+// 긴 한 페이지 폼 대신 3단계 guided flow — 단계는 화면에 하나씩만 보이지만 세 단계 입력이
+// 전부 같은 <form> 안에 마운트돼 있어(비활성 단계는 hidden) 최종 제출 페이로드는 이전과
+// 완전히 동일하다. Enter 제출도 마지막 단계 전에는 다음 단계로만 이동한다.
 export function RecommendForm({ movieId, defaultDate }: { movieId: number; defaultDate: string }) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
+  const [step, setStep] = useState(0);
   // 온보딩 답변은 localStorage에만 있어 서버 렌더링 시점엔 알 수 없다 — 마운트 후 읽어와서
   // 적용한다. 이미 그려진 defaultValue/defaultChecked는 React가 재적용하지 않으므로, prefill이
   // 도착하면 key를 바꿔 해당 입력만 다시 마운트한다(초기 렌더와 하이드레이션은 항상 동일하게
@@ -36,6 +42,11 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    // 마지막 단계 전의 Enter/제출은 다음 단계로만 이동
+    if (step < 2) {
+      setStep((s) => s + 1);
+      return;
+    }
     setSubmitting(true);
     const fd = new FormData(e.currentTarget);
     const qs = new URLSearchParams({
@@ -59,6 +70,27 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
 
   return (
     <form onSubmit={onSubmit} aria-label="추천 조건 입력" className="flex flex-col pb-4">
+      {/* 진행 표시 — 현재 단계는 와인 채움, 지나온 단계는 로즈 텍스트. */}
+      <ol className="m-0 mb-6 flex list-none items-center gap-2 p-0" aria-label="입력 단계">
+        {STEP_TITLES.map((t, i) => (
+          <li key={t} className="flex min-w-0 items-center gap-2">
+            <span
+              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                i === step ? 'bg-primary-strong text-white' : i < step ? 'bg-primary-soft text-primary' : 'bg-surface-strong text-text-tertiary'
+              }`}
+              aria-current={i === step ? 'step' : undefined}
+            >
+              {i + 1}
+            </span>
+            <span className={`hidden truncate text-[13px] sm:block ${i === step ? 'font-semibold text-text' : 'text-text-tertiary'}`}>
+              {t}
+            </span>
+            {i < STEP_TITLES.length - 1 ? <span aria-hidden className="h-px w-4 shrink-0 bg-border sm:w-6" /> : null}
+          </li>
+        ))}
+      </ol>
+
+      <div className={step === 0 ? 'stage-enter' : 'hidden'}>
       <StepSection step={1} title="언제, 어디서 볼까요?" first>
         <label className="block">
           <span className={labelCls}>관람 날짜</span>
@@ -102,8 +134,10 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
           />
         </label>
       </StepSection>
+      </div>
 
-      <StepSection step={2} title="무엇을 가장 중요하게 보나요?">
+      <div className={step === 1 ? 'stage-enter' : 'hidden'}>
+      <StepSection step={2} title="무엇을 가장 중요하게 보나요?" first>
         <SegmentedControl
           key={prefillKey}
           name="priority"
@@ -120,8 +154,10 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
           </div>
         </fieldset>
       </StepSection>
+      </div>
 
-      <StepSection step={3} title="피하고 싶은 조건이 있나요?">
+      <div className={step === 2 ? 'stage-enter' : 'hidden'}>
+      <StepSection step={3} title="피하고 싶은 조건이 있나요?" first>
         <SegmentedControl
           key={prefillKey}
           name="motionSickness"
@@ -144,19 +180,39 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
           </div>
         </fieldset>
       </StepSection>
+      </div>
 
       <div
         className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/95 px-4 py-3 backdrop-blur-md"
         style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }}
       >
-        <div className="mx-auto max-w-content">
-          <button
-            type="submit"
-            className="flex min-h-12 w-full items-center justify-center rounded-card bg-primary-strong text-base font-semibold text-white transition-colors hover:bg-primary-strong-hover disabled:opacity-60"
-            disabled={submitting}
-          >
-            {submitting ? '추천 계산 중…' : '추천 받기'}
-          </button>
+        <div className="mx-auto flex max-w-content items-center gap-3">
+          {step > 0 ? (
+            <button
+              type="button"
+              onClick={() => setStep((s) => s - 1)}
+              className="min-h-12 shrink-0 rounded-card border border-border px-5 text-[15px] font-medium text-text-sub transition-colors hover:text-text"
+            >
+              이전
+            </button>
+          ) : null}
+          {step < 2 ? (
+            <button
+              type="button"
+              onClick={() => setStep((s) => s + 1)}
+              className="flex min-h-12 flex-1 items-center justify-center rounded-card bg-primary-strong text-base font-semibold text-white transition-colors hover:bg-primary-strong-hover"
+            >
+              다음
+            </button>
+          ) : (
+            <button
+              type="submit"
+              className="flex min-h-12 flex-1 items-center justify-center rounded-card bg-primary-strong text-base font-semibold text-white transition-colors hover:bg-primary-strong-hover disabled:opacity-60"
+              disabled={submitting}
+            >
+              {submitting ? '추천 계산 중…' : '추천 받기'}
+            </button>
+          )}
           <span className="sr-only" role="status" aria-live="polite">
             {submitting ? '추천을 계산하고 있습니다. 잠시만 기다려 주세요.' : ''}
           </span>

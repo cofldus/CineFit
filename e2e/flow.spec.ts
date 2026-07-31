@@ -7,10 +7,13 @@ test('홈 → 영화 선택 → 조건 입력 → 추천 3종 → 상세 확인'
   await page.getByRole('link', { name: '영화 선택하기' }).first().click();
   await expect(page).toHaveURL(/\/movies/);
 
-  await page.getByRole('link', { name: '이 영화로 추천받기' }).first().click();
+  // 영화 목록은 컴팩트 리스트 카드 — 카드 전체가 /recommend/ 링크다.
+  await page.locator('a[href^="/recommend/"]').first().click();
   await expect(page).toHaveURL(/\/recommend\/\d+/);
 
-  // 기본값 그대로 제출해도 추천을 받을 수 있어야 한다
+  // 기본값 그대로 제출해도 추천을 받을 수 있어야 한다 — 3단계 flow라 다음 → 다음 → 제출.
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('button', { name: '추천 받기' }).click();
   await expect(page).toHaveURL(/\/results\?/);
 

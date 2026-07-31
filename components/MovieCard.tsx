@@ -56,7 +56,7 @@ export function MovieCard({ movie, variant = 'detailed' }: { movie: MovieWithSpe
             background: 'radial-gradient(ellipse 85% 95% at 50% 100%, var(--hero-soft), var(--hero) 78%)',
           }}
         >
-          <span className="font-mono text-lg font-bold tracking-[0.08em] text-hero-text sm:text-xl">
+          <span className="tabular-nums text-lg font-semibold tracking-[0.04em] text-hero-text sm:text-xl">
             {ratioLabel ?? `${clampedAr.toFixed(2)}:1`}
           </span>
           {formats.length > 0 ? (
@@ -114,7 +114,7 @@ export function MovieCard({ movie, variant = 'detailed' }: { movie: MovieWithSpe
           background: 'radial-gradient(ellipse 85% 95% at 50% 100%, var(--hero-soft), var(--hero) 78%)',
         }}
       >
-        <span className="font-mono text-2xl font-bold tracking-[0.08em] text-hero-text sm:text-[28px]">
+        <span className="tabular-nums text-2xl font-semibold tracking-[0.04em] text-hero-text sm:text-[28px]">
           {ratioLabel ?? `${clampedAr.toFixed(2)}:1`}
         </span>
         {formats.length > 0 ? (

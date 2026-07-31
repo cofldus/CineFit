@@ -26,8 +26,11 @@ test('관리자 로그인 → 실제형 회차 등록 → 사용자 추천에 �
 
   // 4~6. 사용자 흐름: 영화 선택 → 등록한 날짜로 조건 입력 → 추천 결과에 포함 확인
   await page.goto('/movies');
-  await page.getByRole('link', { name: '이 영화로 추천받기' }).first().click();
+  await page.locator('a[href^="/recommend/"]').first().click();
   await page.getByLabel('관람 날짜').fill('2026-08-02');
+  // 3단계 flow — 날짜는 1단계에 있으므로 채운 뒤 다음 → 다음 → 제출.
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('button', { name: '추천 받기' }).click();
   await expect(page).toHaveURL(/\/results\?/);
 

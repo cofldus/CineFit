@@ -74,10 +74,10 @@ function AxisBar({ label, value, detail }: { label: string; value: number; detai
         <span className="text-[12.5px] font-semibold text-hero-text-sub">{label}</span>
         <span className="text-[13px] tabular-nums text-hero-text">
           {detail ? (
-            <strong className="font-mono font-semibold">{detail}</strong>
+            <strong className="tabular-nums font-semibold">{detail}</strong>
           ) : (
             <>
-              <strong className="font-mono font-semibold">{width}%</strong>
+              <strong className="tabular-nums font-semibold">{width}%</strong>
               <span className="ml-1.5 text-[12px] text-hero-text-sub">{axisPhrase(value)}</span>
             </>
           )}
@@ -324,10 +324,19 @@ export function RecommendCard({
               <>
                 <div
                   aria-hidden
-                  className="flex w-full items-center justify-center rounded-t-[10px] rounded-b-[3px] border border-hero-border border-t-2 border-t-accent bg-gradient-to-b from-hero-soft to-transparent"
-                  style={{ aspectRatio: `${nativeAr} / 1` }}
+                  className="relative flex w-full items-center justify-center overflow-hidden rounded-[8px] border border-white/10"
+                  style={{
+                    aspectRatio: `${nativeAr} / 1`,
+                    background:
+                      'linear-gradient(180deg, rgba(93, 24, 40, 0.32) 0%, rgba(36, 28, 31, 0.92) 60%, rgba(26, 22, 24, 0.96) 100%)',
+                    boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.07)',
+                  }}
                 >
-                  <span className="font-mono text-[16px] font-bold tracking-[0.08em] text-hero-text">
+                  <span
+                    className="absolute inset-x-3 top-0 h-px"
+                    style={{ background: 'linear-gradient(90deg, transparent, rgba(201, 111, 132, 0.85), transparent)' }}
+                  />
+                  <span className="tabular-nums text-[16px] font-semibold tracking-[0.04em] text-hero-text">
                     {nativeAr.toFixed(2)}:1
                   </span>
                 </div>

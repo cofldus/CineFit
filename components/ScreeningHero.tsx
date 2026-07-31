@@ -166,14 +166,23 @@ export function ScreeningHero() {
                 </>
               ) : null}
               <div
-                className="relative flex w-full items-center justify-center rounded-[10px] bg-gradient-to-b from-hero-soft to-transparent"
+                className="relative flex w-full items-center justify-center overflow-hidden rounded-[10px] border border-white/10"
                 style={{
                   aspectRatio: `${current.ratio} / 1`,
-                  borderTop: '2px solid #872b42',
-                  boxShadow: isImax ? '0 0 0 1px rgba(201, 111, 132, 0.4), 0 18px 60px -18px rgba(135, 43, 66, 0.6)' : undefined,
+                  background:
+                    'linear-gradient(180deg, rgba(93, 24, 40, 0.32) 0%, rgba(36, 28, 31, 0.92) 55%, rgba(26, 22, 24, 0.96) 100%)',
+                  boxShadow: isImax
+                    ? 'inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 0 1px rgba(201, 111, 132, 0.35), 0 22px 70px -22px rgba(135, 43, 66, 0.6)'
+                    : 'inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 22px 70px -22px rgba(135, 43, 66, 0.45)',
                 }}
               >
-                <span className="font-mono text-[22px] font-semibold tracking-[0.08em] text-hero-text sm:text-[26px]">
+                {/* 상단 하이라이트 — 중앙이 밝고 가장자리로 사라지는 와인 라인(단선 테두리 대체). */}
+                <span
+                  aria-hidden
+                  className="absolute inset-x-4 top-0 h-px"
+                  style={{ background: 'linear-gradient(90deg, transparent, rgba(201, 111, 132, 0.85), transparent)' }}
+                />
+                <span className="tabular-nums text-[22px] font-semibold tracking-[0.04em] text-hero-text sm:text-[26px]">
                   {current.ratio.toFixed(2)}:1
                 </span>
                 {isImax ? (

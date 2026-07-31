@@ -1,62 +1,64 @@
 @import 'tailwindcss';
 
-/* CineFit 디자인 토큰 (3) — "Projector Editorial" 전면 재설계(2026-07-31).
-   이전 다크 테마 전체를 폐기했다(색만 바꾸는 보정이 아니라 아트디렉션 자체를 교체) —
-   완전한 암전이 아니라 "어두운 극장에서 프로젝터가 켜지는 순간"을 표현한다. 페이지는
-   따뜻한 아이보리(라이트) 기본이고, 대표 추천 카드 단 하나만 어두운 시네마 표면(hero)을
-   쓴다. 코랄 레드는 CTA·현재 선택·대표 추천에만 쓰고, 나머지 링크·배지는 잉크 톤 타이포
-   그래피와 옅은 구분선으로만 위계를 만든다(색 경쟁 자체를 없앤다).
-   대비 검증(직접 계산, 배경 위 직접 텍스트 기준 4.5:1 이상 확보):
-   - --primary-strong: 브리프 원안 #E94263은 흰 텍스트 위 3.87:1로 AA 미달. 1차로 낮춘
-     #D93657도 손계산상 4.55:1이었지만 axe 실측(Docker/Chromium 렌더링)에서 4.41로
-     나와 여유가 없었다 — #C22E4C로 더 낮춰 5.54:1까지 안전 여유를 확보했다. 원래의
-     #E94263은 텍스트를 얹지 않는 은은한 강조(테두리·글로우·soft 배경)에만 쓴다.
-   - --text-tertiary: 브리프 원안 #7C8491은 아이보리 배경 위 3.37:1로 미달 → #5E6472로
-     낮춰 5.31:1 확보.
-   - --trust-high(success): 브리프 원안 #2F856F는 3.99:1로 미달 → #256B5A로 낮춰 5.64:1. */
+/* CineFit 디자인 토큰 (4) — "Cinema Selection Desk"(2026-08-01).
+   직전 "Projector Editorial"은 다크→라이트로 반전만 했을 뿐 디자인 언어가 없다는 피드백
+   (공공기관 안내 페이지·금융 랜딩 페이지처럼 보임) — 문제는 아이보리 자체가 아니라 카드가
+   배경과 거의 같은 명도라 화면 전체가 뿌옇게 보인 것과, 링크에 밑줄이 기본으로 걸려 있어
+   로고·메뉴·카드 전체가 브라우저 기본 스타일처럼 보인 것 두 가지였다. 이번에는:
+   1) surface를 캔버스보다 확실히 밝은 순백에 가깝게 잡아 카드가 배경에서 분리되게 했다.
+   2) 딥 네이비(night)를 대표 카드뿐 아니라 히어로 스테이지에도 써서 "중간 명도"를 만든다.
+   3) 링크 기본 스타일은 별도 규칙으로 완전히 제거하고(color:inherit, no underline),
+      각 컴포넌트가 hover/focus에서만 반응하게 한다.
+   대비 검증(직접 계산 + axe 실측 기준 4.5:1 이상, 지난 라운드에서 손계산과 실측이
+   0.1~0.3 정도 벌어진 전례가 있어 여유를 더 뒀다):
+   - coral 채움색(흰 텍스트용): 브리프의 #F03E61은 3.77:1, hover색 #DA304F도 4.65:1로
+     여유가 부족 → #C22E4C(5.54:1, 지난 라운드에 axe로 검증된 값 재사용)를 기본 채움에 쓰고
+     원래의 #F03E61은 텍스트를 얹지 않는 강조(얇은 선·soft 배경)에만 쓴다.
+   - ink-muted: 브리프의 #7A8492는 3.36:1 미달 → #63697A로 낮춰 4.86:1.
+   - blue(텍스트로 쓰는 경우): 브리프의 #5577EA는 3.57:1 미달 → #3F5FD1로 낮춰 4.94:1. */
 :root {
-  --bg: #f5f2ec;
-  --bg-deep: #eeeae2;
-  --surface: #ffffff;
-  --surface-raised: #f8f6f2;
-  --surface-strong: #efe9dd;
-  --border: rgba(21, 25, 35, 0.1);
-  --border-strong: rgba(21, 25, 35, 0.18);
-  --text: #151923;
-  --text-sub: #535b69;
-  --text-tertiary: #5e6472;
-  /* 일반 링크·보조 요소 전용 — 채도 있는 색이 아니라 중성 잉크 톤. 색이 아니라 밑줄(각
-     컴포넌트에서 처리)로 링크임을 표시한다("모든 링크에 primary red" 금지 요구사항). */
-  --primary: #e94263;
+  --bg: #f4f1eb;
+  --bg-deep: #ece8e0;
+  --surface: #fbfaf7;
+  --surface-raised: #ffffff;
+  --surface-strong: #ece8e0;
+  --border: rgba(18, 23, 34, 0.12);
+  --border-strong: rgba(18, 23, 34, 0.22);
+  --text: #121722;
+  --text-sub: #4e5868;
+  --text-tertiary: #63697a;
+  /* 일반 링크·보조 요소 전용 — 채도 있는 색이 아니라 중성 잉크 톤. 링크는 색이 아니라
+     hover/focus 시 밑줄로만 표시한다(기본 상태는 본문과 같은 색+밑줄 없음). */
+  --primary: #f03e61;
   /* 페이지당 하나뿐인 주 CTA·현재 선택·대표 추천 전용 — 흰 텍스트를 얹는 채움색이라
-     브리프 원안보다 살짝 낮췄다(위 대비 검증 참고). */
+     브리프 원안보다 낮췄다(위 대비 검증 참고). */
   --primary-strong: #c22e4c;
   --primary-strong-hover: #ad2841;
-  --primary-soft: #fbe8e6;
-  --accent: #535b69;
+  --primary-soft: #fbe3e7;
+  --accent: #3f5fd1;
+  --accent-soft: #e8edff;
   --trust-high: #256b5a;
   --trust-mid: #765a11;
   --trust-low: #b33f1f;
   --warning-bg: #fff6dc;
   --warning-text: #765a11;
-  /* 대표 추천 카드 전용 — 페이지에서 유일하게 어두운 표면("프로젝터가 켜진 어둠"). */
-  --hero: #171c26;
-  --hero-soft: #222936;
-  --hero-text: #f5f2ec;
-  --hero-text-sub: #b8bfcc;
-  --hero-border: rgba(245, 242, 236, 0.12);
+  /* 대표 추천 카드 + 홈 히어로 스테이지 전용 — 페이지에서 유일하게 어두운 표면. */
+  --hero: #171d2a;
+  --hero-soft: #222a39;
+  --hero-text: #fbfaf7;
+  --hero-text-sub: #b7bfce;
+  --hero-border: rgba(251, 250, 247, 0.14);
   --radius: 10px;
   --radius-lg: 19px;
   --radius-xl: 24px;
-  /* elevation-1..4 = 기본 카드 / 떠 있는 컨트롤 / 모달 / 강조 결과. 라이트 배경이라 그림자를
-     짙게 쓰지 않고 아주 옅은 잉크 톤 그림자만 쓴다(docs/DESIGN-SYSTEM.md §그림자). */
-  --elevation-1: 0 1px 2px rgba(21, 25, 35, 0.05);
-  --elevation-2: 0 8px 24px rgba(21, 25, 35, 0.08);
-  --elevation-3: 0 16px 40px rgba(21, 25, 35, 0.14);
-  --elevation-4: 0 1px 3px rgba(21, 25, 35, 0.06);
-  /* 대표 추천 카드 전용 — 프로젝터 빛이 새어 나오는 듯한 아주 은은한 웜톤 글로우.
-     네온이 아니라 종이 위 카드 뒤에 빛이 있는 정도로만. */
-  --glow-primary: 0 0 60px rgba(245, 242, 236, 0.5), 0 20px 50px rgba(21, 25, 35, 0.16);
+  /* elevation-1..4 = 기본 카드 / 떠 있는 컨트롤 / 모달 / 강조 결과. surface가 캔버스보다
+     확실히 밝기 때문에 그림자는 카드를 "띄우는" 용도로만 옅게 쓴다. */
+  --elevation-1: 0 1px 2px rgba(18, 23, 34, 0.06);
+  --elevation-2: 0 10px 28px rgba(18, 23, 34, 0.1);
+  --elevation-3: 0 20px 48px rgba(18, 23, 34, 0.16);
+  --elevation-4: 0 1px 3px rgba(18, 23, 34, 0.07);
+  /* 대표 추천 카드 + 히어로 스테이지 전용 — 프로젝터 빛이 새어 나오는 듯한 은은한 웜톤 글로우. */
+  --glow-primary: 0 0 60px rgba(251, 250, 247, 0.45), 0 24px 56px rgba(18, 23, 34, 0.22);
 }
 
 /* 관리자 전용 — 사이트 전역이 시네마 레드로 바뀌기 전, 원래 쓰던 블루 팔레트를 그대로
@@ -119,6 +121,7 @@
   --color-primary-strong-hover: var(--primary-strong-hover);
   --color-primary-soft: var(--primary-soft);
   --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
   --color-trust-high: var(--trust-high);
   --color-trust-mid: var(--trust-mid);
   --color-trust-low: var(--trust-low);
@@ -183,12 +186,14 @@
     letter-spacing: -0.01em;
   }
 
-  /* 링크는 색이 아니라 밑줄로 구분한다("모든 링크에 primary red" 금지) — 색은 CTA에만 남긴다. */
+  /* 링크는 기본 상태에서 색·밑줄이 전혀 없다(부모 텍스트 색을 그대로 물려받는다) — 이전
+     라운드에서 모든 링크에 기본 밑줄을 걸었더니 로고·메뉴·카드 전체 링크(TrackedLink가
+     카드 전체를 감쌈)까지 밑줄이 생겨 "꾸미지 않은 기본 HTML"처럼 보인다는 피드백이 있었다.
+     실제로 링크임을 알려야 하는 자리는 각 컴포넌트에서 hover:underline/focus-visible로만
+     반응하게 한다. */
   a {
-    color: var(--text-sub);
-    text-decoration: underline;
-    text-decoration-color: var(--border-strong);
-    text-underline-offset: 2px;
+    color: inherit;
+    text-decoration: none;
   }
 
   main {
@@ -480,6 +485,21 @@
   }
   .enter-5 {
     animation: fade-in-up 420ms ease-out 240ms both;
+  }
+
+  /* 히어로 셀렉션 스테이지 — 예시 정보가 자동으로 넘어갈 때 크로스페이드 + 가로 6px 이동 */
+  @keyframes stage-cross-fade {
+    from {
+      opacity: 0;
+      transform: translateX(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  .stage-enter {
+    animation: stage-cross-fade 280ms ease-out both;
   }
 }
 

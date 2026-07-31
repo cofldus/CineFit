@@ -27,7 +27,7 @@ export function AlphaConsentForm() {
   }
 
   return (
-    <div className="mt-4 max-w-content">
+    <div className="mt-6 max-w-content">
       <button
         type="button"
         onClick={onAgree}

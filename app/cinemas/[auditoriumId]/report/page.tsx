@@ -19,11 +19,11 @@ export default async function ReportPage({ params }: { params: Promise<{ auditor
   return (
     <main className="mx-auto max-w-xl px-4 pb-24 pt-6">
       <p className="m-0 text-sm text-text-sub">
-        <Link className="text-primary" href={`/cinemas/${detail.id}`}>
+        <Link className="text-text hover:underline decoration-border-strong underline-offset-2" href={`/cinemas/${detail.id}`}>
           ← {detail.location.name} {detail.no}
         </Link>
       </p>
-      <h1 className="mt-1 text-2xl font-extrabold text-text">정보 수정 제보</h1>
+      <h1 className="m-0 mt-2 text-[28px] font-bold text-text sm:text-[32px]">정보 수정 제보</h1>
       <div className="mt-3">
         <Notice>
           제출한 내용은 <strong className="font-semibold">즉시 공식 정보로 바뀌지 않아요.</strong>{' '}

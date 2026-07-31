@@ -67,7 +67,7 @@ test.describe('시각 회귀', () => {
   test('상영관 상세', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
     await page.goto('/cinemas/1');
-    await expect(page.getByRole('heading', { name: '현재 사양' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '목적별 좌석 구역' })).toBeVisible();
     await expect(page).toHaveScreenshot('cinema-detail.png', { fullPage: true, ...SCREENSHOT_OPTS });
   });
 

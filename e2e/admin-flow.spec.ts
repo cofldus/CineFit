@@ -26,15 +26,19 @@ test('관리자 로그인 → 실제형 회차 등록 → 사용자 추천에 �
 
   // 4~6. 사용자 흐름: 영화 선택 → 등록한 날짜로 조건 입력 → 추천 결과에 포함 확인
   await page.goto('/movies');
-  await page.getByRole('link', { name: '이 영화로 추천받기' }).first().click();
+  await page.locator('a[href^="/recommend/"]').first().click();
   await page.getByLabel('관람 날짜').fill('2026-08-02');
+  // 3단계 flow — 날짜는 1단계에 있으므로 채운 뒤 다음 → 다음 → 제출.
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('button', { name: '추천 받기' }).click();
   await expect(page).toHaveURL(/\/results\?/);
 
-  // 관리자 확인 회차 기준 배너 + 카드 배지
+  // 관리자 확인 회차 기준 배너 — 결과 페이지 위계 개편으로 카드마다 반복하던 회차 상태
+  // 배지는 없앴다(페이지 상단 배너 하나로 통합, 같은 결과 페이지의 모든 카드는 항상
+  // 배너와 동일한 합성/실제 여부를 공유하므로 배지 반복이 불필요한 중복이었다).
   await expect(page.getByText('관리자가 공식 예매 페이지에서 확인한 회차 기준')).toBeVisible();
   await expect(page.getByTestId('pick-균형')).toBeVisible();
-  await expect(page.getByTestId('pick-균형').getByText('✔ 관리자 확인 회차')).toBeVisible();
 
   // 7. 공식 예매 딥링크 표시
   const booking = page.getByTestId('pick-균형').getByRole('link', { name: /공식 예매 페이지로 이동/ });
@@ -45,5 +49,5 @@ test('관리자 로그인 → 실제형 회차 등록 → 사용자 추천에 �
 test('합성 회차만 있는 날짜는 합성 데이터임을 명시한다', async ({ page }) => {
   await page.goto('/results?movieId=1&date=2026-07-28');
   await expect(page.getByText('검증용 합성 데이터')).toBeVisible();
-  await expect(page.getByTestId('pick-균형').getByText('≈ 검증용 합성 회차')).toBeVisible();
+  await expect(page.getByTestId('pick-균형')).toBeVisible();
 });

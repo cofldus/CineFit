@@ -1,7 +1,76 @@
 @import 'tailwindcss';
 
-/* CineFit 디자인 토큰 — docs/09-ux-ui.md §2 (다크 기본, 라이트 지원) */
+/* CineFit 디자인 토큰 (9) — "Red-Pink Cinema Tech"(2026-08-02, 6차). 갈색 섞인 버건디·탁한
+   차콜을 전부 제거하고, 레퍼런스의 선명한 레드·핑크 + 깊은 블랙 팔레트로 전면 교체한다.
+   이번 라운드부터 사용자 화면 전체가 단일 다크 팔레트다(라이트 "종이" 스코프 폐기) —
+   .cinema-scope 클래스는 마크업 호환을 위해 남아 있지만 :root와 같은 값을 가리킨다.
+   .admin-scope는 여전히 완전 독립(불변). 토큰 "이름"은 그대로, 값만 교체.
+
+   최종 무드(추가 교정 반영): "묵직하고 몰입감 있는 현대적 영화관 + 정교한 프리미엄 테크" —
+   핫핑크 네온·게임 UI 금지, 화면의 70% 이상은 깊은 블랙·차콜, vivid accent(#E9466B)는
+   전체의 10% 이하(CTA·선택 좌석·중요 숫자에만).
+
+   브리프 지정 팔레트: bg #0B0A0B / secondary #121011 / raised #1A1618 / elevated #241C1F,
+   deep oxblood #5D1828 / wine red #872B42 / muted rose #BC6076 / vivid #E9466B,
+   text #F3EEEB / sub #A69EA0 / divider rgba(255,255,255,0.08).
+
+   대비 검증(직접 계산, 기준 배경은 가장 밝은 표면 #241C1F):
+   - muted rose #BC6076: #241C1F 위 4.02:1로 작은 텍스트에 부족 — 텍스트/아이콘용
+     --primary는 한 단계 밝힌 #C96F84(4.82:1, bg 위 5.69:1)로 도출. 원본 #BC6076은
+     그라데이션·큰 글자 전용.
+   - 채움 버튼(--primary-strong)은 wine red #872B42 — 흰 텍스트 8.55:1로 여유.
+   - vivid #E9466B: #241C1F 위 4.40:1로 작은 텍스트에 아슬아슬 — 소형 액센트 텍스트용
+     --accent는 #ED5578(4.89:1)로 미세 보정. 원본은 그래픽·큰 숫자 전용.
+   - text-sub #A69EA0: #241C1F 위 6.36:1. tertiary #8F878A: 4.75:1로 새로 도출.
+   - deep oxblood #5D1828·wine red #872B42는 다크 위 텍스트 금지(각 1.5:1·2.3:1) —
+     채움·그라데이션·간접광 전용. */
 :root {
+  --bg: #0b0a0b;
+  --surface: #121011;
+  --surface-raised: #1a1618;
+  --surface-strong: #241c1f;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --text: #f3eeeb;
+  --text-sub: #a69ea0;
+  --text-tertiary: #8f878a;
+  --primary: #c96f84;
+  --primary-strong: #872b42;
+  --primary-strong-hover: #732337;
+  --primary-soft: rgba(188, 96, 118, 0.14);
+  --accent: #ed5578;
+  --accent-soft: rgba(233, 70, 107, 0.12);
+  --trust-high: #5fcbae;
+  --trust-mid: #e3b15c;
+  --trust-low: #e8836b;
+  --warning-bg: rgba(227, 177, 92, 0.14);
+  --warning-text: #e3b15c;
+  /* hero = 페이지 안에서 한 단계 떠오른 elevated 카드(#241C1F, 와인 기운이 도는 차콜).
+     hero-soft는 그 안의 인셋 표면(좌석 점·게이지 트랙 등 채움 전용 — 작은 텍스트 배경으로
+     쓰지 말 것). 딥 옥스블러드(#5D1828)는 그라데이션·간접광 전용. */
+  --hero: #241c1f;
+  --hero-soft: #2e2327;
+  --hero-text: #f3eeeb;
+  --hero-text-sub: #a69ea0;
+  --hero-border: rgba(255, 255, 255, 0.08);
+  --radius: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --elevation-2: 0 10px 28px rgba(0, 0, 0, 0.4);
+  --elevation-3: 0 20px 48px rgba(0, 0, 0, 0.5);
+  --elevation-4: 0 1px 3px rgba(0, 0, 0, 0.35);
+  /* 와인 레드 간접광 — 네온 링이 아니라 넓고 약하게 퍼지는 조명. 핵심 화면비 프레임·선택
+     좌석·CTA 주변에만 제한적으로 사용. */
+  --glow-primary: 0 24px 80px -24px rgba(135, 43, 66, 0.55);
+}
+
+/* 시네마 스코프 — 이번 라운드부터 사용자 화면 전체가 같은 다크 팔레트라 :root와 동일하다.
+   기존 마크업의 .cinema-scope 클래스는 그대로 두되 아무 값도 재정의하지 않는다(호환용,
+   자기 참조 var()는 변수를 무효화하므로 선언 자체를 두지 않는다). */
+
+/* 관리자 전용 — 사용자 화면 팔레트 개편과 무관하게 독립적으로 유지(§ 여러 라운드째 확정). */
+.admin-scope {
   --bg: #0e1116;
   --surface: #171c24;
   --surface-raised: #1d232e;
@@ -9,19 +78,12 @@
   --text: #e8ecf2;
   --text-sub: #9aa5b5;
   --primary: #4c8dff;
-  /* 흰 글자를 얹는 채워진 배경 전용(버튼·배지) — 링크·테두리용 --primary보다 어둡게 고정해
-     WCAG AA 4.5:1을 항상 만족시킨다(axe-core color-contrast 자동 검사로 확인, docs/ACCESSIBILITY.md).
-     라이트/다크 모드에서 값이 같아도 되는 이유: 흰 글자 대비는 배경색 자체에만 좌우된다. */
   --primary-strong: #2f6fe0;
   --primary-strong-hover: #3f7ce8;
   --accent: #8b7cf6;
   --trust-high: #3dbe7b;
   --trust-mid: #e0a83c;
   --trust-low: #e05c5c;
-  --radius: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  /* elevation-1..4 = 기본 카드 / 떠 있는 컨트롤 / 모달 / 강조 결과 (docs/DESIGN-SYSTEM.md §그림자) */
   --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 1px rgba(0, 0, 0, 0.2);
   --elevation-2: 0 8px 20px rgba(0, 0, 0, 0.35);
   --elevation-3: 0 16px 40px rgba(0, 0, 0, 0.45);
@@ -29,15 +91,13 @@
 }
 
 @media (prefers-color-scheme: light) {
-  :root {
+  .admin-scope {
     --bg: #f7f8fa;
     --surface: #ffffff;
     --surface-raised: #ffffff;
     --border: #e2e6ec;
     --text: #1a202c;
     --text-sub: #5a6474;
-    /* 라이트 배경(흰색 계열)에서 텍스트·링크로 쓰일 때만 어둡게 — 다크 모드는 배경이 이미
-       어두워 원래 --primary(#4c8dff)로도 충분한 대비가 나온다(axe-core로 확인). */
     --primary: #2a68d9;
     --accent: #6a4fe0;
     --trust-mid: #8f5c0c;
@@ -55,16 +115,28 @@
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-surface-raised: var(--surface-raised);
+  --color-surface-strong: var(--surface-strong);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-text: var(--text);
   --color-text-sub: var(--text-sub);
+  --color-text-tertiary: var(--text-tertiary);
   --color-primary: var(--primary);
   --color-primary-strong: var(--primary-strong);
   --color-primary-strong-hover: var(--primary-strong-hover);
+  --color-primary-soft: var(--primary-soft);
   --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
   --color-trust-high: var(--trust-high);
   --color-trust-mid: var(--trust-mid);
   --color-trust-low: var(--trust-low);
+  --color-warning-bg: var(--warning-bg);
+  --color-warning-text: var(--warning-text);
+  --color-hero: var(--hero);
+  --color-hero-soft: var(--hero-soft);
+  --color-hero-text: var(--hero-text);
+  --color-hero-text-sub: var(--hero-text-sub);
+  --color-hero-border: var(--hero-border);
   --radius-card: var(--radius);
   --radius-card-lg: var(--radius-lg);
   --radius-card-xl: var(--radius-xl);
@@ -72,20 +144,21 @@
   --shadow-float: var(--elevation-2);
   --shadow-modal: var(--elevation-3);
   --shadow-highlight: var(--elevation-4);
-  /* 컨텐츠 폭 — 읽기 중심 화면(content)과 비교·그리드가 필요한 화면(wide) 구분 (docs/DESIGN-SYSTEM.md §레이아웃) */
+  --shadow-glow-primary: var(--glow-primary);
+  /* 컨텐츠 폭 — 읽기 중심 화면(content)과 비교·그리드가 필요한 화면(wide) 구분.
+     wide는 데스크톱 활용 요구(1360~1480px)에 맞춰 85rem(1360px)으로 확장. */
   --container-content: 40rem;
-  --container-wide: 72rem;
+  --container-wide: 85rem;
   --font-sans:
     'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
     'Malgun Gothic', system-ui, sans-serif;
+
+  /* 헤드라인 전용 디스플레이 서체(Wanted Sans) — --font-headline 하나만 테마 키로 등록한다.
+     next/font/local이 html에 이미 정의한 같은 이름의 CSS 변수와 겹치면 순환 참조로 폰트가
+     깨진 적이 있어(직접 겪은 버그), 반드시 다른 이름의 테마 키를 거쳐서만 연결한다. */
+  --font-headline: var(--font-display), 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
 }
 
-/*
- * Tailwind v4는 @import로 들어온 리셋·유틸리티를 자체 캐스케이드 레이어(base/components/utilities)
- * 안에 넣는다. 아래 레거시 규칙들을 레이어 밖(전역)에 그대로 두면, 특정성과 무관하게 "레이어 없는
- * 규칙이 레이어 안 규칙을 항상 이긴다"는 캐스케이드 규칙 때문에 새로 추가한 Tailwind 유틸리티
- * 클래스(text-white 등)가 이 규칙들에 가려진다. 그래서 동일한 레이어 구조로 감싼다.
- */
 @layer base {
   * {
     box-sizing: border-box;
@@ -101,11 +174,15 @@
       'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
       'Malgun Gothic', system-ui, sans-serif;
     font-size: 16px;
-    line-height: 1.6;
+    line-height: 1.65;
+    letter-spacing: -0.01em;
   }
 
+  /* 링크는 기본 상태에서 색·밑줄이 없다(부모 텍스트 색 상속) — 모든 링크에 밑줄을 걸면
+     로고·메뉴·카드 전체 링크까지 밑줄이 생겨 "꾸미지 않은 기본 HTML"처럼 보인다는 피드백이
+     있었다. 링크임을 알려야 하는 자리는 각 컴포넌트에서 hover:underline/focus-visible로만. */
   a {
-    color: var(--primary);
+    color: inherit;
     text-decoration: none;
   }
 
@@ -115,21 +192,40 @@
     padding: 16px 16px 96px;
   }
 
+  /* 타이포 굵기 규칙(브리프 정확한 값 그대로): 페이지 제목 28px/700, 질문·라벨류
+     15-16px/600, 본문 15px/400. 800~900 같은 과한 굵기와 지나친 음수 자간은 쓰지 않는다.
+     긴 한글 제목이 이상한 지점에서 줄바꿈되지 않도록 keep-all을 기본으로 깐다. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
   h1 {
     font-size: 28px;
-    line-height: 1.3;
+    font-weight: 700;
+    line-height: 1.35;
   }
   h2 {
-    font-size: 22px;
-    line-height: 1.3;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.35;
   }
   h3 {
-    font-size: 18px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  /* 시간·가격·점수처럼 자릿수가 바뀌는 숫자가 나열될 때 자릿수 폭이 흔들리지 않게 표 형태
+     숫자를 기본값으로 켜 둔다 — 컴포넌트마다 tabular-nums를 반복해서 붙이지 않아도 된다. */
+  time,
+  .tabular {
+    font-variant-numeric: tabular-nums;
   }
 }
 
 @layer components {
-  /* ── 공통 컴포넌트 (CSS Modules 대신 시맨틱 전역 클래스 — 단순성 우선) ── */
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -142,7 +238,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 44px; /* 터치 타깃 최소 44px */
+    min-height: 44px;
     padding: 10px 20px;
     border-radius: var(--radius);
     border: 1px solid var(--border);
@@ -168,7 +264,6 @@
     width: 100%;
   }
 
-  /* TrustBadge — 색+아이콘+텍스트 병기 (색 단독 구분 금지, docs/09 §3) */
   .badge {
     display: inline-flex;
     align-items: center;
@@ -219,7 +314,6 @@
     align-items: center;
   }
 
-  /* 폼 */
   label.field {
     display: block;
     margin-bottom: 14px;
@@ -256,7 +350,6 @@
     height: 20px;
   }
 
-  /* 헤더·내비 */
   .site-header {
     border-bottom: 1px solid var(--border);
     background: var(--surface);
@@ -270,12 +363,14 @@
     justify-content: space-between;
   }
   .brand {
-    font-weight: 800;
+    font-weight: 750;
     font-size: 18px;
     color: var(--text);
     letter-spacing: 0.02em;
   }
   .brand em {
+    /* 다크 배경 위 텍스트이므로 스코프 인식 --primary(밝은 레드) — --primary-strong은
+       채움 전용이라 다크 위 텍스트로는 대비가 부족하다. */
     color: var(--primary);
     font-style: normal;
   }
@@ -297,7 +392,6 @@
     background: var(--bg);
   }
 
-  /* 비교 테이블 — 가로 스크롤 컨테이너 (docs/09 §3 CompareTable) */
   .table-scroll {
     overflow-x: auto;
     border: 1px solid var(--border);
@@ -322,7 +416,6 @@
     white-space: nowrap;
   }
 
-  /* 목록 */
   ul.plain {
     list-style: none;
     padding: 0;
@@ -348,14 +441,13 @@
 }
 
 @layer components {
-  /* 키보드 사용자를 위한 스킵 링크 — 평소엔 화면 밖, 포커스 시에만 나타난다 (docs/ACCESSIBILITY.md) */
   .skip-link {
     position: fixed;
     top: 8px;
     left: 8px;
     z-index: 100;
     transform: translateY(-150%);
-    background: var(--primary);
+    background: var(--primary-strong);
     color: #fff;
     font-weight: 600;
     font-size: 14px;
@@ -367,6 +459,135 @@
     transform: translateY(0);
     outline: 3px solid #fff;
     outline-offset: 2px;
+  }
+}
+
+/* 페이지 진입 스태거 애니메이션 — 브리프 모션 스펙(220-360ms, translateY 6-10px). */
+@layer utilities {
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .enter-1 {
+    animation: fade-in-up 260ms ease-out both;
+  }
+  .enter-2 {
+    animation: fade-in-up 260ms ease-out 50ms both;
+  }
+  .enter-3 {
+    animation: fade-in-up 260ms ease-out 100ms both;
+  }
+  .enter-4 {
+    animation: fade-in-up 260ms ease-out 150ms both;
+  }
+  .enter-5 {
+    animation: fade-in-up 260ms ease-out 200ms both;
+  }
+
+  /* 히어로 프로세스 스트립 — 예시 값이 자동 전환될 때 크로스페이드 + 가로 6px 이동. */
+  @keyframes stage-cross-fade {
+    from {
+      opacity: 0;
+      transform: translateX(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  .stage-enter {
+    animation: stage-cross-fade 240ms ease-out both;
+  }
+
+  /* 검색 결과 목록이 바뀔 때(입력 변화) 살짝 크로스페이드 — 레이아웃이 통째로 점프하지
+     않도록 짧게만. */
+  @keyframes list-cross-fade {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .list-enter {
+    animation: list-cross-fade 220ms ease-out both;
+  }
+
+  /* 브랜드 헤드라인 타이포 — 광고 포스터식 과장(이탤릭·과압축·Black 남발) 금지. Wanted Sans
+     ExtraBold(800) + 가로 폭 97% + 자간 -0.035em + 줄간격 1.0: 무게감은 있지만 차분한
+     헤드라인. scaleX가 transform을 쓰므로 등장 애니메이션은 개별 translate 속성으로만
+     움직여 서로 덮어쓰지 않게 한다. 기울임 없음. */
+  .type-display {
+    font-family: var(--font-display), 'Pretendard Variable', Pretendard, sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1;
+    word-break: keep-all;
+    transform: scaleX(0.97);
+    transform-origin: left center;
+  }
+  /* 강조 단어 — 크기 폭주 대신 색으로 강조: 뮤티드 로즈→비비드의 절제된 그라데이션
+     (큰 글자 전용, 양 끝 모두 다크 bg 위 대형 텍스트 기준 4.7:1 이상). */
+  .text-gradient-primary {
+    background: linear-gradient(96deg, #bc6076 10%, #e9466b 90%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* 홈 헤드라인 — 줄마다 시작 위치·크기를 다르게 두고, 단어(줄)별로 40~60px 아래에서
+     떠오르며 등장한다. transform 대신 개별 translate 속성을 애니메이션해 .type-display의
+     scaleX(transform)와 충돌하지 않는다. */
+  @keyframes hero-word-rise {
+    from {
+      opacity: 0;
+      translate: 0 48px;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+  .hero-word {
+    animation: hero-word-rise 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* 좌석 점 순차 점등 — 추천 구역 블록이 20~30ms 간격으로 켜진다(인라인 animation-delay로
+     스태거). */
+  @keyframes seat-light-up {
+    from {
+      opacity: 0.2;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  .seat-light {
+    animation: seat-light-up 300ms ease-out both;
+  }
+
+  /* 돌비 포맷 선택 시 스크린 주변에 은은하게 퍼지는 음파 링 — 화려한 글로우가 아니라
+     테두리 하나가 옅게 확장·소멸하는 정도로 절제. */
+  @keyframes dolby-pulse {
+    from {
+      opacity: 0.5;
+      transform: scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: scale(1.12);
+    }
+  }
+  .dolby-pulse {
+    animation: dolby-pulse 1800ms ease-out infinite;
   }
 }
 

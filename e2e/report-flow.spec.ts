@@ -67,9 +67,10 @@ test('추천 반영 흐름: 승격된 좌석 존이 상영관 상세와 추천 �
 
   // 승격 전: "데이터 없음 — 중립값" / 승격 후: "제보·추정 기반" — 카드 안에서 문구가 바뀌어야 한다
   await expect(card.getByText('좌석 존 데이터 없음')).toHaveCount(0);
-  await expect(card.getByText('좌석 존은 제보·추정 기반')).toBeVisible();
 
-  // 점수 상세를 펼치면 새 좌석 존이 근거 출처로 인용된다
-  await card.locator('summary').click();
+  // 결과 페이지 정보 밀도 축소로 이유 목록 중 첫 줄만 기본 노출되고 나머지는 "자세히 보기"
+  // 안에 있다.
+  await card.locator('summary').filter({ hasText: '점수' }).click();
+  await expect(card.getByText('좌석 존은 제보·추정 기반')).toBeVisible();
   await expect(card.getByText('좌석 존 (immersive)')).toBeVisible();
 });

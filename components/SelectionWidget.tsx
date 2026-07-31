@@ -119,7 +119,7 @@ export function SelectionWidget({ runId, picks }: { runId: number; picks: PickOp
             {SELECTION_REASONS.map((r) => (
               <label
                 key={r}
-                className="flex min-h-8 cursor-pointer items-center gap-1 rounded-full border border-border px-2.5 text-xs text-text-sub has-[:checked]:border-primary-strong has-[:checked]:text-primary-strong"
+                className="flex min-h-8 cursor-pointer items-center gap-1 rounded-full border border-border px-2.5 text-xs text-text-sub has-[:checked]:border-primary has-[:checked]:text-primary"
               >
                 <input
                   type="checkbox"

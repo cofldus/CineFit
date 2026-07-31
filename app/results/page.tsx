@@ -27,7 +27,8 @@ export default async function ResultsPage({
 
   if (!parsed.ok) {
     return (
-      <main className="mx-auto min-h-dvh max-w-content bg-bg px-4 pb-24 pt-6">
+      <main className="cinema-scope min-h-dvh max-w-none bg-bg px-4 pb-24 pt-6">
+        <div className="mx-auto max-w-content">
         <h1 className="text-2xl font-bold text-text">추천 결과</h1>
         <div className="mt-4 rounded-card-lg border border-trust-low/40 bg-trust-low/5 p-5" role="alert">
           <h3 className="m-0 text-lg font-bold text-text">입력값을 확인해 주세요</h3>
@@ -42,6 +43,7 @@ export default async function ResultsPage({
           >
             영화 선택으로 돌아가기
           </Link>
+        </div>
         </div>
       </main>
     );
@@ -82,11 +84,16 @@ export default async function ResultsPage({
   }
 
   return (
-    <main className="mx-auto min-h-dvh max-w-wide bg-bg px-5 pb-24 pt-8 sm:px-8 sm:pt-12">
-      {/* 1. 결과 제목과 검색 조건 — 박스 밖, 텍스트 중심 */}
+    <main className="cinema-scope min-h-dvh max-w-none bg-bg px-5 pb-24 pt-8 sm:px-8 sm:pt-12">
+      <div className="mx-auto max-w-wide">
+      {/* 1. 결과 제목과 검색 조건 — 관리자 보고서형 "추천 결과" 대신, 결과 화면을 경험의
+          클라이맥스로 만드는 디스플레이 헤드라인. 데스크톱에서도 작아 보이지 않게 크게,
+          타이트한 자간·줄간격으로. 다크 배경은 main이 전폭으로 채우고(밝은 여백 금지),
+          내용만 이 래퍼로 제한한다. */}
       <header>
-        <h1 className="enter-1 m-0 text-[32px] font-bold text-text sm:text-[36px]">
-          추천 결과
+        <p className="enter-1 m-0 text-[13px] font-bold uppercase tracking-[0.08em] text-accent">추천 결과</p>
+        <h1 className="enter-1 m-0 mt-2 font-headline text-[34px] font-extrabold leading-[1.1] tracking-[-0.04em] text-text sm:text-[46px]">
+          {result.picks.length > 0 ? '오늘 가장 잘 맞는 선택' : '조건을 조금 넓혀볼까요?'}
         </h1>
         <p className="enter-2 m-0 mt-4 text-lg font-bold text-text">{result.movie.title}</p>
         <p className="enter-2 m-0 mt-0.5 tabular-nums text-[13.5px] text-text-sub">
@@ -147,18 +154,33 @@ export default async function ResultsPage({
         </div>
       ) : (
         <>
-          {/* 3. 대표 추천 */}
+          {/* 3. 대표 추천 — 영화의 실제 화면비(native_ar)를 스크린 그래픽에 전달 */}
           {result.picks[0] ? (
             <div className="enter-3 mt-8">
-              <RecommendCard rank={1} label={result.picks[0].label} scored={result.picks[0].scored} request={result.request} />
+              <RecommendCard
+                rank={1}
+                label={result.picks[0].label}
+                scored={result.picks[0].scored}
+                request={result.request}
+                nativeAr={result.movie.specs.native_ar ? Number(result.movie.specs.native_ar.value) || null : null}
+              />
             </div>
           ) : null}
 
-          {/* 4. 대안 추천 */}
+          {/* 4. 대안 추천 — 1위와의 차이를 제목에 표기(top 전달). 모바일에서는 가로 스와이프
+              비교, 데스크톱에서는 2열 그리드. */}
           {result.picks.length > 1 ? (
-            <div className="enter-4 mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="enter-4 -mx-5 mt-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-1 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0">
               {result.picks.slice(1).map((p, i) => (
-                <RecommendCard key={p.scored.candidate.showtimeId} rank={i + 2} label={p.label} scored={p.scored} request={result.request} />
+                <div key={p.scored.candidate.showtimeId} className="w-[86%] shrink-0 snap-start sm:w-auto sm:shrink">
+                  <RecommendCard
+                    rank={i + 2}
+                    label={p.label}
+                    scored={p.scored}
+                    request={result.request}
+                    top={result.picks[0]?.scored}
+                  />
+                </div>
               ))}
             </div>
           ) : null}
@@ -231,6 +253,7 @@ export default async function ResultsPage({
           </Link>
         </p>
       ) : null}
+      </div>
     </main>
   );
 }

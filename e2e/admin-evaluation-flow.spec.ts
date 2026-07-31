@@ -6,9 +6,10 @@ test('사용자 피드백 제출이 관리자 데이터 품질 대시보드의 �
   await page.goto('/results?movieId=1&date=2026-07-28');
   await expect(page.getByTestId('pick-균형')).toBeVisible();
 
-  // 카드마다 반복하던 피드백 질문을 페이지 하단 한 곳(대표 추천 기준)으로 합쳤다 — 기본으로
-  // 접혀 있다("대표 추천이 도움이 되었나요?" summary) — 펼친 뒤에 눌러야 한다.
-  await page.getByText('대표 추천이 도움이 되었나요?').click();
+  // 피드백은 "이 추천이 도움이 됐나요?" 버튼 2개가 먼저 보이고, 누르면 하단 시트가 열려
+  // 5단계 세부 조정과 이유 선택을 받는다 — 아쉬워요를 누르면 '별로 도움 안 됨'이 미리
+  // 선택된 상태로 시트가 열린다.
+  await page.getByRole('button', { name: '아쉬워요' }).click();
   await page.getByRole('button', { name: '별로 도움 안 됨' }).click();
   await page.getByText('실제 상영 회차가 없음', { exact: true }).click();
   await page.getByRole('button', { name: '피드백 보내기' }).click();

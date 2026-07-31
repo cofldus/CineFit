@@ -2,7 +2,6 @@ import { FORMAT_LABELS } from '../src/domain/recommendation/presets';
 import type { MovieWithSpecs } from '../src/domain/recommendation/types';
 import { formatSpecValue, keySpecEntries, SPEC_KEY_LABELS } from '../src/lib/display';
 import { IconArrowRight } from './Icon';
-import { AspectFrame } from './ScreenArt';
 import { TrackedLink } from './TrackedLink';
 import { TrustBadge } from './TrustBadge';
 
@@ -71,37 +70,73 @@ export function MovieCard({ movie, variant = 'detailed' }: { movie: MovieWithSpe
     );
   }
 
+  const nativeAr = movie.specs.native_ar?.value ? Number(movie.specs.native_ar.value) : null;
+  const ratioLabel = nativeAr ? `${nativeAr.toFixed(2)}:1` : null;
+  const clampedAr = Math.min(RATIO_MAX, Math.max(RATIO_MIN, nativeAr ?? 1.85));
+  const formats = topFormats(movie, 3);
+  // native_ar·format_versions는 위 프레임/뱃지에서 이미 보여주므로 아래 목록에서는 뺀다(중복 제거).
+  const restSpecs = keySpecEntries(movie).filter(({ key }) => key !== 'native_ar' && key !== 'format_versions');
+
   return (
     <article
-      className="flex h-full flex-col rounded-card-lg border border-border bg-surface p-4 transition-all duration-200 hover:-translate-y-1 hover:border-border-strong hover:bg-surface-raised hover:shadow-float"
+      className="group flex h-full flex-col overflow-hidden rounded-card-lg border border-border bg-surface transition-all duration-200 hover:-translate-y-1 hover:border-border-strong hover:bg-surface-raised hover:shadow-float"
       aria-labelledby={`movie-${movie.id}-title`}
     >
-      <AspectFrame aspect={movie.specs.native_ar?.value ? String(movie.specs.native_ar.value) : null} className="mb-3" />
-      <h3 id={`movie-${movie.id}-title`} className="font-wanted m-0 text-lg font-bold tracking-[-0.01em] text-text">
-        {movie.title}
-        {movie.releaseYear ? <span className="font-normal text-text-sub"> ({movie.releaseYear})</span> : null}
-      </h3>
-      <p className="mb-3 mt-1 text-sm text-text-sub">
-        {movie.originalTitle} · {movie.runtimeMin}분 · {movie.director} · {movie.genres.join('/')}
-      </p>
-      <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
-        {keySpecEntries(movie).map(({ key, spec }) => (
-          <li key={key} className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
-            <span className="text-text-sub">{SPEC_KEY_LABELS[key]}</span>
-            <strong className="font-semibold text-text">{formatSpecValue(key, spec)}</strong>
-            <TrustBadge status={spec.infoStatus} observedAt={spec.observedAt} />
-          </li>
-        ))}
-      </ul>
-      <div className="mt-auto pt-4">
-        <TrackedLink
-          event="movie_selected"
-          eventProperties={{ movieId: movie.id }}
-          href={`/recommend/${movie.id}`}
-          className="flex min-h-11 w-full items-center justify-center rounded-card bg-primary-strong px-5 text-[15px] font-semibold text-white transition-all hover:bg-primary-strong-hover active:scale-[0.98]"
-        >
-          이 영화로 추천받기
-        </TrackedLink>
+      {/* 영화마다 실제 화면비로 모양이 달라지는 프레임 — compact 카드와 같은 원칙(화면비 자체가
+          카드의 정체성). 상단에 배급 포맷 뱃지를 얹어 한눈에 "이 영화가 어떤 버전으로 상영되는지"
+          보이게 한다. */}
+      <div
+        aria-hidden
+        className="relative flex items-center justify-center border-b border-hero-border bg-hero px-4 transition-shadow group-hover:shadow-glow-primary"
+        style={{ aspectRatio: `${clampedAr} / 1` }}
+      >
+        <span className="font-mono text-2xl font-bold text-hero-text sm:text-[28px]">
+          {ratioLabel ?? `${clampedAr.toFixed(2)}:1`}
+        </span>
+        {formats.length > 0 ? (
+          <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
+            {formats.map((f) => (
+              <span
+                key={f}
+                className="rounded-full border border-hero-border bg-bg/70 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-hero-text-sub backdrop-blur-sm"
+              >
+                {f}
+              </span>
+            ))}
+          </div>
+        ) : null}
+      </div>
+      <div className="flex flex-1 flex-col p-5">
+        <h3 id={`movie-${movie.id}-title`} className="font-wanted m-0 text-lg font-bold tracking-[-0.01em] text-text">
+          {movie.title}
+          {movie.releaseYear ? <span className="font-normal text-text-sub"> · {movie.releaseYear}</span> : null}
+        </h3>
+        <p className="m-0 mt-1 text-[13.5px] text-text-sub">
+          {movie.originalTitle} · {movie.runtimeMin}분 · {movie.director}
+        </p>
+        <p className="m-0 mt-0.5 text-[13px] text-text-tertiary">{movie.genres.join(' · ')}</p>
+        {restSpecs.length > 0 ? (
+          <ul className="m-0 mt-3.5 flex list-none flex-col gap-1.5 border-t border-border p-0 pt-3.5">
+            {restSpecs.map(({ key, spec }) => (
+              <li key={key} className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+                <span className="text-text-sub">{SPEC_KEY_LABELS[key]}</span>
+                <strong className="font-semibold text-text">{formatSpecValue(key, spec)}</strong>
+                <TrustBadge status={spec.infoStatus} observedAt={spec.observedAt} />
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        <div className="mt-auto pt-4">
+          <TrackedLink
+            event="movie_selected"
+            eventProperties={{ movieId: movie.id }}
+            href={`/recommend/${movie.id}`}
+            className="flex min-h-11 w-full items-center justify-center gap-1.5 rounded-card bg-primary-strong px-5 text-[15px] font-semibold text-white transition-all hover:bg-primary-strong-hover active:scale-[0.98]"
+          >
+            이 영화로 추천받기
+            <IconArrowRight className="h-4 w-4 shrink-0" />
+          </TrackedLink>
+        </div>
       </div>
     </article>
   );

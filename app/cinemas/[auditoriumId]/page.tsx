@@ -79,10 +79,10 @@ export default async function AuditoriumDetailPage({
   const history = detail.specHistory.filter((s) => s !== current);
 
   return (
-    <main className="mx-auto max-w-wide px-4 pb-24 pt-6">
-      {/* 1. 상영관 이름·위치·핵심 특징 */}
-      <p className="m-0 text-sm text-text-sub">{detail.location.chain}</p>
-      <h1 className="font-wanted m-0 text-2xl font-bold tracking-[-0.01em] text-text">
+    <main className="cinema-scope mx-auto min-h-dvh max-w-wide bg-bg px-4 pb-24 pt-6">
+      {/* 1. 상영관 이름·위치·핵심 특징 — 상단 요약을 더 강하게 */}
+      <p className="m-0 text-[13px] font-bold uppercase tracking-[0.08em] text-primary">{detail.location.chain}</p>
+      <h1 className="font-wanted m-0 mt-2 text-[32px] font-bold tracking-[-0.02em] text-text sm:text-[38px]">
         {detail.location.name} {detail.no}
       </h1>
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
@@ -127,28 +127,27 @@ export default async function AuditoriumDetailPage({
         {detail.seatZones.length === 0 ? (
           <p className="mt-2 text-sm text-text-sub">아직 이 관의 좌석 구역 제보가 없어요.</p>
         ) : (
-          <ul className="m-0 mt-3 grid grid-cols-1 gap-2.5 p-0 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="m-0 mt-3 grid grid-cols-1 gap-3 p-0 sm:grid-cols-2 lg:grid-cols-3">
             {detail.seatZones.map((z, i) => (
-              <li key={i} className="rounded-card-lg border border-border bg-surface p-4">
+              <li key={i} className="rounded-card-lg bg-surface-strong p-5">
                 <div className="flex flex-wrap items-center gap-1.5">
                   {z.purposes.map((p) => (
-                    <span
-                      key={p}
-                      className="inline-flex items-center rounded-full border border-accent/40 px-2.5 py-0.5 text-xs font-medium text-accent"
-                    >
+                    <span key={p} className="text-[13px] font-semibold uppercase tracking-wide text-accent">
                       {PURPOSE_LABELS[p] ?? p}
                     </span>
                   ))}
                 </div>
-                <p className="m-0 mt-2 text-sm font-semibold text-text">
-                  추천 구역: {[z.rowRange, z.colRange].filter(Boolean).join(' ') || '전체'}
+                <p className="m-0 mt-2 text-xl font-bold tracking-[-0.01em] text-text">
+                  {[z.rowRange, z.colRange].filter(Boolean).join(' ') || '전체'}
                 </p>
-                {z.rationale ? <p className="m-0 mt-1 text-sm text-text-sub">이유: {z.rationale}</p> : null}
-                <p className="m-0 mt-2 flex flex-wrap items-center gap-1.5 text-xs text-text-sub">
+                {z.rationale ? <p className="m-0 mt-2 text-sm leading-relaxed text-text-sub">{z.rationale}</p> : null}
+                {/* text-text-tertiary는 이 bg-surface-strong 배경에서 대비가 부족해(axe 실측
+                    3.88:1 < 4.5:1) text-text-sub로 올렸다. */}
+                <p className="m-0 mt-3 flex flex-wrap items-center gap-1.5 border-t border-border pt-3 text-xs text-text-sub">
                   확신도: {INFO_STATUS_LABELS[z.infoStatus] ?? z.infoStatus}
                   <TrustBadge status={z.infoStatus} observedAt={z.observedAt} />
+                  <span>· {z.sourceName ?? '출처 없음'}</span>
                 </p>
-                <p className="m-0 mt-1 text-xs text-text-sub">{z.sourceName ?? '출처 없음'}</p>
               </li>
             ))}
           </ul>
@@ -178,36 +177,31 @@ export default async function AuditoriumDetailPage({
                 </Notice>
               </div>
             ) : null}
-            <ul className="m-0 mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="m-0 mt-3 flex list-none flex-col divide-y divide-border p-0 text-sm">
               {detail.upcomingShowtimes.map((s) => (
-                <li
-                  key={s.id}
-                  className="flex flex-col gap-1.5 rounded-card border border-border bg-surface px-4 py-3"
-                >
-                  <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-                    <span className="font-semibold text-text">{dtFmt.format(new Date(s.startsAt))}</span>
-                    <FormatTag format={s.format} />
-                    <ShowtimeStatusBadge kind={s.isSynthetic ? 'synthetic' : 'verified'} variant="compact" />
-                  </div>
+                <li key={s.id} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 py-3.5">
+                  <span className="w-[92px] shrink-0 font-semibold tabular-nums text-text">
+                    {dtFmt.format(new Date(s.startsAt))}
+                  </span>
                   <Link
                     href={`/recommend/${s.movieId}`}
-                    className="font-medium text-text hover:underline decoration-border-strong underline-offset-2"
+                    className="min-w-0 flex-1 truncate font-medium text-text hover:underline decoration-border-strong underline-offset-2"
                   >
                     {s.movieTitle}
                   </Link>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-medium text-text-sub">{s.priceAdult.toLocaleString('ko-KR')}원</span>
-                    {s.bookingUrl && !s.isSynthetic ? (
-                      <a
-                        className="inline-flex min-h-9 items-center font-semibold text-text hover:underline decoration-border-strong underline-offset-2"
-                        href={s.bookingUrl}
-                        target="_blank"
-                        rel="noopener noreferrer nofollow"
-                      >
-                        예매 ↗
-                      </a>
-                    ) : null}
-                  </div>
+                  <FormatTag format={s.format} />
+                  <ShowtimeStatusBadge kind={s.isSynthetic ? 'synthetic' : 'verified'} variant="compact" />
+                  <span className="font-medium tabular-nums text-text-sub">{s.priceAdult.toLocaleString('ko-KR')}원</span>
+                  {s.bookingUrl && !s.isSynthetic ? (
+                    <a
+                      className="inline-flex min-h-9 items-center font-semibold text-text hover:underline decoration-border-strong underline-offset-2"
+                      href={s.bookingUrl}
+                      target="_blank"
+                      rel="noopener noreferrer nofollow"
+                    >
+                      예매 ↗
+                    </a>
+                  ) : null}
                 </li>
               ))}
             </ul>
@@ -215,8 +209,9 @@ export default async function AuditoriumDetailPage({
         )}
       </section>
 
-      {/* 6. 상세 사양 — 접이식으로 격하(더 이상 예정 회차보다 먼저 보이지 않는다) */}
-      <details className="mt-6 rounded-card-lg border border-border bg-surface p-4">
+      {/* 6. 상세 사양 — 접이식으로 격하(더 이상 예정 회차보다 먼저 보이지 않는다). 과하게
+          박스화하지 않도록 카드 테두리 없이 구분선 하나로만 앞뒤 섹션과 나눈다. */}
+      <details className="mt-8 border-t border-border pt-6">
         <summary className="flex min-h-11 cursor-pointer items-center text-lg font-bold text-text">
           상영관 사양
         </summary>
@@ -288,7 +283,7 @@ export default async function AuditoriumDetailPage({
             <h3 className="m-0 text-sm font-bold text-text">사양 변경 이력</h3>
             <ul className="m-0 mt-2 flex list-none flex-col gap-2 p-0 text-sm">
               {history.map((h, i) => (
-                <li key={i} className="rounded-card border border-border bg-bg px-4 py-3">
+                <li key={i} className="rounded-card bg-surface-strong px-4 py-3">
                   <span className="text-text-sub">
                     {h.validFrom} ~ {h.validTo ?? '현재'}
                   </span>

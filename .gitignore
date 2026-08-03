@@ -17,3 +17,4 @@ coverage/
 # 추천 평가 CLI 산출물 — 골든 데이터셋(eval/golden/)은 커밋하되 실행 리포트는 커밋하지 않는다
 eval/reports/
 captures/
+capture-pages.mjs

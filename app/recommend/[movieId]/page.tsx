@@ -21,7 +21,7 @@ export default async function RecommendPage({ params }: { params: Promise<{ movi
   const defaultDate = dates.find((d) => d >= today) ?? dates.at(-1) ?? DEMO_DATE;
 
   return (
-    <main className="mx-auto max-w-xl px-4 pb-24 pt-6 lg:max-w-4xl">
+    <main className="mx-auto max-w-xl px-4 pb-24 pt-6 lg:max-w-6xl">
       <h1 className="type-display m-0 text-[28px] text-text sm:text-[32px]">어떤 조건을 원하세요?</h1>
       <p className="m-0 mt-1.5 text-[15px] text-text-sub">아래 조건에 맞는 상영관을 찾아드릴게요.</p>
 

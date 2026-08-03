@@ -4,8 +4,9 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { MOTION_OPTIONS, ORIGIN_PRESETS, PRIORITY_OPTIONS } from '../src/data/constants';
+import { WEIGHT_PRESETS } from '../src/domain/recommendation/presets';
 import { readOnboardingState, type OnboardingAnswers } from '../src/lib/onboarding';
-import type { MovieWithSpecs } from '../src/domain/recommendation/types';
+import type { MovieWithSpecs, Priority } from '../src/domain/recommendation/types';
 import { formatSpecValue, keySpecEntries, SPEC_KEY_LABELS } from '../src/lib/display';
 import { TrustBadge } from './TrustBadge';
 import { SegmentedControl } from './SegmentedControl';
@@ -129,6 +130,59 @@ const PlusGlyph = () => (
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
 const STEP_TITLES = ['언제, 어디서 볼까요?', '무엇을 가장 중요하게 보나요?', '피하고 싶은 조건이 있나요?'];
+
+// 스테퍼 옆 preset 칩 — −/+만 반복 누르는 대신 자주 쓰는 값으로 바로 이동(R14 §8 Step 1).
+const TRAVEL_PRESETS = [30, 60, 90] as const;
+const PRICE_PRESETS = [15000, 25000, 40000] as const;
+
+// 우선순위 선택이 엔진 가중치를 실제로 어떻게 바꾸는지 — WEIGHT_PRESETS(실제 엔진 값)를
+// 사용자용 3그룹으로 합산해 보여준다(새 숫자를 만들지 않음). 화면·음향 = 포맷 매칭 W1 +
+// 상영관 품질 W2, 좌석·시간대 = 시간대 W3 + 좌석 W4, 이동·가격 = W7 + W8.
+function weightGroups(priority: Priority): { label: string; value: number }[] {
+  const w = WEIGHT_PRESETS[priority];
+  return [
+    { label: '화면·음향', value: w.W1 + w.W2 },
+    { label: '좌석·시간대', value: w.W3 + w.W4 },
+    { label: '이동·가격', value: w.W7 + w.W8 },
+  ];
+}
+
+// 좌석·편의 선호(step 3)의 compact toggle row — 큰 카드 3장이 세로로 쌓이는 대신, 체크 시
+// 추천 로직에 어떻게 반영되는지 한 문장과 함께 얇은 행으로(R14 §8 Step 3).
+function ToggleRow({
+  name,
+  title,
+  effect,
+  defaultChecked,
+  visual,
+}: {
+  name: string;
+  title: string;
+  effect: string;
+  defaultChecked?: boolean;
+  visual: React.ReactNode;
+}) {
+  return (
+    <label className="group flex min-h-[52px] cursor-pointer items-center gap-3 rounded-card bg-surface-raised px-3.5 py-2.5 transition-colors has-[:checked]:bg-primary-soft has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary">
+      <input type="checkbox" name={name} defaultChecked={defaultChecked} className="sr-only" />
+      <span aria-hidden className="flex h-8 w-11 shrink-0 items-center justify-center opacity-70 group-has-[:checked]:opacity-100">
+        {visual}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[14.5px] font-semibold text-text">{title}</span>
+        <span className="block text-[13px] leading-snug text-text-sub">{effect}</span>
+      </span>
+      <span
+        aria-hidden
+        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-border-strong text-transparent transition-colors group-has-[:checked]:border-primary-strong group-has-[:checked]:bg-primary-strong group-has-[:checked]:text-white"
+      >
+        <svg viewBox="0 0 16 16" fill="none" className="h-3 w-3">
+          <path d="M3 8.2l3.2 3.2L13 4.6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </span>
+    </label>
+  );
+}
 
 // 제출·실시간 카운트가 완전히 같은 쿼리를 쓰도록 한 곳에서만 조립한다.
 function buildQuery(movieId: number, fd: FormData): URLSearchParams {
@@ -271,8 +325,12 @@ export function RecommendForm({
   // 조건을 바꿀 때마다 "현재 조건에 맞는 후보 N개"를 실시간 조회(디바운스) — 결과 페이지와
   // 같은 파서·서비스의 preview 모드를 쓰므로 실제 결과 개수와 항상 일치한다.
   const [preview, setPreview] = useState<{ candidates: number; total: number } | null>(null);
+  // 직전 후보 수 — 조건이 바뀌어 개수가 달라졌을 때 "7개 → 4개"로 변화를 보여준다(§8).
+  const [prevCount, setPrevCount] = useState<number | null>(null);
+  const previewRef = useRef<{ candidates: number; total: number } | null>(null);
   const [formTick, setFormTick] = useState(0);
   const [originVal, setOriginVal] = useState('cityhall');
+  const [priorityVal, setPriorityVal] = useState<Priority>('balance');
   // 날짜는 퀵 칩(오늘/내일/모레) 선택 상태 표시를 위해 controlled — 값 자체는 여전히
   // name="date" 입력으로 폼 제출된다. 기준일은 서버가 준 defaultDate(앱 클럭의 오늘).
   const [dateVal, setDateVal] = useState(defaultDate);
@@ -294,7 +352,9 @@ export function RecommendForm({
   // 서버 기본값으로 그려지므로 하이드레이션 불일치는 생기지 않는다).
   const [prefill, setPrefill] = useState<OnboardingAnswers | null>(null);
   useEffect(() => {
-    setPrefill(readOnboardingState()?.answers ?? null);
+    const answers = readOnboardingState()?.answers ?? null;
+    setPrefill(answers);
+    if (answers?.priority) setPriorityVal(answers.priority as Priority);
   }, []);
   const prefillKey = prefill ? 'prefilled' : 'initial';
 
@@ -308,7 +368,12 @@ export function RecommendForm({
         const r = await fetch(`/api/recommendations/preview-count?${qs.toString()}`);
         if (r.ok) {
           const j = (await r.json()) as { ok: boolean; candidates: number; total: number };
-          if (j.ok) setPreview({ candidates: j.candidates, total: j.total });
+          if (j.ok) {
+            const prev = previewRef.current;
+            setPrevCount(prev && prev.candidates !== j.candidates ? prev.candidates : null);
+            previewRef.current = { candidates: j.candidates, total: j.total };
+            setPreview(previewRef.current);
+          }
         }
       } catch {
         /* 네트워크 실패 시 마지막 값 유지 — 카운트는 보조 정보라 조용히 넘어간다 */
@@ -337,12 +402,31 @@ export function RecommendForm({
       aria-label="추천 조건 입력"
       className="pb-4"
     >
-      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_290px] lg:items-start lg:gap-10">
+      {/* R14 §8: 데스크톱 65/35 작업 공간 — 좌측 입력, 우측 라이브 조건 패널. */}
+      <div className="lg:grid lg:grid-cols-[minmax(0,13fr)_minmax(0,7fr)] lg:items-start lg:gap-10">
       <div className="flex min-w-0 flex-col">
-      {/* 모바일: 영화 요약을 폼 위에 compact로. 데스크톱은 우측 요약 패널이 담당. */}
-      <div className="mb-5 lg:hidden">
-        <MovieSummary movie={movie} />
-      </div>
+      {/* 모바일: 접을 수 있는 top sheet 요약 — 영화 + 현재 조건. 데스크톱은 우측 패널 담당. */}
+      <details className="mb-5 rounded-card-lg bg-surface-raised lg:hidden">
+        <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 px-3.5 text-[13.5px] font-semibold text-text">
+          <span className="truncate">{movie.title} · 현재 조건 요약</span>
+          <span aria-hidden className="text-text-tertiary">▾</span>
+        </summary>
+        <div className="border-t border-border px-3.5 pb-3.5 pt-3">
+          <MovieSummary movie={movie} />
+          <dl className="m-0 mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[13px]">
+            <dt className="text-text-tertiary">날짜</dt>
+            <dd className="m-0 text-right font-medium tabular-nums text-text">{dateVal}</dd>
+            <dt className="text-text-tertiary">출발</dt>
+            <dd className="m-0 text-right font-medium text-text">
+              {ORIGIN_PRESETS.find((o) => o.id === originVal)?.label.replace(' 인근', '') ?? '-'}
+            </dd>
+            <dt className="text-text-tertiary">이동·예산</dt>
+            <dd className="m-0 text-right font-medium tabular-nums text-text">
+              {travelVal}분 · {priceVal.toLocaleString('ko-KR')}원
+            </dd>
+          </dl>
+        </div>
+      </details>
 
       {/* 진행 표시 — 완료 단계는 체크, 현재는 와인 채움, 연결선도 완료 구간은 로즈. */}
       <ol className="m-0 mb-6 flex list-none items-center gap-2 p-0" aria-label="입력 단계">
@@ -462,13 +546,30 @@ export function RecommendForm({
                   <span className="text-[13px] text-text-sub">분</span>
                 </span>
               </label>
-              <div className="flex gap-1">
-                <StepBtn label="이동 시간 5분 줄이기" onClick={() => setTravelVal((v) => clamp(v - 5, 5, 240))}>
-                  <MinusGlyph />
-                </StepBtn>
-                <StepBtn label="이동 시간 5분 늘리기" onClick={() => setTravelVal((v) => clamp(v + 5, 5, 240))}>
-                  <PlusGlyph />
-                </StepBtn>
+              <div className="flex flex-col items-end gap-1.5">
+                <div className="flex gap-1">
+                  <StepBtn label="이동 시간 5분 줄이기" onClick={() => setTravelVal((v) => clamp(v - 5, 5, 240))}>
+                    <MinusGlyph />
+                  </StepBtn>
+                  <StepBtn label="이동 시간 5분 늘리기" onClick={() => setTravelVal((v) => clamp(v + 5, 5, 240))}>
+                    <PlusGlyph />
+                  </StepBtn>
+                </div>
+                <div className="flex gap-1" role="group" aria-label="이동 시간 빠른 선택">
+                  {TRAVEL_PRESETS.map((v) => (
+                    <button
+                      key={v}
+                      type="button"
+                      aria-pressed={travelVal === v}
+                      onClick={() => setTravelVal(v)}
+                      className={`min-h-7 rounded-full px-2.5 text-[11.5px] font-semibold tabular-nums transition-colors ${
+                        travelVal === v ? 'bg-primary-strong text-white' : 'bg-white/[0.04] text-text-sub hover:text-text'
+                      }`}
+                    >
+                      {v}분
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
             <div className={fieldCls}>
@@ -492,13 +593,30 @@ export function RecommendForm({
                   <span className="text-[13px] text-text-sub">원</span>
                 </span>
               </label>
-              <div className="flex gap-1">
-                <StepBtn label="가격 5천 원 줄이기" onClick={() => setPriceVal((v) => clamp(v - 5000, 1000, 200000))}>
-                  <MinusGlyph />
-                </StepBtn>
-                <StepBtn label="가격 5천 원 늘리기" onClick={() => setPriceVal((v) => clamp(v + 5000, 1000, 200000))}>
-                  <PlusGlyph />
-                </StepBtn>
+              <div className="flex flex-col items-end gap-1.5">
+                <div className="flex gap-1">
+                  <StepBtn label="가격 5천 원 줄이기" onClick={() => setPriceVal((v) => clamp(v - 5000, 1000, 200000))}>
+                    <MinusGlyph />
+                  </StepBtn>
+                  <StepBtn label="가격 5천 원 늘리기" onClick={() => setPriceVal((v) => clamp(v + 5000, 1000, 200000))}>
+                    <PlusGlyph />
+                  </StepBtn>
+                </div>
+                <div className="flex gap-1" role="group" aria-label="가격 빠른 선택">
+                  {PRICE_PRESETS.map((v) => (
+                    <button
+                      key={v}
+                      type="button"
+                      aria-pressed={priceVal === v}
+                      onClick={() => setPriceVal(v)}
+                      className={`min-h-7 rounded-full px-2.5 text-[11.5px] font-semibold tabular-nums transition-colors ${
+                        priceVal === v ? 'bg-primary-strong text-white' : 'bg-white/[0.04] text-text-sub hover:text-text'
+                      }`}
+                    >
+                      {(v / 10000).toLocaleString('ko-KR')}만
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -510,7 +628,15 @@ export function RecommendForm({
       <StepSection step={2} title="무엇을 가장 중요하게 보나요?" first numbered={false}>
         <fieldset className="m-0 border-0 p-0" key={prefillKey}>
           <legend className="mb-2 block text-sm font-semibold text-text">가장 중요한 것</legend>
-          <div className="grid gap-2.5 sm:[grid-template-columns:repeat(auto-fit,minmax(230px,1fr))]" role="radiogroup" aria-label="가장 중요한 것">
+          <div
+            className="grid gap-2.5 sm:[grid-template-columns:repeat(auto-fit,minmax(230px,1fr))]"
+            role="radiogroup"
+            aria-label="가장 중요한 것"
+            onChange={(e) => {
+              const t = e.target as HTMLInputElement;
+              if (t.name === 'priority') setPriorityVal(t.value as Priority);
+            }}
+          >
             <RadioCard
               name="priority"
               value="balance"
@@ -535,6 +661,23 @@ export function RecommendForm({
               description="이동시간·가격 가중치를 높여요"
               visual={<RouteGlyph />}
             />
+          </div>
+          {/* 선택이 엔진 가중치를 실제로 어떻게 바꾸는지 — 실제 WEIGHT_PRESETS 합산값의
+              미세 시각화(§8 Step 2). 선택을 바꾸면 세 그룹 배분이 함께 움직인다. */}
+          <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 rounded-card bg-surface-raised px-3.5 py-2.5">
+            <span className="text-[11.5px] font-semibold uppercase tracking-wide text-text-tertiary">가중치 배분</span>
+            {weightGroups(priorityVal).map((g) => (
+              <span key={g.label} className="flex items-center gap-1.5 text-[12px] text-text-sub">
+                {g.label}
+                <span aria-hidden className="h-[5px] w-14 overflow-hidden rounded-full bg-hero-soft">
+                  <span
+                    className="block h-full rounded-full bg-primary transition-[width] duration-300"
+                    style={{ width: `${Math.round(g.value * 100)}%` }}
+                  />
+                </span>
+                <span className="tabular-nums text-text">{Math.round(g.value * 100)}%</span>
+              </span>
+            ))}
           </div>
         </fieldset>
         <fieldset className="m-0 border-0 p-0">
@@ -577,25 +720,27 @@ export function RecommendForm({
         />
         <fieldset className="m-0 border-0 p-0">
           <legend className="mb-2 block text-sm font-semibold text-text">좌석·편의 선호</legend>
-          <div className="grid gap-2.5 sm:[grid-template-columns:repeat(auto-fit,minmax(230px,1fr))]">
-            <ToggleCard
+          {/* 큰 카드 3장 대신 compact toggle row — 각 행이 추천 로직에 어떻게 반영되는지
+              한 문장으로(§8 Step 3). */}
+          <div className="flex flex-col gap-2">
+            <ToggleRow
               key={prefillKey}
               name="subtitleReadability"
               defaultChecked={prefill?.subtitleReadability ?? false}
               title="자막 가독 우선"
-              description="자막이 잘 보이는 구역을 먼저 추천"
+              effect="켜면 자막이 잘 보이는 중앙·중간열 구역의 좌석 점수를 높여요"
               visual={<SeatGlyph lit={(r, c) => r === 1 && c >= 2 && c <= 4} />}
             />
-            <ToggleCard
+            <ToggleRow
               name="neckComfort"
               title="목 편한 좌석 우선"
-              description="고개를 덜 들어도 되는 구역 우선"
+              effect="켜면 고개를 덜 들어도 되는 중·후방 구역을 먼저 추천해요"
               visual={<SeatGlyph lit={(r, c) => r === 3 && c >= 2 && c <= 4} />}
             />
-            <ToggleCard
+            <ToggleRow
               name="wheelchair"
               title="휠체어 접근 필수"
-              description="확인 안 된 상영관은 제외돼요"
+              effect="켜면 휠체어 접근이 확인 안 된 상영관은 후보에서 제외돼요"
               visual={<SeatGlyph lit={(r, c) => r === 3 && c <= 1} />}
             />
           </div>
@@ -626,8 +771,14 @@ export function RecommendForm({
             <div className="mt-3.5 border-t border-border pt-3.5" role="status" aria-live="polite">
               {preview ? (
                 <>
-                  <p className="m-0 text-[14px] font-bold text-text">
-                    조건에 맞는 후보 <span className="text-primary">{preview.candidates}개</span>
+                  <p className="m-0 text-[14px] font-bold tabular-nums text-text">
+                    조건에 맞는 후보{' '}
+                    {prevCount !== null ? (
+                      <span className="text-text-tertiary">
+                        {prevCount}개 <span aria-hidden>→</span>{' '}
+                      </span>
+                    ) : null}
+                    <span className="text-primary">{preview.candidates}개</span>
                   </p>
                   <p className="m-0 mt-0.5 text-[12px] tabular-nums text-text-tertiary">전체 {preview.total}개 회차 중</p>
                 </>
@@ -645,8 +796,14 @@ export function RecommendForm({
         style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }}
       >
         {preview ? (
-          <p className="m-0 mb-2 text-center text-[12px] text-text-sub lg:hidden" role="status">
-            현재 조건에 맞는 후보 <strong className="font-bold text-primary">{preview.candidates}개</strong>
+          <p className="m-0 mb-2 text-center text-[12px] tabular-nums text-text-sub lg:hidden" role="status">
+            현재 조건에 맞는 후보{' '}
+            {prevCount !== null ? (
+              <span className="text-text-tertiary">
+                {prevCount}개 <span aria-hidden>→</span>{' '}
+              </span>
+            ) : null}
+            <strong className="font-bold text-primary">{preview.candidates}개</strong>
           </p>
         ) : null}
         <div className="mx-auto flex max-w-content items-center gap-3">

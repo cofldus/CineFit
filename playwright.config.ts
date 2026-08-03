@@ -15,6 +15,19 @@ export default defineConfig({
   // 결정적으로 만든다(테스트 수가 적어 성능 영향은 미미하다).
   fullyParallel: false,
   workers: 1,
+  // 시각 회귀는 "시드 직후" 상태에서만 찍는다 — 기능 테스트(추천 실행 기록·회차 등록·제보
+  // 승격)가 DB를 변형하므로, visual이 뒤에 돌면 스냅샷이 "그 시점까지 돈 테스트 수"에
+  // 의존해 버린다. 실제 사고: visual 스펙만 단독 실행해 베이스라인을 재생성했더니(=시드
+  // 상태) 풀 스위트(=변형 상태)를 도는 CI와 관리자 대시보드의 실행 건수·행 수가 어긋나
+  // 3장이 계속 빨간불이었다. visual을 선행 프로젝트로 분리하면 단독 실행과 풀 스위트가
+  // 항상 같은 상태를 본다.
+  projects: [
+    { name: 'visual', testMatch: /visual\.spec\.ts/ },
+    { name: 'functional', testIgnore: /visual\.spec\.ts/, dependencies: ['visual'] },
+  ],
+  // 프로젝트 도입 시 기본 템플릿은 파일명에 -visual(프로젝트명)을 붙인다 — 기존 베이스라인
+  // 파일명(…-linux.png)을 유지하기 위해 프로젝트명 토큰을 뺀 템플릿으로 고정.
+  snapshotPathTemplate: '{snapshotDir}/{testFileDir}/{testFileName}-snapshots/{arg}-{platform}{ext}',
   use: { baseURL: 'http://localhost:3000' },
   webServer: {
     command: 'npm run start',

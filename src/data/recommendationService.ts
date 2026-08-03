@@ -36,7 +36,7 @@ export function toDomainRequest(input: RecommendationInput): RecommendationReque
 
 export async function getRecommendations(
   input: RecommendationInput,
-  ctx: { sessionId?: string } = {},
+  ctx: { sessionId?: string; preview?: boolean } = {},
 ): Promise<RecommendationServiceResult> {
   const movie = await movieRepository.findById(input.movieId);
   if (!movie) return { ok: false, error: 'movie_not_found' };
@@ -58,11 +58,15 @@ export async function getRecommendations(
     syntheticSuppressed: all.length - candidates.length,
   };
   result.latencyMs = Math.round(performance.now() - started);
-  result.runId = await recommendationRepository.saveRun(result, result.latencyMs, now.toISOString(), {
-    policyVersion: ACTIVE_POLICY.version,
-    codeVersion: CODE_VERSION,
-    sessionId: ctx.sessionId,
-  });
+  // preview(조건 입력 중 실시간 후보 수 조회)는 run 기록을 남기지 않는다 — 키 입력마다
+  // recommendation_runs가 쌓여 퍼널 집계가 오염되는 것을 막는다.
+  if (!ctx.preview) {
+    result.runId = await recommendationRepository.saveRun(result, result.latencyMs, now.toISOString(), {
+      policyVersion: ACTIVE_POLICY.version,
+      codeVersion: CODE_VERSION,
+      sessionId: ctx.sessionId,
+    });
+  }
 
   return { ok: true, result };
 }

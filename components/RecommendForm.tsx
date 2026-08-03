@@ -1,9 +1,13 @@
 'use client';
 
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { MOTION_OPTIONS, ORIGIN_PRESETS, PRIORITY_OPTIONS } from '../src/data/constants';
 import { readOnboardingState, type OnboardingAnswers } from '../src/lib/onboarding';
+import type { MovieWithSpecs } from '../src/domain/recommendation/types';
+import { formatSpecValue, keySpecEntries, SPEC_KEY_LABELS } from '../src/lib/display';
+import { TrustBadge } from './TrustBadge';
 import { SegmentedControl } from './SegmentedControl';
 import { StepSection } from './StepSection';
 import { RadioCard, ToggleCard } from './ToggleCard';
@@ -126,6 +130,79 @@ const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(mi
 
 const STEP_TITLES = ['언제, 어디서 볼까요?', '무엇을 가장 중요하게 보나요?', '피하고 싶은 조건이 있나요?'];
 
+// 제출·실시간 카운트가 완전히 같은 쿼리를 쓰도록 한 곳에서만 조립한다.
+function buildQuery(movieId: number, fd: FormData): URLSearchParams {
+  return new URLSearchParams({
+    movieId: String(movieId),
+    date: String(fd.get('date')),
+    originId: String(fd.get('originId')),
+    maxTravelMinutes: String(fd.get('maxTravelMinutes')),
+    maxPrice: String(fd.get('maxPrice')),
+    priority: String(fd.get('priority')),
+    allowImax: String(fd.get('allowImax') === 'on'),
+    allowDolby: String(fd.get('allowDolby') === 'on'),
+    allowStandard: String(fd.get('allowStandard') === 'on'),
+    motionSickness: String(fd.get('motionSickness')),
+    subtitleReadability: String(fd.get('subtitleReadability') === 'on'),
+    neckComfort: String(fd.get('neckComfort') === 'on'),
+    wheelchair: String(fd.get('wheelchair') === 'on'),
+  });
+}
+
+// 선택한 영화 compact 요약 — 포스터 썸네일 + 제목 + 핵심 칩. 상세 사양은 펼침으로.
+function MovieSummary({ movie }: { movie: MovieWithSpecs }) {
+  const nativeAr = movie.specs.native_ar?.value;
+  const chips: string[] = [];
+  if (nativeAr) chips.push(`${Number(nativeAr).toFixed(2)}:1`);
+  if (movie.specs.atmos_mix?.value === true) chips.push('Atmos');
+  if (movie.specs.dolby_vision?.value === true) chips.push('Dolby Vision');
+  const entries = keySpecEntries(movie);
+  const verified = entries.filter((e) => e.spec.infoStatus === 'official' || e.spec.infoStatus === 'multi_source').length;
+  const trust = entries.length === 0 ? '확인 중' : verified === entries.length ? '정보 확인됨' : '일부 추정';
+
+  return (
+    <section className="rounded-card-lg bg-surface-raised p-3.5" aria-label="선택한 영화">
+      <div className="flex items-center gap-3.5">
+        {movie.posterUrl ? (
+          <Image src={movie.posterUrl} alt="" width={44} height={62} className="shrink-0 rounded-[6px] object-cover" />
+        ) : (
+          <div aria-hidden className="h-[62px] w-[44px] shrink-0 rounded-[6px] bg-surface-strong" />
+        )}
+        <div className="min-w-0 flex-1">
+          <p className="m-0 truncate text-[15.5px] font-bold text-text">
+            {movie.title}{' '}
+            {movie.releaseYear ? <span className="font-normal text-text-sub">({movie.releaseYear})</span> : null}
+          </p>
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            {chips.map((c) => (
+              <span key={c} className="rounded-full border border-border px-2 py-0.5 text-[11px] font-semibold tabular-nums text-text-sub">
+                {c}
+              </span>
+            ))}
+            <span className="text-[11.5px] text-text-tertiary">{trust}</span>
+          </div>
+        </div>
+      </div>
+      {entries.length > 0 ? (
+        <details className="mt-2">
+          <summary className="cursor-pointer text-[12px] font-medium text-text-tertiary hover:text-text-sub">
+            사양·출처 자세히
+          </summary>
+          <ul className="m-0 mt-2 flex list-none flex-col gap-1.5 p-0">
+            {entries.map(({ key, spec }) => (
+              <li key={key} className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px]">
+                <span className="text-text-sub">{SPEC_KEY_LABELS[key]}</span>
+                <strong className="font-semibold text-text">{formatSpecValue(key, spec)}</strong>
+                <TrustBadge status={spec.infoStatus} observedAt={spec.observedAt} />
+              </li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
+    </section>
+  );
+}
+
 // 토글 카드용 미니 스크린 일러스트 — 포맷마다 실제 화면비 모양(IMAX는 1.43:1로 세로가 큼,
 // 돌비는 음파 링, 일반관은 1.85:1)을 그대로 보여준다. CineFit 시그니처 그래픽 언어를
 // 폼 컨트롤 안까지 일관되게 유지하는 의도.
@@ -178,10 +255,24 @@ function SeatGlyph({ lit }: { lit: (r: number, c: number) => boolean }) {
 // 긴 한 페이지 폼 대신 3단계 guided flow — 단계는 화면에 하나씩만 보이지만 세 단계 입력이
 // 전부 같은 <form> 안에 마운트돼 있어(비활성 단계는 hidden) 최종 제출 페이로드는 이전과
 // 완전히 동일하다. Enter 제출도 마지막 단계 전에는 다음 단계로만 이동한다.
-export function RecommendForm({ movieId, defaultDate }: { movieId: number; defaultDate: string }) {
+export function RecommendForm({
+  movieId,
+  defaultDate,
+  movie,
+}: {
+  movieId: number;
+  defaultDate: string;
+  movie: MovieWithSpecs;
+}) {
   const router = useRouter();
+  const formRef = useRef<HTMLFormElement>(null);
   const [submitting, setSubmitting] = useState(false);
   const [step, setStep] = useState(0);
+  // 조건을 바꿀 때마다 "현재 조건에 맞는 후보 N개"를 실시간 조회(디바운스) — 결과 페이지와
+  // 같은 파서·서비스의 preview 모드를 쓰므로 실제 결과 개수와 항상 일치한다.
+  const [preview, setPreview] = useState<{ candidates: number; total: number } | null>(null);
+  const [formTick, setFormTick] = useState(0);
+  const [originVal, setOriginVal] = useState('cityhall');
   // 날짜는 퀵 칩(오늘/내일/모레) 선택 상태 표시를 위해 controlled — 값 자체는 여전히
   // name="date" 입력으로 폼 제출된다. 기준일은 서버가 준 defaultDate(앱 클럭의 오늘).
   const [dateVal, setDateVal] = useState(defaultDate);
@@ -207,6 +298,25 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
   }, []);
   const prefillKey = prefill ? 'prefilled' : 'initial';
 
+  // 실시간 후보 수 — 400ms 디바운스, 폼 데이터 그대로 조회(제출과 같은 buildQuery).
+  useEffect(() => {
+    const t = setTimeout(async () => {
+      const el = formRef.current;
+      if (!el) return;
+      try {
+        const qs = buildQuery(movieId, new FormData(el));
+        const r = await fetch(`/api/recommendations/preview-count?${qs.toString()}`);
+        if (r.ok) {
+          const j = (await r.json()) as { ok: boolean; candidates: number; total: number };
+          if (j.ok) setPreview({ candidates: j.candidates, total: j.total });
+        }
+      } catch {
+        /* 네트워크 실패 시 마지막 값 유지 — 카운트는 보조 정보라 조용히 넘어간다 */
+      }
+    }, 400);
+    return () => clearTimeout(t);
+  }, [movieId, formTick, dateVal, travelVal, priceVal, originVal, prefillKey]);
+
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     // 마지막 단계 전의 Enter/제출은 다음 단계로만 이동
@@ -215,44 +325,49 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
       return;
     }
     setSubmitting(true);
-    const fd = new FormData(e.currentTarget);
-    const qs = new URLSearchParams({
-      movieId: String(movieId),
-      date: String(fd.get('date')),
-      originId: String(fd.get('originId')),
-      maxTravelMinutes: String(fd.get('maxTravelMinutes')),
-      maxPrice: String(fd.get('maxPrice')),
-      priority: String(fd.get('priority')),
-      // 체크박스는 미체크 시 폼 데이터에 없으므로 명시적으로 true/false를 만든다
-      allowImax: String(fd.get('allowImax') === 'on'),
-      allowDolby: String(fd.get('allowDolby') === 'on'),
-      allowStandard: String(fd.get('allowStandard') === 'on'),
-      motionSickness: String(fd.get('motionSickness')),
-      subtitleReadability: String(fd.get('subtitleReadability') === 'on'),
-      neckComfort: String(fd.get('neckComfort') === 'on'),
-      wheelchair: String(fd.get('wheelchair') === 'on'),
-    });
+    const qs = buildQuery(movieId, new FormData(e.currentTarget));
     router.push(`/results?${qs.toString()}`);
   }
 
   return (
-    <form onSubmit={onSubmit} aria-label="추천 조건 입력" className="flex flex-col pb-4">
-      {/* 진행 표시 — 현재 단계는 와인 채움, 지나온 단계는 로즈 텍스트. */}
+    <form
+      ref={formRef}
+      onChange={() => setFormTick((t) => t + 1)}
+      onSubmit={onSubmit}
+      aria-label="추천 조건 입력"
+      className="pb-4"
+    >
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_290px] lg:items-start lg:gap-10">
+      <div className="flex min-w-0 flex-col">
+      {/* 모바일: 영화 요약을 폼 위에 compact로. 데스크톱은 우측 요약 패널이 담당. */}
+      <div className="mb-5 lg:hidden">
+        <MovieSummary movie={movie} />
+      </div>
+
+      {/* 진행 표시 — 완료 단계는 체크, 현재는 와인 채움, 연결선도 완료 구간은 로즈. */}
       <ol className="m-0 mb-6 flex list-none items-center gap-2 p-0" aria-label="입력 단계">
         {STEP_TITLES.map((t, i) => (
           <li key={t} className="flex min-w-0 items-center gap-2">
             <span
-              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-colors ${
                 i === step ? 'bg-primary-strong text-white' : i < step ? 'bg-primary-soft text-primary' : 'bg-surface-strong text-text-tertiary'
               }`}
               aria-current={i === step ? 'step' : undefined}
             >
-              {i + 1}
+              {i < step ? (
+                <svg viewBox="0 0 16 16" fill="none" className="h-3 w-3" aria-hidden>
+                  <path d="M3 8.2l3.2 3.2L13 4.6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              ) : (
+                i + 1
+              )}
             </span>
             <span className={`hidden truncate text-[13px] sm:block ${i === step ? 'font-semibold text-text' : 'text-text-tertiary'}`}>
               {t}
             </span>
-            {i < STEP_TITLES.length - 1 ? <span aria-hidden className="h-px w-4 shrink-0 bg-border sm:w-6" /> : null}
+            {i < STEP_TITLES.length - 1 ? (
+              <span aria-hidden className={`h-px w-4 shrink-0 transition-colors sm:w-6 ${i < step ? 'bg-primary/50' : 'bg-border'}`} />
+            ) : null}
           </li>
         ))}
       </ol>
@@ -311,7 +426,14 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
                   key={o.id}
                   className="flex min-h-10 cursor-pointer items-center justify-center rounded-[10px] bg-white/[0.04] px-2 text-center text-[13px] font-medium text-text-sub transition-colors hover:text-text has-[:checked]:bg-primary-strong has-[:checked]:font-semibold has-[:checked]:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary"
                 >
-                  <input type="radio" name="originId" value={o.id} defaultChecked={o.id === 'cityhall'} className="sr-only" />
+                  <input
+                    type="radio"
+                    name="originId"
+                    value={o.id}
+                    checked={originVal === o.id}
+                    onChange={() => setOriginVal(o.id)}
+                    className="sr-only"
+                  />
                   {o.label.replace(' 인근', '')}
                 </label>
               ))}
@@ -480,11 +602,53 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
         </fieldset>
       </StepSection>
       </div>
+      </div>
+
+      {/* 데스크톱 요약 패널 — 선택한 영화 + 현재 조건 + 실시간 후보 수. 조건을 조절할수록
+          결과가 좁혀지는 것이 바로 보인다. */}
+      <aside className="hidden lg:block" aria-label="현재 조건 요약">
+        <div className="sticky top-24 flex flex-col gap-4">
+          <MovieSummary movie={movie} />
+          <div className="rounded-card-lg bg-surface-raised p-4">
+            <p className="m-0 text-[12px] font-semibold uppercase tracking-wide text-text-sub">현재 조건</p>
+            <dl className="m-0 mt-2.5 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-[13.5px]">
+              <dt className="text-text-tertiary">날짜</dt>
+              <dd className="m-0 text-right font-medium tabular-nums text-text">{dateVal}</dd>
+              <dt className="text-text-tertiary">출발</dt>
+              <dd className="m-0 text-right font-medium text-text">
+                {ORIGIN_PRESETS.find((o) => o.id === originVal)?.label.replace(' 인근', '') ?? '-'}
+              </dd>
+              <dt className="text-text-tertiary">이동</dt>
+              <dd className="m-0 text-right font-medium tabular-nums text-text">{travelVal}분 이내</dd>
+              <dt className="text-text-tertiary">예산</dt>
+              <dd className="m-0 text-right font-medium tabular-nums text-text">{priceVal.toLocaleString('ko-KR')}원</dd>
+            </dl>
+            <div className="mt-3.5 border-t border-border pt-3.5" role="status" aria-live="polite">
+              {preview ? (
+                <>
+                  <p className="m-0 text-[14px] font-bold text-text">
+                    조건에 맞는 후보 <span className="text-primary">{preview.candidates}개</span>
+                  </p>
+                  <p className="m-0 mt-0.5 text-[12px] tabular-nums text-text-tertiary">전체 {preview.total}개 회차 중</p>
+                </>
+              ) : (
+                <p className="m-0 text-[13px] text-text-tertiary">후보 계산 중…</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </aside>
+      </div>
 
       <div
         className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/95 px-4 py-3 backdrop-blur-md"
         style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }}
       >
+        {preview ? (
+          <p className="m-0 mb-2 text-center text-[12px] text-text-sub lg:hidden" role="status">
+            현재 조건에 맞는 후보 <strong className="font-bold text-primary">{preview.candidates}개</strong>
+          </p>
+        ) : null}
         <div className="mx-auto flex max-w-content items-center gap-3">
           {step > 0 ? (
             <button

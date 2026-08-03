@@ -146,8 +146,11 @@ export function MovieList({ movies }: { movies: MovieWithSpecs[] }) {
                     {movie.runtimeMin}분
                     {movie.director ? ` · ${movie.director}` : ''}
                   </p>
-                  {/* 태그는 최대 2개 + 초과분 +N(R15 §4) — 모바일 스캔 피로를 줄인다. */}
-                  <div className="mt-1.5 flex flex-nowrap items-center gap-1.5 overflow-hidden">
+                  {/* 태그는 최대 2개 + 초과분 +N(R15 §4) — 모바일 스캔 피로를 줄인다. R16 §2:
+                      검증 상태를 "상영 정보 확인됨" 대신 짧은 "· 확인됨"으로 줄였다. overflow-hidden
+                      +nowrap은 "상영…"/"일부 추…"처럼 어절 중간을 잘랐다 — flex-wrap으로 바꿔 흔한
+                      경우(확인됨)는 한 줄, 긴 상태(일부 추정)만 다음 줄로 깔끔히 넘어가게 한다. */}
+                  <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1">
                     {formats.slice(0, 2).map((f) => (
                       <span key={f} className="shrink-0 rounded-full border border-border px-2 py-px text-[11px] font-medium text-text-sub">
                         {FORMAT_LABELS[f] ?? f}
@@ -156,7 +159,9 @@ export function MovieList({ movies }: { movies: MovieWithSpecs[] }) {
                     {formats.length > 2 ? (
                       <span className="shrink-0 text-[11px] font-medium tabular-nums text-text-tertiary">+{formats.length - 2}</span>
                     ) : null}
-                    <span className="truncate text-[12px] text-text-tertiary">상영 정보 {verificationSummary(movie)}</span>
+                    <span className="shrink-0 text-[12px] text-text-tertiary" title="상영 정보 확인 상태">
+                      · {verificationSummary(movie)}
+                    </span>
                   </div>
                 </div>
                 <IconChevronRight

@@ -143,31 +143,54 @@ export function DifferenceSummary({ picks }: { picks: Pick[] }) {
   );
 }
 
+/**
+ * R16 §1 — 픽 라벨(균형·품질·근접·가성비)을 속성 행마다 3번씩 반복하던 카드형(속성당 label+값)을
+ * 실제 표 구조로 바꿨다: 상단에 픽 라벨을 단 한 번만 두는 헤더 행 + 좌측 속성명 컬럼 + 값 컬럼들.
+ * 라벨 반복이 15회(속성 5 × 픽 3)에서 3회로 줄어 모바일에서도 한눈에 스캔된다.
+ * 컬럼 수는 런타임 값(picks.length=2~3)이라 Tailwind JIT를 피해 inline gridTemplateColumns로 준다.
+ */
 function RowList({ rows, picks }: { rows: Row[]; picks: Pick[] }) {
+  const gridStyle = { gridTemplateColumns: `minmax(4.25rem, 0.9fr) repeat(${picks.length}, minmax(0, 1fr))` };
   return (
-    <div className="divide-y divide-border">
-      {rows.map((row) => {
-        const winners = winnerIndices(row, picks);
-        return (
-          <div key={row.name} className="py-3">
-            <p className="m-0 text-[13px] font-semibold text-text-tertiary">{row.name}</p>
-            <div className="mt-1.5 grid grid-cols-3 gap-3">
+    <div role="table" aria-label="속성별 후보 비교">
+      {/* 헤더 — 픽 라벨을 한 번만 노출 */}
+      <div role="row" className="grid items-end gap-x-2.5 border-b border-border-strong pb-2" style={gridStyle}>
+        <span role="columnheader" className="text-[11.5px] font-medium text-text-tertiary">
+          항목
+        </span>
+        {picks.map((p) => (
+          <span key={p.label} role="columnheader" className="text-[12.5px] font-bold leading-tight text-text">
+            {p.label}
+          </span>
+        ))}
+      </div>
+      {/* 값 행 — 좌측 속성명 + 정렬된 값 컬럼(승자만 체크 아이콘 + 굵기) */}
+      <div className="divide-y divide-border">
+        {rows.map((row) => {
+          const winners = winnerIndices(row, picks);
+          return (
+            <div key={row.name} role="row" className="grid items-center gap-x-2.5 py-2.5" style={gridStyle}>
+              <span role="rowheader" className="text-[12.5px] font-medium text-text-tertiary">
+                {row.name}
+              </span>
               {picks.map((p, i) => {
                 const isWinner = winners.includes(i);
                 return (
-                  <div key={p.label} className="text-[14px] tabular-nums text-text">
-                    <span className="block text-[12px] font-medium text-text-tertiary">{p.label}</span>
-                    <span className={`inline-flex items-center gap-1 ${isWinner ? 'font-bold' : 'font-medium'}`}>
-                      {isWinner ? <IconCheckCircle className="h-3.5 w-3.5 shrink-0 text-trust-high" /> : null}
-                      {row.render(p.scored)}
-                    </span>
-                  </div>
+                  <span
+                    key={p.label}
+                    className={`inline-flex items-center gap-0.5 whitespace-nowrap text-[13.5px] tabular-nums ${
+                      isWinner ? 'font-bold text-text' : 'font-medium text-text-sub'
+                    }`}
+                  >
+                    {isWinner ? <IconCheckCircle className="h-3 w-3 shrink-0 text-trust-high" /> : null}
+                    {row.render(p.scored)}
+                  </span>
                 );
               })}
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -191,7 +214,7 @@ export function DetailedCompare({ picks }: { picks: Pick[] }) {
       : null;
 
   return (
-    <details>
+    <details data-testid="detailed-compare">
       <summary className="flex min-h-11 cursor-pointer items-center text-[14px] font-semibold text-primary hover:underline decoration-primary underline-offset-2">
         후보 {picks.length}개 자세히 비교 →
       </summary>

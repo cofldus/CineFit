@@ -64,6 +64,17 @@ test.describe('시각 회귀', () => {
     await expect(page).toHaveScreenshot('results-empty.png', { fullPage: true, ...SCREENSHOT_OPTS });
   });
 
+  test('추천 결과 — 상세 비교 펼침', async ({ page }) => {
+    await page.setViewportSize(VIEWPORTS.mobile);
+    await page.goto('/results?movieId=1&date=2026-07-28');
+    // "후보 N개 자세히 비교"를 펼쳐 R16 단일 헤더 비교표를 캡처한다(기본은 접힘 상태라
+    // 기존 results.png에는 잡히지 않던 커버리지 공백).
+    await page.getByText(/후보 \d+개 자세히 비교/).click();
+    const compare = page.getByTestId('detailed-compare');
+    await expect(compare.getByRole('table', { name: '속성별 후보 비교' }).first()).toBeVisible();
+    await expect(compare).toHaveScreenshot('compare-expanded.png', SCREENSHOT_OPTS);
+  });
+
   test('상영관 상세', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
     await page.goto('/cinemas/1');

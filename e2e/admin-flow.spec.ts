@@ -11,6 +11,9 @@ test('관리자 로그인 → 실제형 회차 등록 → 사용자 추천에 �
   // 2. 실제형 회차 등록 (합성 아님, 공식 예매 딥링크 포함)
   await page.goto('/admin/showtimes/new');
   await page.getByLabel('영화').selectOption({ index: 1 });
+  // 등록한 영화 제목을 기억해 뒤의 사용자 흐름에서 같은 영화로 진입한다 — /movies 목록은
+  // 기본 정렬(상영 정보 충분한 순, R15)이 있어 "첫 번째 링크"가 이 영화라는 보장이 없다.
+  const movieTitle = (await page.getByLabel('영화').locator('option:checked').innerText()).trim();
   await page.getByLabel('극장·상영관').selectOption({ label: 'CGV 용산아이파크몰 IMAX관 [imax]' });
   await page.getByLabel('상영 날짜').fill('2026-08-02');
   await page.getByLabel('시작 시각').fill('19:00');
@@ -26,7 +29,7 @@ test('관리자 로그인 → 실제형 회차 등록 → 사용자 추천에 �
 
   // 4~6. 사용자 흐름: 영화 선택 → 등록한 날짜로 조건 입력 → 추천 결과에 포함 확인
   await page.goto('/movies');
-  await page.locator('a[href^="/recommend/"]').first().click();
+  await page.locator('a[href^="/recommend/"]').filter({ hasText: movieTitle.split(' (')[0] }).first().click();
   await page.getByLabel('관람 날짜').fill('2026-08-02');
   // 3단계 flow — 날짜는 1단계에 있으므로 채운 뒤 단계별 CTA로 진행(R15 문구).
   await page.getByRole('button', { name: /우선순위 정하기/ }).click();

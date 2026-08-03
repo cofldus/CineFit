@@ -41,7 +41,7 @@ export function MovieCard({ movie, variant = 'detailed' }: { movie: MovieWithSpe
         event="movie_selected"
         eventProperties={{ movieId: movie.id }}
         href={`/recommend/${movie.id}`}
-        className="group block w-[85%] shrink-0 snap-start rounded-card-lg border border-border bg-surface p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-float focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:translate-y-0 sm:w-[250px]"
+        className="group block w-[85%] shrink-0 snap-start rounded-card-lg border border-border bg-surface p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-float focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:translate-y-0 sm:w-auto"
       >
         {/* 화면비 프레임 — 실제 극장의 마스킹 원리: 외곽 프레임(스크린 벽)은 모든 카드에서
             동일한 2.39:1로 고정되고(행 정렬 유지), 영화의 실제 화면비만큼만 안쪽 화면이

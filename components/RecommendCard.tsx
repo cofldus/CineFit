@@ -451,7 +451,7 @@ export function RecommendCard({
 
   return (
     <article
-      className="rounded-card-lg border border-border bg-surface p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-float"
+      className="flex w-full flex-col rounded-card-lg border border-border bg-surface p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-float"
       aria-labelledby={`pick-${rank}-title`}
       data-testid={`pick-${label}`}
     >
@@ -497,7 +497,10 @@ export function RecommendCard({
         상세 보기 →
       </Link>
 
-      <DetailPanel scored={scored} restPros={restPros} tone="plain" />
+      {/* 레일에서 카드 높이가 늘어나도 빈 공간이 카드 중간에 뜨지 않게 하단 밀착 */}
+      <div className="mt-auto">
+        <DetailPanel scored={scored} restPros={restPros} tone="plain" />
+      </div>
     </article>
   );
 }

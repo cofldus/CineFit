@@ -114,7 +114,7 @@ export function MovieList({ movies }: { movies: MovieWithSpecs[] }) {
                       style={{
                         width: `${(clampedAr / RATIO_MAX) * 100}%`,
                         background:
-                          'linear-gradient(180deg, rgba(93, 24, 40, 0.45) 0%, rgba(46, 33, 37, 0.95) 60%, rgba(30, 24, 26, 0.98) 100%)',
+                          'linear-gradient(180deg, rgba(135, 43, 66, 0.48) 0%, rgba(64, 42, 49, 0.95) 60%, rgba(38, 28, 31, 0.98) 100%)',
                       }}
                     >
                       <span

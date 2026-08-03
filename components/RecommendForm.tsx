@@ -258,7 +258,7 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
       </ol>
 
       <div className={step === 0 ? 'stage-enter' : 'hidden'}>
-      <StepSection step={1} title="언제, 어디서 볼까요?" first>
+      <StepSection step={1} title="언제, 어디서 볼까요?" first numbered={false}>
         <div className="flex flex-col gap-2.5">
           {/* 날짜 — 대부분의 선택은 오늘/내일/모레 퀵 칩으로 끝나고, 다른 날짜만 입력 필드를
               쓴다(네이티브 달력 팝업 의존 최소화). */}
@@ -385,7 +385,7 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
       </div>
 
       <div className={step === 1 ? 'stage-enter' : 'hidden'}>
-      <StepSection step={2} title="무엇을 가장 중요하게 보나요?" first>
+      <StepSection step={2} title="무엇을 가장 중요하게 보나요?" first numbered={false}>
         <fieldset className="m-0 border-0 p-0" key={prefillKey}>
           <legend className="mb-2 block text-sm font-semibold text-text">가장 중요한 것</legend>
           <div className="grid gap-2.5 sm:grid-cols-3" role="radiogroup" aria-label="가장 중요한 것">
@@ -445,7 +445,7 @@ export function RecommendForm({ movieId, defaultDate }: { movieId: number; defau
       </div>
 
       <div className={step === 2 ? 'stage-enter' : 'hidden'}>
-      <StepSection step={3} title="피하고 싶은 조건이 있나요?" first>
+      <StepSection step={3} title="피하고 싶은 조건이 있나요?" first numbered={false}>
         <SegmentedControl
           key={prefillKey}
           name="motionSickness"

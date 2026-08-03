@@ -21,7 +21,7 @@ export function HomeClosing() {
   return (
     <section className="enter-3 px-5 py-14 sm:px-10 sm:py-16">
       <div className="mx-auto max-w-wide">
-        <h2 className="m-0 text-xl font-bold text-text">CineFit이 비교하는 것</h2>
+        <h2 className="type-display m-0 text-[22px] text-text sm:text-[26px]">CineFit이 비교하는 것</h2>
         <div className="mt-8 flex flex-col gap-8 sm:flex-row sm:items-start sm:gap-6">
           {STEPS.map((s, i) => (
             <div key={s.n} className="flex flex-col gap-8 sm:flex-1 sm:flex-row sm:items-start sm:gap-6">

@@ -66,12 +66,12 @@ export function ScreeningHero() {
 
   return (
     <section className="enter-1 px-5 pb-12 pt-10 sm:px-10 sm:pt-16 lg:pb-16">
-      <div className="mx-auto grid max-w-wide items-center gap-10 lg:min-h-[72vh] lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-14">
+      <div className="mx-auto grid max-w-wide items-center gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-14">
         {/* 좌: 헤드라인·설명·CTA */}
         <div>
           <h1 className="m-0 flex flex-col gap-1 break-keep">
             <span
-              className="hero-word type-display block text-[6vw] text-text-sub sm:text-[24px]"
+              className="hero-word type-display block text-[6vw] text-text/75 sm:text-[24px]"
               style={{ animationDelay: '0ms' }}
             >
               이 영화,
@@ -172,7 +172,7 @@ export function ScreeningHero() {
                   style={{
                     width: `${(current.ratio / MAX_RATIO) * 100}%`,
                     background:
-                      'linear-gradient(180deg, rgba(93, 24, 40, 0.45) 0%, rgba(46, 33, 37, 0.95) 55%, rgba(30, 24, 26, 0.98) 100%)',
+                      'linear-gradient(180deg, rgba(135, 43, 66, 0.48) 0%, rgba(64, 42, 49, 0.95) 55%, rgba(38, 28, 31, 0.98) 100%)',
                   }}
                 >
                   <span
@@ -180,9 +180,19 @@ export function ScreeningHero() {
                     className="absolute inset-x-3 top-0 h-px"
                     style={{ background: 'linear-gradient(90deg, transparent, rgba(201, 111, 132, 0.85), transparent)' }}
                   />
-                  <span className="whitespace-nowrap text-[21px] font-light tracking-[0.16em] tabular-nums text-hero-text sm:text-[25px]">
-                    {current.ratio.toFixed(2)}:1
+                  <span className="flex flex-col items-center gap-1.5">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.3em] text-hero-text-sub">
+                      {current.format}
+                    </span>
+                    <span className="whitespace-nowrap text-[21px] font-light tracking-[0.16em] tabular-nums text-hero-text sm:text-[25px]">
+                      {current.ratio.toFixed(2)}:1
+                    </span>
                   </span>
+                  <span
+                    aria-hidden
+                    className="absolute inset-x-6 bottom-0 h-px"
+                    style={{ background: 'linear-gradient(90deg, transparent, rgba(201, 111, 132, 0.45), transparent)' }}
+                  />
                 </div>
                 {isImax ? (
                   <span className="absolute right-2.5 top-2 rounded-full border border-primary px-2 py-px text-[10px] font-bold uppercase tracking-wide text-primary">

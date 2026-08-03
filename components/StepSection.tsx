@@ -7,18 +7,23 @@ export function StepSection({
   title,
   children,
   first = false,
+  numbered = true,
 }: {
   step: number;
   title: string;
   children: ReactNode;
   first?: boolean;
+  /** 바깥에 별도 진행 표시가 있는 flow(추천 폼)에서는 번호 원을 숨겨 중복을 없앤다. */
+  numbered?: boolean;
 }) {
   return (
     <section className={first ? 'pt-0' : 'mt-6 border-t border-border pt-6'}>
       <h2 className="m-0 mb-4 flex items-center gap-2.5 text-base font-bold text-text">
-        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-strong text-xs font-bold text-white">
-          {step}
-        </span>
+        {numbered ? (
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-strong text-xs font-bold text-white">
+            {step}
+          </span>
+        ) : null}
         {title}
       </h2>
       <div className="flex flex-col gap-4">{children}</div>

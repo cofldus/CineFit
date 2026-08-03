@@ -9,6 +9,7 @@ import { ShowtimeStatusBadge } from '../../../components/StatusBadge';
 import { TrustBadge } from '../../../components/TrustBadge';
 import { cinemaRepository } from '../../../src/data/cinemaRepository';
 import { getAppClock } from '../../../src/lib/clock';
+import { humanizeObservationField, humanizeObservationValue } from '../../../src/lib/observationDisplay';
 
 export const metadata: Metadata = { title: '상영관 상세' };
 export const dynamic = 'force-dynamic';
@@ -66,15 +67,19 @@ export default async function AuditoriumDetailPage({
   const current = detail.specHistory.find((s) => s.validTo === null) ?? detail.specHistory[0] ?? null;
   const history = detail.specHistory.filter((s) => s !== current);
 
+  // 모바일 하단 내비게이션과 콘텐츠가 겹치지 않도록 여유 있는 하단 패딩 + safe-area(R15 §7).
   return (
-    <main className="cinema-scope min-h-dvh max-w-none bg-bg px-4 pb-24 pt-6">
+    <main
+      className="cinema-scope min-h-dvh max-w-none bg-bg px-4 pt-6"
+      style={{ paddingBottom: 'calc(8rem + env(safe-area-inset-bottom))' }}
+    >
       {/* 다크 배경은 main이 전폭으로 채우고, 내용만 아래 래퍼로 제한한다(넓은 화면에서
           밝은 여백이 드러나지 않게). */}
       <div className="mx-auto max-w-wide">
       {/* 1. 상영관 이름·위치·핵심 특징 — 상단 요약을 더 강하게, 줄바꿈이 어색한 지점에서
           끊기지 않도록 관 이름은 통째로 줄바꿈되게 한다. */}
       <p className="m-0 text-[13px] font-bold uppercase tracking-[0.08em] text-accent">{detail.location.chain}</p>
-      <h1 className="m-0 mt-2 text-balance font-headline text-[32px] font-extrabold tracking-[-0.02em] text-text sm:text-[38px]">
+      <h1 className="type-display m-0 mt-2 text-[30px] sm:text-[36px]">
         {detail.location.name} <span className="whitespace-nowrap">{detail.no}</span>
       </h1>
       <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -183,16 +188,15 @@ export default async function AuditoriumDetailPage({
         )}
       </section>
 
-      {/* 6. 상세 사양 — 접이식으로 격하(더 이상 예정 회차보다 먼저 보이지 않는다). 과하게
-          박스화하지 않도록 카드 테두리 없이 구분선 하나로만 앞뒤 섹션과 나눈다. */}
-      <details className="mt-8 border-t border-border pt-6">
-        <summary className="flex min-h-11 cursor-pointer items-center text-lg font-bold text-text">
-          상영관 사양
-        </summary>
+      {/* 6. 상영관 사양(R15 §7) — 접이식이 아니라 실제 정보 카드로 채운다: 스크린·영사·
+          사운드·좌석·데이터 상태. 값이 없는 항목은 "실측 정보 없음"으로 정직하게. */}
+      <section aria-label="상영관 사양" className="mt-8 border-t border-border pt-6">
+        <h2 className="m-0 text-lg font-bold text-text">상영관 사양</h2>
 
         {current ? (
-          <div className="mt-3">
+          <div className="mt-3 max-w-content rounded-card-lg bg-surface-raised p-4">
             <div className="flex flex-col gap-1.5">
+              <SpecRow label="좌석 수" value={detail.seatCount ? `${detail.seatCount}석` : null} />
               <SpecRow
                 label="영사기"
                 value={[
@@ -253,8 +257,10 @@ export default async function AuditoriumDetailPage({
         )}
 
         {history.length > 0 ? (
-          <div className="mt-4 border-t border-border pt-4">
-            <h3 className="m-0 text-sm font-bold text-text">사양 변경 이력</h3>
+          <details className="mt-4 max-w-content border-t border-border pt-4">
+            <summary className="flex min-h-11 cursor-pointer items-center text-sm font-bold text-text">
+              사양 변경 이력
+            </summary>
             <ul className="m-0 mt-2 flex list-none flex-col gap-2 p-0 text-sm">
               {history.map((h, i) => (
                 <li key={i} className="rounded-card bg-surface-strong px-4 py-3">
@@ -266,11 +272,11 @@ export default async function AuditoriumDetailPage({
                 </li>
               ))}
             </ul>
-          </div>
+          </details>
         ) : null}
-      </details>
+      </section>
 
-      {/* 7. 출처·근거 기록 */}
+      {/* 7. 출처·근거 기록 — 내부 필드 키·코드값을 사용자 언어로 변환해 노출(R15 §7). */}
       {detail.observations.length > 0 ? (
         <section aria-label="근거 기록" className="mt-6">
           <h2 className="text-lg font-bold text-text">근거 기록</h2>
@@ -278,8 +284,8 @@ export default async function AuditoriumDetailPage({
           <ul className="m-0 mt-3 flex list-none flex-col gap-1.5 p-0 text-sm">
             {detail.observations.map((o, i) => (
               <li key={i} className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                <span className="text-text-sub">{o.field}</span>
-                <span className="font-medium text-text">{String(o.value)}</span>
+                <span className="text-text-sub">{humanizeObservationField(o.field)}</span>
+                <span className="font-medium text-text">{humanizeObservationValue(o.value)}</span>
                 <TrustBadge status={o.infoStatus} observedAt={o.observedAt} />
                 <span className="text-text-sub">{o.sourceName ?? '출처 없음'}</span>
               </li>

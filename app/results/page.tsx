@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { DetailedCompare, DifferenceSummary } from '../../components/CompareTable';
+import { ShareLinkButton } from '../../components/ShareLinkButton';
+import { INFO_STATUS_LABELS } from '../../src/domain/recommendation/presets';
 import { pickPersonality } from '../../src/lib/display';
 import { FeedbackWidget } from '../../components/FeedbackWidget';
 import { IconLightbulb } from '../../components/Icon';
@@ -177,13 +179,22 @@ export default async function ResultsPage({
                 scored={result.picks[0].scored}
                 request={result.request}
                 nativeAr={result.movie.specs.native_ar ? Number(result.movie.specs.native_ar.value) || null : null}
+                nativeArStatus={
+                  result.movie.specs.native_ar
+                    ? (INFO_STATUS_LABELS[result.movie.specs.native_ar.infoStatus] ?? '추정')
+                    : null
+                }
               />
             ) : null}
 
+            {/* 2·3위 모바일: viewport-48px 폭 + snap — 다음 카드가 28px만 살짝 보인다(R15 §6). */}
             {result.picks.length > 1 ? (
               <div className="enter-4 -mx-5 mt-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-1 sm:mx-0 sm:px-0 sm:pb-0 lg:mt-0 lg:flex-col lg:overflow-visible">
                 {result.picks.slice(1).map((p, i) => (
-                  <div key={p.scored.candidate.showtimeId} className="flex w-[86%] shrink-0 snap-start sm:w-[70%] lg:w-auto lg:shrink">
+                  <div
+                    key={p.scored.candidate.showtimeId}
+                    className="flex w-[calc(100vw-48px)] shrink-0 snap-start sm:w-[70%] lg:w-auto lg:shrink"
+                  >
                     <RecommendCard
                       rank={i + 2}
                       label={p.label}
@@ -205,17 +216,56 @@ export default async function ResultsPage({
               여기서는 관점별 결론(가장 좋은 상영 환경/가장 저렴/가장 짧은 이동)만 남기고
               각 항목에서 해당 후보 카드로 바로 이동할 수 있게 한다(R14 §9F). */}
           {result.picks.length > 1 ? (
-            <section className="enter-5 mt-10 max-w-content">
+            <section id="compare-rail" className="enter-5 mt-10 max-w-content">
               <h2 className="m-0 text-[21px] font-bold text-text">1위와 비교하면</h2>
               <div className="mt-2">
                 <DifferenceSummary picks={result.picks} />
               </div>
+              {/* 상세 비교는 이 섹션의 액션으로 통합 — 빈 "세부 수치 비교" 문구 단독 노출 금지. */}
+              <div className="mt-3">
+                <DetailedCompare picks={result.picks} />
+              </div>
             </section>
           ) : null}
 
-          {/* 6. 상세 비교 */}
-          <section className="enter-5 mt-8 max-w-content">
-            <DetailedCompare picks={result.picks} />
+          {/* 6. 다음 행동(R15 §6) — 결과를 본 뒤 바로 할 수 있는 4가지. 합성 데이터면 공식
+              예매 확인이 왜 비활성인지 명확히 적는다. */}
+          <section className="enter-5 mt-10 max-w-content">
+            <h2 className="m-0 text-[21px] font-bold text-text">다음 행동</h2>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              {result.picks[0]?.scored.candidate.bookingUrl && !result.picks[0].scored.candidate.isSynthetic ? (
+                <a
+                  href={result.picks[0].scored.candidate.bookingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  className="btn-cta flex min-h-12 items-center justify-center rounded-card bg-primary-strong px-4 text-[14.5px] font-semibold text-white hover:bg-primary-strong-hover"
+                >
+                  공식 상영시간표·예매 확인 ↗
+                </a>
+              ) : (
+                <span
+                  aria-disabled
+                  className="flex min-h-12 items-center justify-center rounded-card border border-border px-4 text-center text-[13px] leading-snug text-text-tertiary"
+                >
+                  검증용 합성 회차라 공식 예매 페이지가 없어요
+                </span>
+              )}
+              <Link
+                href={`/recommend/${result.movie.id}`}
+                className="flex min-h-12 items-center justify-center rounded-card border border-border px-4 text-[14.5px] font-medium text-text transition-colors hover:border-border-strong"
+              >
+                조건 수정하기
+              </Link>
+              {result.picks.length > 1 ? (
+                <a
+                  href="#compare-rail"
+                  className="flex min-h-12 items-center justify-center rounded-card border border-border px-4 text-[14.5px] font-medium text-text transition-colors hover:border-border-strong"
+                >
+                  다른 후보 비교
+                </a>
+              ) : null}
+              <ShareLinkButton className="flex min-h-12 items-center justify-center rounded-card border border-border px-4 text-[14.5px] font-medium text-text transition-colors hover:border-border-strong" />
+            </div>
           </section>
 
           {/* 7. 피드백 — 짧은 2버튼 질문이 먼저, 긴 선택 기록은 접힌 패널로(설문이 결과보다

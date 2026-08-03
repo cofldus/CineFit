@@ -345,6 +345,7 @@ export function RecommendCard({
   request,
   top,
   nativeAr,
+  nativeArStatus,
   personality,
 }: {
   rank: number;
@@ -356,6 +357,8 @@ export function RecommendCard({
   top?: ScoredCandidate;
   /** 영화의 실제 기본 화면비(native_ar) — 대표 카드 스크린 그래픽에만 사용 */
   nativeAr?: number | null;
+  /** native_ar 값의 확인 상태 라벨("공식 확인"/"추정" 등) — 화면비 시각화 캡션용 */
+  nativeArStatus?: string | null;
   /** 전체 픽 중 단독 최댓값/최솟값일 때만 부여되는 성격 배지("가장 저렴" 등) */
   personality?: string | null;
 }) {
@@ -399,7 +402,7 @@ export function RecommendCard({
         </h2>
         {/* 왜 이겼는지 한 줄 — 계산된 축 값에서 파생한 요약(새 사실 없음). */}
         <p className="m-0 mt-2.5 max-w-xl text-[15px] leading-relaxed text-hero-text-sub">
-          {winnerVerdict(scored)}
+          {winnerVerdict(scored, request)}
         </p>
 
         {/* 우측 레일 높이에 맞춰 카드가 늘어날 때 남는 공간을 시각화 블록 위·아래로 균등
@@ -411,12 +414,19 @@ export function RecommendCard({
           <div className="mx-auto flex w-full max-w-[300px] flex-col items-center @3xl:mx-0">
             {nativeAr ? (
               <>
+                {/* 화면비 구분 표시(R15 §6): 영화 비율 / 스크린 기준 비율을 함께 라벨링. */}
+                <p className="m-0 mb-1 flex w-full items-baseline justify-between text-[10.5px] tabular-nums text-hero-text-sub">
+                  <span>
+                    영화 <strong className="font-semibold text-hero-text">{nativeAr.toFixed(2)}:1</strong>
+                  </span>
+                  <span>스크린 기준 {RATIO_ENVELOPE}:1</span>
+                </p>
                 <div
                   aria-hidden
                   className="relative flex w-full items-center justify-center overflow-hidden rounded-[8px] border border-white/10 bg-[#0d0b0c]"
                   style={{ aspectRatio: `${RATIO_ENVELOPE} / 1` }}
                 >
-                  {/* 켜진 화면 — 실제 화면비만큼만. 남는 좌우는 어두운 마스킹. */}
+                  {/* 켜진 화면 — 실제 화면비만큼만. 남는 좌우는 어두운 마스킹(예상 여백). */}
                   <div
                     className="relative flex h-full items-center justify-center overflow-hidden"
                     style={{
@@ -433,9 +443,15 @@ export function RecommendCard({
                       {nativeAr.toFixed(2)}:1
                     </span>
                   </div>
+                  {nativeAr < RATIO_ENVELOPE - 0.05 ? (
+                    <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8.5px] uppercase tracking-wide text-hero-text-sub/70">
+                      여백
+                    </span>
+                  ) : null}
                 </div>
-                <p aria-hidden className="m-0 mb-3 mt-1 text-[9px] font-semibold uppercase tracking-[0.25em] text-hero-text-sub">
-                  Screen
+                <p className="m-0 mb-3 mt-1 flex w-full items-baseline justify-between text-[9.5px] text-hero-text-sub">
+                  <span aria-hidden className="font-semibold uppercase tracking-[0.25em]">Screen</span>
+                  <span>{nativeArStatus ?? '추정'}</span>
                 </p>
               </>
             ) : null}
@@ -452,9 +468,11 @@ export function RecommendCard({
                 <div>
                   <p className="m-0 text-[12px] font-bold uppercase tracking-wide text-hero-text-sub">이 선택에서 얻는 것</p>
                   <ul className="m-0 mt-1.5 flex list-none flex-col gap-1.5 p-0">
+                    {/* 좋은 점/감안할 점은 초록·빨강 대립이 아니라 아이보리·amber 명도 차로
+                        구분한다(R15 §6). */}
                     {gains.map((g) => (
                       <li key={g} className="flex items-start gap-1.5 text-[14px] leading-snug text-hero-text">
-                        <IconCheckCircle aria-hidden className="mt-0.5 h-3.5 w-3.5 shrink-0 text-trust-high" />
+                        <IconCheckCircle aria-hidden className="mt-0.5 h-3.5 w-3.5 shrink-0 text-cream" />
                         {g}
                       </li>
                     ))}
@@ -467,7 +485,7 @@ export function RecommendCard({
                   <ul className="m-0 mt-1.5 flex list-none flex-col gap-1.5 p-0">
                     {tradeoffs.map((t) => (
                       <li key={t} className="flex items-start gap-1.5 text-[14px] leading-snug text-hero-text-sub">
-                        <IconThumbsDown aria-hidden className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                        <IconThumbsDown aria-hidden className="mt-0.5 h-3.5 w-3.5 shrink-0 text-trust-mid" />
                         {t}
                       </li>
                     ))}

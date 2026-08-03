@@ -108,22 +108,24 @@ export function SeatMap({ zones }: { zones: SeatZone[] }) {
             aria-label={`${[active.rowRange, active.colRange].filter(Boolean).join(' ') || '전체'} 구역 개략도`}
           >
             {ROW_LETTERS.map((letter, r) => {
-              // 원근감 — 스크린(위)에서 멀어질수록 좌석이 조금 커지고 기본 밝기도 올라간다.
+              // 원근감 — 스크린(위)에서 멀어질수록 좌석이 조금 커진다. 일반 좌석은 옅게
+              // (18~24%), 추천 인접부는 중간(35~45%), 핵심 추천은 진하게(75~90%) — 대비를
+              // 3단으로 명확히 벌린다(R15 §7).
               const depth = r / (ROW_LETTERS.length - 1);
               const seatH = 7 + depth * 3.5;
-              const baseOpacity = 0.45 + depth * 0.35;
+              const baseOpacity = 0.18 + depth * 0.06;
               return (
                 <div key={letter} className="flex items-center gap-[3px]">
-                  <span aria-hidden className="w-3 shrink-0 text-right text-[9px] text-hero-text-sub">
+                  <span aria-hidden className="w-3 shrink-0 text-right text-[9.5px] font-medium text-hero-text">
                     {letter}
                   </span>
                   <div className="flex flex-1 gap-[3px]">
                     {Array.from({ length: COL_COUNT }, (_, c) => {
                       const inBlock = r >= rowStart && r <= rowEnd && c >= colStart && c <= colEnd;
                       const d = Math.sqrt(((r - r0) / rSpanHalf) ** 2 + ((c - c0) / cSpanHalf) ** 2);
-                      const heat = inBlock ? Math.max(0.35, 1 - d * 0.6) : Math.max(0, 1 - d) * 0.35;
-                      const lit = !weak && heat > 0.08;
-                      const core = !weak && inBlock && heat > 0.75;
+                      const core = !weak && inBlock && d <= 0.6;
+                      const adjacent = !weak && !core && (inBlock || d <= 1);
+                      const mix = core ? 85 : adjacent ? Math.round(45 - Math.min(1, d) * 10) : 0;
                       return (
                         <span
                           key={c}
@@ -136,10 +138,8 @@ export function SeatMap({ zones }: { zones: SeatZone[] }) {
                             transitionDelay: `${Math.round(d * 45)}ms`,
                             ...(weak && inBlock
                               ? {}
-                              : lit
-                                ? {
-                                    background: `color-mix(in oklab, var(--primary) ${Math.round(18 + heat * 82)}%, var(--hero-soft))`,
-                                  }
+                              : mix > 0
+                                ? { background: `color-mix(in oklab, var(--primary) ${mix}%, var(--hero-soft))` }
                                 : { background: 'var(--hero-soft)', opacity: baseOpacity }),
                             ...(core ? { animationDelay: `${Math.round(d * 260)}ms` } : {}),
                           }}

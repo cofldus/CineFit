@@ -108,9 +108,15 @@ export function keySpecEntries(movie: MovieWithSpecs): { key: MovieSpecKey; spec
   });
 }
 
-// 1위 카드의 "왜 이겼는지 한 줄" — 새 사실을 만들지 않고, 이미 계산된 축 값 중 가장 높은
-// 축과 순위 사실(final 최고)만으로 요약한다.
-export function winnerVerdict(scored: ScoredCandidate): string {
+// 1위 카드의 결론(R15 §6) — 사용자의 선택 기준(priority)을 포함한 문장 + 예산·이동 대비
+// 실제 델타 문장. 전부 이미 계산된 값에서만 파생한다(새 사실 없음).
+const PRIORITY_PHRASE: Record<RecommendationRequest['priority'], string> = {
+  balance: '균형을 우선한',
+  quality: '화면·음향을 우선한',
+  logistics: '이동·가격을 우선한',
+};
+
+export function winnerVerdict(scored: ScoredCandidate, request: RecommendationRequest): string {
   const axes: [string, number][] = [
     ['화면·음향', scored.axes.audQ],
     ['좌석 적합', scored.axes.seatQ],
@@ -118,7 +124,12 @@ export function winnerVerdict(scored: ScoredCandidate): string {
     ['가격 적합', scored.axes.pv],
   ];
   const strongest = axes.reduce((a, b) => (b[1] > a[1] ? b : a));
-  return `${strongest[0]}이 특히 좋고, 입력한 조건 전체에서 종합 적합도가 가장 높은 선택이에요.`;
+  const first = `${PRIORITY_PHRASE[request.priority]} 조건에서 ${strongest[0]}이 특히 좋고, 종합 적합도가 가장 높습니다.`;
+  const priceSlack = request.maxPrice - scored.candidate.priceAdult;
+  const travelSlack = request.maxTravelMinutes - scored.travelMinutes;
+  const pricePart = priceSlack > 0 ? `예산보다 ${priceSlack.toLocaleString('ko-KR')}원 낮고` : '예산에 맞고';
+  const travelPart = travelSlack > 0 ? `이동시간도 기준보다 ${travelSlack}분 여유가 있습니다` : '이동시간도 기준 안에 들어옵니다';
+  return `${first} ${pricePart}, ${travelPart}.`;
 }
 
 // 2·3위 카드의 성격 배지 — 전체 픽 중에서 "단독 최솟값/최댓값"일 때만 부여한다(동률이면

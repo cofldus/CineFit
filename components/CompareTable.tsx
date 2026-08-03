@@ -192,8 +192,8 @@ export function DetailedCompare({ picks }: { picks: Pick[] }) {
 
   return (
     <details>
-      <summary className="flex min-h-11 cursor-pointer items-center text-[13.5px] font-medium text-text hover:underline decoration-border-strong underline-offset-2">
-        세부 수치 비교
+      <summary className="flex min-h-11 cursor-pointer items-center text-[14px] font-semibold text-primary hover:underline decoration-primary underline-offset-2">
+        후보 {picks.length}개 자세히 비교 →
       </summary>
 
       <div className="mt-4">

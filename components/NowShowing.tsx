@@ -5,10 +5,11 @@ import type { MovieWithSpecs } from '../src/domain/recommendation/types';
 import { MovieCard } from './MovieCard';
 
 /**
- * "지금 볼 수 있는 영화" — 데스크톱은 콘텐츠 폭 전체를 쓰는 그리드(영화 개수만큼 열을
- * 잡는다 — 4열로 고정했더니 영화가 3편일 때 오른쪽에 빈 열이 그대로 남는 문제가 있었다).
- * 모바일은 카드 85% 폭 + 다음 카드가 살짝 보이는 가로 스크롤이고, 스크롤 위치를 추적해
- * 아래 진행 점으로 표시한다.
+ * "지금 볼 수 있는 영화" — 모든 화면에서 고정 폭 카드의 가로 스크롤 캐러셀.
+ * 이전의 "영화 개수만큼 열을 잡는 데스크톱 그리드"는 실제 카탈로그가 13편으로 늘어나자
+ * 13열로 짜부되는 사고가 났다(실데이터 확충 직후 실측) — 카드 폭을 고정하고 개수는
+ * 스크롤로 흡수하는 구조가 개수 변화에 안전하다. 모바일은 다음 카드가 살짝 보이는
+ * 85% 폭 + 진행 점, 데스크톱은 250px 고정 폭.
  */
 export function NowShowing({ movies }: { movies: MovieWithSpecs[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -33,18 +34,17 @@ export function NowShowing({ movies }: { movies: MovieWithSpecs[] }) {
           <div
             ref={scrollRef}
             onScroll={onScroll}
-            className="mt-4 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 sm:grid sm:gap-5 sm:overflow-visible sm:pb-0"
-            style={{ gridTemplateColumns: `repeat(${movies.length}, minmax(0, 1fr))` }}
+            className="mt-4 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 sm:gap-5"
           >
             {movies.map((m) => (
               <MovieCard key={m.id} movie={m} variant="compact" />
             ))}
           </div>
-          {/* 다음 카드의 바깥 테두리만 살짝 보이게 하고, 넘어간 글자는 배경색으로 페이드아웃해서
-              가려지지 않게 한다("잘린 글자가 보이면 안 된다" 요구사항) — 데스크톱 그리드에서는 뺀다. */}
+          {/* 넘어간 카드의 글자가 반쯤 잘려 보이지 않게 오른쪽 가장자리를 배경색으로
+              페이드아웃 — 이제 모든 화면이 캐러셀이라 데스크톱에도 적용한다. */}
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-bg to-transparent sm:hidden"
+            className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-bg to-transparent"
           />
         </div>
         {movies.length > 1 ? (

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { FormatId, PickLabel, RecommendationRequest, ScoredCandidate } from '../src/domain/recommendation/types';
 import { FORMAT_LABELS } from '../src/domain/recommendation/presets';
-import { categorizeReason, citationsTrustSummary, coreConditionsSummary, pct, REASON_CATEGORY_LABEL } from '../src/lib/display';
+import { categorizeReason, citationsTrustSummary, coreConditionsSummary, pct, REASON_CATEGORY_LABEL, winnerVerdict } from '../src/lib/display';
 import { IconArrowRight, IconCheckCircle, IconFilm, IconNote, IconPrice, IconQuestion, IconThumbsDown, IconTransit, IconWrench } from './Icon';
 import { TrackedExternalLink } from './TrackedLink';
 import { TrustBadge } from './TrustBadge';
@@ -27,7 +27,7 @@ const PREMIUM_FORMATS = new Set<FormatId>(['imax', 'dolby_cinema']);
 // 2·3위 카드 제목에 붙는 "1위와의 핵심 차이" — 이미 계산된 가격·이동시간·포맷 값만 비교해
 // 만든 문장이다(새 수치를 만들지 않음). 장점 1개 + 트레이드오프 1개가 모두 있으면
 // "…지만 …" 형태로 잇는다.
-function diffVsTop(scored: ScoredCandidate, top: ScoredCandidate): string | null {
+export function diffVsTop(scored: ScoredCandidate, top: ScoredCandidate): string | null {
   const c = scored.candidate;
   const t = top.candidate;
   const pros: string[] = [];
@@ -122,14 +122,16 @@ function MiniSeatMap({ zone }: { zone: string }) {
   );
 }
 
-function ReasonBlock({ reason, tone }: { reason: string; tone: 'hero' | 'plain' }) {
+function ReasonBlock({ reason, tone, showLabel = true }: { reason: string; tone: 'hero' | 'plain'; showLabel?: boolean }) {
   const label = REASON_CATEGORY_LABEL[categorizeReason(reason)];
   return (
     <div>
-      <p className={`m-0 text-[12.5px] font-semibold uppercase tracking-wide ${tone === 'hero' ? 'text-hero-text-sub' : 'text-text-sub'}`}>
-        {label}
-      </p>
-      <p className={`m-0 mt-1 text-[15.5px] leading-relaxed ${tone === 'hero' ? 'text-hero-text' : 'text-text'}`}>{reason}</p>
+      {showLabel ? (
+        <p className={`m-0 text-[12.5px] font-semibold uppercase tracking-wide ${tone === 'hero' ? 'text-hero-text-sub' : 'text-text-sub'}`}>
+          {label}
+        </p>
+      ) : null}
+      <p className={`m-0 ${showLabel ? 'mt-1' : 'mt-0.5'} text-[15.5px] leading-relaxed ${tone === 'hero' ? 'text-hero-text' : 'text-text'}`}>{reason}</p>
     </div>
   );
 }
@@ -269,6 +271,7 @@ export function RecommendCard({
   request,
   top,
   nativeAr,
+  personality,
 }: {
   rank: number;
   label: PickLabel;
@@ -279,6 +282,8 @@ export function RecommendCard({
   top?: ScoredCandidate;
   /** 영화의 실제 기본 화면비(native_ar) — 대표 카드 스크린 그래픽에만 사용 */
   nativeAr?: number | null;
+  /** 전체 픽 중 단독 최댓값/최솟값일 때만 부여되는 성격 배지("가장 저렴" 등) */
+  personality?: string | null;
 }) {
   const { candidate: c } = scored;
   const isTop = rank === 1;
@@ -308,13 +313,22 @@ export function RecommendCard({
           className="absolute inset-x-0 top-0 h-[3px]"
           style={{ background: 'linear-gradient(90deg, #872b42, #bc6076)' }}
         />
-        <p className="m-0 text-[13px] font-bold uppercase tracking-[0.08em] text-accent">가장 잘 맞는 선택</p>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <p className="m-0 text-[13px] font-bold uppercase tracking-[0.08em] text-accent">가장 잘 맞는 선택</p>
+          <span className="rounded-full border border-hero-border px-2.5 py-0.5 text-[11.5px] font-semibold text-hero-text-sub">
+            {formatLabel}
+          </span>
+        </div>
         <h2
           id={`pick-${rank}-title`}
           className="m-0 mt-2.5 text-balance font-headline text-[27px] font-extrabold leading-[1.15] tracking-[-0.02em] text-hero-text sm:text-[36px]"
         >
           {c.location.name} {c.auditorium.no} · {timeFmt.format(new Date(c.startsAt))}
         </h2>
+        {/* 왜 이겼는지 한 줄 — 계산된 축 값에서 파생한 요약(새 사실 없음). */}
+        <p className="m-0 mt-2.5 max-w-xl text-[15px] leading-relaxed text-hero-text-sub">
+          {winnerVerdict(scored)}
+        </p>
 
         {/* 시그니처 비주얼 — 왼쪽: 영화의 실제 화면비 스크린 + 추천 구역 미니 좌석 맵,
             오른쪽: 엔진 축 값 4개 게이지. 종합 퍼센트는 전면에 노출하지 않는다(상세 패널에만). */}
@@ -360,8 +374,14 @@ export function RecommendCard({
 
         {reasons.length > 0 ? (
           <div className="mt-6 flex flex-col gap-3 border-t border-hero-border pt-5">
-            {reasons.map((r) => (
-              <ReasonBlock key={r} reason={r} tone="hero" />
+            {reasons.map((r, i) => (
+              <ReasonBlock
+                key={r}
+                reason={r}
+                tone="hero"
+                // 같은 카테고리 라벨('상영관'·'상영관')이 연달아 반복되지 않게 첫 항목에만 표시
+                showLabel={i === 0 || categorizeReason(r) !== categorizeReason(reasons[i - 1])}
+              />
             ))}
           </div>
         ) : null}
@@ -431,21 +451,30 @@ export function RecommendCard({
 
   return (
     <article
-      className="rounded-card-lg border border-border bg-surface p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-float"
+      className="rounded-card-lg border border-border bg-surface p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-float"
       aria-labelledby={`pick-${rank}-title`}
       data-testid={`pick-${label}`}
     >
       <div className="flex items-start justify-between gap-3">
-        {/* 1위와의 실제 차이를 제목 위에 직접 표기 — 카드를 각각 읽지 않아도 차이가 바로
-            보이게 한다. 차이를 계산할 수 없으면 상황 서술형 문구로 대체. */}
-        <p className="m-0 text-[14px] font-bold text-primary">{diff ?? PICK_SCENARIO[label]}</p>
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          {/* 성격 배지("가장 저렴" 등, 단독 최값일 때만) + 1위와의 실제 차이 — 카드를 각각
+              읽지 않아도 성격과 차이가 바로 보인다. */}
+          {personality ? (
+            <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-[11.5px] font-bold text-primary">
+              {personality}
+            </span>
+          ) : null}
+          <p className="m-0 text-[14px] font-bold text-primary">{diff ?? PICK_SCENARIO[label]}</p>
+        </div>
         <span className="shrink-0 text-[12px] font-medium text-text-tertiary">{rank}순위</span>
       </div>
-      <h3 id={`pick-${rank}-title`} className="m-0 mb-3 mt-1.5 text-balance text-lg font-bold text-text">
+      <h3 id={`pick-${rank}-title`} className="m-0 mb-2.5 mt-1.5 text-balance text-lg font-bold text-text">
         {c.location.name} {c.auditorium.no} · {timeFmt.format(new Date(c.startsAt))}
       </h3>
 
-      {topPro ? <ReasonBlock reason={topPro} tone="plain" /> : null}
+      {topPro ? (
+        <p className="m-0 line-clamp-2 text-[14px] leading-relaxed text-text-sub">{topPro}</p>
+      ) : null}
 
       {/* 대표 카드의 아이콘 데이터 행과 같은 순서(이동 → 가격 → 포맷) — 후보끼리 같은 항목이
           같은 위치에 오도록 맞춘다. */}

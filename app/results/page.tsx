@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { DetailedCompare, DifferenceSummary } from '../../components/CompareTable';
+import { diffVsTop } from '../../components/RecommendCard';
+import { pickPersonality } from '../../src/lib/display';
 import { FeedbackWidget } from '../../components/FeedbackWidget';
 import { IconLightbulb } from '../../components/Icon';
 import { Notice } from '../../components/Notice';
@@ -95,17 +97,27 @@ export default async function ResultsPage({
         <h1 className="enter-1 type-display m-0 mt-2.5 text-[34px] text-text sm:text-[46px]">
           {result.picks.length > 0 ? '오늘 가장 잘 맞는 선택' : '조건을 조금 넓혀볼까요?'}
         </h1>
-        <p className="enter-2 m-0 mt-4 text-lg font-bold text-text">{result.movie.title}</p>
-        <p className="enter-2 m-0 mt-0.5 tabular-nums text-[13.5px] text-text-sub">
-          {result.movie.runtimeMin}분 · {result.request.date}
+        <p className="enter-2 m-0 mt-4 text-lg font-bold text-text">
+          {result.movie.title}
+          <span className="ml-2 align-middle text-[13.5px] font-medium tabular-nums text-text-sub">
+            {result.movie.runtimeMin}분 · {result.request.date}
+          </span>
         </p>
-        <p className="enter-2 m-0 mt-1.5 text-[15px] text-text-sub">
-          {origin.label ?? '지정 위치'} 출발 · 이동 {result.request.maxTravelMinutes}분 이내 ·{' '}
-          {result.request.maxPrice.toLocaleString('ko-KR')}원 이하
-        </p>
-        <p className="enter-2 m-0 mt-1 text-[13px] text-text-tertiary">
-          조건에 맞는 회차 {result.scored.length}개 (전체 {result.totalCandidates}개 중)
-        </p>
+        {/* 이번 추천의 조건 맥락 — 문장 나열 대신 스캔 가능한 칩으로 */}
+        <div className="enter-2 mt-3 flex flex-wrap items-center gap-1.5">
+          {[
+            `${origin.label ?? '지정 위치'} 출발`,
+            `이동 ${result.request.maxTravelMinutes}분 이내`,
+            `${result.request.maxPrice.toLocaleString('ko-KR')}원 이하`,
+          ].map((chip) => (
+            <span key={chip} className="rounded-full bg-surface-raised px-3 py-1 text-[12.5px] font-medium tabular-nums text-text-sub">
+              {chip}
+            </span>
+          ))}
+          <span className="text-[12.5px] tabular-nums text-text-tertiary">
+            조건에 맞는 회차 {result.scored.length}개 / 전체 {result.totalCandidates}개
+          </span>
+        </div>
       </header>
 
       {/* 2. 데이터 안내 */}
@@ -158,7 +170,13 @@ export default async function ResultsPage({
               배치해 넓은 화면을 실제로 사용한다. 모바일은 1위 아래에 2·3위를 가로 스와이프로
               (다음 카드가 살짝 잘려 보이게). 영화의 실제 화면비(native_ar)는 1위 스크린
               그래픽에 전달. */}
-          <div className="enter-3 mt-8 lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,4fr)] lg:items-start lg:gap-6">
+          <div
+            className={`enter-3 mt-8 ${
+              result.picks.length > 1
+                ? 'lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,4fr)] lg:items-start lg:gap-6'
+                : 'mx-auto max-w-[880px]'
+            }`}
+          >
             {result.picks[0] ? (
               <RecommendCard
                 rank={1}
@@ -179,6 +197,10 @@ export default async function ResultsPage({
                       scored={p.scored}
                       request={result.request}
                       top={result.picks[0]?.scored}
+                      personality={pickPersonality(
+                        p.scored,
+                        result.picks.map((x) => x.scored),
+                      )}
                     />
                   </div>
                 ))}
@@ -186,35 +208,68 @@ export default async function ResultsPage({
             ) : null}
           </div>
 
-          {/* 5. 추천 차이 요약 */}
-          <section className="enter-5 mt-10 max-w-content">
-            <h2 className="m-0 text-[21px] font-bold text-text">추천 차이 한눈에</h2>
-            <div className="mt-3">
-              <DifferenceSummary picks={result.picks} />
-            </div>
-          </section>
+          {/* 5. 1위와 비교 — 순위별 핵심 차이를 문장으로. 각 카드를 따로 읽지 않아도
+              "왜 1위인지"가 보이게 한다. */}
+          {result.picks.length > 1 ? (
+            <section className="enter-5 mt-10 max-w-content">
+              <h2 className="m-0 text-[21px] font-bold text-text">1위와 비교하면</h2>
+              <ul className="m-0 mt-3 flex list-none flex-col gap-2 p-0">
+                {result.picks.slice(1).map((p, i) => {
+                  const diff = result.picks[0] ? diffVsTop(p.scored, result.picks[0].scored) : null;
+                  const tag = pickPersonality(
+                    p.scored,
+                    result.picks.map((x) => x.scored),
+                  );
+                  return (
+                    <li
+                      key={p.scored.candidate.showtimeId}
+                      className="flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-card bg-surface-raised px-4 py-3"
+                    >
+                      <span className="text-[12px] font-bold text-text-tertiary">{i + 2}위</span>
+                      <span className="min-w-0 font-semibold text-text">
+                        {p.scored.candidate.location.name} {p.scored.candidate.auditorium.no}
+                      </span>
+                      {tag ? (
+                        <span className="rounded-full bg-primary-soft px-2 py-0.5 text-[11.5px] font-bold text-primary">{tag}</span>
+                      ) : null}
+                      <span className="text-[13.5px] text-text-sub">{diff ?? '1위와 조건 차이가 크지 않아요'}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+              <div className="mt-4">
+                <DifferenceSummary picks={result.picks} />
+              </div>
+            </section>
+          ) : null}
 
           {/* 6. 상세 비교 */}
           <section className="enter-5 mt-8 max-w-content">
             <DetailedCompare picks={result.picks} />
           </section>
 
-          {/* 7. 피드백 — 카드마다 반복하던 질문을 페이지 하단 한 곳으로 합쳤다 */}
+          {/* 7. 피드백 — 짧은 2버튼 질문이 먼저, 긴 선택 기록은 접힌 패널로(설문이 결과보다
+              길어 보이지 않게). */}
           {result.runId ? (
-            <div className="mt-10 max-w-content">
-              <SelectionWidget
-                runId={result.runId}
-                picks={result.picks.map((p) => ({
-                  auditoriumId: p.scored.candidate.auditorium.id,
-                  auditoriumLabel: `${p.scored.candidate.location.name} ${p.scored.candidate.auditorium.no}`,
-                  pickLabel: p.label,
-                }))}
-              />
+            <div className="mt-10 max-w-content border-t border-border pt-6">
               {result.picks[0] ? (
-                <div className="mt-4 border-t border-border pt-4">
-                  <FeedbackWidget runId={result.runId} showtimeId={result.picks[0].scored.candidate.showtimeId} />
-                </div>
+                <FeedbackWidget runId={result.runId} showtimeId={result.picks[0].scored.candidate.showtimeId} />
               ) : null}
+              <details className="mt-5">
+                <summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium text-text-sub hover:text-text">
+                  실제로 고른 상영관 남기기 — 추천 품질 개선에 활용돼요
+                </summary>
+                <div className="mt-2">
+                  <SelectionWidget
+                    runId={result.runId}
+                    picks={result.picks.map((p) => ({
+                      auditoriumId: p.scored.candidate.auditorium.id,
+                      auditoriumLabel: `${p.scored.candidate.location.name} ${p.scored.candidate.auditorium.no}`,
+                      pickLabel: p.label,
+                    }))}
+                  />
+                </div>
+              </details>
             </div>
           ) : null}
 

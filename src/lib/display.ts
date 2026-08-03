@@ -95,6 +95,33 @@ export function keySpecEntries(movie: MovieWithSpecs): { key: MovieSpecKey; spec
   });
 }
 
+// 1위 카드의 "왜 이겼는지 한 줄" — 새 사실을 만들지 않고, 이미 계산된 축 값 중 가장 높은
+// 축과 순위 사실(final 최고)만으로 요약한다.
+export function winnerVerdict(scored: ScoredCandidate): string {
+  const axes: [string, number][] = [
+    ['화면·음향', scored.axes.audQ],
+    ['좌석 적합', scored.axes.seatQ],
+    ['이동 편의', scored.axes.conv],
+    ['가격 적합', scored.axes.pv],
+  ];
+  const strongest = axes.reduce((a, b) => (b[1] > a[1] ? b : a));
+  return `${strongest[0]}이 특히 좋고, 입력한 조건 전체에서 종합 적합도가 가장 높은 선택이에요.`;
+}
+
+// 2·3위 카드의 성격 배지 — 전체 픽 중에서 "단독 최솟값/최댓값"일 때만 부여한다(동률이면
+// 없음). 실제 가격·이동시간·audQ 비교 결과 그대로.
+export function pickPersonality(
+  scored: ScoredCandidate,
+  all: ScoredCandidate[],
+): string | null {
+  const others = all.filter((s) => s !== scored);
+  if (others.length === 0) return null;
+  if (others.every((o) => scored.candidate.priceAdult < o.candidate.priceAdult)) return '가장 저렴';
+  if (others.every((o) => scored.travelMinutes < o.travelMinutes)) return '가장 가까움';
+  if (others.every((o) => scored.axes.audQ > o.axes.audQ)) return '화면·음향 최고';
+  return null;
+}
+
 // 좌석 존 목적 라벨 — 상영관 상세 페이지와 좌석 맵 일러스트 양쪽에서 같은 라벨을 쓴다.
 export const SEAT_PURPOSE_LABELS: Record<string, string> = {
   immersive: '몰입',

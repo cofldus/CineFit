@@ -43,6 +43,8 @@ export interface MovieWithSpecs {
   genres: string[];
   releaseYear: number | null;
   releaseStatus: string | null;
+  /** KMDb 공식 API posters 필드의 첫 URL — 없으면 null */
+  posterUrl: string | null;
   specs: Partial<Record<MovieSpecKey, SpecValue>>;
 }
 

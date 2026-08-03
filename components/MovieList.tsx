@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useMemo, useState } from 'react';
 import { FORMAT_LABELS } from '../src/domain/recommendation/presets';
 import type { MovieWithSpecs } from '../src/domain/recommendation/types';
@@ -117,11 +118,19 @@ export function MovieList({ movies }: { movies: MovieWithSpecs[] }) {
                           'linear-gradient(180deg, rgba(135, 43, 66, 0.48) 0%, rgba(64, 42, 49, 0.95) 60%, rgba(38, 28, 31, 0.98) 100%)',
                       }}
                     >
+                      {/* 실제 포스터(KMDb 공식 API)가 있으면 켜진 화면 배경으로 어둡게 —
+                          없으면 와인 그라데이션 폴백. */}
+                      {movie.posterUrl ? (
+                        <>
+                          <Image src={movie.posterUrl} alt="" fill sizes="112px" className="object-cover" />
+                          <span className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,10,11,0.3)_0%,rgba(11,10,11,0.78)_100%)]" />
+                        </>
+                      ) : null}
                       <span
                         className="absolute inset-x-1.5 top-0 h-px"
                         style={{ background: 'linear-gradient(90deg, transparent, rgba(201, 111, 132, 0.8), transparent)' }}
                       />
-                      <span className="whitespace-nowrap text-[10.5px] font-normal tracking-[0.1em] tabular-nums text-hero-text">
+                      <span className="relative whitespace-nowrap text-[10.5px] font-normal tracking-[0.1em] tabular-nums text-hero-text">
                         {nativeAr ? `${nativeAr.toFixed(2)}:1` : `${clampedAr.toFixed(2)}:1`}
                       </span>
                     </div>

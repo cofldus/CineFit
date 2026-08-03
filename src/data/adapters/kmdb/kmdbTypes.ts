@@ -19,6 +19,7 @@ export interface NormalizedKmdbMovie {
   directors: string[];
   rating: string | null;
   plotSummary: string | null;
+  posterUrl: string | null; // posters 필드의 첫 URL(https 승격) — 없으면 null(추정 금지)
   technicalFields: KmdbTechnicalField[]; // 비어있지 않은 필드만
 }
 

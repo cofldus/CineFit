@@ -29,6 +29,7 @@ export function makeMovie(
     id: 1,
     title: '테스트 영화',
     originalTitle: 'Test Movie',
+    posterUrl: null,
     runtimeMin: 150,
     director: '테스트 감독',
     rating: null,

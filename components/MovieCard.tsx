@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { FORMAT_LABELS } from '../src/domain/recommendation/presets';
 import type { MovieWithSpecs } from '../src/domain/recommendation/types';
 import { formatSpecValue, keySpecEntries, SPEC_KEY_LABELS } from '../src/lib/display';
@@ -70,11 +71,20 @@ export function MovieCard({ movie, variant = 'detailed' }: { movie: MovieWithSpe
                   'linear-gradient(180deg, rgba(135, 43, 66, 0.48) 0%, rgba(64, 42, 49, 0.95) 60%, rgba(38, 28, 31, 0.98) 100%)',
               }}
             >
+              {/* 실제 포스터(KMDb 공식 API)가 있으면 켜진 화면의 배경으로 어둡게 깔린다 —
+                  화면비 마스킹 정체성은 유지하면서 "빈 상자" 인상을 없앤다. 없으면 와인
+                  그라데이션 폴백. */}
+              {movie.posterUrl ? (
+                <>
+                  <Image src={movie.posterUrl} alt="" fill sizes="250px" className="object-cover" />
+                  <span className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,10,11,0.3)_0%,rgba(11,10,11,0.78)_100%)]" />
+                </>
+              ) : null}
               <span
                 className="absolute inset-x-2 top-0 h-px"
                 style={{ background: 'linear-gradient(90deg, transparent, rgba(201, 111, 132, 0.85), transparent)' }}
               />
-              <span className="whitespace-nowrap text-base font-light tracking-[0.14em] tabular-nums text-hero-text">
+              <span className="relative whitespace-nowrap text-base font-light tracking-[0.14em] tabular-nums text-hero-text">
                 {ratioLabel ?? `${clampedAr.toFixed(2)}:1`}
               </span>
             </div>

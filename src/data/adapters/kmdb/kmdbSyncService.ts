@@ -160,7 +160,13 @@ export async function syncLinkedMovie(
     );
     const sourceId = await getOrCreateKmdbSource(tx);
     const specsPromoted = await promotePlotAndTechnicalFields(tx, movieId, normalized, sourceId, nowIso);
-    log(`+ [DOCID ${normalized.docId}] ${movie.title} — 기술 필드 ${specsPromoted}건 반영`);
+    // 포스터 — KMDb가 URL을 준 경우에만 저장(없으면 기존 값 유지, NULL 덮어쓰기 없음).
+    if (normalized.posterUrl) {
+      await tx.run(`UPDATE movies SET poster_url = ? WHERE id = ?`, [normalized.posterUrl, movieId]);
+    }
+    log(
+      `+ [DOCID ${normalized.docId}] ${movie.title} — 기술 필드 ${specsPromoted}건 반영${normalized.posterUrl ? ', 포스터 저장' : ''}`,
+    );
     return { outcome: 'promoted', specsPromoted } as const;
   });
 }

@@ -12,6 +12,7 @@ interface MovieRow {
   director: string | null;
   release_date: string | null;
   release_status: string | null;
+  poster_url: string | null;
 }
 
 interface SpecRow {
@@ -35,7 +36,7 @@ interface FormatVersionRow {
 
 // 복수 개봉(재개봉 포함) 시 최초 개봉일 기준 — JOIN 중복 행 방지를 위해 스칼라 서브쿼리 사용
 const MOVIE_SELECT = `
-  SELECT m.id, m.title, m.original_title, m.runtime_min, m.rating, m.genres, m.director,
+  SELECT m.id, m.title, m.original_title, m.runtime_min, m.rating, m.genres, m.director, m.poster_url,
          (SELECT MIN(release_date) FROM movie_releases WHERE movie_id = m.id) AS release_date,
          (SELECT status FROM movie_releases WHERE movie_id = m.id ORDER BY release_date LIMIT 1) AS release_status
   FROM movies m`;
@@ -102,6 +103,7 @@ export function createMovieRepository(getDb: () => DbClient) {
       director: row.director,
       releaseYear: row.release_date ? Number(row.release_date.slice(0, 4)) : null,
       releaseStatus: row.release_status,
+      posterUrl: row.poster_url,
       specs: await loadSpecs(row.id),
     };
   }

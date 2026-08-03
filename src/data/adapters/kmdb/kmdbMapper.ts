@@ -11,6 +11,14 @@ function toDate(repRlsDate: string): string | null {
   return /^\d{4}-\d{2}-\d{2}$/.test(repRlsDate) ? repRlsDate : null;
 }
 
+// posters는 '|' 구분 URL 목록 — 첫 URL만 쓰고, http는 https로 승격한다(영상자료원 파일
+// 서버가 https를 지원함을 실호출로 확인). http/https가 아닌 값은 버린다.
+function posterUrlOf(item: KmdbResultItem): string | null {
+  const first = item.posters.split('|')[0]?.trim();
+  if (!first || !/^https?:\/\//.test(first)) return null;
+  return first.replace(/^http:\/\//, 'https://');
+}
+
 function technicalFieldsOf(item: KmdbResultItem): KmdbTechnicalField[] {
   const fields: KmdbTechnicalField[] = [];
   if (item.screenArea.trim()) fields.push({ key: 'screen_area', rawValue: item.screenArea.trim() });
@@ -30,6 +38,7 @@ export function mapSearchResult(item: KmdbResultItem): NormalizedKmdbMovie {
     directors: item.directors.director.map((d) => stripHighlight(d.directorNm)).filter(Boolean),
     rating: item.rating.trim() || null,
     plotSummary: item.plots.plot[0]?.plotText?.trim() || null,
+    posterUrl: posterUrlOf(item),
     technicalFields: technicalFieldsOf(item),
   };
 }

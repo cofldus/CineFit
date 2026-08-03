@@ -26,6 +26,8 @@ export const kmdbResultItemSchema = z.object({
   screenArea: z.string().optional().default(''),
   soundEcho: z.string().optional().default(''),
   fSound: z.string().optional().default(''),
+  // '|' 구분 URL 목록 — 실호출로 확인(2026-08-03, 오펜하이머 F56428 등). 비어 있을 수 있다.
+  posters: z.string().optional().default(''),
 });
 
 export const kmdbSearchResponseSchema = z.object({

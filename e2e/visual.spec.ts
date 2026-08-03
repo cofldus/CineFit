@@ -75,7 +75,10 @@ test.describe('시각 회귀', () => {
     await page.setViewportSize(VIEWPORTS.mobile);
     await page.goto('/results?movieId=1&date=2026-07-28');
     await page.getByRole('link', { name: /관람하고 오셨다면/ }).click();
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    // 결과 페이지에도 level-1 heading이 있어 제네릭 heading 체크는 클라이언트 내비게이션 완료를
+    // 기다리지 못하고 즉시 통과 → 스크린샷이 결과 페이지를 잡는 레이스가 있었다. post-watch
+    // 고유 heading을 기다려 내비게이션 완료를 보장한다.
+    await expect(page.getByRole('heading', { name: '관람은 어떠셨나요?' })).toBeVisible();
     await expect(page).toHaveScreenshot('post-watch.png', { fullPage: true, ...SCREENSHOT_OPTS });
   });
 

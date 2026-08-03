@@ -752,10 +752,15 @@ export function RecommendForm({
       {/* 데스크톱 요약 패널 — 선택한 영화 + 현재 조건 + 실시간 후보 수. 조건을 조절할수록
           결과가 좁혀지는 것이 바로 보인다. */}
       <aside className="hidden lg:block" aria-label="현재 조건 요약">
-        <div className="sticky top-24 flex flex-col gap-4">
-          <MovieSummary movie={movie} />
-          <div className="rounded-card-lg bg-surface-raised p-4">
-            <p className="m-0 text-[12px] font-semibold uppercase tracking-wide text-text-sub">현재 조건</p>
+        {/* 영화 정보(채움 카드)와 조건·후보 수(외곽선 카드)를 다른 표면 문법으로 구분 —
+            라벨 kicker도 각각 붙여 두 블록이 한 덩어리로 읽히지 않게 한다. */}
+        <div className="sticky top-24 flex flex-col gap-5">
+          <div>
+            <p className="m-0 mb-2 text-[12px] font-semibold uppercase tracking-wide text-text-tertiary">선택한 영화</p>
+            <MovieSummary movie={movie} />
+          </div>
+          <div className="rounded-card-lg border border-border bg-surface p-4">
+            <p className="m-0 text-[12px] font-semibold uppercase tracking-wide text-primary">현재 조건</p>
             <dl className="m-0 mt-2.5 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-[13.5px]">
               <dt className="text-text-tertiary">날짜</dt>
               <dd className="m-0 text-right font-medium tabular-nums text-text">{dateVal}</dd>

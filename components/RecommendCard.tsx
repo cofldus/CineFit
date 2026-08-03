@@ -375,7 +375,7 @@ export function RecommendCard({
     return (
       <article
         id={`pick-rank-${rank}`}
-        className="@container surface-selected relative overflow-hidden rounded-card-xl bg-hero p-6 sm:p-7"
+        className="@container surface-selected relative flex h-full flex-col overflow-hidden rounded-card-xl bg-hero p-6 sm:p-7"
         aria-labelledby={`pick-${rank}-title`}
         data-testid={`pick-${label}`}
       >
@@ -402,6 +402,9 @@ export function RecommendCard({
           {winnerVerdict(scored)}
         </p>
 
+        {/* 우측 레일 높이에 맞춰 카드가 늘어날 때 남는 공간을 시각화 블록 위·아래로 균등
+            분배하는 신축 스페이서(공간이 없으면 0). */}
+        <div aria-hidden className="mt-auto" />
         {/* 좌: 화면비·좌석 시각화 / 우: 얻는 것·포기하는 것·핵심 수치·신뢰도. 컨테이너 쿼리로
             카드 자신의 너비 기준 2열(@3xl≈768px) ↔ 1열 전환. */}
         <div className="mt-5 grid gap-6 border-t border-hero-border pt-5 @3xl:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] @3xl:gap-10">
@@ -495,6 +498,9 @@ export function RecommendCard({
           </div>
         </div>
 
+        {/* 1위 카드가 우측 레일 높이에 맞춰 늘어날 때 남는 공간은 여기 위에서 흡수 —
+            CTA·상세 패널은 항상 카드 하단에 붙는다. */}
+        <div className="mt-auto" />
         <div className="mt-5 flex flex-col gap-3 border-t border-hero-border pt-5 sm:flex-row sm:items-center">
           <Link
             href={`/cinemas/${c.auditorium.id}`}

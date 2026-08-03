@@ -161,10 +161,12 @@ export default async function ResultsPage({
               배치해 넓은 화면을 실제로 사용한다. 모바일은 1위 아래에 2·3위를 가로 스와이프로
               (다음 카드가 살짝 잘려 보이게). 영화의 실제 화면비(native_ar)는 1위 스크린
               그래픽에 전달. */}
+          {/* 데스크톱 2열은 items-stretch(기본값) — 1위 카드가 2·3위 레일이 끝나는 지점과
+              같은 높이로 끝난다(1열 내부는 flex로 아래 정렬 분배). */}
           <div
             className={`enter-3 mt-8 ${
               result.picks.length > 1
-                ? 'lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,4fr)] lg:items-start lg:gap-6'
+                ? 'lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,4fr)] lg:gap-6'
                 : 'mx-auto max-w-[880px]'
             }`}
           >

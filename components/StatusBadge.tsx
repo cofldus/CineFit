@@ -2,9 +2,25 @@
 // 같은 상태는 항상 같은 아이콘·색·문구로 보이도록 한다(docs/DESIGN-SYSTEM.md §상태 배지).
 export type ShowtimeStatusKind = 'synthetic' | 'verified';
 
-const CONFIG: Record<ShowtimeStatusKind, { icon: string; full: string; compact: string; cls: string }> = {
-  synthetic: { icon: '≈', full: '검증용 합성 회차', compact: '합성', cls: 'border-trust-mid/40 text-trust-mid' },
-  verified: { icon: '✔', full: '관리자 확인 회차', compact: '관리자 확인', cls: 'border-trust-high/40 text-trust-high' },
+// R14 §4: 배지 테두리·라벨은 중성, 의미색은 아이콘에만(확인 = 저채도 steel, 합성 = amber).
+const CONFIG: Record<
+  ShowtimeStatusKind,
+  { icon: string; full: string; compact: string; cls: string; iconCls: string }
+> = {
+  synthetic: {
+    icon: '≈',
+    full: '검증용 합성 회차',
+    compact: '합성',
+    cls: 'border-border-strong text-text-sub',
+    iconCls: 'text-trust-mid',
+  },
+  verified: {
+    icon: '✓',
+    full: '관리자 확인 회차',
+    compact: '관리자 확인',
+    cls: 'border-border-strong text-text-sub',
+    iconCls: 'text-trust-high',
+  },
 };
 
 export function ShowtimeStatusBadge({
@@ -19,7 +35,10 @@ export function ShowtimeStatusBadge({
   if (variant === 'compact') {
     return (
       <span className={`inline-flex items-center gap-1 whitespace-nowrap text-xs font-medium ${c.cls}`}>
-        <span aria-hidden>{c.icon}</span> {c.compact}
+        <span aria-hidden className={c.iconCls}>
+          {c.icon}
+        </span>{' '}
+        {c.compact}
       </span>
     );
   }
@@ -27,7 +46,10 @@ export function ShowtimeStatusBadge({
     <span
       className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-medium ${c.cls}`}
     >
-      <span aria-hidden>{c.icon}</span> {c.full}
+      <span aria-hidden className={c.iconCls}>
+        {c.icon}
+      </span>{' '}
+      {c.full}
     </span>
   );
 }

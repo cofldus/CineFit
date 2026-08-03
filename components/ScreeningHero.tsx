@@ -72,21 +72,23 @@ export function ScreeningHero() {
       <div className="mx-auto grid max-w-wide items-center gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-14">
         {/* 좌: 헤드라인·설명·CTA */}
         <div>
-          <h1 className="m-0 flex flex-col gap-1.5 break-keep">
+          {/* R14 §3: 세 줄 시작점 정렬, '어디서 봐야'만 로즈 단색 + 10% 크게. 그라데이션·
+              가로압축·기울임 금지. 헤드라인이 화면을 지배하지 않는 절제된 크기. */}
+          <h1 className="m-0 flex flex-col gap-1 break-keep">
             <span
-              className="hero-word type-display block text-[6vw] text-text/75 sm:text-[24px]"
+              className="hero-word type-display block text-[9vw] sm:text-[44px]"
               style={{ animationDelay: '0ms' }}
             >
               이 영화,
             </span>{' '}
             <span
-              className="hero-word type-display text-gradient-primary block w-fit pr-2 text-[11.5vw] sm:text-[56px]"
+              className="hero-word type-display block text-[10vw] text-primary sm:text-[49px]"
               style={{ animationDelay: '120ms' }}
             >
               어디서 봐야
             </span>{' '}
             <span
-              className="hero-word type-display block text-[9vw] text-text sm:text-[46px]"
+              className="hero-word type-display block text-[9vw] sm:text-[44px]"
               style={{ animationDelay: '240ms' }}
             >
               할까요?

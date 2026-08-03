@@ -1,68 +1,70 @@
 @import 'tailwindcss';
 
-/* CineFit 디자인 토큰 (9) — "Red-Pink Cinema Tech"(2026-08-02, 6차). 갈색 섞인 버건디·탁한
-   차콜을 전부 제거하고, 레퍼런스의 선명한 레드·핑크 + 깊은 블랙 팔레트로 전면 교체한다.
-   이번 라운드부터 사용자 화면 전체가 단일 다크 팔레트다(라이트 "종이" 스코프 폐기) —
-   .cinema-scope 클래스는 마크업 호환을 위해 남아 있지만 :root와 같은 값을 가리킨다.
-   .admin-scope는 여전히 완전 독립(불변). 토큰 "이름"은 그대로, 값만 교체.
+/* CineFit 디자인 토큰 (10) — "Wine Cinema Information Service"(2026-08-03, R14).
+   단일 버건디 반복을 버리고 같은 레드 계열 안에서 명도·채도·온도를 분화한다. 배경·표면
+   사다리는 OKLCH로 정의해 층간 명도 차가 지각적으로 균일하게 벌어지게 했고(warm ink black,
+   hue ~15 = 아주 미세한 와인 기운), 텍스트·액센트처럼 WCAG 대비를 직접 계산해 둔 색은
+   검증된 sRGB 값을 유지한다. 토큰 "이름"은 이전 라운드와 동일 — 값만 교체.
 
-   최종 무드(추가 교정 반영): "묵직하고 몰입감 있는 현대적 영화관 + 정교한 프리미엄 테크" —
-   핫핑크 네온·게임 UI 금지, 화면의 70% 이상은 깊은 블랙·차콜, vivid accent(#E9466B)는
-   전체의 10% 이하(CTA·선택 좌석·중요 숫자에만).
+   포인트 사용 비율(브리프 §4): 블랙·차콜·중성 표면 75% / 딥 와인 15% / 로즈·코랄 7% /
+   상태색 3% 이하. 초록 확인 배지는 폐기 — 확인 상태는 색이 아니라 체크 아이콘·문구·출처
+   수로 전달하고, 의미색이 꼭 필요한 자리만 저채도 steel(--trust-high)을 아이콘·표시선에
+   제한적으로 쓴다.
 
-   브리프 지정 팔레트: bg #0B0A0B / secondary #121011 / raised #1A1618 / elevated #241C1F,
-   deep oxblood #5D1828 / wine red #872B42 / muted rose #BC6076 / vivid #E9466B,
-   text #F3EEEB / sub #A69EA0 / divider rgba(255,255,255,0.08).
-
-   대비 검증(직접 계산, 기준 배경은 가장 밝은 표면 #241C1F):
-   - muted rose #BC6076: #241C1F 위 4.02:1로 작은 텍스트에 부족 — 텍스트/아이콘용
-     --primary는 한 단계 밝힌 #C96F84(4.82:1, bg 위 5.69:1)로 도출. 원본 #BC6076은
-     그라데이션·큰 글자 전용.
-   - 채움 버튼(--primary-strong)은 wine red #872B42 — 흰 텍스트 8.55:1로 여유.
-   - vivid #E9466B: #241C1F 위 4.40:1로 작은 텍스트에 아슬아슬 — 소형 액센트 텍스트용
-     --accent는 #ED5578(4.89:1)로 미세 보정. 원본은 그래픽·큰 숫자 전용.
-   - text-sub #A69EA0: #241C1F 위 6.36:1. tertiary #8F878A: 4.75:1로 새로 도출.
-   - deep oxblood #5D1828·wine red #872B42는 다크 위 텍스트 금지(각 1.5:1·2.3:1) —
-     채움·그라데이션·간접광 전용. */
+   대비 검증(직접 계산, 기준 배경은 가장 밝은 표면 --surface-strong ≈ #241C1F):
+   - --primary #C96F84: 4.82:1 (bg 위 5.69:1) — 다크 위 텍스트·아이콘용 로즈.
+   - --primary-strong #872B42: 흰 텍스트 8.55:1 — 채움 전용, 다크 위 텍스트 금지(2.3:1).
+   - --accent #ED5578: 4.89:1 — 소형 액센트 텍스트 하한선.
+   - --text-sub #B3AAAC: 7.35:1 (기존 #A69EA0 6.36:1에서 명도 상향 — "작은 회색 글씨가
+     흐릿하다" 진단 반영). --text-tertiary #9A9295: 5.48:1.
+   - --trust-high(steel) #9DB8C4: 8.05:1 — 아이콘·2px 표시선 전용, 채움 배지 금지.
+   - --oxblood #5D1828: 간접광·그림자·깊은 선택 배경 전용(다크 위 텍스트 1.5:1 금지). */
 :root {
-  --bg: #0b0a0b;
-  --surface: #121011;
-  --surface-raised: #1a1618;
-  --surface-strong: #241c1f;
+  /* 배경 사다리 — bg-0(잉크 블랙) → bg-1(와인기 차콜) → bg-2(섹션 표면) */
+  --bg: oklch(0.145 0.008 15);
+  --surface: oklch(0.175 0.009 15);
+  --surface-raised: oklch(0.215 0.011 12);
+  --surface-strong: oklch(0.255 0.013 10);
   --border: rgba(255, 255, 255, 0.08);
   --border-strong: rgba(255, 255, 255, 0.16);
   --text: #f3eeeb;
-  --text-sub: #a69ea0;
-  --text-tertiary: #8f878a;
+  --cream: #f8f3ec; /* 주요 제목·핵심 숫자 전용 — 본문 --text보다 반 단계 밝다 */
+  --text-sub: #b3aaac;
+  --text-tertiary: #9a9295;
   --primary: #c96f84;
   --primary-strong: #872b42;
   --primary-strong-hover: #732337;
   --primary-soft: rgba(188, 96, 118, 0.14);
   --accent: #ed5578;
   --accent-soft: rgba(233, 70, 107, 0.12);
-  --trust-high: #5fcbae;
+  --oxblood: #5d1828;
+  --coral: #e8917c; /* soft coral — 아주 작은 highlight 그래픽 전용, 텍스트 금지 */
+  /* 확인 상태 — 초록 폐기. steel(저채도 청회색)은 아이콘·표시선에만. */
+  --trust-high: #9db8c4;
   --trust-mid: #e3b15c;
   --trust-low: #e8836b;
-  --warning-bg: rgba(227, 177, 92, 0.14);
+  --warning-bg: rgba(227, 177, 92, 0.1);
   --warning-text: #e3b15c;
-  /* hero = 페이지 안에서 한 단계 떠오른 elevated 카드(#241C1F, 와인 기운이 도는 차콜).
-     hero-soft는 그 안의 인셋 표면(좌석 점·게이지 트랙 등 채움 전용 — 작은 텍스트 배경으로
-     쓰지 말 것). 딥 옥스블러드(#5D1828)는 그라데이션·간접광 전용. */
-  --hero: #241c1f;
-  --hero-soft: #2e2327;
+  /* hero = 페이지 안에서 한 단계 떠오른 elevated 표면(딥 와인 기운). hero-soft는 그 안의
+     인셋 채움 전용(작은 텍스트 배경 금지). */
+  --hero: oklch(0.255 0.013 10);
+  --hero-soft: oklch(0.29 0.018 5);
   --hero-text: #f3eeeb;
-  --hero-text-sub: #a69ea0;
+  --hero-text-sub: #b3aaac;
   --hero-border: rgba(255, 255, 255, 0.08);
-  --radius: 14px;
-  --radius-lg: 18px;
-  --radius-xl: 24px;
+  /* 카드 radius 3단계(브리프 §6): compact 12 / standard 16 / hero 22 */
+  --radius: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
   --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.35);
   --elevation-2: 0 10px 28px rgba(0, 0, 0, 0.4);
   --elevation-3: 0 20px 48px rgba(0, 0, 0, 0.5);
   --elevation-4: 0 1px 3px rgba(0, 0, 0, 0.35);
-  /* 와인 레드 간접광 — 네온 링이 아니라 넓고 약하게 퍼지는 조명. 핵심 화면비 프레임·선택
-     좌석·CTA 주변에만 제한적으로 사용. */
+  /* 와인 레드 간접광 — 네온 링이 아니라 넓고 약하게 퍼지는 조명. 히어로·선택 상태에만. */
   --glow-primary: 0 24px 80px -24px rgba(135, 43, 66, 0.55);
+  /* 선택 표면 — 상단 1px 로즈 반사광 + 아래로 넓고 약한 oxblood ambient shadow */
+  --edge-selected:
+    inset 0 1px 0 rgba(233, 180, 195, 0.22), 0 18px 44px -20px rgba(93, 24, 40, 0.65);
 }
 
 /* 시네마 스코프 — 이번 라운드부터 사용자 화면 전체가 같은 다크 팔레트라 :root와 동일하다.
@@ -83,7 +85,7 @@
   --primary-strong: #872b42;
   --primary-strong-hover: #732337;
   --accent: #ed5578;
-  --trust-high: #5fcbae;
+  --trust-high: #9db8c4;
   --trust-mid: #e3b15c;
   --trust-low: #e8836b;
   --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 1px rgba(0, 0, 0, 0.2);
@@ -106,7 +108,7 @@
     --accent: #a1274b;
     --trust-mid: #8f5c0c;
     --trust-low: #c23434;
-    --trust-high: #167a48;
+    --trust-high: #3d6a7d;
     --elevation-1: 0 1px 2px rgba(36, 28, 31, 0.06), 0 1px 1px rgba(36, 28, 31, 0.04);
     --elevation-2: 0 8px 20px rgba(36, 28, 31, 0.1);
     --elevation-3: 0 16px 40px rgba(36, 28, 31, 0.18);
@@ -134,6 +136,9 @@
   --color-trust-high: var(--trust-high);
   --color-trust-mid: var(--trust-mid);
   --color-trust-low: var(--trust-low);
+  --color-cream: var(--cream);
+  --color-oxblood: var(--oxblood);
+  --color-coral: var(--coral);
   --color-warning-bg: var(--warning-bg);
   --color-warning-text: var(--warning-text);
   --color-hero: var(--hero);
@@ -196,8 +201,8 @@
     padding: 16px 16px 96px;
   }
 
-  /* 타이포 굵기 규칙(브리프 정확한 값 그대로): 페이지 제목 28px/700, 질문·라벨류
-     15-16px/600, 본문 15px/400. 800~900 같은 과한 굵기와 지나친 음수 자간은 쓰지 않는다.
+  /* 타이포 스케일(R14 §3) — 글자의 힘은 굵기(Black)가 아니라 크기 대비·줄 길이·여백으로.
+     페이지 제목 680, 섹션 640, 카드 600, 본문 450. 제목은 balance, 본문 설명은 pretty.
      긴 한글 제목이 이상한 지점에서 줄바꿈되지 않도록 keep-all을 기본으로 깐다. */
   h1,
   h2,
@@ -205,20 +210,26 @@
   h4 {
     word-break: keep-all;
     overflow-wrap: break-word;
+    text-wrap: balance;
   }
   h1 {
-    font-size: 28px;
-    font-weight: 700;
-    line-height: 1.35;
+    font-size: clamp(28px, 3.2vw, 36px);
+    font-weight: 680;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
   }
   h2 {
-    font-size: 20px;
-    font-weight: 600;
-    line-height: 1.35;
+    font-size: clamp(20px, 2.2vw, 24px);
+    font-weight: 640;
+    line-height: 1.3;
+    letter-spacing: -0.015em;
   }
   h3 {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 600;
+  }
+  p {
+    text-wrap: pretty;
   }
 
   /* 시간·가격·점수처럼 자릿수가 바뀌는 숫자가 나열될 때 자릿수 폭이 흔들리지 않게 표 형태
@@ -279,29 +290,29 @@
     color: var(--text-sub);
     white-space: nowrap;
   }
-  .badge-high {
-    border-color: var(--trust-high);
-    color: var(--trust-high);
-  }
-  .badge-mid {
-    border-color: var(--trust-mid);
-    color: var(--trust-mid);
-  }
+  /* 상태 배지(R14 §4) — 색 테두리 채움 배지 폐기. 테두리는 중성, 의미는 아이콘 색과
+     문구로만 전달한다(확인 상태의 핵심은 색이 아니라 체크·출처 수·확인 날짜). */
+  .badge-high,
+  .badge-mid,
   .badge-low {
-    border-color: var(--trust-low);
-    color: var(--trust-low);
+    border-color: var(--border-strong);
+    color: var(--text-sub);
   }
   .badge-format {
-    border-color: var(--accent);
-    color: var(--accent);
+    border-color: var(--border-strong);
+    color: var(--primary);
     font-weight: 600;
   }
 
+  /* 경고·안내(R14 §4) — 어두운 amber 전체 채움·점선 박스 대신 중성 표면 + 얇은 warm amber
+     선 하나. 페이지를 지배하지 않는 compact notice. */
   .notice {
-    border: 1px dashed var(--trust-mid);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--trust-mid);
     border-radius: var(--radius);
-    padding: 10px 14px;
-    font-size: 14px;
+    background: var(--surface);
+    padding: 9px 13px;
+    font-size: 13.5px;
     color: var(--text-sub);
     margin: 12px 0;
   }
@@ -525,26 +536,17 @@
     animation: list-cross-fade 220ms ease-out both;
   }
 
-  /* 브랜드 헤드라인 타이포 — 광고 포스터식 과장(이탤릭·과압축·Black 남발) 금지. Wanted Sans
-     ExtraBold(800) + 가로 폭 97% + 자간 -0.035em + 줄간격 1.0: 무게감은 있지만 차분한
-     헤드라인. scaleX가 transform을 쓰므로 등장 애니메이션은 개별 translate 속성으로만
-     움직여 서로 덮어쓰지 않게 한다. 기울임 없음. */
+  /* 브랜드 헤드라인 타이포(R14 §3) — 과장 전면 금지: 이탤릭 없음, 가로 압축 없음(기존
+     scaleX 0.97 제거), 그라데이션 텍스트 없음, Black(800~900) 없음. Wanted Sans Variable
+     700 + 자간 -0.022em + 줄간격 1.05. 무게감은 굵기가 아니라 크기 대비와 여백으로 만든다. */
   .type-display {
     font-family: var(--font-display), 'Pretendard Variable', Pretendard, sans-serif;
-    font-weight: 800;
-    letter-spacing: -0.035em;
-    line-height: 1;
+    font-weight: 700;
+    letter-spacing: -0.022em;
+    line-height: 1.05;
     word-break: keep-all;
-    transform: scaleX(0.97);
-    transform-origin: left center;
-  }
-  /* 강조 단어 — 크기 폭주 대신 색으로 강조: 뮤티드 로즈→비비드의 절제된 그라데이션
-     (큰 글자 전용, 양 끝 모두 다크 bg 위 대형 텍스트 기준 4.7:1 이상). */
-  .text-gradient-primary {
-    background: linear-gradient(96deg, #bc6076 10%, #e9466b 90%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    text-wrap: balance;
+    color: var(--cream);
   }
 
   /* 홈 헤드라인 — 줄마다 시작 위치·크기를 다르게 두고, 단어(줄)별로 40~60px 아래에서
@@ -612,6 +614,102 @@
   .dolby-pulse {
     animation: dolby-pulse 1800ms ease-out infinite;
   }
+
+  /* ── R14 브랜드 그래픽 프리미티브 ─────────────────────────────── */
+
+  /* 선택·추천 표면 — 상단 1px 로즈 반사광 + 넓고 약한 oxblood ambient shadow.
+     모든 카드가 아니라 핵심 히어로와 선택 상태에만 쓴다. */
+  .surface-selected {
+    box-shadow: var(--edge-selected);
+  }
+
+  /* edge-light-sweep — hover/focus 등 직접 상호작용 때만 카드 가장자리를 짧게 지나가는
+     부드러운 조명. 자동 반복 재생 금지(one-shot). */
+  @keyframes edge-sweep {
+    from {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    30% {
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+  .edge-sweep {
+    position: relative;
+    overflow: hidden;
+  }
+  .edge-sweep::after {
+    content: '';
+    position: absolute;
+    inset: 0 auto auto 0;
+    height: 1px;
+    width: 100%;
+    background: linear-gradient(90deg, transparent, rgba(233, 180, 195, 0.55), transparent);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .edge-sweep:hover::after,
+  .edge-sweep:focus-visible::after,
+  .edge-sweep:focus-within::after {
+    animation: edge-sweep 700ms ease-out 1;
+  }
+
+  /* segment meter(R14 §9C) — 0~100 적합도 전용 5단계 미터. 긴 수평 진행 막대를 대체한다.
+     최대 폭은 사용처에서 max-width 140~180px로 제한. 채움 세그먼트는 사용처에서
+     색을 지정(화면·음향 muted rose, 좌석 밝은 rose). */
+  .seg-meter {
+    display: inline-flex;
+    gap: 3px;
+    width: 100%;
+    max-width: 160px;
+  }
+  .seg-meter > span {
+    height: 6px;
+    flex: 1;
+    border-radius: 2px;
+    background: var(--hero-soft);
+  }
+  .seg-meter > span[data-on='true'] {
+    background: var(--primary);
+  }
+  .seg-meter > span[data-on='half'] {
+    background: linear-gradient(90deg, var(--primary) 50%, var(--hero-soft) 50%);
+  }
+
+  /* data-dot-field — 신뢰도·출처 수를 표현하는 미세한 점 밀도. 장식이 아니라 데이터
+     양에 따라 사용처에서 점 개수를 바꾼다(밀도 = 확신도). */
+  .dot-field {
+    display: inline-grid;
+    grid-template-columns: repeat(6, 4px);
+    gap: 3px;
+  }
+  .dot-field > span {
+    width: 4px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--hero-soft);
+  }
+  .dot-field > span[data-on='true'] {
+    background: var(--trust-high);
+  }
+}
+
+/* ambient-grain(R14 §5) — 단색 검정의 밴딩·평면감을 줄이는 매우 약한 필름성 텍스처.
+   feTurbulence 노이즈 SVG 타일, opacity 2%. 빈티지 스크래치가 아니라 무광 질감에 가깝다.
+   고정 레이어라 스크롤 성능에 영향 없고 포인터를 막지 않는다. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.02;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
 }
 
 @media (prefers-reduced-motion: reduce) {

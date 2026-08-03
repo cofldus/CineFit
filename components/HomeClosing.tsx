@@ -28,7 +28,7 @@ export function HomeClosing() {
           {STEPS.map((s) => (
             <div key={s.n} className="group relative">
               <span aria-hidden className="absolute -top-8 left-0 h-px w-10 bg-primary/60 transition-all duration-300 group-hover:w-16" />
-              <span className="type-display text-gradient-primary block text-[34px] sm:text-[40px]">{s.n}</span>
+              <span className="type-display block text-[34px] text-primary sm:text-[40px]">{s.n}</span>
               <p className="m-0 mt-2.5 text-base font-bold text-text">{s.label}</p>
               <p className="m-0 mt-1 max-w-[240px] break-keep text-[14.5px] leading-relaxed text-text-sub">
                 {s.detail}

@@ -225,7 +225,7 @@ export function ScreeningHero() {
                       <span
                         key={c}
                         className={`h-[7px] flex-1 rounded-[2px] ${
-                          highlighted ? 'seat-light bg-gradient-to-b from-primary/80 to-primary-strong' : 'bg-hero-soft/70'
+                          highlighted ? 'seat-live bg-gradient-to-b from-primary/80 to-primary-strong' : 'bg-hero-soft/70'
                         }`}
                         style={highlighted ? { animationDelay: `${(r - hlRows[0]) * 60 + (c - hlCols[0]) * 25}ms` } : undefined}
                       />

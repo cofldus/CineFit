@@ -112,7 +112,8 @@ function MiniSeatMap({ zone }: { zone: string }) {
             return (
               <span
                 key={c}
-                className={`h-[6px] flex-1 rounded-[2px] ${on ? 'bg-gradient-to-b from-primary to-primary-strong' : 'bg-hero-soft'}`}
+                className={`h-[6px] flex-1 rounded-[2px] ${on ? 'seat-live bg-gradient-to-b from-primary to-primary-strong' : 'bg-hero-soft'}`}
+                style={on ? { animationDelay: `${(r - rows[0]) * 70 + (c - cols[0]) * 28}ms` } : undefined}
               />
             );
           })}
@@ -292,12 +293,13 @@ export function RecommendCard({
   const formatLabel = FORMAT_LABELS[c.format] ?? c.format;
 
   if (isTop) {
-    const [reason1, reason2, ...restPros] = scored.pros;
-    const reasons = [reason1, reason2].filter((r): r is string => Boolean(r));
+    // 이유 문장들은 전부 상세 패널로 — 전면에는 verdict 한 줄과 축 게이지가 같은 내용을
+    // 더 압축해 전달한다("1위 정보가 한 화면에 안 보인다" 피드백로 카드 높이 축소).
+    const restPros = scored.pros;
 
     return (
       <article
-        className="relative overflow-hidden rounded-card-xl bg-hero p-6 shadow-glow-primary transition-shadow duration-300 sm:p-8"
+        className="relative overflow-hidden rounded-card-xl bg-hero p-6 shadow-glow-primary transition-shadow duration-300 sm:p-7"
         aria-labelledby={`pick-${rank}-title`}
         data-testid={`pick-${label}`}
       >
@@ -332,7 +334,7 @@ export function RecommendCard({
 
         {/* 시그니처 비주얼 — 왼쪽: 영화의 실제 화면비 스크린 + 추천 구역 미니 좌석 맵,
             오른쪽: 엔진 축 값 4개 게이지. 종합 퍼센트는 전면에 노출하지 않는다(상세 패널에만). */}
-        <div className="mt-6 grid gap-6 border-t border-hero-border pt-5 sm:grid-cols-[250px,1fr] sm:items-center sm:gap-10">
+        <div className="mt-5 grid gap-5 border-t border-hero-border pt-4 sm:grid-cols-[240px,1fr] sm:items-center sm:gap-9">
           <div className="mx-auto flex w-full max-w-[250px] flex-col items-center">
             {nativeAr ? (
               <>
@@ -372,54 +374,22 @@ export function RecommendCard({
           </div>
         </div>
 
-        {reasons.length > 0 ? (
-          <div className="mt-6 flex flex-col gap-3 border-t border-hero-border pt-5">
-            {reasons.map((r, i) => (
-              <ReasonBlock
-                key={r}
-                reason={r}
-                tone="hero"
-                // 같은 카테고리 라벨('상영관'·'상영관')이 연달아 반복되지 않게 첫 항목에만 표시
-                showLabel={i === 0 || categorizeReason(r) !== categorizeReason(reasons[i - 1])}
-              />
-            ))}
-          </div>
-        ) : null}
-
-        {/* 이동·가격·포맷·충족 조건 — 아이콘형 데이터 행 */}
-        <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-hero-border pt-5 sm:grid-cols-4">
-          <div className="flex items-start gap-2">
-            <IconTransit aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-hero-text-sub" />
-            <div className="flex flex-col gap-0.5">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-hero-text-sub">이동 시간</span>
-              <span className="tabular-nums text-[15px] font-semibold text-hero-text">{scored.travelMinutes}분(추정)</span>
-            </div>
-          </div>
-          <div className="flex items-start gap-2">
-            <IconPrice aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-hero-text-sub" />
-            <div className="flex flex-col gap-0.5">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-hero-text-sub">가격</span>
-              <span className="tabular-nums text-[15px] font-semibold text-hero-text">{c.priceAdult.toLocaleString('ko-KR')}원</span>
-            </div>
-          </div>
-          <div className="flex items-start gap-2">
-            <IconFilm aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-hero-text-sub" />
-            <div className="flex flex-col gap-0.5">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-hero-text-sub">포맷</span>
-              <span className="text-[15px] font-semibold text-hero-text">{formatLabel}</span>
-            </div>
-          </div>
-          <div className="flex items-start gap-2">
-            <IconCheckCircle aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-hero-text-sub" />
-            <div className="flex flex-col gap-0.5">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-hero-text-sub">충족 조건</span>
-              <span className="text-[15px] font-semibold text-hero-text">{conditionsLine}</span>
-            </div>
-          </div>
+        {/* 이동·가격·충족·신뢰 — 4단 그리드 대신 아이콘 인라인 한 줄(카드 높이 압축).
+            포맷은 상단 칩, 이동·가격 상세는 축 게이지에도 이미 있다. */}
+        <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-hero-border pt-4 text-[13.5px] font-medium text-hero-text">
+          <span className="inline-flex items-center gap-1.5 tabular-nums">
+            <IconTransit aria-hidden className="h-4 w-4 shrink-0 text-hero-text-sub" /> {scored.travelMinutes}분(추정)
+          </span>
+          <span className="inline-flex items-center gap-1.5 tabular-nums">
+            <IconPrice aria-hidden className="h-4 w-4 shrink-0 text-hero-text-sub" /> {c.priceAdult.toLocaleString('ko-KR')}원
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <IconCheckCircle aria-hidden className="h-4 w-4 shrink-0 text-hero-text-sub" /> {conditionsLine}
+          </span>
+          <span className="text-[13px] text-hero-text-sub">정보 {trustSummary}</span>
         </div>
-        <p className="m-0 mt-3 text-[13px] text-hero-text-sub">정보 {trustSummary}</p>
 
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
           <Link
             href={`/cinemas/${c.auditorium.id}`}
             className="group/cta flex min-h-12 items-center justify-center gap-1.5 rounded-card bg-primary-strong px-8 text-base font-semibold text-white transition-all hover:bg-primary-strong-hover active:scale-[0.99]"

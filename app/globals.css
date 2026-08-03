@@ -69,44 +69,48 @@
    기존 마크업의 .cinema-scope 클래스는 그대로 두되 아무 값도 재정의하지 않는다(호환용,
    자기 참조 var()는 변수를 무효화하므로 선언 자체를 두지 않는다). */
 
-/* 관리자 전용 — 사용자 화면 팔레트 개편과 무관하게 독립적으로 유지(§ 여러 라운드째 확정). */
+/* 관리자 전용 — 오랫동안 독립 블루 팔레트였으나 사용자 요청(2026-08-03)으로 와인 시스템에
+   편입. 사용자 화면과 같은 언어를 쓰되, 배경을 반 단계 중립적으로 틀어 "지금 관리자 화면"
+   이라는 맥락 구분은 남긴다. 대비: primary #C96F84는 가장 밝은 표면 #1B181A 위 4.9:1. */
 .admin-scope {
-  --bg: #0e1116;
-  --surface: #171c24;
-  --surface-raised: #1d232e;
-  --border: #2a3240;
-  --text: #e8ecf2;
-  --text-sub: #9aa5b5;
-  --primary: #4c8dff;
-  --primary-strong: #2f6fe0;
-  --primary-strong-hover: #3f7ce8;
-  --accent: #8b7cf6;
-  --trust-high: #3dbe7b;
-  --trust-mid: #e0a83c;
-  --trust-low: #e05c5c;
+  --bg: #0d0c0d;
+  --surface: #151314;
+  --surface-raised: #1b181a;
+  --border: rgba(255, 255, 255, 0.09);
+  --text: #f3eeeb;
+  --text-sub: #a69ea0;
+  --primary: #c96f84;
+  --primary-strong: #872b42;
+  --primary-strong-hover: #732337;
+  --accent: #ed5578;
+  --trust-high: #5fcbae;
+  --trust-mid: #e3b15c;
+  --trust-low: #e8836b;
   --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 1px rgba(0, 0, 0, 0.2);
   --elevation-2: 0 8px 20px rgba(0, 0, 0, 0.35);
   --elevation-3: 0 16px 40px rgba(0, 0, 0, 0.45);
-  --elevation-4: 0 0 0 1px var(--primary), 0 8px 24px rgba(76, 141, 255, 0.25);
+  --elevation-4: 0 0 0 1px var(--primary), 0 8px 24px rgba(135, 43, 66, 0.25);
 }
 
 @media (prefers-color-scheme: light) {
   .admin-scope {
-    --bg: #f7f8fa;
+    --bg: #faf7f6;
     --surface: #ffffff;
     --surface-raised: #ffffff;
-    --border: #e2e6ec;
-    --text: #1a202c;
-    --text-sub: #5a6474;
-    --primary: #2a68d9;
-    --accent: #6a4fe0;
+    --border: #e8e1e0;
+    --text: #241c1f;
+    --text-sub: #5d5356;
+    --primary: #872b42;
+    --primary-strong: #872b42;
+    --primary-strong-hover: #732337;
+    --accent: #a1274b;
     --trust-mid: #8f5c0c;
     --trust-low: #c23434;
     --trust-high: #167a48;
-    --elevation-1: 0 1px 2px rgba(20, 26, 36, 0.06), 0 1px 1px rgba(20, 26, 36, 0.04);
-    --elevation-2: 0 8px 20px rgba(20, 26, 36, 0.1);
-    --elevation-3: 0 16px 40px rgba(20, 26, 36, 0.18);
-    --elevation-4: 0 0 0 1px var(--primary), 0 8px 24px rgba(76, 141, 255, 0.18);
+    --elevation-1: 0 1px 2px rgba(36, 28, 31, 0.06), 0 1px 1px rgba(36, 28, 31, 0.04);
+    --elevation-2: 0 8px 20px rgba(36, 28, 31, 0.1);
+    --elevation-3: 0 16px 40px rgba(36, 28, 31, 0.18);
+    --elevation-4: 0 0 0 1px var(--primary), 0 8px 24px rgba(135, 43, 66, 0.18);
   }
 }
 
@@ -572,6 +576,25 @@
   }
   .seat-light {
     animation: seat-light-up 300ms ease-out both;
+  }
+
+  /* 점등 후 은은하게 숨쉬는 추천 좌석 — 좌석별 delay가 그대로 이어져 블록 위를 파도처럼
+     지나간다. 글로우는 아주 약한 로즈 광 하나(네온 금지 원칙 안에서). 두 애니메이션이
+     같은 inline animation-delay를 공유한다. prefers-reduced-motion 전역 규칙이 모두 끈다. */
+  @keyframes seat-breathe {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+  .seat-live {
+    animation:
+      seat-light-up 300ms ease-out both,
+      seat-breathe 2800ms ease-in-out 900ms infinite;
+    box-shadow: 0 0 6px rgba(233, 70, 107, 0.3);
   }
 
   /* 돌비 포맷 선택 시 스크린 주변에 은은하게 퍼지는 음파 링 — 화려한 글로우가 아니라

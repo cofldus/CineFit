@@ -94,6 +94,7 @@ export function SeatMap({ zones }: { zones: SeatZone[] }) {
       </p>
 
       <div
+        key={idx}
         className="mx-auto flex max-w-[360px] flex-col gap-[3px]"
         role="img"
         aria-label={`${[active.rowRange, active.colRange].filter(Boolean).join(' ') || '전체'} 구역 개략도`}
@@ -115,10 +116,15 @@ export function SeatMap({ zones }: { zones: SeatZone[] }) {
                       className={`h-[9px] flex-1 rounded-[2px] transition-colors duration-300 ${
                         highlighted
                           ? weak
-                            ? 'border border-dashed border-primary bg-transparent'
-                            : 'bg-gradient-to-b from-primary to-primary-strong'
+                            ? 'seat-light border border-dashed border-primary bg-transparent'
+                            : 'seat-live bg-gradient-to-b from-primary to-primary-strong'
                           : 'bg-hero-soft'
                       }`}
+                      style={
+                        highlighted
+                          ? { animationDelay: `${(r - rowStart) * 60 + (c - colStart) * 24}ms` }
+                          : undefined
+                      }
                     />
                   );
                 })}

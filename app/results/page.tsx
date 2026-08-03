@@ -173,7 +173,7 @@ export default async function ResultsPage({
           <div
             className={`enter-3 mt-8 ${
               result.picks.length > 1
-                ? 'lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,4fr)] lg:gap-6'
+                ? 'lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,4fr)] lg:items-start lg:gap-6'
                 : 'mx-auto max-w-[880px]'
             }`}
           >
@@ -188,9 +188,9 @@ export default async function ResultsPage({
             ) : null}
 
             {result.picks.length > 1 ? (
-              <div className="enter-4 -mx-5 mt-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-1 sm:mx-0 sm:px-0 sm:pb-0 lg:mt-0 lg:h-full lg:flex-col lg:overflow-visible">
+              <div className="enter-4 -mx-5 mt-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-1 sm:mx-0 sm:px-0 sm:pb-0 lg:mt-0 lg:flex-col lg:overflow-visible">
                 {result.picks.slice(1).map((p, i) => (
-                  <div key={p.scored.candidate.showtimeId} className="flex w-[86%] shrink-0 snap-start sm:w-[70%] lg:w-auto lg:min-h-0 lg:flex-1 lg:shrink">
+                  <div key={p.scored.candidate.showtimeId} className="flex w-[86%] shrink-0 snap-start sm:w-[70%] lg:w-auto lg:shrink">
                     <RecommendCard
                       rank={i + 2}
                       label={p.label}

@@ -83,6 +83,47 @@ export function createCinemaRepository(getDb: () => DbClient) {
       return (await listAuditoriums()).find((a) => a.id === id) ?? null;
     },
 
+    /** 홈 "최근 확인된 상영관 정보" — 상영관 사양 관측 기록을 최신순으로 몇 건만.
+        마케팅 문구가 아니라 실제 업데이트 기록을 그대로 보여주기 위한 조회(R14 §7C). */
+    async listRecentObservations(limit: number): Promise<
+      {
+        auditoriumId: number;
+        auditoriumLabel: string;
+        field: string;
+        observedAt: string;
+        infoStatus: InfoStatus;
+        sourceName: string | null;
+      }[]
+    > {
+      const rows = await getDb().query<{
+        auditorium_id: number;
+        auditorium_no: string;
+        loc_name: string;
+        field: string;
+        observed_at: string;
+        info_status: InfoStatus;
+        source_name: string | null;
+      }>(
+        `SELECT a.id AS auditorium_id, a.auditorium_no, l.name AS loc_name,
+                o.field, o.observed_at, o.info_status, s.name AS source_name
+         FROM observations o
+         JOIN auditoriums a ON o.entity_type = 'auditorium' AND a.id = o.entity_id
+         JOIN cinema_locations l ON l.id = a.location_id
+         LEFT JOIN sources s ON s.id = o.source_id
+         ORDER BY o.observed_at DESC
+         LIMIT ?`,
+        [limit],
+      );
+      return rows.map((r) => ({
+        auditoriumId: r.auditorium_id,
+        auditoriumLabel: `${r.loc_name} ${r.auditorium_no}`,
+        field: r.field,
+        observedAt: r.observed_at,
+        infoStatus: r.info_status,
+        sourceName: r.source_name,
+      }));
+    },
+
     /** 상영관 상세 — 사양 이력·관측 근거·좌석 존·예정 회차 (docs/09 화면 8 축소) */
     async getAuditoriumDetail(id: number, nowIso: string): Promise<AuditoriumDetail | null> {
       const db = getDb();

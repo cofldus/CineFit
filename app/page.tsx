@@ -1,22 +1,25 @@
-import { HomeClosing } from '../components/HomeClosing';
+import { HomeInfo, type RecentObservation } from '../components/HomeInfo';
 import { NowShowing } from '../components/NowShowing';
 import { ScreeningHero } from '../components/ScreeningHero';
+import { cinemaRepository } from '../src/data/cinemaRepository';
 import { DbNotSeededError } from '../src/data/db';
 import { movieRepository } from '../src/data/movieRepository';
 import type { MovieWithSpecs } from '../src/domain/recommendation/types';
 
 export const dynamic = 'force-dynamic';
 
-// 홈 — 헤드라인+설명+CTA(ScreeningHero) → 지금 볼 수 있는 영화(NowShowing) → 비교 기준+
-// 마지막 CTA(HomeClosing). MarketingHeader는 사용자 화면 전체의 공통 헤더라
-// app/layout.tsx에서 렌더한다(여기서 다시 렌더하지 않음). 온보딩 3문항 폼은 홈에서 뺐다 —
-// localStorage 읽기/쓰기 유틸과 recommend 폼 기본값 연동 로직은 그대로 남아 있지만, 지금은
-// 이 폼을 채울 진입점이 홈에 없다(추후 recommend 플로우 초입으로 옮기는 별도 작업).
+// 홈 — 헤드라인+설명+CTA(ScreeningHero) → 지금 볼 수 있는 영화(NowShowing) → 정보 서비스
+// 섹션(HomeInfo: 최근 확인 기록·선택 가이드·데이터 투명성, R14 §7 — 마케팅형 01/02/03
+// 소개 폐기). MarketingHeader는 사용자 화면 전체의 공통 헤더라 app/layout.tsx에서 렌더한다.
+// 온보딩 3문항 폼은 홈에서 뺐다 — localStorage 읽기/쓰기 유틸과 recommend 폼 기본값 연동
+// 로직은 그대로 남아 있지만, 지금은 이 폼을 채울 진입점이 홈에 없다.
 export default async function HomePage() {
   let movies: MovieWithSpecs[] = [];
+  let observations: RecentObservation[] = [];
   let dbMissing = false;
   try {
     movies = await movieRepository.list();
+    observations = await cinemaRepository.listRecentObservations(4);
   } catch (e) {
     if (e instanceof DbNotSeededError) dbMissing = true;
     else throw e;
@@ -39,7 +42,7 @@ export default async function HomePage() {
       ) : (
         <NowShowing movies={movies} />
       )}
-      <HomeClosing />
+      <HomeInfo observations={observations} />
     </main>
   );
 }

@@ -1,5 +1,10 @@
 import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
+// 본문 폰트 실로드 — 지금까지 font-family 스택에 이름만 있고 패키지가 설치돼 있지 않아
+// Windows에서 맑은 고딕으로 폴백되고 있었다("작은 글씨가 깨져 보인다" 피드백의 원인).
+// dynamic subset: 한글 전체(~2MB)가 아니라 화면에 쓰인 글자 블록만 unicode-range로 나눠
+// 받는다 — 최초 로드가 가볍고 셀프호스팅이라 외부 CDN 의존도 없다.
+import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css';
 import { AppHeader } from '../components/AppHeader';
 import { AppOpenedTracker } from '../components/AppOpenedTracker';
 import { MarketingHeader } from '../components/MarketingHeader';

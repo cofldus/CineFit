@@ -13,11 +13,11 @@ export default async function MoviesPage() {
     <main className="cinema-scope min-h-dvh max-w-none bg-bg px-4 pb-24 pt-10 sm:pt-14">
       {/* 다크 배경은 main이 전폭으로 채우고(넓은 화면에서 밝은 여백이 드러나지 않게),
           내용만 이 래퍼로 제한한다. */}
-      <div className="mx-auto max-w-wide">
+      {/* R14 보강: 목록만 좌우로 넓게 퍼지던 max-w-wide 대신, 카탈로그(좌 필터 레일 + 우
+          목록)에 맞는 폭으로 조인다. 헤더 타이포도 extrabold → type-display 700. */}
+      <div className="mx-auto max-w-6xl">
       <p className="m-0 text-[13px] font-bold uppercase tracking-[0.08em] text-accent">영화 선택</p>
-      <h1 className="m-0 mt-2 font-headline text-[32px] font-extrabold tracking-[-0.02em] text-text sm:text-[38px]">
-        어떤 영화를 보러 가세요?
-      </h1>
+      <h1 className="type-display m-0 mt-2 text-[30px] sm:text-[36px]">어떤 영화를 보러 가세요?</h1>
       <p className="m-0 mt-2 max-w-content text-[15px] text-text-sub">
         오늘 상영 중인 작품 중 하나를 고르면, 그 영화에 가장 잘 맞는 상영관을 찾아드릴게요.
       </p>
@@ -37,7 +37,7 @@ export default async function MoviesPage() {
           </p>
         </div>
       ) : (
-        <div className="mt-6">
+        <div className="mt-8">
           <MovieList movies={movies} />
         </div>
       )}

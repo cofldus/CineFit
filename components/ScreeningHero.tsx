@@ -65,11 +65,14 @@ export function ScreeningHero() {
   const { rows: hlRows, cols: hlCols } = current.seatHighlight;
 
   return (
-    <section className="enter-1 px-5 pb-12 pt-10 sm:px-10 sm:pt-16 lg:pb-16">
+    <section className="enter-1 relative overflow-hidden px-5 pb-12 pt-10 sm:px-10 sm:pt-16 lg:pb-16">
+      {/* 공간을 채우는 아주 약한 조명층 — 휑한 배경 방지, 네온이 아니라 극장 간접광. */}
+      <div aria-hidden className="pointer-events-none absolute -left-44 top-8 h-[440px] w-[440px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(135, 43, 66, 0.13), transparent 65%)' }} />
+      <div aria-hidden className="pointer-events-none absolute -right-32 top-1/3 h-[400px] w-[400px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(188, 96, 118, 0.09), transparent 65%)' }} />
       <div className="mx-auto grid max-w-wide items-center gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-14">
         {/* 좌: 헤드라인·설명·CTA */}
         <div>
-          <h1 className="m-0 flex flex-col gap-1 break-keep">
+          <h1 className="m-0 flex flex-col gap-1.5 break-keep">
             <span
               className="hero-word type-display block text-[6vw] text-text/75 sm:text-[24px]"
               style={{ animationDelay: '0ms' }}
@@ -77,7 +80,7 @@ export function ScreeningHero() {
               이 영화,
             </span>{' '}
             <span
-              className="hero-word type-display text-gradient-primary block w-fit pr-2 text-[11.5vw] sm:text-[58px]"
+              className="hero-word type-display text-gradient-primary block w-fit pr-2 text-[11.5vw] sm:text-[56px]"
               style={{ animationDelay: '120ms' }}
             >
               어디서 봐야
@@ -95,7 +98,7 @@ export function ScreeningHero() {
           <div className="mt-7 flex">
             <Link
               href="/movies"
-              className="group inline-flex min-h-12 items-center justify-center gap-1.5 rounded-card bg-primary-strong px-8 text-base font-semibold text-white transition-all hover:bg-primary-strong-hover hover:shadow-glow-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary active:scale-[0.98]"
+              className="group inline-flex min-h-12 items-center justify-center gap-1.5 rounded-card bg-primary-strong px-8 text-base font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-primary-strong-hover hover:shadow-glow-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary active:scale-[0.98]"
             >
               영화 선택하기
               <IconArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />

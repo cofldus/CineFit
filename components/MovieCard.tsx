@@ -76,8 +76,8 @@ export function MovieCard({ movie, variant = 'detailed' }: { movie: MovieWithSpe
                   그라데이션 폴백. */}
               {movie.posterUrl ? (
                 <>
-                  <Image src={movie.posterUrl} alt="" fill sizes="250px" className="object-cover" />
-                  <span className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,10,11,0.3)_0%,rgba(11,10,11,0.78)_100%)]" />
+                  <Image src={movie.posterUrl} alt="" fill sizes="250px" className="object-cover transition-transform duration-300 group-hover:scale-[1.04]" />
+                  <span className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,10,11,0.3)_0%,rgba(11,10,11,0.78)_100%)] transition-opacity duration-300 group-hover:opacity-75" />
                 </>
               ) : null}
               <span

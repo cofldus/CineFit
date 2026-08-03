@@ -19,29 +19,20 @@ const TRUST_KEYS = ['official', 'multi_source', 'user_report', 'estimated'] as c
 // 잘린다는 피드백).
 export function HomeClosing() {
   return (
-    <section className="enter-3 px-5 py-14 sm:px-10 sm:py-16">
+    <section id="compare" className="enter-3 px-5 py-14 sm:px-10 sm:py-16">
       <div className="mx-auto max-w-wide">
         <h2 className="type-display m-0 text-[22px] text-text sm:text-[26px]">CineFit이 비교하는 것</h2>
-        <div className="mt-8 flex flex-col gap-8 sm:flex-row sm:items-start sm:gap-6">
-          {STEPS.map((s, i) => (
-            <div key={s.n} className="flex flex-col gap-8 sm:flex-1 sm:flex-row sm:items-start sm:gap-6">
-              <div className="flex items-start gap-4 sm:flex-col sm:gap-2">
-                {/* 순서 번호는 색이 아니라 크기·굵기로만 강조한다 — 파랑은 CTA·선택·포커스·활성
-                    내비게이션 전용이라 장식적 강조에는 쓰지 않는다. */}
-                <span className="shrink-0 text-3xl font-bold text-text-tertiary sm:text-4xl">{s.n}</span>
-                <div className="min-w-0">
-                  <p className="m-0 text-base font-bold text-text">{s.label}</p>
-                  <p className="m-0 mt-1 max-w-[220px] break-keep text-[14.5px] leading-relaxed text-text-sub">
-                    {s.detail}
-                  </p>
-                </div>
-              </div>
-              {i < STEPS.length - 1 ? (
-                <>
-                  <IconArrowRight aria-hidden className="h-5 w-5 shrink-0 rotate-90 text-border-strong sm:hidden" />
-                  <IconArrowRight aria-hidden className="mt-3 hidden h-5 w-5 shrink-0 text-border-strong sm:block" />
-                </>
-              ) : null}
+        {/* 설명서식 화살표 나열 대신, 위쪽 헤어라인 위에 번호가 걸린 3열 리듬 — 번호는
+            디스플레이 서체 + 로즈 그라데이션으로 브랜드 시스템의 일부처럼. */}
+        <div className="mt-8 grid gap-10 border-t border-border pt-8 sm:grid-cols-3 sm:gap-6">
+          {STEPS.map((s) => (
+            <div key={s.n} className="group relative">
+              <span aria-hidden className="absolute -top-8 left-0 h-px w-10 bg-primary/60 transition-all duration-300 group-hover:w-16" />
+              <span className="type-display text-gradient-primary block text-[34px] sm:text-[40px]">{s.n}</span>
+              <p className="m-0 mt-2.5 text-base font-bold text-text">{s.label}</p>
+              <p className="m-0 mt-1 max-w-[240px] break-keep text-[14.5px] leading-relaxed text-text-sub">
+                {s.detail}
+              </p>
             </div>
           ))}
         </div>

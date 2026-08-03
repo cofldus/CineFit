@@ -122,7 +122,7 @@ export function MovieList({ movies }: { movies: MovieWithSpecs[] }) {
                           없으면 와인 그라데이션 폴백. */}
                       {movie.posterUrl ? (
                         <>
-                          <Image src={movie.posterUrl} alt="" fill sizes="112px" className="object-cover" />
+                          <Image src={movie.posterUrl} alt="" fill sizes="112px" className="object-cover transition-transform duration-300 group-hover:scale-[1.05]" />
                           <span className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,10,11,0.3)_0%,rgba(11,10,11,0.78)_100%)]" />
                         </>
                       ) : null}

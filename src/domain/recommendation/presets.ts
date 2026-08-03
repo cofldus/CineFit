@@ -19,6 +19,9 @@ export const FORMAT_LABELS: Record<string, string> = {
   '4dx': '4DX',
   superplex: '수퍼플렉스',
   standard: '일반',
+  // KOBIS 배급 포맷 버전에 등장하는 값 — CineFit이 추천하는 상영관 브랜드는 아니지만
+  // 영화 카드 배지에 원문 그대로('screenx') 새는 것을 막는다.
+  screenx: 'ScreenX',
 };
 
 // 사용자에게는 쉬운 말로 노출 — 원래 상태 값(official 등)은 내부 로직에서만 사용 (docs/09 §1.3)

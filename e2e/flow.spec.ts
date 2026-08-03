@@ -11,10 +11,10 @@ test('홈 → 영화 선택 → 조건 입력 → 추천 3종 → 상세 확인'
   await page.locator('a[href^="/recommend/"]').first().click();
   await expect(page).toHaveURL(/\/recommend\/\d+/);
 
-  // 기본값 그대로 제출해도 추천을 받을 수 있어야 한다 — 3단계 flow라 다음 → 다음 → 제출.
-  await page.getByRole('button', { name: '다음' }).click();
-  await page.getByRole('button', { name: '다음' }).click();
-  await page.getByRole('button', { name: '추천 받기' }).click();
+  // 기본값 그대로 제출해도 추천을 받을 수 있어야 한다 — 3단계 flow, 단계별 CTA 문구(R15).
+  await page.getByRole('button', { name: /우선순위 정하기/ }).click();
+  await page.getByRole('button', { name: /불편 조건 설정하기/ }).click();
+  await page.getByRole('button', { name: /결과 확인하기/ }).click();
   await expect(page).toHaveURL(/\/results\?/);
 
   await expect(page.getByTestId('pick-균형')).toBeVisible();

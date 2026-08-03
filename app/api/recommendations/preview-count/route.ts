@@ -17,9 +17,21 @@ export async function GET(req: NextRequest) {
   if (!res.ok) {
     return NextResponse.json({ ok: false, error: res.error }, { status: 404 });
   }
+  // 후보 변화 내역(R15 §5) — 제외 사유 문구에서 이동/가격 단계를 집계해 "전체 → 이동시간
+  // 적용 → 예산 적용 → 최종" 퍼널을 만든다(엔진의 실제 제외 결과 그대로, 새 계산 없음).
+  const excluded = res.result.excluded;
+  const travelCut = excluded.filter((e) => /최대 이동 시간 .*초과/.test(e.reason)).length;
+  const priceCut = excluded.filter((e) => /상한 .*초과/.test(e.reason)).length;
+  const total = res.result.totalCandidates;
   return NextResponse.json({
     ok: true,
     candidates: res.result.scored.length,
-    total: res.result.totalCandidates,
+    total,
+    funnel: {
+      total,
+      afterTravel: total - travelCut,
+      afterPrice: total - travelCut - priceCut,
+      final: res.result.scored.length,
+    },
   });
 }

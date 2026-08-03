@@ -130,6 +130,9 @@ const PlusGlyph = () => (
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
 const STEP_TITLES = ['언제, 어디서 볼까요?', '무엇을 가장 중요하게 보나요?', '피하고 싶은 조건이 있나요?'];
+// 모바일 compact progress("1 / 3 · 위치와 시간")와 단계별 CTA 문구(R15 §5).
+const STEP_SHORT = ['위치와 시간', '우선순위', '불편 조건'] as const;
+const NEXT_LABELS = ['우선순위 정하기 →', '불편 조건 설정하기 →'] as const;
 
 // 스테퍼 옆 preset 칩 — −/+만 반복 누르는 대신 자주 쓰는 값으로 바로 이동(R14 §8 Step 1).
 const TRAVEL_PRESETS = [30, 60, 90] as const;
@@ -324,10 +327,15 @@ export function RecommendForm({
   const [step, setStep] = useState(0);
   // 조건을 바꿀 때마다 "현재 조건에 맞는 후보 N개"를 실시간 조회(디바운스) — 결과 페이지와
   // 같은 파서·서비스의 preview 모드를 쓰므로 실제 결과 개수와 항상 일치한다.
-  const [preview, setPreview] = useState<{ candidates: number; total: number } | null>(null);
+  type Preview = {
+    candidates: number;
+    total: number;
+    funnel?: { total: number; afterTravel: number; afterPrice: number; final: number };
+  };
+  const [preview, setPreview] = useState<Preview | null>(null);
   // 직전 후보 수 — 조건이 바뀌어 개수가 달라졌을 때 "7개 → 4개"로 변화를 보여준다(§8).
   const [prevCount, setPrevCount] = useState<number | null>(null);
-  const previewRef = useRef<{ candidates: number; total: number } | null>(null);
+  const previewRef = useRef<Preview | null>(null);
   const [formTick, setFormTick] = useState(0);
   const [originVal, setOriginVal] = useState('cityhall');
   const [priorityVal, setPriorityVal] = useState<Priority>('balance');
@@ -367,11 +375,11 @@ export function RecommendForm({
         const qs = buildQuery(movieId, new FormData(el));
         const r = await fetch(`/api/recommendations/preview-count?${qs.toString()}`);
         if (r.ok) {
-          const j = (await r.json()) as { ok: boolean; candidates: number; total: number };
+          const j = (await r.json()) as { ok: boolean } & Preview;
           if (j.ok) {
             const prev = previewRef.current;
             setPrevCount(prev && prev.candidates !== j.candidates ? prev.candidates : null);
-            previewRef.current = { candidates: j.candidates, total: j.total };
+            previewRef.current = { candidates: j.candidates, total: j.total, funnel: j.funnel };
             setPreview(previewRef.current);
           }
         }
@@ -400,7 +408,7 @@ export function RecommendForm({
       onChange={() => setFormTick((t) => t + 1)}
       onSubmit={onSubmit}
       aria-label="추천 조건 입력"
-      className="pb-4"
+      className="pb-36 lg:pb-4"
     >
       {/* R14 §8: 데스크톱 65/35 작업 공간 — 좌측 입력, 우측 라이브 조건 패널. */}
       <div className="lg:grid lg:grid-cols-[minmax(0,13fr)_minmax(0,7fr)] lg:items-start lg:gap-10">
@@ -428,8 +436,12 @@ export function RecommendForm({
         </div>
       </details>
 
-      {/* 진행 표시 — 완료 단계는 체크, 현재는 와인 채움, 연결선도 완료 구간은 로즈. */}
-      <ol className="m-0 mb-6 flex list-none items-center gap-2 p-0" aria-label="입력 단계">
+      {/* 모바일: 점 대신 "1 / 3 · 위치와 시간" compact progress(R15 §5). */}
+      <p className="m-0 mb-4 text-[13.5px] font-semibold tabular-nums text-text sm:hidden" aria-label="입력 단계">
+        {step + 1} <span className="text-text-tertiary">/ 3</span> · {STEP_SHORT[step]}
+      </p>
+      {/* 데스크톱 진행 표시 — 완료 단계는 체크, 현재는 와인 채움, 연결선도 완료 구간은 로즈. */}
+      <ol className="m-0 mb-6 hidden list-none items-center gap-2 p-0 sm:flex" aria-label="입력 단계">
         {STEP_TITLES.map((t, i) => (
           <li key={t} className="flex min-w-0 items-center gap-2">
             <span
@@ -709,7 +721,7 @@ export function RecommendForm({
       </StepSection>
       </div>
 
-      <div className={step === 2 ? 'stage-enter' : 'hidden'}>
+      <div className={step === 2 ? 'stage-enter' : 'hidden'} data-step-last>
       <StepSection step={3} title="피하고 싶은 조건이 있나요?" first numbered={false}>
         <SegmentedControl
           key={prefillKey}
@@ -746,6 +758,39 @@ export function RecommendForm({
           </div>
         </fieldset>
       </StepSection>
+      </div>
+
+      {/* 데스크톱 인라인 CTA(R15 §5) — 전체 폭 고정 바 대신 입력 영역 안에서 240px 버튼.
+          모바일 sticky 바는 lg 미만 전용. */}
+      <div className="mt-8 hidden items-center gap-3 border-t border-border pt-6 lg:flex">
+        {step > 0 ? (
+          <button
+            type="button"
+            onClick={() => setStep((s) => s - 1)}
+            className="min-h-12 shrink-0 rounded-card border border-border px-5 text-[15px] font-medium text-text-sub transition-colors hover:text-text"
+          >
+            이전
+          </button>
+        ) : null}
+        {step < 2 ? (
+          <button
+            key="next-desktop"
+            type="button"
+            onClick={() => setStep((s) => s + 1)}
+            className="btn-cta flex min-h-12 w-[240px] items-center justify-center rounded-card bg-primary-strong text-[15px] font-semibold text-white hover:bg-primary-strong-hover"
+          >
+            {NEXT_LABELS[step]}
+          </button>
+        ) : (
+          <button
+            key="submit-desktop"
+            type="submit"
+            className="btn-cta flex min-h-12 w-[240px] items-center justify-center rounded-card bg-primary-strong text-[15px] font-semibold text-white hover:bg-primary-strong-hover"
+            disabled={submitting}
+          >
+            {submitting ? '추천 계산 중…' : '결과 확인하기 →'}
+          </button>
+        )}
       </div>
       </div>
 
@@ -785,23 +830,64 @@ export function RecommendForm({
                     ) : null}
                     <span className="text-primary">{preview.candidates}개</span>
                   </p>
-                  <p className="m-0 mt-0.5 text-[12px] tabular-nums text-text-tertiary">전체 {preview.total}개 회차 중</p>
+                  {/* 후보 변화 내역(R15 §5) — 조건이 후보를 어떻게 좁히는지 단계별로. */}
+                  {preview.funnel ? (
+                    <ol className="m-0 mt-2 flex list-none flex-col gap-1 p-0 text-[12.5px] tabular-nums text-text-sub">
+                      <li className="flex justify-between gap-3">
+                        전체 후보 <span>{preview.funnel.total}개</span>
+                      </li>
+                      <li className="flex justify-between gap-3">
+                        이동시간 적용 <span>{preview.funnel.afterTravel}개</span>
+                      </li>
+                      <li className="flex justify-between gap-3">
+                        예산 적용 <span>{preview.funnel.afterPrice}개</span>
+                      </li>
+                      <li className="flex justify-between gap-3 font-semibold text-text">
+                        포맷·조건 반영 <span className="text-primary">{preview.funnel.final}개</span>
+                      </li>
+                    </ol>
+                  ) : (
+                    <p className="m-0 mt-0.5 text-[12px] tabular-nums text-text-tertiary">전체 {preview.total}개 회차 중</p>
+                  )}
                 </>
               ) : (
                 <p className="m-0 text-[13px] text-text-tertiary">후보 계산 중…</p>
               )}
+            </div>
+            {/* 탐색 반경 그래픽(R15 §5) — 최대 이동 시간을 동심원의 활성 링으로 표현. */}
+            <div aria-hidden className="mt-3.5 flex items-center gap-3 border-t border-border pt-3.5">
+              <span className="relative block h-14 w-14 shrink-0">
+                {[1, 0.66, 0.33].map((f) => (
+                  <span
+                    key={f}
+                    className="absolute rounded-full border border-border"
+                    style={{ inset: `${(1 - f) * 50}%` }}
+                  />
+                ))}
+                <span
+                  className="absolute rounded-full border border-primary/70 transition-all duration-300"
+                  style={{ inset: `${(1 - Math.min(1, travelVal / 120)) * 50}%` }}
+                />
+                <span className="absolute left-1/2 top-1/2 h-1 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary" />
+              </span>
+              <p className="m-0 text-[12px] leading-snug text-text-tertiary">
+                출발 위치 기준 이동 {travelVal}분 반경에서 회차를 찾아요.
+              </p>
             </div>
           </div>
         </div>
       </aside>
       </div>
 
+      {/* 모바일 sticky CTA(R15 §5) — 반투명 다크 표면 + blur, 버튼 54px + 상단 edge
+          highlight + press state. 단계별 문구로 다음에 무엇이 오는지 알려준다. 데스크톱은
+          아래 인라인 CTA가 담당(lg:hidden). */}
       <div
-        className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/95 px-4 py-3 backdrop-blur-md"
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/90 px-4 py-3 backdrop-blur-md lg:hidden"
         style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }}
       >
         {preview ? (
-          <p className="m-0 mb-2 text-center text-[12px] tabular-nums text-text-sub lg:hidden" role="status">
+          <p className="m-0 mb-2 text-center text-[12px] tabular-nums text-text-sub" role="status">
             현재 조건에 맞는 후보{' '}
             {prevCount !== null ? (
               <span className="text-text-tertiary">
@@ -816,7 +902,7 @@ export function RecommendForm({
             <button
               type="button"
               onClick={() => setStep((s) => s - 1)}
-              className="min-h-12 shrink-0 rounded-card border border-border px-5 text-[15px] font-medium text-text-sub transition-colors hover:text-text"
+              className="min-h-[54px] shrink-0 rounded-card border border-border px-5 text-[15px] font-medium text-text-sub transition-colors hover:text-text"
             >
               이전
             </button>
@@ -829,18 +915,18 @@ export function RecommendForm({
               key="next"
               type="button"
               onClick={() => setStep((s) => s + 1)}
-              className="flex min-h-12 flex-1 items-center justify-center rounded-card bg-primary-strong text-base font-semibold text-white transition-colors hover:bg-primary-strong-hover"
+              className="btn-cta flex min-h-[54px] flex-1 items-center justify-center rounded-card bg-primary-strong text-base font-semibold text-white hover:bg-primary-strong-hover"
             >
-              다음
+              {NEXT_LABELS[step]}
             </button>
           ) : (
             <button
               key="submit"
               type="submit"
-              className="flex min-h-12 flex-1 items-center justify-center rounded-card bg-primary-strong text-base font-semibold text-white transition-colors hover:bg-primary-strong-hover disabled:opacity-60"
+              className="btn-cta flex min-h-[54px] flex-1 items-center justify-center rounded-card bg-primary-strong text-base font-semibold text-white hover:bg-primary-strong-hover"
               disabled={submitting}
             >
-              {submitting ? '추천 계산 중…' : '추천 받기'}
+              {submitting ? '추천 계산 중…' : '결과 확인하기 →'}
             </button>
           )}
           <span className="sr-only" role="status" aria-live="polite">

@@ -28,10 +28,10 @@ test('관리자 로그인 → 실제형 회차 등록 → 사용자 추천에 �
   await page.goto('/movies');
   await page.locator('a[href^="/recommend/"]').first().click();
   await page.getByLabel('관람 날짜').fill('2026-08-02');
-  // 3단계 flow — 날짜는 1단계에 있으므로 채운 뒤 다음 → 다음 → 제출.
-  await page.getByRole('button', { name: '다음' }).click();
-  await page.getByRole('button', { name: '다음' }).click();
-  await page.getByRole('button', { name: '추천 받기' }).click();
+  // 3단계 flow — 날짜는 1단계에 있으므로 채운 뒤 단계별 CTA로 진행(R15 문구).
+  await page.getByRole('button', { name: /우선순위 정하기/ }).click();
+  await page.getByRole('button', { name: /불편 조건 설정하기/ }).click();
+  await page.getByRole('button', { name: /결과 확인하기/ }).click();
   await expect(page).toHaveURL(/\/results\?/);
 
   // 관리자 확인 회차 기준 배너 — 결과 페이지 위계 개편으로 카드마다 반복하던 회차 상태

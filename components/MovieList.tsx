@@ -32,9 +32,24 @@ function verificationSummary(movie: MovieWithSpecs): string {
  * 폭을 채우는 게 아니라 폭에 역할을 준다. 모바일은 기존 sticky 상단 검색·칩 유지.
  * 필터링은 이미 받아온 목록에 대한 클라이언트 측 표시 필터일 뿐, 데이터 요청을 바꾸지 않는다.
  */
+// 정렬(R15 §4) — 전부 이미 받아온 목록에 대한 클라이언트 정렬. 값은 실제 데이터에서만 파생.
+const SORTS = [
+  { key: 'info', label: '상영 정보 충분한 순' },
+  { key: 'special', label: '특별관 많은 순' },
+  { key: 'runtime', label: '러닝타임 순' },
+  { key: 'name', label: '가나다순' },
+] as const;
+type SortKey = (typeof SORTS)[number]['key'];
+
+function verifiedCount(movie: MovieWithSpecs): number {
+  return keySpecEntries(movie).filter((e) => e.spec.infoStatus === 'official' || e.spec.infoStatus === 'multi_source')
+    .length;
+}
+
 export function MovieList({ movies }: { movies: MovieWithSpecs[] }) {
   const [query, setQuery] = useState('');
   const [format, setFormat] = useState<string | null>(null);
+  const [sort, setSort] = useState<SortKey>('info');
 
   const formatCounts = useMemo(() => {
     const counts = new Map<string, number>();
@@ -44,12 +59,21 @@ export function MovieList({ movies }: { movies: MovieWithSpecs[] }) {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return movies.filter((m) => {
+    const base = movies.filter((m) => {
       if (q && !m.title.toLowerCase().includes(q) && !(m.originalTitle ?? '').toLowerCase().includes(q)) return false;
       if (format && !movieFormats(m).includes(format)) return false;
       return true;
     });
-  }, [movies, query, format]);
+    const specialCount = (m: MovieWithSpecs) => movieFormats(m).filter((f) => f !== 'standard').length;
+    return [...base].sort((a, b) => {
+      if (sort === 'info') return verifiedCount(b) - verifiedCount(a) || a.title.localeCompare(b.title, 'ko');
+      if (sort === 'special') return specialCount(b) - specialCount(a) || a.title.localeCompare(b.title, 'ko');
+      if (sort === 'runtime') return a.runtimeMin - b.runtimeMin;
+      return a.title.localeCompare(b.title, 'ko');
+    });
+  }, [movies, query, format, sort]);
+
+  const activeFilters = (query.trim() ? 1 : 0) + (format ? 1 : 0);
 
   const searchBox = (
     <div className="relative">
@@ -73,14 +97,14 @@ export function MovieList({ movies }: { movies: MovieWithSpecs[] }) {
         {filtered.map((movie) => {
           const nativeAr = movie.specs.native_ar?.value ? Number(movie.specs.native_ar.value) : null;
           const clampedAr = Math.min(RATIO_MAX, Math.max(RATIO_MIN, nativeAr ?? 1.85));
-          const formats = movieFormats(movie).slice(0, 3);
+          const formats = movieFormats(movie);
           return (
             <li key={movie.id} className="list-enter">
               <TrackedLink
                 event="movie_selected"
                 eventProperties={{ movieId: movie.id }}
                 href={`/recommend/${movie.id}`}
-                className="edge-sweep group flex items-center gap-4 rounded-card-lg bg-surface-raised p-4 transition-all duration-200 hover:-translate-y-0.5 hover:bg-surface-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                className="edge-sweep group flex items-center gap-3.5 rounded-card-lg bg-surface-raised p-3.5 transition-colors duration-200 hover:bg-surface-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:gap-4 sm:p-4"
               >
                 {/* 미니 스크린 썸네일 — 실제 극장의 마스킹 원리: 외곽 프레임은 모든 행에서
                     동일한 2.39:1이고, 영화의 실제 화면비만큼만 안쪽이 켜진다. 남는 좌우는
@@ -116,19 +140,23 @@ export function MovieList({ movies }: { movies: MovieWithSpecs[] }) {
                   </div>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="m-0 truncate text-[16.5px] font-bold text-text">{movie.title}</h3>
+                  <h3 className="m-0 truncate text-[16px] font-bold text-text">{movie.title}</h3>
                   <p className="m-0 mt-0.5 truncate text-[13px] tabular-nums text-text-sub">
                     {movie.releaseYear ? `${movie.releaseYear} · ` : ''}
                     {movie.runtimeMin}분
                     {movie.director ? ` · ${movie.director}` : ''}
                   </p>
-                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                    {formats.map((f) => (
-                      <span key={f} className="rounded-full border border-border px-2 py-px text-[11px] font-medium text-text-sub">
+                  {/* 태그는 최대 2개 + 초과분 +N(R15 §4) — 모바일 스캔 피로를 줄인다. */}
+                  <div className="mt-1.5 flex flex-nowrap items-center gap-1.5 overflow-hidden">
+                    {formats.slice(0, 2).map((f) => (
+                      <span key={f} className="shrink-0 rounded-full border border-border px-2 py-px text-[11px] font-medium text-text-sub">
                         {FORMAT_LABELS[f] ?? f}
                       </span>
                     ))}
-                    <span className="text-[12px] text-text-tertiary">상영 정보 {verificationSummary(movie)}</span>
+                    {formats.length > 2 ? (
+                      <span className="shrink-0 text-[11px] font-medium tabular-nums text-text-tertiary">+{formats.length - 2}</span>
+                    ) : null}
+                    <span className="truncate text-[12px] text-text-tertiary">상영 정보 {verificationSummary(movie)}</span>
                   </div>
                 </div>
                 <IconChevronRight
@@ -204,8 +232,33 @@ export function MovieList({ movies }: { movies: MovieWithSpecs[] }) {
               })}
             </ul>
           </nav>
+          {/* 정렬(R15 §4) — 필터와 같은 세로 리스트 문법. */}
+          <nav aria-label="정렬">
+            <p className="m-0 mb-2 text-[12px] font-semibold uppercase tracking-wide text-text-tertiary">정렬</p>
+            <ul className="m-0 flex list-none flex-col p-0">
+              {SORTS.map((s) => {
+                const active = sort === s.key;
+                return (
+                  <li key={s.key}>
+                    <button
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => setSort(s.key)}
+                      className={`flex min-h-9 w-full items-center border-l-2 px-3 text-left text-[13.5px] transition-colors ${
+                        active
+                          ? 'border-primary-strong font-semibold text-text'
+                          : 'border-border text-text-sub hover:border-border-strong hover:text-text'
+                      }`}
+                    >
+                      {s.label}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
           <p className="m-0 border-t border-border pt-4 text-[13px] tabular-nums text-text-sub" role="status" aria-live="polite">
-            {query || format ? `조건에 맞는 영화 ${filtered.length}편` : `전체 ${movies.length}편`}
+            {activeFilters > 0 ? `필터 ${activeFilters}개 적용 · 영화 ${filtered.length}편` : `전체 ${movies.length}편`}
           </p>
         </div>
       </aside>

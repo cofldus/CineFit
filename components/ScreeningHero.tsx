@@ -1,26 +1,46 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { IconArrowRight } from './Icon';
 
 // 실제 특정 상영관을 가리키지 않는, "CineFit이 무엇을 비교하는지" 보여주는 예시 값들 —
 // 화면비·포맷·좌석·이동시간은 전부 실제 서비스가 다루는 항목이고 숫자는 대표값일 뿐,
-// 특정 영화·상영관·회차를 지어낸 것이 아니다. seatHighlight는 seat 라벨 문구와 일치하는
-// 대략적 좌석 그리드 강조 영역(행/열 인덱스 범위) — "핵심 좌석 일부만 은은하게" 원칙에
-// 맞춰 블록을 좁게 잡는다.
+// 특정 영화·상영관·회차를 지어낸 것이 아니다. frameRatio는 그 포맷의 스크린 프레임
+// 비율(IMAX 디지털 확장 1.90:1, 돌비 2.20:1, 일반관 마스킹 벽 2.39:1) — 탭을 바꾸면
+// 프레임의 실제 높이가 morph하고(§3), ratio(켜지는 화면)와의 차이는 마스킹으로 남는다.
 const STAGE_FRAMES = [
-  { ratio: 2.39, format: 'IMAX', seat: '중앙 블록', travel: '24분', seatHighlight: { rows: [2, 3], cols: [4, 7] } },
-  { ratio: 2.2, format: '돌비시네마', seat: '뒤쪽 중앙', travel: '18분', seatHighlight: { rows: [3, 4], cols: [4, 7] } },
-  { ratio: 1.85, format: '일반관', seat: '가운데 열', travel: '12분', seatHighlight: { rows: [2, 2], cols: [3, 8] } },
+  {
+    ratio: 1.9,
+    frameRatio: 1.9,
+    format: 'IMAX',
+    seat: '중앙 블록',
+    travel: '24분',
+    desc: '확장 화면비 — 화면이 위아래로 더 큽니다',
+    seatHighlight: { rows: [2, 3], cols: [4, 7] },
+  },
+  {
+    ratio: 2.2,
+    frameRatio: 2.2,
+    format: '돌비시네마',
+    seat: '뒤쪽 중앙',
+    travel: '18분',
+    desc: '돌비 비전·애트모스 — 명암과 입체 음향 중심',
+    seatHighlight: { rows: [3, 4], cols: [4, 7] },
+  },
+  {
+    ratio: 1.85,
+    frameRatio: 2.39,
+    format: '일반관',
+    seat: '가운데 열',
+    travel: '12분',
+    desc: '1.85:1 상영 — 좌우 마스킹이 남습니다',
+    seatHighlight: { rows: [2, 2], cols: [3, 8] },
+  },
 ] as const;
-
-const RATIOS = STAGE_FRAMES.map((f) => f.ratio);
-const MAX_RATIO = Math.max(...RATIOS);
 
 const SEAT_ROWS = 5;
 const SEAT_COLS = 12;
-const ROTATE_MS = 4200;
 
 function HeroStat({ label, value }: { label: string; value: string }) {
   return (
@@ -42,22 +62,8 @@ function HeroStat({ label, value }: { label: string; value: string }) {
  * 애니메이션 모두 꺼진다.
  */
 export function ScreeningHero() {
+  // R15 §3: 자동 순환 제거 — 사용자가 탭을 누를 때만 반응한다(자동 반복 애니메이션 금지).
   const [frame, setFrame] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const [userPicked, setUserPicked] = useState(false);
-  const reducedMotion = useRef(false);
-
-  useEffect(() => {
-    reducedMotion.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  }, []);
-
-  useEffect(() => {
-    if (paused || userPicked || reducedMotion.current) return;
-    const id = setInterval(() => {
-      setFrame((f) => (f + 1) % STAGE_FRAMES.length);
-    }, ROTATE_MS);
-    return () => clearInterval(id);
-  }, [paused, userPicked]);
 
   const current = STAGE_FRAMES[frame];
   const isImax = current.format === 'IMAX';
@@ -109,11 +115,7 @@ export function ScreeningHero() {
         </div>
 
         {/* 우: 스크린 시뮬레이터 — 하나의 중심(스크린). 카드 테두리 없이 표면과 간접광만. */}
-        <div
-          className="relative overflow-hidden rounded-card-xl bg-hero px-5 py-7 shadow-glow-primary sm:px-8 sm:py-9"
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => setPaused(false)}
-        >
+        <div className="group relative overflow-hidden rounded-card-xl bg-hero px-5 py-7 shadow-glow-primary sm:px-8 sm:py-9">
           {/* 배경 객석 실루엣 — 아래쪽에서 옥스블러드가 아주 옅게 올라오는 간접 조명. */}
           <div
             aria-hidden
@@ -131,10 +133,7 @@ export function ScreeningHero() {
                   key={f.format}
                   type="button"
                   aria-pressed={i === frame}
-                  onClick={() => {
-                    setFrame(i);
-                    setUserPicked(true);
-                  }}
+                  onClick={() => setFrame(i)}
                   className={`rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition-colors ${
                     i === frame
                       ? 'bg-primary-strong text-white'
@@ -147,10 +146,10 @@ export function ScreeningHero() {
             </div>
           </div>
 
-          <div key={frame} className="stage-enter relative mt-8 flex flex-col items-center">
-            {/* 스크린 외곽 프레임 — 실제 극장의 마스킹 원리: 프레임(스크린 벽)은 가장 넓은
-                2.39:1 크기로 고정돼 있고, 포맷의 실제 화면비만큼만 안쪽 화면이 켜진다.
-                남는 좌우 영역은 어두운 마스킹으로 남아 비율 차이가 즉각 체감된다. */}
+          <div className="relative mt-8 flex flex-col items-center">
+            {/* 스크린 프레임(R15 §3) — 탭을 바꾸면 프레임의 실제 비율·높이가 morph한다
+                (IMAX 1.90:1은 눈에 띄게 높아진다). 프레임보다 좁은 화면비는 좌우 마스킹으로
+                남아 비율 차이가 즉각 체감된다. 높이 전환은 padding-top(애니메이션 가능)으로. */}
             <div className="relative w-full max-w-[560px]">
               {isDolby ? (
                 <>
@@ -163,19 +162,21 @@ export function ScreeningHero() {
                 </>
               ) : null}
               <div
-                className="relative flex w-full items-center justify-center overflow-hidden rounded-[10px] border border-white/10 bg-[#0d0b0c]"
+                className="relative w-full overflow-hidden rounded-[10px] border border-white/10 bg-[#0d0b0c] transition-[padding-top,box-shadow] duration-[550ms] ease-out"
                 style={{
-                  aspectRatio: `${MAX_RATIO} / 1`,
+                  paddingTop: `${(1 / current.frameRatio) * 100}%`,
                   boxShadow: isImax
                     ? '0 0 0 1px rgba(201, 111, 132, 0.35), 0 22px 70px -22px rgba(135, 43, 66, 0.6)'
                     : '0 22px 70px -22px rgba(135, 43, 66, 0.45)',
                 }}
               >
-                {/* 켜진 화면 — 실제 화면비만큼만 점등. 폭 전환은 부드럽게 애니메이션. */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                {/* 켜진 화면 — 실제 화면비만큼만 점등. 활성 모듈에 마우스가 올라가면 내부광이
+                    7%만 밝아진다(자동 반복 발광 없음). */}
                 <div
-                  className="relative flex h-full items-center justify-center overflow-hidden transition-[width] duration-[550ms] ease-out"
+                  className="relative flex h-full items-center justify-center overflow-hidden transition-[width,filter] duration-[550ms] ease-out group-hover:brightness-[1.07]"
                   style={{
-                    width: `${(current.ratio / MAX_RATIO) * 100}%`,
+                    width: `${(current.ratio / current.frameRatio) * 100}%`,
                     background:
                       'linear-gradient(180deg, rgba(135, 43, 66, 0.48) 0%, rgba(64, 42, 49, 0.95) 55%, rgba(38, 28, 31, 0.98) 100%)',
                   }}
@@ -204,6 +205,7 @@ export function ScreeningHero() {
                     확장
                   </span>
                 ) : null}
+                </div>
               </div>
               {/* 스크린 불빛이 객석으로 번지는 간접광. */}
               <div
@@ -213,8 +215,10 @@ export function ScreeningHero() {
               />
             </div>
 
-            {/* 객석 — 실루엣 수준의 좌석 점. 추천 구역의 좁은 핵심 블록만 은은하게 점등. */}
-            <div aria-hidden className="mt-8 flex w-full flex-col items-center gap-[5px]">
+            {/* 객석(R15 §3) — 포맷을 바꿀 때마다 추천 블록이 중앙부터 순차 점등 "1회"만
+                실행된다(무한 호흡 애니메이션 제거 — 자동 반복 금지). key={frame}로 포맷
+                전환 시에만 재점등. */}
+            <div key={frame} aria-hidden className="mt-8 flex w-full flex-col items-center gap-[5px]">
               {Array.from({ length: SEAT_ROWS }, (_, r) => (
                 <div
                   key={r}
@@ -223,13 +227,16 @@ export function ScreeningHero() {
                 >
                   {Array.from({ length: SEAT_COLS }, (_, c) => {
                     const highlighted = r >= hlRows[0] && r <= hlRows[1] && c >= hlCols[0] && c <= hlCols[1];
+                    const rc = (hlRows[0] + hlRows[1]) / 2;
+                    const cc = (hlCols[0] + hlCols[1]) / 2;
+                    const dist = Math.sqrt((r - rc) ** 2 + ((c - cc) / 2) ** 2);
                     return (
                       <span
                         key={c}
                         className={`h-[7px] flex-1 rounded-[2px] ${
-                          highlighted ? 'seat-live bg-gradient-to-b from-primary/80 to-primary-strong' : 'bg-hero-soft/70'
+                          highlighted ? 'seat-light bg-gradient-to-b from-primary/80 to-primary-strong' : 'bg-hero-soft/70'
                         }`}
-                        style={highlighted ? { animationDelay: `${(r - hlRows[0]) * 60 + (c - hlCols[0]) * 25}ms` } : undefined}
+                        style={highlighted ? { animationDelay: `${Math.round(dist * 55)}ms` } : undefined}
                       />
                     );
                   })}
@@ -242,8 +249,8 @@ export function ScreeningHero() {
             <HeroStat label="추천 좌석 구역" value={current.seat} />
             <span aria-hidden className="hidden h-8 w-px bg-hero-border sm:block" />
             <HeroStat label="이동 시간" value={current.travel} />
-            <p className="m-0 ml-auto hidden max-w-[220px] text-right text-[12px] leading-relaxed text-hero-text-sub sm:block">
-              포맷을 바꾸면 화면비·좌석·이동 조건이 함께 달라져요.
+            <p key={frame} className="stage-enter m-0 ml-auto hidden max-w-[240px] text-right text-[12.5px] leading-relaxed text-hero-text-sub sm:block">
+              {current.desc}
             </p>
           </div>
         </div>

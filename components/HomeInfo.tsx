@@ -66,25 +66,35 @@ export function HomeInfo({ observations }: { observations: RecentObservation[] }
           {observations.length > 0 ? (
             <div>
               <h2 className="m-0 text-[20px] font-bold text-text sm:text-[22px]">최근 확인된 상영관 정보</h2>
-              <ul className="m-0 mt-4 flex list-none flex-col divide-y divide-border p-0">
+              {/* 업데이트 타임라인(R15 §3) — 텍스트 목록이 아니라 세로 라인 + 점으로 시간의
+                  흐름이 보이는 기록 형태. */}
+              <ol className="relative m-0 mt-5 flex list-none flex-col gap-5 p-0 pl-5 before:absolute before:bottom-1 before:left-[3px] before:top-1 before:w-px before:bg-border">
                 {observations.map((o, i) => (
-                  <li key={`${o.auditoriumId}-${o.field}-${i}`}>
-                    <Link
-                      href={`/cinemas/${o.auditoriumId}`}
-                      className="group flex min-h-12 flex-wrap items-baseline gap-x-3 gap-y-0.5 py-2.5"
-                    >
-                      <span className="font-semibold text-text group-hover:underline decoration-border-strong underline-offset-2">
-                        {o.auditoriumLabel}
+                  <li key={`${o.auditoriumId}-${o.field}-${i}`} className="relative">
+                    <span
+                      aria-hidden
+                      className={`absolute -left-5 top-[7px] h-[7px] w-[7px] rounded-full ${i === 0 ? 'bg-primary' : 'bg-border-strong'}`}
+                    />
+                    <Link href={`/cinemas/${o.auditoriumId}`} className="group block">
+                      <span className="flex flex-wrap items-baseline gap-x-2.5 gap-y-0.5">
+                        <span className="text-[12px] tabular-nums text-text-tertiary">
+                          {dateFmt.format(new Date(o.observedAt))} 확인
+                        </span>
+                        <span className="text-[12.5px] text-text-tertiary">
+                          {INFO_STATUS_LABELS[o.infoStatus] ?? o.infoStatus}
+                          {o.sourceName ? ` · ${o.sourceName}` : ''}
+                        </span>
                       </span>
-                      <span className="text-[13.5px] text-text-sub">{fieldLabel(o.field)}</span>
-                      <span className="ml-auto flex items-center gap-2 text-[12.5px] tabular-nums text-text-tertiary">
-                        {INFO_STATUS_LABELS[o.infoStatus] ?? o.infoStatus}
-                        {o.sourceName ? ` · ${o.sourceName}` : ''} · {dateFmt.format(new Date(o.observedAt))} 확인
+                      <span className="mt-0.5 block">
+                        <span className="font-semibold text-text group-hover:underline decoration-border-strong underline-offset-2">
+                          {o.auditoriumLabel}
+                        </span>
+                        <span className="ml-2 text-[13.5px] text-text-sub">{fieldLabel(o.field)}</span>
                       </span>
                     </Link>
                   </li>
                 ))}
-              </ul>
+              </ol>
             </div>
           ) : null}
 

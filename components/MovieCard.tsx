@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { FORMAT_LABELS } from '../src/domain/recommendation/presets';
 import type { MovieWithSpecs } from '../src/domain/recommendation/types';
-import { formatSpecValue, keySpecEntries, SPEC_KEY_LABELS } from '../src/lib/display';
+import { formatSpecValue, keySpecEntries, keyTrait, SPEC_KEY_LABELS } from '../src/lib/display';
 import { IconArrowRight } from './Icon';
 import { TrackedLink } from './TrackedLink';
 import { TrustBadge } from './TrustBadge';
@@ -99,6 +99,10 @@ export function MovieCard({ movie, variant = 'detailed' }: { movie: MovieWithSpe
           {movie.releaseYear ? `${movie.releaseYear} · ` : ''}
           {movie.runtimeMin}분
         </p>
+        {/* 영화별 핵심 특징 한 줄(R15 §3) — 사양에서 파생, 없으면 표시하지 않는다. */}
+        {keyTrait(movie) ? (
+          <p className="m-0 mt-1.5 text-[12.5px] font-semibold text-primary">{keyTrait(movie)}</p>
+        ) : null}
         <p className="m-0 mt-3 flex items-center justify-between gap-2 border-t border-border pt-3 text-[13.5px] font-medium text-text-sub">
           상영 정보 {verificationSummary(movie)}
           <IconArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1" />

@@ -86,6 +86,19 @@ export function formatSpecValue(key: MovieSpecKey, spec: SpecValue): string {
   return String(v);
 }
 
+// 영화 카드의 "핵심 특징 한 줄"(R15 §3) — 이미 저장된 사양에서 관람 선택에 가장 영향이
+// 큰 것 하나만 뽑는다(새 사실을 만들지 않고, 없으면 null).
+export function keyTrait(movie: MovieWithSpecs): string | null {
+  const s = movie.specs;
+  if (s.imax_expanded_ar?.value) return `IMAX 확장 ${s.imax_expanded_ar.value}:1 장면 포함`;
+  if (s.filmed_for_imax?.value === true) return 'IMAX 인증 카메라 촬영';
+  if (s.atmos_mix?.value === true) return '돌비 애트모스 믹스 — 사운드 포맷 중요';
+  if (s.dolby_vision?.value === true) return '돌비 비전 마스터 — 명암 표현 중요';
+  if (typeof s.dark_scene_ratio?.value === 'number' && Number(s.dark_scene_ratio.value) >= 0.5)
+    return '어두운 장면 비중 높음 — 영사 밝기 중요';
+  return null;
+}
+
 // 영화 카드에 노출할 대표 사양 (있는 것만)
 export function keySpecEntries(movie: MovieWithSpecs): { key: MovieSpecKey; spec: SpecValue }[] {
   const keys: MovieSpecKey[] = ['native_ar', 'imax_expanded_ar', 'film_format', 'atmos_mix', 'format_versions'];

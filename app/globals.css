@@ -183,8 +183,9 @@
       'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
       'Malgun Gothic', system-ui, sans-serif;
     font-size: 16px;
+    font-weight: 450;
     line-height: 1.65;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.008em;
   }
 
   /* 링크는 기본 상태에서 색·밑줄이 없다(부모 텍스트 색 상속) — 모든 링크에 밑줄을 걸면
@@ -201,9 +202,10 @@
     padding: 16px 16px 96px;
   }
 
-  /* 타이포 스케일(R14 §3) — 글자의 힘은 굵기(Black)가 아니라 크기 대비·줄 길이·여백으로.
-     페이지 제목 680, 섹션 640, 카드 600, 본문 450. 제목은 balance, 본문 설명은 pretty.
-     긴 한글 제목이 이상한 지점에서 줄바꿈되지 않도록 keep-all을 기본으로 깐다. */
+  /* 타이포 스케일(R15 §1) — 위계는 크기+굵기 "차이"로 만든다: 페이지 제목 670 / 섹션 615 /
+     카드 585 / 본문 450. 섹션·카드 제목이 페이지 제목처럼 무거워 보이지 않게 한 단계씩
+     확실히 벌린다. 제목 자간 -0.025em, 본문 -0.008em. 긴 한글 제목이 이상한 지점에서
+     줄바꿈되지 않도록 keep-all을 기본으로 깐다. */
   h1,
   h2,
   h3,
@@ -211,22 +213,21 @@
     word-break: keep-all;
     overflow-wrap: break-word;
     text-wrap: balance;
+    letter-spacing: -0.025em;
   }
   h1 {
     font-size: clamp(28px, 3.2vw, 36px);
-    font-weight: 680;
+    font-weight: 670;
     line-height: 1.25;
-    letter-spacing: -0.02em;
   }
   h2 {
     font-size: clamp(20px, 2.2vw, 24px);
-    font-weight: 640;
+    font-weight: 615;
     line-height: 1.3;
-    letter-spacing: -0.015em;
   }
   h3 {
     font-size: 17px;
-    font-weight: 600;
+    font-weight: 585;
   }
   p {
     text-wrap: pretty;
@@ -541,12 +542,26 @@
      700 + 자간 -0.022em + 줄간격 1.05. 무게감은 굵기가 아니라 크기 대비와 여백으로 만든다. */
   .type-display {
     font-family: var(--font-display), 'Pretendard Variable', Pretendard, sans-serif;
-    font-weight: 700;
-    letter-spacing: -0.022em;
+    font-weight: 680;
+    letter-spacing: -0.025em;
     line-height: 1.05;
     word-break: keep-all;
     text-wrap: balance;
     color: var(--cream);
+  }
+
+  /* 값-단위 분리(R15 §1) — 큰 숫자 + 작은 단위 + 아래 델타 설명이 한 문법으로 반복되도록. */
+  .stat-value {
+    font-size: 1em;
+    font-weight: 620;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.015em;
+  }
+  .stat-unit {
+    margin-left: 0.15em;
+    font-size: 0.72em;
+    font-weight: 480;
+    color: var(--text-sub);
   }
 
   /* 홈 헤드라인 — 줄마다 시작 위치·크기를 다르게 두고, 단어(줄)별로 40~60px 아래에서
@@ -621,6 +636,27 @@
      모든 카드가 아니라 핵심 히어로와 선택 상태에만 쓴다. */
   .surface-selected {
     box-shadow: var(--edge-selected);
+  }
+
+  /* CTA 버튼 공통 디테일(R15 §8) — 단순 버건디 직사각형이 아니라 상단 edge highlight를
+     가진 표면. hover lift 최대 2px, press scale 0.985, 180~240ms ease-out. bounce 금지. */
+  .btn-cta {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    transition:
+      transform 200ms ease-out,
+      background-color 200ms ease-out,
+      box-shadow 200ms ease-out,
+      opacity 200ms ease-out;
+  }
+  .btn-cta:hover:not(:disabled) {
+    transform: translateY(-2px);
+  }
+  .btn-cta:active:not(:disabled) {
+    transform: scale(0.985);
+  }
+  .btn-cta:disabled {
+    opacity: 0.45;
+    box-shadow: none;
   }
 
   /* edge-light-sweep — hover/focus 등 직접 상호작용 때만 카드 가장자리를 짧게 지나가는

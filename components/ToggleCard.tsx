@@ -43,10 +43,10 @@ function SelectableCard({
         </span>
       ) : null}
       <span className="flex min-w-0 flex-col">
-        <span className="text-[15px] font-semibold leading-snug text-text transition-colors group-has-[:checked]:text-primary">
+        <span className="break-keep text-[15px] font-semibold leading-snug text-text transition-colors group-has-[:checked]:text-primary">
           {title}
         </span>
-        <span className="mt-1 text-[13px] leading-snug text-text-sub">{description}</span>
+        <span className="mt-1 break-keep text-[13px] leading-snug text-text-sub">{description}</span>
       </span>
     </label>
   );

@@ -510,7 +510,7 @@ export function RecommendForm({
       <StepSection step={2} title="무엇을 가장 중요하게 보나요?" first numbered={false}>
         <fieldset className="m-0 border-0 p-0" key={prefillKey}>
           <legend className="mb-2 block text-sm font-semibold text-text">가장 중요한 것</legend>
-          <div className="grid gap-2.5 sm:grid-cols-3" role="radiogroup" aria-label="가장 중요한 것">
+          <div className="grid gap-2.5 sm:[grid-template-columns:repeat(auto-fit,minmax(230px,1fr))]" role="radiogroup" aria-label="가장 중요한 것">
             <RadioCard
               name="priority"
               value="balance"
@@ -539,7 +539,7 @@ export function RecommendForm({
         </fieldset>
         <fieldset className="m-0 border-0 p-0">
           <legend className="mb-2 block text-sm font-semibold text-text">허용할 상영 방식</legend>
-          <div className="grid gap-2.5 sm:grid-cols-3">
+          <div className="grid gap-2.5 sm:[grid-template-columns:repeat(auto-fit,minmax(230px,1fr))]">
             <ToggleCard
               name="allowImax"
               defaultChecked
@@ -577,7 +577,7 @@ export function RecommendForm({
         />
         <fieldset className="m-0 border-0 p-0">
           <legend className="mb-2 block text-sm font-semibold text-text">좌석·편의 선호</legend>
-          <div className="grid gap-2.5 sm:grid-cols-3">
+          <div className="grid gap-2.5 sm:[grid-template-columns:repeat(auto-fit,minmax(230px,1fr))]">
             <ToggleCard
               key={prefillKey}
               name="subtitleReadability"

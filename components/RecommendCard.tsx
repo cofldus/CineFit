@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import type { FormatId, PickLabel, RecommendationRequest, ScoredCandidate } from '../src/domain/recommendation/types';
-import { FORMAT_LABELS } from '../src/domain/recommendation/presets';
+import { FORMAT_LABELS, VERIFIED_STATUSES } from '../src/domain/recommendation/presets';
 import { categorizeReason, citationsTrustSummary, coreConditionsSummary, pct, REASON_CATEGORY_LABEL, winnerVerdict } from '../src/lib/display';
-import { IconArrowRight, IconCheckCircle, IconFilm, IconNote, IconPrice, IconQuestion, IconThumbsDown, IconTransit, IconWrench } from './Icon';
+import { IconArrowRight, IconCheckCircle, IconNote, IconQuestion, IconThumbsDown, IconWrench } from './Icon';
 import { TrackedExternalLink } from './TrackedLink';
 import { TrustBadge } from './TrustBadge';
 
@@ -14,8 +14,8 @@ const timeFmt = new Intl.DateTimeFormat('ko-KR', {
 });
 
 // 카드 제목만 보고도 대안이 어떤 상황에 맞는 선택인지 구분되도록 — PickLabel(데이터 값)은
-// 그대로 두고 화면 표시 문구만 상황 서술형으로 바꿨다. 1위와의 실제 차이(diffVsTop)를 계산할
-// 수 없거나 차이가 없을 때의 대체 문구로도 쓴다.
+// 그대로 두고 화면 표시 문구만 상황 서술형으로 바꿨다. 1위와의 실제 차이를 계산할 수 없거나
+// 차이가 없을 때의 대체 문구로도 쓴다.
 const PICK_SCENARIO: Record<PickLabel, string> = {
   균형: '가장 균형 잡힌 선택',
   품질: '화질과 사운드를 더 중요하게 본다면',
@@ -24,68 +24,123 @@ const PICK_SCENARIO: Record<PickLabel, string> = {
 
 const PREMIUM_FORMATS = new Set<FormatId>(['imax', 'dolby_cinema']);
 
-// 2·3위 카드 제목에 붙는 "1위와의 핵심 차이" — 이미 계산된 가격·이동시간·포맷 값만 비교해
-// 만든 문장이다(새 수치를 만들지 않음). 장점 1개 + 트레이드오프 1개가 모두 있으면
-// "…지만 …" 형태로 잇는다.
-export function diffVsTop(scored: ScoredCandidate, top: ScoredCandidate): string | null {
+// 좌석 정보 신뢰 요약이 1위보다 낮은지 — 이미 붙어 있는 citation 상태만 비교한다.
+function seatTrustLower(scored: ScoredCandidate, top: ScoredCandidate): boolean {
+  return citationsTrustSummary(scored.citations) === '일부 추정' && citationsTrustSummary(top.citations) === '확인됨';
+}
+
+type DiffClause = { jiman: string; end: string; gain: boolean };
+
+// 1위 대비 차이 절(節) 목록 — 이미 계산된 가격·이동시간·포맷·출처 상태만 비교해 만든다
+// (새 수치를 만들지 않음). 문장은 "…지만 …요" 형태로 조합한다.
+function diffClauses(scored: ScoredCandidate, top: ScoredCandidate): DiffClause[] {
   const c = scored.candidate;
   const t = top.candidate;
-  const pros: string[] = [];
-  const cons: string[] = [];
-
-  const priceDiff = t.priceAdult - c.priceAdult;
-  if (priceDiff > 0) pros.push(`${priceDiff.toLocaleString('ko-KR')}원 저렴`);
-  else if (priceDiff < 0) cons.push(`${Math.abs(priceDiff).toLocaleString('ko-KR')}원 비쌈`);
+  const out: DiffClause[] = [];
 
   const travelDiff = scored.travelMinutes - top.travelMinutes;
-  if (travelDiff < 0) pros.push(`이동 ${Math.abs(travelDiff)}분 짧음`);
-  else if (travelDiff > 0) cons.push(`이동 ${travelDiff}분 더`);
+  if (travelDiff < 0) {
+    const d = Math.abs(travelDiff);
+    out.push({ jiman: `${d}분 더 가깝지만`, end: `이동이 ${d}분 더 짧아요`, gain: true });
+  } else if (travelDiff > 0) {
+    out.push({ jiman: `이동이 ${travelDiff}분 더 걸리지만`, end: `이동이 ${travelDiff}분 더 걸려요`, gain: false });
+  }
+
+  const priceDiff = t.priceAdult - c.priceAdult;
+  if (priceDiff > 0) {
+    const won = priceDiff.toLocaleString('ko-KR');
+    out.push({ jiman: `${won}원 더 저렴하지만`, end: `${won}원 더 저렴해요`, gain: true });
+  } else if (priceDiff < 0) {
+    const won = Math.abs(priceDiff).toLocaleString('ko-KR');
+    out.push({ jiman: `${won}원 더 비싸지만`, end: `${won}원 더 비싸요`, gain: false });
+  }
 
   if (c.format !== t.format) {
-    if (PREMIUM_FORMATS.has(t.format) && !PREMIUM_FORMATS.has(c.format)) {
-      cons.push(`${FORMAT_LABELS[t.format] ?? t.format} 아님`);
-    } else if (PREMIUM_FORMATS.has(c.format) && !PREMIUM_FORMATS.has(t.format)) {
-      pros.push(`${FORMAT_LABELS[c.format] ?? c.format} 상영`);
+    if (PREMIUM_FORMATS.has(c.format) && !PREMIUM_FORMATS.has(t.format)) {
+      const f = FORMAT_LABELS[c.format] ?? c.format;
+      out.push({ jiman: `${f}를 볼 수 있지만`, end: `${f}를 볼 수 있어요`, gain: true });
+    } else if (PREMIUM_FORMATS.has(t.format) && !PREMIUM_FORMATS.has(c.format)) {
+      const f = FORMAT_LABELS[t.format] ?? t.format;
+      out.push({ jiman: `${f}는 아니지만`, end: `${f}는 아니에요`, gain: false });
     }
   }
 
-  if (pros.length > 0 && cons.length > 0) return `${pros[0]}지만 ${cons[0]}`;
-  if (pros.length > 0) return pros.slice(0, 2).join(' · ');
-  if (cons.length > 0) return cons.slice(0, 2).join(' · ');
+  if (seatTrustLower(scored, top)) {
+    out.push({ jiman: '좌석 정보가 일부 추정이지만', end: '좌석 정보가 일부 추정이에요', gain: false });
+  }
+
+  return out;
+}
+
+// 2·3위 카드의 "1위 대비 한 문장 판단" — 장점 1개 + 트레이드오프 1개가 모두 있으면
+// "…지만 …요"로 잇는다. 예: "15분 더 가깝지만 12,000원 더 비싸요".
+export function diffVsTop(scored: ScoredCandidate, top: ScoredCandidate): string | null {
+  const clauses = diffClauses(scored, top);
+  const gains = clauses.filter((c) => c.gain);
+  const losses = clauses.filter((c) => !c.gain);
+  if (gains.length > 0 && losses.length > 0) return `${gains[0].jiman} ${losses[0].end}`;
+  if (gains.length > 0) return gains[0].end;
+  if (losses.length > 0) return losses[0].end;
   return null;
 }
 
-// 대표 카드의 축별 게이지 — 의미가 불분명한 종합 퍼센트 하나 대신, 엔진이 실제로 계산한
-// 축 값(audQ·seatQ·conv·pv)을 각각 라벨과 함께 보여준다. value는 항상 0~1의 실제 축 점수,
-// detail은 그 축의 구체 사실(이동 분·가격 원)이 있으면 대신 표기한다. 막대는 얇고 절제된
-// 와인 레드 단색이고, 점수 축에는 짧은 상태 문구를 붙여 숫자만 반복되지 않게 한다.
-function axisPhrase(value: number): string {
-  if (value >= 0.8) return '우수';
-  if (value >= 0.6) return '좋음';
-  if (value >= 0.4) return '보통';
-  return '낮음';
+// 0~100 적합도 전용 5단계 세그먼트 미터(R14 §9C) — 카드 폭 전체를 가로지르는 긴 진행
+// 막대를 대체한다. 단위가 다른 이동·가격에는 쓰지 않는다(그쪽은 delta 텍스트).
+function SegMeter({ label, value }: { label: string; value: number }) {
+  const v = Math.min(1, Math.max(0, value)) * 5;
+  const phrase = value >= 0.8 ? '우수' : value >= 0.6 ? '좋음' : value >= 0.4 ? '보통' : '낮음';
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <span className="text-[13px] font-semibold text-hero-text-sub">{label}</span>
+      <span className="flex items-center gap-2.5">
+        <span className="seg-meter w-[110px]" aria-hidden>
+          {Array.from({ length: 5 }, (_, i) => (
+            <span key={i} data-on={v >= i + 0.75 ? 'true' : v >= i + 0.25 ? 'half' : undefined} />
+          ))}
+        </span>
+        <span className="whitespace-nowrap text-[13.5px] tabular-nums text-hero-text">
+          <strong className="font-semibold">{pct(value)}</strong>
+          <span className="ml-1 text-[12px] text-hero-text-sub">{phrase}</span>
+        </span>
+      </span>
+    </div>
+  );
 }
 
-function AxisBar({ label, value, detail }: { label: string; value: number; detail?: string }) {
-  const width = Math.round(Math.min(1, Math.max(0, value)) * 100);
+// 단위가 있는 값(이동·가격) — 진행률처럼 보이는 막대 대신 실제 숫자 + 기준 대비 여유를
+// 문장으로(R14 §9C: "46분 · 기준보다 14분 여유").
+function DeltaStat({ label, value, delta }: { label: string; value: string; delta: string }) {
   return (
-    <div>
-      <div className="flex items-baseline justify-between gap-3">
-        <span className="text-[12.5px] font-semibold text-hero-text-sub">{label}</span>
-        <span className="text-[13px] tabular-nums text-hero-text">
-          {detail ? (
-            <strong className="tabular-nums font-semibold">{detail}</strong>
-          ) : (
-            <>
-              <strong className="tabular-nums font-semibold">{width}%</strong>
-              <span className="ml-1.5 text-[12px] text-hero-text-sub">{axisPhrase(value)}</span>
-            </>
-          )}
+    <div className="flex items-baseline justify-between gap-4">
+      <span className="text-[13px] font-semibold text-hero-text-sub">{label}</span>
+      <span className="text-right">
+        <span className="text-[17px] font-semibold tabular-nums text-cream">{value}</span>
+        <span className="ml-2 whitespace-nowrap text-[12.5px] text-hero-text-sub">{delta}</span>
+      </span>
+    </div>
+  );
+}
+
+// 정보 신뢰도 — 출처 수·확인 비율을 점 밀도로(data-dot-field). 색이 아니라 밀도와 문구가
+// 정보를 전달한다.
+function TrustDots({ scored }: { scored: ScoredCandidate }) {
+  const total = scored.citations.length;
+  const verified = scored.citations.filter((c) => VERIFIED_STATUSES.has(c.infoStatus)).length;
+  const dots = Math.min(6, total);
+  const onDots = total === 0 ? 0 : Math.round((verified / total) * dots);
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <span className="text-[13px] font-semibold text-hero-text-sub">정보 신뢰도</span>
+      <span className="flex items-center gap-2.5">
+        <span className="dot-field" aria-hidden>
+          {Array.from({ length: 6 }, (_, i) => (
+            <span key={i} data-on={i < onDots ? 'true' : undefined} />
+          ))}
         </span>
-      </div>
-      <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-hero-soft">
-        <div className="h-full rounded-full bg-primary-strong" style={{ width: `${width}%` }} />
-      </div>
+        <span className="whitespace-nowrap text-[13px] tabular-nums text-hero-text">
+          출처 {total}건 · {verified === total && total > 0 ? '모두 확인' : `${verified}건 확인`}
+        </span>
+      </span>
     </div>
   );
 }
@@ -100,20 +155,36 @@ function seatHighlight(zone: string): { rows: [number, number]; cols: [number, n
   return { rows, cols };
 }
 
+// 좌석 개략도(R14 §5-2) — 단일 핑크 덩어리가 아니라 중심에서 주변으로 강도가 낮아지는
+// heat field. 앞줄(스크린 쪽)은 좌석이 조금 작고 어둡게(원근감). 핵심 셀만 점등 애니메이션.
 function MiniSeatMap({ zone }: { zone: string }) {
   const { rows, cols } = seatHighlight(zone);
+  const r0 = (rows[0] + rows[1]) / 2;
+  const c0 = (cols[0] + cols[1]) / 2;
+  const rSpan = Math.max(1, (rows[1] - rows[0]) / 2 + 1.1);
+  const cSpan = Math.max(1, (cols[1] - cols[0]) / 2 + 1.4);
   return (
     <div aria-hidden className="flex w-full flex-col items-center gap-[4px]">
       <div className="h-px w-[70%] rounded-full bg-[#bc6076]/60" />
       {Array.from({ length: 5 }, (_, r) => (
         <div key={r} className="flex justify-center gap-[4px]" style={{ width: `${72 + r * 7}%` }}>
           {Array.from({ length: 12 }, (_, c) => {
-            const on = r >= rows[0] && r <= rows[1] && c >= cols[0] && c <= cols[1];
+            const d = Math.sqrt(((r - r0) / rSpan) ** 2 + ((c - c0) / cSpan) ** 2);
+            const heat = Math.max(0, 1 - d);
+            const core = heat > 0.55;
             return (
               <span
                 key={c}
-                className={`h-[6px] flex-1 rounded-[2px] ${on ? 'seat-live bg-gradient-to-b from-primary to-primary-strong' : 'bg-hero-soft'}`}
-                style={on ? { animationDelay: `${(r - rows[0]) * 70 + (c - cols[0]) * 28}ms` } : undefined}
+                className={`flex-1 rounded-[2px] ${core ? 'seat-live' : ''}`}
+                style={{
+                  height: `${5 + r * 0.6}px`,
+                  background:
+                    heat > 0.08
+                      ? `color-mix(in oklab, var(--primary) ${Math.round(22 + heat * 78)}%, var(--hero-soft))`
+                      : 'var(--hero-soft)',
+                  opacity: heat > 0.08 ? undefined : 0.55 + r * 0.09,
+                  animationDelay: core ? `${Math.round(d * 260)}ms` : undefined,
+                }}
               />
             );
           })}
@@ -132,7 +203,7 @@ function ReasonBlock({ reason, tone, showLabel = true }: { reason: string; tone:
           {label}
         </p>
       ) : null}
-      <p className={`m-0 ${showLabel ? 'mt-1' : 'mt-0.5'} text-[15.5px] leading-relaxed ${tone === 'hero' ? 'text-hero-text' : 'text-text'}`}>{reason}</p>
+      <p className={`m-0 ${showLabel ? 'mt-1' : 'mt-0.5'} text-[15px] leading-relaxed ${tone === 'hero' ? 'text-hero-text' : 'text-text'}`}>{reason}</p>
     </div>
   );
 }
@@ -256,14 +327,16 @@ function DetailPanel({
   );
 }
 
+// 스크린 외곽 프레임은 극장 마스킹 원리대로 항상 2.39:1로 고정하고, 영화의 실제 화면비만큼만
+// 안쪽이 켜진다(비율 차이가 즉각 체감되는 방식 — 홈·영화 카드와 같은 문법).
+const RATIO_ENVELOPE = 2.39;
+
 /**
- * 결과 페이지 — "Cinematic Tech" 개편(11차). 페이지 전체가 홈과 같은 다크 시네마 스코프가
- * 되면서, 대표 카드는 더 이상 "밝은 페이지 위 유일한 다크 카드"가 아니라 페이지의
- * 클라이맥스 무대다: 상영관 이름·시각이 디스플레이 서체로 가장 크게, 종합 퍼센트 막대 대신
- * 엔진의 실제 축 값 4개(화면·음향/좌석/이동/가격)를 각각 게이지로, 영화의 실제 화면비를 가진
- * 스크린 그래픽과 추천 구역이 강조된 미니 좌석 맵을 시그니처 비주얼로 보여준다. 대안 카드는
- * 같은 항목을 같은 위치에 배치하고, 제목 자리에 1위와의 실제 차이("4,000원 저렴하지만 이동
- * 2분 더")를 계산해 표시한다.
+ * 결과 페이지 대표·대안 카드(R14 §9). 대표 카드는 데스크톱에서 좌(이름·결론·화면비/좌석
+ * 시각화) / 우(얻는 것·포기하는 것·핵심 수치·신뢰도)의 2열 구성이고, 컨테이너 쿼리로 카드
+ * "자신의" 너비에 따라 접힌다. 긴 수평 진행 막대는 전부 제거 — 0~100 적합도 두 개만 5단계
+ * 세그먼트 미터, 이동·가격은 기준 대비 여유 문장, 신뢰도는 출처 점 밀도로 표현한다.
+ * 대안 카드는 같은 항목이 같은 위치에 오는 "1위 대비" 구조화 비교 행 + 한 문장 판단.
  */
 export function RecommendCard({
   rank,
@@ -277,7 +350,7 @@ export function RecommendCard({
   rank: number;
   label: PickLabel;
   scored: ScoredCandidate;
-  /** "핵심 조건 N개 충족" 계산에 쓰는 사용자의 실제 입력 조건 */
+  /** 핵심 수치의 "기준 대비 여유" 계산에 쓰는 사용자의 실제 입력 조건 */
   request: RecommendationRequest;
   /** 1위 후보 — 2·3위 카드가 "1위와의 차이"를 계산할 때만 전달 */
   top?: ScoredCandidate;
@@ -293,13 +366,16 @@ export function RecommendCard({
   const formatLabel = FORMAT_LABELS[c.format] ?? c.format;
 
   if (isTop) {
-    // 이유 문장들은 전부 상세 패널로 — 전면에는 verdict 한 줄과 축 게이지가 같은 내용을
-    // 더 압축해 전달한다("1위 정보가 한 화면에 안 보인다" 피드백로 카드 높이 축소).
     const restPros = scored.pros;
+    const gains = scored.pros.slice(0, 2);
+    const tradeoffs = scored.cons.slice(0, 2);
+    const travelSlack = request.maxTravelMinutes - scored.travelMinutes;
+    const priceSlack = request.maxPrice - c.priceAdult;
 
     return (
       <article
-        className="relative overflow-hidden rounded-card-xl bg-hero p-6 shadow-glow-primary transition-shadow duration-300 sm:p-7"
+        id={`pick-rank-${rank}`}
+        className="@container surface-selected relative overflow-hidden rounded-card-xl bg-hero p-6 sm:p-7"
         aria-labelledby={`pick-${rank}-title`}
         data-testid={`pick-${label}`}
       >
@@ -307,13 +383,7 @@ export function RecommendCard({
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 h-2/5"
-          style={{ background: 'radial-gradient(ellipse 90% 120% at 20% -20%, rgba(93, 24, 40, 0.5), transparent 70%)' }}
-        />
-        {/* 카드 상단의 얇은 와인→로즈 트림 — 텍스트가 아니라 장식 선이라 대비 요건과 무관. */}
-        <span
-          aria-hidden
-          className="absolute inset-x-0 top-0 h-[3px]"
-          style={{ background: 'linear-gradient(90deg, #872b42, #bc6076)' }}
+          style={{ background: 'radial-gradient(ellipse 90% 120% at 20% -20%, rgba(93, 24, 40, 0.45), transparent 70%)' }}
         />
         <div className="flex flex-wrap items-center gap-2.5">
           <p className="m-0 text-[13px] font-bold uppercase tracking-[0.08em] text-accent">가장 잘 맞는 선택</p>
@@ -323,7 +393,7 @@ export function RecommendCard({
         </div>
         <h2
           id={`pick-${rank}-title`}
-          className="m-0 mt-2.5 text-balance font-headline text-[27px] font-extrabold leading-[1.15] tracking-[-0.02em] text-hero-text sm:text-[36px]"
+          className="m-0 mt-2.5 text-balance font-headline text-[25px] font-bold leading-[1.15] tracking-[-0.02em] text-cream sm:text-[31px]"
         >
           {c.location.name} {c.auditorium.no} · {timeFmt.format(new Date(c.startsAt))}
         </h2>
@@ -332,29 +402,34 @@ export function RecommendCard({
           {winnerVerdict(scored)}
         </p>
 
-        {/* 시그니처 비주얼 — 왼쪽: 영화의 실제 화면비 스크린 + 추천 구역 미니 좌석 맵,
-            오른쪽: 엔진 축 값 4개 게이지. 종합 퍼센트는 전면에 노출하지 않는다(상세 패널에만). */}
-        <div className="mt-5 grid gap-5 border-t border-hero-border pt-4 sm:grid-cols-[240px,1fr] sm:items-center sm:gap-9">
-          <div className="mx-auto flex w-full max-w-[250px] flex-col items-center">
+        {/* 좌: 화면비·좌석 시각화 / 우: 얻는 것·포기하는 것·핵심 수치·신뢰도. 컨테이너 쿼리로
+            카드 자신의 너비 기준 2열(@3xl≈768px) ↔ 1열 전환. */}
+        <div className="mt-5 grid gap-6 border-t border-hero-border pt-5 @3xl:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] @3xl:gap-10">
+          <div className="mx-auto flex w-full max-w-[300px] flex-col items-center @3xl:mx-0">
             {nativeAr ? (
               <>
                 <div
                   aria-hidden
-                  className="relative flex w-full items-center justify-center overflow-hidden rounded-[8px] border border-white/10"
-                  style={{
-                    aspectRatio: `${nativeAr} / 1`,
-                    background:
-                      'linear-gradient(180deg, rgba(93, 24, 40, 0.32) 0%, rgba(36, 28, 31, 0.92) 60%, rgba(26, 22, 24, 0.96) 100%)',
-                    boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.07)',
-                  }}
+                  className="relative flex w-full items-center justify-center overflow-hidden rounded-[8px] border border-white/10 bg-[#0d0b0c]"
+                  style={{ aspectRatio: `${RATIO_ENVELOPE} / 1` }}
                 >
-                  <span
-                    className="absolute inset-x-3 top-0 h-px"
-                    style={{ background: 'linear-gradient(90deg, transparent, rgba(201, 111, 132, 0.85), transparent)' }}
-                  />
-                  <span className="whitespace-nowrap text-[16px] font-light tracking-[0.14em] tabular-nums text-hero-text">
-                    {nativeAr.toFixed(2)}:1
-                  </span>
+                  {/* 켜진 화면 — 실제 화면비만큼만. 남는 좌우는 어두운 마스킹. */}
+                  <div
+                    className="relative flex h-full items-center justify-center overflow-hidden"
+                    style={{
+                      width: `${(Math.min(nativeAr, RATIO_ENVELOPE) / RATIO_ENVELOPE) * 100}%`,
+                      background:
+                        'linear-gradient(180deg, rgba(93, 24, 40, 0.4) 0%, rgba(48, 32, 38, 0.95) 60%, rgba(26, 22, 24, 0.97) 100%)',
+                    }}
+                  >
+                    <span
+                      className="absolute inset-x-2 top-0 h-px"
+                      style={{ background: 'linear-gradient(90deg, transparent, rgba(201, 111, 132, 0.85), transparent)' }}
+                    />
+                    <span className="whitespace-nowrap text-[15px] font-light tracking-[0.14em] tabular-nums text-hero-text">
+                      {nativeAr.toFixed(2)}:1
+                    </span>
+                  </div>
                 </div>
                 <p aria-hidden className="m-0 mb-3 mt-1 text-[9px] font-semibold uppercase tracking-[0.25em] text-hero-text-sub">
                   Screen
@@ -362,34 +437,65 @@ export function RecommendCard({
               </>
             ) : null}
             <MiniSeatMap zone={scored.seatZone.zone} />
-            <p className="m-0 mt-2 text-center text-[12px] text-hero-text-sub">
+            <p className="m-0 mt-2 text-center text-[12.5px] text-hero-text-sub">
               추천 좌석 {scored.seatZone.zone} · {scored.seatZone.label}
             </p>
           </div>
-          <div className="flex flex-col gap-3.5">
-            <AxisBar label="화면·음향 품질" value={scored.axes.audQ} />
-            <AxisBar label="좌석 적합" value={scored.axes.seatQ} />
-            <AxisBar label="이동 편의" value={scored.axes.conv} detail={`${scored.travelMinutes}분`} />
-            <AxisBar label="가격 적합" value={scored.axes.pv} detail={`${c.priceAdult.toLocaleString('ko-KR')}원`} />
+
+          <div className="flex flex-col gap-4">
+            {/* 얻는 것 / 포기하는 것 — 엔진이 이미 계산한 pros/cons에서 그대로. */}
+            <div className="grid gap-3 @xl:grid-cols-2">
+              {gains.length > 0 ? (
+                <div>
+                  <p className="m-0 text-[12px] font-bold uppercase tracking-wide text-hero-text-sub">이 선택에서 얻는 것</p>
+                  <ul className="m-0 mt-1.5 flex list-none flex-col gap-1.5 p-0">
+                    {gains.map((g) => (
+                      <li key={g} className="flex items-start gap-1.5 text-[14px] leading-snug text-hero-text">
+                        <IconCheckCircle aria-hidden className="mt-0.5 h-3.5 w-3.5 shrink-0 text-trust-high" />
+                        {g}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+              {tradeoffs.length > 0 ? (
+                <div>
+                  <p className="m-0 text-[12px] font-bold uppercase tracking-wide text-hero-text-sub">감안할 것</p>
+                  <ul className="m-0 mt-1.5 flex list-none flex-col gap-1.5 p-0">
+                    {tradeoffs.map((t) => (
+                      <li key={t} className="flex items-start gap-1.5 text-[14px] leading-snug text-hero-text-sub">
+                        <IconThumbsDown aria-hidden className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                        {t}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
+
+            <div className="flex flex-col gap-2.5 border-t border-hero-border pt-3.5">
+              <SegMeter label="화면·음향 품질" value={scored.axes.audQ} />
+              <SegMeter label="좌석 적합" value={scored.axes.seatQ} />
+              <DeltaStat
+                label="이동"
+                value={`${scored.travelMinutes}분`}
+                delta={travelSlack > 0 ? `기준보다 ${travelSlack}분 여유` : '기준과 같음'}
+              />
+              <DeltaStat
+                label="가격"
+                value={`${c.priceAdult.toLocaleString('ko-KR')}원`}
+                delta={priceSlack > 0 ? `예산보다 ${priceSlack.toLocaleString('ko-KR')}원 낮음` : '예산과 같음'}
+              />
+              <TrustDots scored={scored} />
+            </div>
+
+            <p className="m-0 flex items-center gap-1.5 text-[13px] text-hero-text-sub">
+              <IconCheckCircle aria-hidden className="h-4 w-4 shrink-0" /> {conditionsLine} · 정보 {trustSummary}
+            </p>
           </div>
         </div>
 
-        {/* 이동·가격·충족·신뢰 — 4단 그리드 대신 아이콘 인라인 한 줄(카드 높이 압축).
-            포맷은 상단 칩, 이동·가격 상세는 축 게이지에도 이미 있다. */}
-        <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-hero-border pt-4 text-[13.5px] font-medium text-hero-text">
-          <span className="inline-flex items-center gap-1.5 tabular-nums">
-            <IconTransit aria-hidden className="h-4 w-4 shrink-0 text-hero-text-sub" /> {scored.travelMinutes}분(추정)
-          </span>
-          <span className="inline-flex items-center gap-1.5 tabular-nums">
-            <IconPrice aria-hidden className="h-4 w-4 shrink-0 text-hero-text-sub" /> {c.priceAdult.toLocaleString('ko-KR')}원
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <IconCheckCircle aria-hidden className="h-4 w-4 shrink-0 text-hero-text-sub" /> {conditionsLine}
-          </span>
-          <span className="text-[13px] text-hero-text-sub">정보 {trustSummary}</span>
-        </div>
-
-        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="mt-5 flex flex-col gap-3 border-t border-hero-border pt-5 sm:flex-row sm:items-center">
           <Link
             href={`/cinemas/${c.auditorium.id}`}
             className="group/cta flex min-h-12 items-center justify-center gap-1.5 rounded-card bg-primary-strong px-8 text-base font-semibold text-white transition-all hover:bg-primary-strong-hover active:scale-[0.99]"
@@ -416,53 +522,93 @@ export function RecommendCard({
     );
   }
 
-  const [topPro, ...restPros] = scored.pros;
-  const diff = top ? diffVsTop(scored, top) : null;
+  const restPros = scored.pros;
+  const sentence = top ? diffVsTop(scored, top) : null;
+
+  // 1위 대비 구조화 비교 행 — 후보끼리 같은 항목이 항상 같은 위치에 온다(R14 §9E).
+  const rows: { name: string; value: string; delta?: string; gain?: boolean }[] = top
+    ? [
+        (() => {
+          const d = scored.travelMinutes - top.travelMinutes;
+          return {
+            name: '이동',
+            value: `${scored.travelMinutes}분`,
+            delta: d === 0 ? '1위와 같음' : d < 0 ? `${Math.abs(d)}분 짧음` : `${d}분 더`,
+            gain: d < 0,
+          };
+        })(),
+        (() => {
+          const d = scored.candidate.priceAdult - top.candidate.priceAdult;
+          return {
+            name: '가격',
+            value: `${c.priceAdult.toLocaleString('ko-KR')}원`,
+            delta:
+              d === 0 ? '1위와 같음' : d < 0 ? `${Math.abs(d).toLocaleString('ko-KR')}원 저렴` : `${d.toLocaleString('ko-KR')}원 비쌈`,
+            gain: d < 0,
+          };
+        })(),
+        {
+          name: '포맷',
+          value: formatLabel,
+          delta:
+            c.format === top.candidate.format
+              ? '1위와 같음'
+              : `1위는 ${FORMAT_LABELS[top.candidate.format] ?? top.candidate.format}`,
+        },
+        {
+          name: '정보',
+          value: trustSummary,
+          delta: seatTrustLower(scored, top) ? '1위보다 낮음' : '1위와 비슷',
+        },
+      ]
+    : [];
 
   return (
     <article
-      className="flex w-full flex-col rounded-card-lg border border-border bg-surface p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-float"
+      id={`pick-rank-${rank}`}
+      className="edge-sweep flex w-full flex-col rounded-card-lg border border-border bg-surface p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-float"
       aria-labelledby={`pick-${rank}-title`}
       data-testid={`pick-${label}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-wrap items-center gap-2">
-          {/* 성격 배지("가장 저렴" 등, 단독 최값일 때만) + 1위와의 실제 차이 — 카드를 각각
-              읽지 않아도 성격과 차이가 바로 보인다. */}
           {personality ? (
             <span className="rounded-full border border-primary/40 px-2.5 py-0.5 text-[11.5px] font-bold text-primary">
               {personality}
             </span>
           ) : null}
-          <p className="m-0 text-[14px] font-bold text-primary">{diff ?? PICK_SCENARIO[label]}</p>
         </div>
         <span className="shrink-0 text-[12px] font-medium text-text-tertiary">{rank}순위</span>
       </div>
-      <h3 id={`pick-${rank}-title`} className="m-0 mb-2.5 mt-1.5 text-balance text-lg font-bold text-text">
+      <h3 id={`pick-${rank}-title`} className="m-0 mt-1.5 text-balance text-[17.5px] font-bold text-text">
         {c.location.name} {c.auditorium.no} · {timeFmt.format(new Date(c.startsAt))}
       </h3>
+      {/* 1위 대비 한 문장 판단 — 카드의 결론이 먼저 온다. */}
+      <p className="m-0 mt-1.5 text-[14.5px] font-semibold leading-snug text-primary">
+        {sentence ?? PICK_SCENARIO[label]}
+      </p>
 
-      {topPro ? (
-        <p className="m-0 line-clamp-2 text-[14px] leading-relaxed text-text-sub">{topPro}</p>
+      {rows.length > 0 ? (
+        <div className="mt-3.5 divide-y divide-border border-t border-border">
+          {rows.map((row) => (
+            <div key={row.name} className="flex items-baseline justify-between gap-3 py-1.5 text-[13.5px]">
+              <span className="shrink-0 font-medium text-text-tertiary">{row.name}</span>
+              <span className="flex min-w-0 items-baseline gap-2 text-right">
+                <span className="font-semibold tabular-nums text-text">{row.value}</span>
+                {row.delta ? (
+                  <span className={`whitespace-nowrap text-[12.5px] tabular-nums ${row.gain ? 'text-primary' : 'text-text-sub'}`}>
+                    {row.delta}
+                  </span>
+                ) : null}
+              </span>
+            </div>
+          ))}
+        </div>
       ) : null}
-
-      {/* 대표 카드의 아이콘 데이터 행과 같은 순서(이동 → 가격 → 포맷) — 후보끼리 같은 항목이
-          같은 위치에 오도록 맞춘다. */}
-      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13.5px] font-medium text-text-sub">
-        <span className="inline-flex items-center gap-1.5">
-          <IconTransit aria-hidden className="h-4 w-4 shrink-0" /> {scored.travelMinutes}분
-        </span>
-        <span className="inline-flex items-center gap-1.5 tabular-nums">
-          <IconPrice aria-hidden className="h-4 w-4 shrink-0" /> {c.priceAdult.toLocaleString('ko-KR')}원
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <IconFilm aria-hidden className="h-4 w-4 shrink-0" /> {formatLabel}
-        </span>
-      </div>
 
       <Link
         href={`/cinemas/${c.auditorium.id}`}
-        className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-primary decoration-primary hover:underline underline-offset-2"
+        className="mt-3.5 inline-flex min-h-11 items-center text-sm font-semibold text-primary decoration-primary hover:underline underline-offset-2"
       >
         상세 보기 →
       </Link>

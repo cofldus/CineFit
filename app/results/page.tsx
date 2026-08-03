@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { DetailedCompare, DifferenceSummary } from '../../components/CompareTable';
-import { diffVsTop } from '../../components/RecommendCard';
 import { pickPersonality } from '../../src/lib/display';
 import { FeedbackWidget } from '../../components/FeedbackWidget';
 import { IconLightbulb } from '../../components/Icon';
@@ -88,34 +87,26 @@ export default async function ResultsPage({
   return (
     <main className="cinema-scope min-h-dvh max-w-none bg-bg px-5 pb-24 pt-8 sm:px-8 sm:pt-12">
       <div className="mx-auto max-w-wide">
-      {/* 1. 결과 제목과 검색 조건 — 관리자 보고서형 "추천 결과" 대신, 결과 화면을 경험의
-          클라이맥스로 만드는 디스플레이 헤드라인. 데스크톱에서도 작아 보이지 않게 크게,
-          타이트한 자간·줄간격으로. 다크 배경은 main이 전폭으로 채우고(밝은 여백 금지),
-          내용만 이 래퍼로 제한한다. */}
+      {/* 1. 결과 헤더(R14 §9A) — 지나치게 큰 광고 제목 대신 페이지 타이틀 스케일. 그 아래
+          영화·날짜·출발·예산·허용 이동시간을 한 줄 compact summary strip으로 모은다. */}
       <header>
         <p className="enter-1 m-0 text-[13px] font-bold uppercase tracking-[0.08em] text-accent">추천 결과</p>
-        <h1 className="enter-1 type-display m-0 mt-2.5 text-[34px] text-text sm:text-[46px]">
+        <h1 className="enter-1 type-display m-0 mt-2 text-[28px] sm:text-[36px]">
           {result.picks.length > 0 ? '오늘 가장 잘 맞는 선택' : '조건을 조금 넓혀볼까요?'}
         </h1>
-        <p className="enter-2 m-0 mt-4 text-lg font-bold text-text">
-          {result.movie.title}
-          <span className="ml-2 align-middle text-[13.5px] font-medium tabular-nums text-text-sub">
-            {result.movie.runtimeMin}분 · {result.request.date}
-          </span>
-        </p>
-        {/* 이번 추천의 조건 맥락 — 문장 나열 대신 스캔 가능한 칩으로 */}
-        <div className="enter-2 mt-3 flex flex-wrap items-center gap-1.5">
-          {[
-            `${origin.label ?? '지정 위치'} 출발`,
-            `이동 ${result.request.maxTravelMinutes}분 이내`,
-            `${result.request.maxPrice.toLocaleString('ko-KR')}원 이하`,
-          ].map((chip) => (
-            <span key={chip} className="rounded-full bg-surface-raised px-3 py-1 text-[12.5px] font-medium tabular-nums text-text-sub">
-              {chip}
-            </span>
-          ))}
-          <span className="text-[12.5px] tabular-nums text-text-tertiary">
-            조건에 맞는 회차 {result.scored.length}개 / 전체 {result.totalCandidates}개
+        <div className="enter-2 mt-4 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-[13.5px] tabular-nums">
+          <span className="text-[15px] font-bold text-text">{result.movie.title}</span>
+          <span className="text-text-sub">{result.movie.runtimeMin}분</span>
+          <span aria-hidden className="h-3 w-px bg-border-strong" />
+          <span className="text-text-sub">{result.request.date}</span>
+          <span aria-hidden className="h-3 w-px bg-border-strong" />
+          <span className="text-text-sub">{origin.label ?? '지정 위치'} 출발</span>
+          <span aria-hidden className="h-3 w-px bg-border-strong" />
+          <span className="text-text-sub">이동 {result.request.maxTravelMinutes}분 이내</span>
+          <span aria-hidden className="h-3 w-px bg-border-strong" />
+          <span className="text-text-sub">{result.request.maxPrice.toLocaleString('ko-KR')}원 이하</span>
+          <span className="text-text-tertiary">
+            · 조건에 맞는 회차 {result.scored.length}개 / 전체 {result.totalCandidates}개
           </span>
         </div>
       </header>
@@ -208,36 +199,13 @@ export default async function ResultsPage({
             ) : null}
           </div>
 
-          {/* 5. 1위와 비교 — 순위별 핵심 차이를 문장으로. 각 카드를 따로 읽지 않아도
-              "왜 1위인지"가 보이게 한다. */}
+          {/* 5. 1위와 비교 — 순위별 차이 행은 이제 각 대안 카드 안에 구조화돼 있으므로,
+              여기서는 관점별 결론(가장 좋은 상영 환경/가장 저렴/가장 짧은 이동)만 남기고
+              각 항목에서 해당 후보 카드로 바로 이동할 수 있게 한다(R14 §9F). */}
           {result.picks.length > 1 ? (
             <section className="enter-5 mt-10 max-w-content">
               <h2 className="m-0 text-[21px] font-bold text-text">1위와 비교하면</h2>
-              <ul className="m-0 mt-3 flex list-none flex-col gap-2 p-0">
-                {result.picks.slice(1).map((p, i) => {
-                  const diff = result.picks[0] ? diffVsTop(p.scored, result.picks[0].scored) : null;
-                  const tag = pickPersonality(
-                    p.scored,
-                    result.picks.map((x) => x.scored),
-                  );
-                  return (
-                    <li
-                      key={p.scored.candidate.showtimeId}
-                      className="flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-card bg-surface-raised px-4 py-3"
-                    >
-                      <span className="text-[12px] font-bold text-text-tertiary">{i + 2}위</span>
-                      <span className="min-w-0 font-semibold text-text">
-                        {p.scored.candidate.location.name} {p.scored.candidate.auditorium.no}
-                      </span>
-                      {tag ? (
-                        <span className="rounded-full border border-primary/40 px-2 py-0.5 text-[11.5px] font-bold text-primary">{tag}</span>
-                      ) : null}
-                      <span className="text-[13.5px] text-text-sub">{diff ?? '1위와 조건 차이가 크지 않아요'}</span>
-                    </li>
-                  );
-                })}
-              </ul>
-              <div className="mt-4">
+              <div className="mt-2">
                 <DifferenceSummary picks={result.picks} />
               </div>
             </section>

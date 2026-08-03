@@ -121,19 +121,24 @@ export function DifferenceSummary({ picks }: { picks: Pick[] }) {
     })(),
   ];
 
+  // 각 관점의 승자를 누르면 해당 후보 카드로 바로 이동한다(카드 id: pick-rank-N).
   return (
     <section aria-label="추천 차이 요약" className="divide-y divide-border">
-      {lines.map((line) => (
-        <div key={line.title} className="flex flex-col gap-0.5 py-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
-          <p className="m-0 text-[13.5px] font-semibold text-text-tertiary">{line.title}</p>
-          <p className="m-0 text-[15px] font-medium tabular-nums text-text">
-            <span className="font-bold">
-              {line.winners.length > 1 ? `${line.winners.map((w) => w.label).join('·')} 추천` : `${line.winners[0].label} 추천`}
-            </span>{' '}
-            · {line.winners.length > 1 ? `각각 ${line.valueText}` : line.valueText}
-          </p>
-        </div>
-      ))}
+      {lines.map((line) => {
+        const first = line.winners[0];
+        const rank = picks.indexOf(first) + 1;
+        return (
+          <div key={line.title} className="flex flex-col gap-0.5 py-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+            <p className="m-0 text-[13.5px] font-semibold text-text-tertiary">{line.title}</p>
+            <p className="m-0 text-[15px] font-medium tabular-nums text-text">
+              <a href={`#pick-rank-${rank}`} className="font-bold hover:underline decoration-border-strong underline-offset-2">
+                {line.winners.length > 1 ? `${line.winners.map((w) => w.label).join('·')} 추천` : `${first.label} 추천`}
+              </a>{' '}
+              · {line.winners.length > 1 ? `각각 ${line.valueText}` : line.valueText}
+            </p>
+          </div>
+        );
+      })}
     </section>
   );
 }

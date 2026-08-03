@@ -230,7 +230,7 @@ export default async function ResultsPage({
                         {p.scored.candidate.location.name} {p.scored.candidate.auditorium.no}
                       </span>
                       {tag ? (
-                        <span className="rounded-full bg-primary-soft px-2 py-0.5 text-[11.5px] font-bold text-primary">{tag}</span>
+                        <span className="rounded-full border border-primary/40 px-2 py-0.5 text-[11.5px] font-bold text-primary">{tag}</span>
                       ) : null}
                       <span className="text-[13.5px] text-text-sub">{diff ?? '1위와 조건 차이가 크지 않아요'}</span>
                     </li>

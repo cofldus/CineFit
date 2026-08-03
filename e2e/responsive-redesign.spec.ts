@@ -32,7 +32,7 @@ test.describe('반응형 뷰포트 점검 — 홈/결과/상영관 상세', () =
       await page.setViewportSize(vp);
       await page.goto('/results?movieId=1&date=2026-07-28');
       await expect(page.getByTestId('pick-균형')).toBeVisible();
-      await expect(page.getByRole('heading', { name: '추천 차이 한눈에' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: '1위와 비교하면' })).toBeVisible();
       await expectNoHorizontalScroll(page);
     });
 

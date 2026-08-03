@@ -460,7 +460,7 @@ export function RecommendCard({
           {/* 성격 배지("가장 저렴" 등, 단독 최값일 때만) + 1위와의 실제 차이 — 카드를 각각
               읽지 않아도 성격과 차이가 바로 보인다. */}
           {personality ? (
-            <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-[11.5px] font-bold text-primary">
+            <span className="rounded-full border border-primary/40 px-2.5 py-0.5 text-[11.5px] font-bold text-primary">
               {personality}
             </span>
           ) : null}

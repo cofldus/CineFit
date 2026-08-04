@@ -23,8 +23,11 @@ test('관리자 로그인 → 실제형 회차 등록 → 사용자 추천에 �
   await page.getByLabel('정보 출처 (어디서 확인했나)').fill('CGV 공식 예매 페이지에서 확인 (E2E)');
   await page.getByRole('button', { name: '회차 등록' }).click();
 
-  // 3. 목록에서 관리자 확인 배지로 표시됨
-  await expect(page).toHaveURL(/\/admin\/showtimes/);
+  // 3. R18: 등록 후 폼에 남아 연속 등록이 가능하다 — 성공 배너 확인 후 목록으로 이동해
+  //    관리자 확인 배지 표시를 검증한다.
+  await expect(page.getByText(/회차 1건 등록 완료/)).toBeVisible();
+  await page.getByRole('link', { name: '회차 목록 보기' }).click();
+  await expect(page).toHaveURL(/\/admin\/showtimes$/);
   await expect(page.getByText('✔ 관리자 확인').first()).toBeVisible();
 
   // 4~6. 사용자 흐름: 영화 선택 → 등록한 날짜로 조건 입력 → 추천 결과에 포함 확인

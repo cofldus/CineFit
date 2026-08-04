@@ -1,7 +1,19 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+
+// R18 배치 등록: "19:00, 22:10"처럼 콤마로 여러 시작 시각을 받는다(수동 운영 고속화).
+const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+function parseStartTimes(raw: string): { times: string[]; invalid: string[] } {
+  const parts = raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return { times: parts.filter((p) => TIME_RE.test(p)), invalid: parts.filter((p) => !TIME_RE.test(p)) };
+}
 
 export interface AdminFormOption {
   id: number;
@@ -53,18 +65,22 @@ export function AdminShowtimeForm({
   const [warnings, setWarnings] = useState<string[]>([]);
   const [needsMismatchNote, setNeedsMismatchNote] = useState(false);
   const [busy, setBusy] = useState(false);
+  // R18: 생성 모드는 등록 후 목록으로 튕기지 않고 이 화면에 남는다(같은 관·영화·날짜로
+  // 연속 등록). 방금 몇 건이 등록됐는지만 배너로 알려주고 시작 시각 입력만 비운다.
+  const [savedCount, setSavedCount] = useState(0);
+  const startTimeRef = useRef<HTMLInputElement>(null);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setBusy(true);
     setErrors([]);
     setWarnings([]);
+    setSavedCount(0);
     const fd = new FormData(e.currentTarget);
-    const payload = {
+    const base = {
       movieId: fd.get('movieId'),
       auditoriumId: fd.get('auditoriumId'),
       date: fd.get('date'),
-      startTime: fd.get('startTime'),
       endTime: fd.get('endTime') || undefined,
       crossesMidnight: fd.get('crossesMidnight') === 'on',
       format: fd.get('format'),
@@ -81,25 +97,67 @@ export function AdminShowtimeForm({
       ...(duplicateOf ? { duplicateOf } : {}),
     };
 
-    const res = await fetch(showtimeId ? `/api/admin/showtimes/${showtimeId}` : '/api/admin/showtimes', {
-      method: showtimeId ? 'PATCH' : 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    const body = (await res.json().catch(() => ({}))) as {
-      error?: string;
-      details?: string[];
-      warnings?: string[];
-      needsMismatchNote?: boolean;
-    };
-    if (res.ok) {
-      if (body.warnings?.length) setWarnings(body.warnings);
-      router.push('/admin/showtimes');
-      router.refresh();
+    async function submitOne(startTime: string) {
+      const res = await fetch(showtimeId ? `/api/admin/showtimes/${showtimeId}` : '/api/admin/showtimes', {
+        method: showtimeId ? 'PATCH' : 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ ...base, startTime }),
+      });
+      const body = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        details?: string[];
+        warnings?: string[];
+        needsMismatchNote?: boolean;
+      };
+      return { ok: res.ok, body };
+    }
+
+    // 수정 모드는 단일 시각만 허용 — 기존 동작 유지(저장 후 목록 이동).
+    if (showtimeId) {
+      const { ok, body } = await submitOne(String(fd.get('startTime')));
+      if (ok) {
+        router.push('/admin/showtimes');
+        router.refresh();
+        return;
+      }
+      setErrors(body.details ?? [body.error ?? '저장에 실패했습니다.']);
+      setNeedsMismatchNote(Boolean(body.needsMismatchNote));
+      setBusy(false);
       return;
     }
-    setErrors(body.details ?? [body.error ?? '저장에 실패했습니다.']);
-    setNeedsMismatchNote(Boolean(body.needsMismatchNote));
+
+    const { times, invalid } = parseStartTimes(String(fd.get('startTime') ?? ''));
+    if (invalid.length > 0 || times.length === 0) {
+      setErrors([`시작 시각 형식을 확인해 주세요 (HH:MM, 콤마로 여러 개): ${invalid.join(', ') || '입력 없음'}`]);
+      setBusy(false);
+      return;
+    }
+    // 여러 시각을 등록할 때 종료 시각·심야 플래그는 시각마다 다를 수 있어 안전하게 무시하고
+    // 러닝타임 기반 추정에 맡긴다(단일 시각이면 입력값 그대로).
+    if (times.length > 1) {
+      base.endTime = undefined;
+      base.crossesMidnight = false;
+    }
+
+    const failed: string[] = [];
+    const collectedWarnings: string[] = [];
+    let saved = 0;
+    for (const t of times) {
+      const { ok, body } = await submitOne(t);
+      if (ok) {
+        saved += 1;
+        if (body.warnings?.length) collectedWarnings.push(...body.warnings.map((w) => `${t} — ${w}`));
+      } else {
+        failed.push(`${t} — ${(body.details ?? [body.error ?? '저장 실패']).join(', ')}`);
+        setNeedsMismatchNote((prev) => prev || Boolean(body.needsMismatchNote));
+      }
+    }
+
+    setSavedCount(saved);
+    setWarnings(collectedWarnings);
+    setErrors(failed);
+    if (saved > 0 && startTimeRef.current) startTimeRef.current.value = '';
+    router.refresh();
     setBusy(false);
   }
 
@@ -139,8 +197,17 @@ export function AdminShowtimeForm({
           <input type="date" name="date" defaultValue={initial.date} required />
         </label>
         <label className="field" style={{ flex: 1 }}>
-          <span>시작 시각</span>
-          <input type="time" name="startTime" defaultValue={initial.startTime} required />
+          <span>{showtimeId ? '시작 시각' : '시작 시각 (콤마로 여러 개)'}</span>
+          <input
+            ref={startTimeRef}
+            type="text"
+            inputMode="numeric"
+            name="startTime"
+            defaultValue={initial.startTime}
+            placeholder="19:00 또는 10:30, 14:00, 19:00"
+            aria-label="시작 시각"
+            required
+          />
         </label>
         <label className="field" style={{ flex: 1 }}>
           <span>종료 시각 (비우면 러닝타임+20분)</span>
@@ -234,6 +301,16 @@ export function AdminShowtimeForm({
         <input type="hidden" name="mismatchNote" value={initial.mismatchNote ?? ''} />
       )}
 
+      {savedCount > 0 ? (
+        <div role="status" className="notice" style={{ borderLeftColor: 'var(--trust-high)' }}>
+          <p style={{ margin: '2px 0' }}>
+            ✓ 회차 {savedCount}건 등록 완료 — 같은 조건으로 계속 등록하거나{' '}
+            <Link href="/admin/showtimes" style={{ textDecoration: 'underline' }}>
+              회차 목록 보기
+            </Link>
+          </p>
+        </div>
+      ) : null}
       {errors.length > 0 ? (
         <div role="alert" className="notice" style={{ borderColor: 'var(--trust-low)' }}>
           {errors.map((e) => (

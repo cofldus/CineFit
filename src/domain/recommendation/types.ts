@@ -10,7 +10,12 @@ export type InfoStatus =
   | 'conflict';
 
 export type FormatId = 'imax' | 'dolby_cinema' | '4dx' | 'superplex' | 'standard';
-export type Priority = 'balance' | 'quality' | 'logistics';
+// R19: 우선순위 5축 — seat(좌석)·distance(이동)·price(가격)가 1급으로 승격됐다.
+// 'logistics'는 과거 실행 기록·저장된 URL 재현을 위해 값으로는 계속 허용한다.
+export type Priority = 'balance' | 'quality' | 'seat' | 'distance' | 'price' | 'logistics';
+
+// 희망 상영 "시작 시간대"(R19 Step 1) — 회차 시작 시각 기준의 하드 필터.
+export type TimeWindow = 'any' | 'morning' | 'afternoon' | 'evening' | 'late' | 'custom';
 
 export interface SpecValue<T = unknown> {
   value: T;
@@ -119,9 +124,21 @@ export interface RecommendationRequest {
   movieId: number;
   origin: { lat: number; lng: number; label?: string };
   date: string; // YYYY-MM-DD
+  /** 희망 상영 시작 시간대(R19) — 회차 "시작 시각" 기준 하드 필터. */
+  timeWindow?: TimeWindow;
+  /** timeWindow='custom'일 때의 시작 시각 범위(HH:MM, Asia/Seoul). */
+  timeFrom?: string;
+  timeTo?: string;
+  /** 극장까지 "편도" 이동 한도(분). */
   maxTravelMinutes: number;
+  /** 실효 가격 상한 — R19부터 사용자가 직접 입력하지 않고, 추가 지불 의향
+      (premiumAllowance)과 후보의 일반관 최저가로부터 서비스 계층이 파생시킨다. */
   maxPrice: number;
+  /** 더 좋은 상영 환경을 위한 추가 지불 의향(R19 Step 2) — 표시·기록용 원본 값. */
+  premiumAllowance?: 'price_first' | 'plus_5000' | 'plus_10000' | 'experience_first';
   priority: Priority;
+  /** 두 번째 우선 기준(선택) — 가중치 블렌드에만 쓰인다. */
+  prioritySecondary?: 'none' | 'quality' | 'seat' | 'distance' | 'price';
   allowImax: boolean;
   allowDolby: boolean;
   allowStandard: boolean; // 일반관·수퍼플렉스(대형 일반) 그룹

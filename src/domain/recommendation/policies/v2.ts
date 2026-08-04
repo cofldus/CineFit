@@ -8,8 +8,7 @@ import type { RecommendationPolicy } from './types';
 export const POLICY_V2: RecommendationPolicy = {
   version: 'v2',
   weights: {
+    ...WEIGHT_PRESETS, // R19 5축(seat·distance·price 포함)은 v1 값 그대로 상속
     balance: { ...WEIGHT_PRESETS.balance, W1: 0.22, W2: 0.19, W7: 0.13, W8: 0.07 },
-    quality: WEIGHT_PRESETS.quality,
-    logistics: WEIGHT_PRESETS.logistics,
   },
 };

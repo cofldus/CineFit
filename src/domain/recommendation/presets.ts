@@ -1,15 +1,35 @@
 import type { Priority, Weights } from './types';
 
 // topPriority 가중치 프리셋 (문서 05 §5)
+// R19: 우선순위 5축(+구 logistics 호환). 각 프리셋은 합이 1.0 — seat는 좌석 축(W4),
+// distance는 이동 축(W7), price는 가격 축(W8)을 각각 최상위로 끌어올린 변형이다.
 export const WEIGHT_PRESETS: Record<Priority, Weights> = {
   balance: { W1: 0.18, W2: 0.15, W3: 0.12, W4: 0.12, W5: 0.1, W6: 0.05, W7: 0.18, W8: 0.1 },
   quality: { W1: 0.25, W2: 0.22, W3: 0.15, W4: 0.1, W5: 0.08, W6: 0.05, W7: 0.1, W8: 0.05 },
+  seat: { W1: 0.14, W2: 0.12, W3: 0.1, W4: 0.28, W5: 0.1, W6: 0.05, W7: 0.13, W8: 0.08 },
+  distance: { W1: 0.1, W2: 0.08, W3: 0.08, W4: 0.08, W5: 0.08, W6: 0.05, W7: 0.38, W8: 0.15 },
+  price: { W1: 0.1, W2: 0.08, W3: 0.08, W4: 0.08, W5: 0.08, W6: 0.05, W7: 0.15, W8: 0.38 },
   logistics: { W1: 0.1, W2: 0.08, W3: 0.08, W4: 0.08, W5: 0.08, W6: 0.05, W7: 0.3, W8: 0.23 },
 };
+
+// 1순위 80% + 2순위 20% 블렌드 — 두 프리셋 모두 합이 1이므로 결과도 합 1을 유지한다.
+export function blendWeights(primary: Weights, secondary: Weights | null): Weights {
+  if (!secondary) return primary;
+  const mix = (a: number, b: number) => a * 0.8 + b * 0.2;
+  return {
+    W1: mix(primary.W1, secondary.W1), W2: mix(primary.W2, secondary.W2),
+    W3: mix(primary.W3, secondary.W3), W4: mix(primary.W4, secondary.W4),
+    W5: mix(primary.W5, secondary.W5), W6: mix(primary.W6, secondary.W6),
+    W7: mix(primary.W7, secondary.W7), W8: mix(primary.W8, secondary.W8),
+  };
+}
 
 export const PRIORITY_LABELS: Record<Priority, string> = {
   balance: '균형',
   quality: '영상·음향 품질',
+  seat: '좌석',
+  distance: '이동 거리',
+  price: '가격',
   logistics: '이동·편의',
 };
 

@@ -3,15 +3,20 @@
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { MOTION_OPTIONS, ORIGIN_PRESETS, PRIORITY_OPTIONS } from '../src/data/constants';
+import {
+  ORIGIN_PRESETS,
+  PREMIUM_ALLOWANCE_OPTIONS,
+  PRIORITY_OPTIONS,
+  PRIORITY_SECONDARY_OPTIONS,
+  TIME_WINDOW_OPTIONS,
+  TRAVEL_LIMIT_OPTIONS,
+} from '../src/data/constants';
 import { WEIGHT_PRESETS } from '../src/domain/recommendation/presets';
 import { readOnboardingState, type OnboardingAnswers } from '../src/lib/onboarding';
-import type { MovieWithSpecs, Priority } from '../src/domain/recommendation/types';
+import type { MovieWithSpecs, Priority, TimeWindow } from '../src/domain/recommendation/types';
 import { formatSpecValue, keySpecEntries, SPEC_KEY_LABELS } from '../src/lib/display';
 import { TrustBadge } from './TrustBadge';
-import { SegmentedControl } from './SegmentedControl';
 import { StepSection } from './StepSection';
-import { RadioCard, ToggleCard } from './ToggleCard';
 
 // 채움형 필드 — 검은 배경 위 테두리 박스 대신, 아이콘 타일 + 라벨이 안에 들어간 raised
 // 서피스. 포커스 시 얇은 와인 인셋 라인이 켜지고 아이콘 타일도 로즈로 점등된다(선택
@@ -71,72 +76,23 @@ function ClockGlyph() {
   );
 }
 
-function WonGlyph() {
+// 편도 이동 한도용 동심원 글리프 — 우측 패널의 반경 그래픽과 같은 언어.
+function RouteRadiusGlyph() {
   return (
     <svg {...glyphProps} className="h-[18px] w-[18px]">
-      <path d="M3 6.5l2.4 7 2.3-7 2.3 7 2.3-7 2.3 7 2.4-7" />
-      <path d="M2.5 10.5h15" />
+      <circle cx="10" cy="10" r="7.5" opacity="0.45" />
+      <circle cx="10" cy="10" r="4" opacity="0.75" />
+      <circle cx="10" cy="10" r="1.1" fill="currentColor" stroke="none" />
     </svg>
   );
 }
 
-// 우선순위 라디오 카드용 글리프 — 균형(같은 높이 막대 3개)은 세 축을 고르게, 나머지는
-// 화면(스크린)·이동/가격(핀+₩)을 각각 나타낸다.
-function BalanceGlyph() {
-  return (
-    <span aria-hidden className="flex items-end gap-[4px] text-primary/80">
-      {[0, 1, 2].map((i) => (
-        <span key={i} className="w-[6px] rounded-[2px] bg-current" style={{ height: '16px' }} />
-      ))}
-    </span>
-  );
-}
-
-function RouteGlyph() {
-  return (
-    <span aria-hidden className="flex items-center gap-1 text-primary/80">
-      <PinGlyph />
-      <WonGlyph />
-    </span>
-  );
-}
-
-// 커스텀 −/+ 스테퍼 버튼 — 네이티브 숫자 스피너는 스타일이 불가능해 숨기고 이것으로
-// 조절한다(입력 필드에 직접 타이핑도 여전히 가능).
-function StepBtn({ label, onClick, children }: { label: string; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      onClick={onClick}
-      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-white/[0.04] text-text-sub transition-all hover:text-text active:scale-95"
-    >
-      {children}
-    </button>
-  );
-}
-
-const MinusGlyph = () => (
-  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" className="h-4 w-4">
-    <path d="M3.5 8h9" />
-  </svg>
-);
-const PlusGlyph = () => (
-  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" className="h-4 w-4">
-    <path d="M3.5 8h9M8 3.5v9" />
-  </svg>
-);
-
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
-const STEP_TITLES = ['언제, 어디서 볼까요?', '무엇을 가장 중요하게 보나요?', '피하고 싶은 조건이 있나요?'];
-// 모바일 compact progress("1 / 3 · 위치와 시간")와 단계별 CTA 문구(R15 §5).
-const STEP_SHORT = ['위치와 시간', '우선순위', '불편 조건'] as const;
-const NEXT_LABELS = ['우선순위 정하기 →', '불편 조건 설정하기 →'] as const;
-
-// 스테퍼 옆 preset 칩 — −/+만 반복 누르는 대신 자주 쓰는 값으로 바로 이동(R14 §8 Step 1).
-const TRAVEL_PRESETS = [30, 60, 90] as const;
-const PRICE_PRESETS = [15000, 25000, 40000] as const;
+const STEP_TITLES = ['언제, 어디서 볼까요?', '이번 관람에서 무엇이 가장 중요한가요?', '피하고 싶은 조건이 있나요?'];
+// 모바일 compact progress("1 / 3 · 위치와 시간")와 단계별 CTA 문구(R15 §5, R19 문구).
+const STEP_SHORT = ['위치와 시간', '우선순위', '피하고 싶은 조건'] as const;
+const NEXT_LABELS = ['관람 우선순위 정하기 →', '피하고 싶은 조건 →'] as const;
 
 // 우선순위 선택이 엔진 가중치를 실제로 어떻게 바꾸는지 — WEIGHT_PRESETS(실제 엔진 값)를
 // 사용자용 3그룹으로 합산해 보여준다(새 숫자를 만들지 않음). 화면·음향 = 포맷 매칭 W1 +
@@ -150,27 +106,37 @@ function weightGroups(priority: Priority): { label: string; value: number }[] {
   ];
 }
 
-// 좌석·편의 선호(step 3)의 compact toggle row — 큰 카드 3장이 세로로 쌓이는 대신, 체크 시
-// 추천 로직에 어떻게 반영되는지 한 문장과 함께 얇은 행으로(R14 §8 Step 3).
+// 회피 조건(step 3)의 compact toggle row — R19: 부모가 상태를 소유하는 controlled 체크
+// ("해당 없음" 상호 배타 처리를 위해). name이 없으면 폼 데이터로 제출되지 않는 표시 전용.
 function ToggleRow({
   name,
   title,
   effect,
-  defaultChecked,
+  checked,
+  onChange,
   visual,
 }: {
-  name: string;
+  name?: string;
   title: string;
   effect: string;
-  defaultChecked?: boolean;
-  visual: React.ReactNode;
+  checked: boolean;
+  onChange: (on: boolean) => void;
+  visual?: React.ReactNode;
 }) {
   return (
     <label className="group flex min-h-[52px] cursor-pointer items-center gap-3 rounded-card bg-surface-raised px-3.5 py-2.5 transition-colors has-[:checked]:bg-primary-soft has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary">
-      <input type="checkbox" name={name} defaultChecked={defaultChecked} className="sr-only" />
-      <span aria-hidden className="flex h-8 w-11 shrink-0 items-center justify-center opacity-70 group-has-[:checked]:opacity-100">
-        {visual}
-      </span>
+      <input
+        type="checkbox"
+        name={name}
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="sr-only"
+      />
+      {visual ? (
+        <span aria-hidden className="flex h-8 w-11 shrink-0 items-center justify-center opacity-70 group-has-[:checked]:opacity-100">
+          {visual}
+        </span>
+      ) : null}
       <span className="min-w-0 flex-1">
         <span className="block text-[14.5px] font-semibold text-text">{title}</span>
         <span className="block text-[13px] leading-snug text-text-sub">{effect}</span>
@@ -187,23 +153,37 @@ function ToggleRow({
   );
 }
 
-// 제출·실시간 카운트가 완전히 같은 쿼리를 쓰도록 한 곳에서만 조립한다.
+// 제출·실시간 카운트가 완전히 같은 쿼리를 쓰도록 한 곳에서만 조립한다(R19 파라미터 체계).
+// 절대 예산(maxPrice)은 더 이상 보내지 않는다 — 서버가 추가 지불 의향으로 상한을 파생한다.
 function buildQuery(movieId: number, fd: FormData): URLSearchParams {
-  return new URLSearchParams({
+  const timeWindow = String(fd.get('timeWindow') ?? 'any');
+  const originId = String(fd.get('originId') ?? 'cityhall');
+  const p = new URLSearchParams({
     movieId: String(movieId),
     date: String(fd.get('date')),
-    originId: String(fd.get('originId')),
+    timeWindow,
+    originId,
     maxTravelMinutes: String(fd.get('maxTravelMinutes')),
-    maxPrice: String(fd.get('maxPrice')),
-    priority: String(fd.get('priority')),
-    allowImax: String(fd.get('allowImax') === 'on'),
-    allowDolby: String(fd.get('allowDolby') === 'on'),
-    allowStandard: String(fd.get('allowStandard') === 'on'),
-    motionSickness: String(fd.get('motionSickness')),
+    premiumAllowance: String(fd.get('premiumAllowance') ?? 'experience_first'),
+    priority: String(fd.get('priority') ?? 'balance'),
+    prioritySecondary: String(fd.get('prioritySecondary') ?? 'none'),
+    motionSickness: String(fd.get('motionSickness') ?? '0'),
+    avoidFront: String(fd.get('avoidFront') === 'on'),
+    bigScreenSensitive: String(fd.get('bigScreenSensitive') === 'on'),
     subtitleReadability: String(fd.get('subtitleReadability') === 'on'),
     neckComfort: String(fd.get('neckComfort') === 'on'),
     wheelchair: String(fd.get('wheelchair') === 'on'),
   });
+  if (timeWindow === 'custom') {
+    p.set('timeFrom', String(fd.get('timeFrom') ?? ''));
+    p.set('timeTo', String(fd.get('timeTo') ?? ''));
+  }
+  if (originId === 'custom') {
+    p.set('originLat', String(fd.get('originLat') ?? ''));
+    p.set('originLng', String(fd.get('originLng') ?? ''));
+    p.set('originLabel', String(fd.get('originLabel') ?? '현재 위치'));
+  }
+  return p;
 }
 
 // 선택한 영화 compact 요약 — 포스터 썸네일 + 제목 + 핵심 칩. 상세 사양은 펼침으로.
@@ -339,32 +319,104 @@ export function RecommendForm({
   const [formTick, setFormTick] = useState(0);
   const [originVal, setOriginVal] = useState('cityhall');
   const [priorityVal, setPriorityVal] = useState<Priority>('balance');
-  // 날짜는 퀵 칩(오늘/내일/모레) 선택 상태 표시를 위해 controlled — 값 자체는 여전히
-  // name="date" 입력으로 폼 제출된다. 기준일은 서버가 준 defaultDate(앱 클럭의 오늘).
+  const [secondaryVal, setSecondaryVal] = useState('none');
+  // 날짜·시간대는 퀵 칩 선택 상태 표시를 위해 controlled — 값 자체는 name 입력으로 제출된다.
   const [dateVal, setDateVal] = useState(defaultDate);
-  // 이동 시간·가격은 네이티브 스피너(스타일 불가) 대신 커스텀 −/+ 스테퍼로 조절한다.
+  const [timeWindowVal, setTimeWindowVal] = useState<TimeWindow>('any');
+  const [timeFromVal, setTimeFromVal] = useState('18:00');
+  const [timeToVal, setTimeToVal] = useState('21:00');
+  // 편도 이동 한도 — preset 칩이 기본, 직접 입력은 보조(R19).
   const [travelVal, setTravelVal] = useState(60);
-  const [priceVal, setPriceVal] = useState(40000);
+  // 현재 위치(geolocation) — 정확한 주소를 강제하지 않고 좌표만 쓴다.
+  const [customOrigin, setCustomOrigin] = useState<{ lat: number; lng: number } | null>(null);
+  const [geoBusy, setGeoBusy] = useState(false);
+  const [geoError, setGeoError] = useState<string | null>(null);
+  const [recentOrigins, setRecentOrigins] = useState<string[]>([]);
+  // 회피 조건(step 3) — "해당 없음" 상호 배타를 위해 부모가 상태를 소유한다.
+  const [avoid, setAvoid] = useState({
+    front: false,
+    bigScreen: false,
+    neck: false,
+    subtitle: false,
+    vibration: false,
+    wheelchair: false,
+  });
+  const noneAvoided = !Object.values(avoid).some(Boolean);
+  const setAvoidFlag = (key: keyof typeof avoid, on: boolean) => setAvoid((a) => ({ ...a, [key]: on }));
+  const clearAvoid = () =>
+    setAvoid({ front: false, bigScreen: false, neck: false, subtitle: false, vibration: false, wheelchair: false });
+
+  function useCurrentLocation() {
+    if (!navigator.geolocation) {
+      setGeoError('이 브라우저에서는 위치를 쓸 수 없어요 — 아래에서 장소를 선택해 주세요.');
+      return;
+    }
+    setGeoBusy(true);
+    setGeoError(null);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setCustomOrigin({ lat: Number(pos.coords.latitude.toFixed(5)), lng: Number(pos.coords.longitude.toFixed(5)) });
+        setOriginVal('custom');
+        setGeoBusy(false);
+      },
+      () => {
+        setGeoError('위치 권한이 없어요 — 아래에서 가까운 장소를 선택해 주세요.');
+        setGeoBusy(false);
+      },
+      { maximumAge: 60_000, timeout: 8_000 },
+    );
+  }
+
   const quickDates = useMemo(() => {
     const base = new Date(`${defaultDate}T12:00:00`);
     const pad = (n: number) => String(n).padStart(2, '0');
-    return ['오늘', '내일', '모레'].map((label, i) => {
-      const d = new Date(base);
-      d.setDate(base.getDate() + i);
-      return { label, value: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` };
-    });
+    const fmt = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    const tomorrow = new Date(base);
+    tomorrow.setDate(base.getDate() + 1);
+    // 이번 주말 = 다가오는 토요일(오늘이 주말이면 오늘).
+    const weekend = new Date(base);
+    const day = weekend.getDay();
+    if (day !== 6 && day !== 0) weekend.setDate(weekend.getDate() + ((6 - day + 7) % 7));
+    return [
+      { label: '오늘', value: fmt(base) },
+      { label: '내일', value: fmt(tomorrow) },
+      { label: '이번 주말', value: fmt(weekend) },
+    ];
   }, [defaultDate]);
   // 온보딩 답변은 localStorage에만 있어 서버 렌더링 시점엔 알 수 없다 — 마운트 후 읽어와서
-  // 적용한다. 이미 그려진 defaultValue/defaultChecked는 React가 재적용하지 않으므로, prefill이
-  // 도착하면 key를 바꿔 해당 입력만 다시 마운트한다(초기 렌더와 하이드레이션은 항상 동일하게
-  // 서버 기본값으로 그려지므로 하이드레이션 불일치는 생기지 않는다).
+  // 적용한다. 최근 출발 위치도 같은 시점에 읽는다.
   const [prefill, setPrefill] = useState<OnboardingAnswers | null>(null);
   useEffect(() => {
     const answers = readOnboardingState()?.answers ?? null;
     setPrefill(answers);
-    if (answers?.priority) setPriorityVal(answers.priority as Priority);
+    if (answers?.priority) {
+      // 구 온보딩 값 'logistics'는 R19 5축에서 distance로 흡수한다.
+      setPriorityVal(answers.priority === 'logistics' ? 'distance' : (answers.priority as Priority));
+    }
+    if (answers?.subtitleReadability) setAvoid((a) => ({ ...a, subtitle: true }));
+    try {
+      const stored = JSON.parse(localStorage.getItem('cinefit.recent-origins') ?? '[]') as string[];
+      setRecentOrigins(stored.filter((id) => ORIGIN_PRESETS.some((o) => o.id === id)).slice(0, 2));
+    } catch {
+      /* 저장값 손상 시 무시 */
+    }
   }, []);
   const prefillKey = prefill ? 'prefilled' : 'initial';
+
+  // 입력 조건을 사람이 읽는 문장으로 실시간 요약(R19) — 모바일 top sheet와 우측 패널 공용.
+  const summaryLines = useMemo(() => {
+    const dateLabel = quickDates.find((q) => q.value === dateVal)?.label ?? dateVal;
+    const tw =
+      timeWindowVal === 'custom'
+        ? `${timeFromVal}–${timeToVal} 시작`
+        : (TIME_WINDOW_OPTIONS.find((o) => o.value === timeWindowVal)?.label ?? '시간 상관없음');
+    const originLabel =
+      originVal === 'custom'
+        ? '현재 위치'
+        : (ORIGIN_PRESETS.find((o) => o.id === originVal)?.label.replace(' 인근', '') ?? '-');
+    const travelLabel = travelVal >= 240 ? '거리 상관없음' : `편도 ${travelVal}분 이내`;
+    return [`${dateLabel} · ${tw}`, `${originLabel} 출발`, travelLabel];
+  }, [quickDates, dateVal, timeWindowVal, timeFromVal, timeToVal, originVal, travelVal]);
 
   // 실시간 후보 수 — 400ms 디바운스, 폼 데이터 그대로 조회(제출과 같은 buildQuery).
   useEffect(() => {
@@ -388,7 +440,7 @@ export function RecommendForm({
       }
     }, 400);
     return () => clearTimeout(t);
-  }, [movieId, formTick, dateVal, travelVal, priceVal, originVal, prefillKey]);
+  }, [movieId, formTick, dateVal, travelVal, originVal, timeWindowVal, timeFromVal, timeToVal, priorityVal, secondaryVal, avoid, prefillKey]);
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -398,6 +450,15 @@ export function RecommendForm({
       return;
     }
     setSubmitting(true);
+    // 최근 출발 위치 저장(프리셋만) — 다음 방문의 "최근:" 칩.
+    if (originVal !== 'custom') {
+      try {
+        const next = [originVal, ...recentOrigins.filter((r) => r !== originVal)].slice(0, 2);
+        localStorage.setItem('cinefit.recent-origins', JSON.stringify(next));
+      } catch {
+        /* 저장 실패는 무시 */
+      }
+    }
     const qs = buildQuery(movieId, new FormData(e.currentTarget));
     router.push(`/results?${qs.toString()}`);
   }
@@ -421,18 +482,11 @@ export function RecommendForm({
         </summary>
         <div className="border-t border-border px-3.5 pb-3.5 pt-3">
           <MovieSummary movie={movie} />
-          <dl className="m-0 mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[13px]">
-            <dt className="text-text-tertiary">날짜</dt>
-            <dd className="m-0 text-right font-medium tabular-nums text-text">{dateVal}</dd>
-            <dt className="text-text-tertiary">출발</dt>
-            <dd className="m-0 text-right font-medium text-text">
-              {ORIGIN_PRESETS.find((o) => o.id === originVal)?.label.replace(' 인근', '') ?? '-'}
-            </dd>
-            <dt className="text-text-tertiary">이동·예산</dt>
-            <dd className="m-0 text-right font-medium tabular-nums text-text">
-              {travelVal}분 · {priceVal.toLocaleString('ko-KR')}원
-            </dd>
-          </dl>
+          <p className="m-0 mt-3 flex flex-col gap-0.5 text-[13.5px] font-medium tabular-nums text-text">
+            {summaryLines.map((line) => (
+              <span key={line}>{line}</span>
+            ))}
+          </p>
         </div>
       </details>
 
@@ -471,8 +525,7 @@ export function RecommendForm({
       <div className={step === 0 ? 'stage-enter' : 'hidden'}>
       <StepSection step={1} title="언제, 어디서 볼까요?" first numbered={false}>
         <div className="flex flex-col gap-2.5">
-          {/* 날짜 — 대부분의 선택은 오늘/내일/모레 퀵 칩으로 끝나고, 다른 날짜만 입력 필드를
-              쓴다(네이티브 달력 팝업 의존 최소화). */}
+          {/* 1) 관람 날짜 — 오늘/내일/이번 주말 shortcut이 기본, 다른 날짜만 달력 입력. */}
           <div className="rounded-card bg-surface-raised p-3.5 transition-shadow focus-within:shadow-[inset_0_0_0_1px_rgba(188,96,118,0.5)]">
             <div className="flex items-center gap-3">
               <FieldIcon>
@@ -490,10 +543,10 @@ export function RecommendForm({
                 />
               </label>
             </div>
-            <div className="mt-2.5 flex gap-1.5 pl-12" role="group" aria-label="빠른 날짜 선택">
+            <div className="mt-2.5 flex flex-wrap gap-1.5 pl-12" role="group" aria-label="빠른 날짜 선택">
               {quickDates.map((q) => (
                 <button
-                  key={q.value}
+                  key={q.label}
                   type="button"
                   aria-pressed={dateVal === q.value}
                   onClick={() => setDateVal(q.value)}
@@ -507,16 +560,110 @@ export function RecommendForm({
             </div>
           </div>
 
-          {/* 출발 위치 — 네이티브 드롭다운(스타일 불가한 흰 팝업) 대신 커스텀 위치 칩 그리드.
-              같은 name의 radio 그룹이라 폼 데이터는 select와 동일하게 하나의 originId. */}
+          {/* 2) 희망 상영 시작 시간 — 반드시 "상영 시작 시각" 기준임을 안내(R19). */}
           <div className="rounded-card bg-surface-raised p-3.5">
             <div className="flex items-center gap-3">
               <FieldIcon>
-                <PinGlyph />
+                <ClockGlyph />
               </FieldIcon>
-              <span className={fieldLabelCls}>출발 위치</span>
+              <span className={fieldLabelCls}>
+                희망 상영 시작 시간 <span className="font-normal normal-case text-text-tertiary">· 상영 시작 시각 기준</span>
+              </span>
             </div>
-            <div className="mt-2.5 grid grid-cols-2 gap-1.5 pl-12 sm:grid-cols-3 sm:pl-12" role="radiogroup" aria-label="출발 위치">
+            <div className="mt-2.5 flex flex-wrap gap-1.5 pl-12" role="radiogroup" aria-label="희망 상영 시작 시간">
+              {TIME_WINDOW_OPTIONS.map((o) => (
+                <label
+                  key={o.value}
+                  className={`flex min-h-8 cursor-pointer items-center rounded-full px-3.5 text-[12.5px] font-semibold transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary ${
+                    timeWindowVal === o.value ? 'bg-primary-strong text-white' : 'bg-white/[0.04] text-text-sub hover:text-text'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="timeWindow"
+                    value={o.value}
+                    checked={timeWindowVal === o.value}
+                    onChange={() => setTimeWindowVal(o.value)}
+                    className="sr-only"
+                  />
+                  {o.label}
+                  {'hint' in o && o.hint ? <span className="ml-1 text-[10.5px] opacity-75">{o.hint}</span> : null}
+                </label>
+              ))}
+              <label
+                className={`flex min-h-8 cursor-pointer items-center rounded-full px-3.5 text-[12.5px] font-semibold transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary ${
+                  timeWindowVal === 'custom' ? 'bg-primary-strong text-white' : 'bg-white/[0.04] text-text-sub hover:text-text'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="timeWindow"
+                  value="custom"
+                  checked={timeWindowVal === 'custom'}
+                  onChange={() => setTimeWindowVal('custom')}
+                  className="sr-only"
+                />
+                직접 설정
+              </label>
+            </div>
+            {timeWindowVal === 'custom' ? (
+              <div className="mt-2.5 flex flex-wrap items-center gap-2 pl-12 text-[13px] text-text-sub">
+                <input
+                  type="time"
+                  name="timeFrom"
+                  value={timeFromVal}
+                  onChange={(e) => setTimeFromVal(e.target.value)}
+                  aria-label="시작 범위 시작"
+                  className="min-h-9 rounded-[8px] border border-border bg-bg px-2 text-[14px] text-text [color-scheme:dark]"
+                  required
+                />
+                부터
+                <input
+                  type="time"
+                  name="timeTo"
+                  value={timeToVal}
+                  onChange={(e) => setTimeToVal(e.target.value)}
+                  aria-label="시작 범위 끝"
+                  className="min-h-9 rounded-[8px] border border-border bg-bg px-2 text-[14px] text-text [color-scheme:dark]"
+                  required
+                />
+                사이에 시작
+              </div>
+            ) : null}
+          </div>
+
+          {/* 3) 출발 위치 — 현재 위치 / 장소 프리셋 / 최근 위치. 정확한 주소를 강제하지 않는다. */}
+          <div className="rounded-card bg-surface-raised p-3.5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-3">
+                <FieldIcon>
+                  <PinGlyph />
+                </FieldIcon>
+                <span className={fieldLabelCls}>출발 위치</span>
+              </div>
+              <button
+                type="button"
+                onClick={useCurrentLocation}
+                disabled={geoBusy}
+                className="min-h-8 rounded-full border border-border px-3 text-[12px] font-semibold text-text-sub transition-colors hover:border-border-strong hover:text-text disabled:opacity-50"
+              >
+                {geoBusy ? '위치 확인 중…' : '현재 위치 사용'}
+              </button>
+            </div>
+            {originVal === 'custom' && customOrigin ? (
+              <p className="m-0 mt-2 pl-12 text-[13px] font-medium text-primary">
+                현재 위치 기준으로 찾을게요
+                <button
+                  type="button"
+                  onClick={() => setOriginVal('cityhall')}
+                  className="ml-2 text-[12px] font-normal text-text-tertiary underline underline-offset-2"
+                >
+                  지우기
+                </button>
+              </p>
+            ) : null}
+            {geoError ? <p className="m-0 mt-2 pl-12 text-[12.5px] text-trust-low">{geoError}</p> : null}
+            <div className="mt-2.5 grid grid-cols-2 gap-1.5 pl-12 sm:grid-cols-3" role="radiogroup" aria-label="출발 위치">
               {ORIGIN_PRESETS.map((o) => (
                 <label
                   key={o.id}
@@ -534,148 +681,112 @@ export function RecommendForm({
                 </label>
               ))}
             </div>
+            {recentOrigins.length > 0 ? (
+              <div className="mt-2 flex flex-wrap items-center gap-1.5 pl-12">
+                <span className="text-[11px] text-text-tertiary">최근:</span>
+                {recentOrigins.map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setOriginVal(r)}
+                    className="min-h-7 rounded-full bg-white/[0.04] px-2.5 text-[11.5px] text-text-sub transition-colors hover:text-text"
+                  >
+                    {ORIGIN_PRESETS.find((o) => o.id === r)?.label.replace(' 인근', '') ?? r}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+            {originVal === 'custom' && customOrigin ? (
+              <>
+                <input type="hidden" name="originId" value="custom" />
+                <input type="hidden" name="originLat" value={customOrigin.lat} />
+                <input type="hidden" name="originLng" value={customOrigin.lng} />
+                <input type="hidden" name="originLabel" value="현재 위치" />
+              </>
+            ) : null}
           </div>
 
-          <div className="grid gap-2.5 sm:grid-cols-2">
-            <div className={fieldCls}>
+          {/* 4) 극장까지 "편도" 이동 한도 — preset 칩이 기본, 직접 입력은 보조(R19). */}
+          <div className="rounded-card bg-surface-raised p-3.5">
+            <div className="flex items-center gap-3">
               <FieldIcon>
-                <ClockGlyph />
+                <RouteRadiusGlyph />
               </FieldIcon>
-              <label className="min-w-0 flex-1">
-                <span className={fieldLabelCls}>최대 이동 시간</span>
-                <span className="mt-0.5 flex items-baseline gap-1">
-                  <input
-                    className={`${fieldInputCls} w-14 [appearance:textfield] [&::-webkit-inner-spin-button]:hidden [&::-webkit-outer-spin-button]:hidden`}
-                    type="number"
-                    name="maxTravelMinutes"
-                    value={travelVal}
-                    onChange={(e) => setTravelVal(Number(e.target.value) || 0)}
-                    onBlur={() => setTravelVal((v) => clamp(v, 5, 240))}
-                    min={5}
-                    max={240}
-                    step={5}
-                  />
-                  <span className="text-[13px] text-text-sub">분</span>
-                </span>
-              </label>
-              <div className="flex flex-col items-end gap-1.5">
-                <div className="flex gap-1">
-                  <StepBtn label="이동 시간 5분 줄이기" onClick={() => setTravelVal((v) => clamp(v - 5, 5, 240))}>
-                    <MinusGlyph />
-                  </StepBtn>
-                  <StepBtn label="이동 시간 5분 늘리기" onClick={() => setTravelVal((v) => clamp(v + 5, 5, 240))}>
-                    <PlusGlyph />
-                  </StepBtn>
-                </div>
-                <div className="flex gap-1" role="group" aria-label="이동 시간 빠른 선택">
-                  {TRAVEL_PRESETS.map((v) => (
-                    <button
-                      key={v}
-                      type="button"
-                      aria-pressed={travelVal === v}
-                      onClick={() => setTravelVal(v)}
-                      className={`min-h-7 rounded-full px-2.5 text-[11.5px] font-semibold tabular-nums transition-colors ${
-                        travelVal === v ? 'bg-primary-strong text-white' : 'bg-white/[0.04] text-text-sub hover:text-text'
-                      }`}
-                    >
-                      {v}분
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <span className={fieldLabelCls}>극장까지 편도 이동 한도</span>
             </div>
-            <div className={fieldCls}>
-              <FieldIcon>
-                <WonGlyph />
-              </FieldIcon>
-              <label className="min-w-0 flex-1">
-                <span className={fieldLabelCls}>최대 가격</span>
-                <span className="mt-0.5 flex items-baseline gap-1">
+            <div className="mt-2.5 flex flex-wrap gap-1.5 pl-12" role="radiogroup" aria-label="편도 이동 한도">
+              {TRAVEL_LIMIT_OPTIONS.map((o) => (
+                <label
+                  key={o.value}
+                  className={`flex min-h-8 cursor-pointer items-center rounded-full px-3.5 text-[12.5px] font-semibold transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary ${
+                    travelVal === o.value ? 'bg-primary-strong text-white' : 'bg-white/[0.04] text-text-sub hover:text-text'
+                  }`}
+                >
                   <input
-                    className={`${fieldInputCls} w-20 [appearance:textfield] [&::-webkit-inner-spin-button]:hidden [&::-webkit-outer-spin-button]:hidden`}
-                    type="number"
-                    name="maxPrice"
-                    value={priceVal}
-                    onChange={(e) => setPriceVal(Number(e.target.value) || 0)}
-                    onBlur={() => setPriceVal((v) => clamp(v, 1000, 200000))}
-                    min={1000}
-                    max={200000}
-                    step={1000}
+                    type="radio"
+                    name="travelPreset"
+                    value={o.value}
+                    checked={travelVal === o.value}
+                    onChange={() => setTravelVal(o.value)}
+                    className="sr-only"
                   />
-                  <span className="text-[13px] text-text-sub">원</span>
-                </span>
-              </label>
-              <div className="flex flex-col items-end gap-1.5">
-                <div className="flex gap-1">
-                  <StepBtn label="가격 5천 원 줄이기" onClick={() => setPriceVal((v) => clamp(v - 5000, 1000, 200000))}>
-                    <MinusGlyph />
-                  </StepBtn>
-                  <StepBtn label="가격 5천 원 늘리기" onClick={() => setPriceVal((v) => clamp(v + 5000, 1000, 200000))}>
-                    <PlusGlyph />
-                  </StepBtn>
-                </div>
-                <div className="flex gap-1" role="group" aria-label="가격 빠른 선택">
-                  {PRICE_PRESETS.map((v) => (
-                    <button
-                      key={v}
-                      type="button"
-                      aria-pressed={priceVal === v}
-                      onClick={() => setPriceVal(v)}
-                      className={`min-h-7 rounded-full px-2.5 text-[11.5px] font-semibold tabular-nums transition-colors ${
-                        priceVal === v ? 'bg-primary-strong text-white' : 'bg-white/[0.04] text-text-sub hover:text-text'
-                      }`}
-                    >
-                      {(v / 10000).toLocaleString('ko-KR')}만
-                    </button>
-                  ))}
-                </div>
-              </div>
+                  {o.label}
+                </label>
+              ))}
             </div>
+            <details className="mt-2 pl-12">
+              <summary className="cursor-pointer text-[12px] text-text-tertiary hover:text-text-sub">
+                분 단위로 직접 입력
+              </summary>
+              <span className="mt-1.5 flex items-baseline gap-1.5">
+                <input
+                  className="min-h-9 w-16 rounded-[8px] border border-border bg-bg px-2 text-[14px] tabular-nums text-text [appearance:textfield] [&::-webkit-inner-spin-button]:hidden [&::-webkit-outer-spin-button]:hidden"
+                  type="number"
+                  value={travelVal}
+                  onChange={(e) => setTravelVal(clamp(Number(e.target.value) || 0, 5, 240))}
+                  min={5}
+                  max={240}
+                  step={5}
+                  aria-label="편도 이동 한도(분)"
+                />
+                <span className="text-[13px] text-text-sub">분</span>
+              </span>
+            </details>
+            <input type="hidden" name="maxTravelMinutes" value={travelVal} />
           </div>
         </div>
       </StepSection>
       </div>
 
       <div className={step === 1 ? 'stage-enter' : 'hidden'}>
-      <StepSection step={2} title="무엇을 가장 중요하게 보나요?" first numbered={false}>
+      <StepSection step={2} title="이번 관람에서 무엇이 가장 중요한가요?" first numbered={false}>
         <fieldset className="m-0 border-0 p-0" key={prefillKey}>
-          <legend className="mb-2 block text-sm font-semibold text-text">가장 중요한 것</legend>
-          <div
-            className="grid gap-2.5 sm:[grid-template-columns:repeat(auto-fit,minmax(230px,1fr))]"
-            role="radiogroup"
-            aria-label="가장 중요한 것"
-            onChange={(e) => {
-              const t = e.target as HTMLInputElement;
-              if (t.name === 'priority') setPriorityVal(t.value as Priority);
-            }}
-          >
-            <RadioCard
-              name="priority"
-              value="balance"
-              defaultChecked={(prefill?.priority ?? 'balance') === 'balance'}
-              title="균형 있게"
-              description="화면·이동·가격을 고르게 반영"
-              visual={<BalanceGlyph />}
-            />
-            <RadioCard
-              name="priority"
-              value="quality"
-              defaultChecked={prefill?.priority === 'quality'}
-              title="영상·음향 품질"
-              description="화면과 사운드 가중치를 높여요"
-              visual={<ScreenGlyph ratio={2.2} wave />}
-            />
-            <RadioCard
-              name="priority"
-              value="logistics"
-              defaultChecked={prefill?.priority === 'logistics'}
-              title="가까운 곳·가성비"
-              description="이동시간·가격 가중치를 높여요"
-              visual={<RouteGlyph />}
-            />
+          <legend className="mb-2 block text-sm font-semibold text-text">가장 중요한 기준</legend>
+          <div className="flex flex-col gap-2" role="radiogroup" aria-label="가장 중요한 기준">
+            {PRIORITY_OPTIONS.map((o) => (
+              <label
+                key={o.value}
+                className="group flex min-h-[48px] cursor-pointer items-center gap-3 rounded-card bg-surface-raised px-3.5 py-2 transition-colors has-[:checked]:bg-primary-soft has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary"
+              >
+                <input
+                  type="radio"
+                  name="priority"
+                  value={o.value}
+                  checked={priorityVal === o.value}
+                  onChange={() => setPriorityVal(o.value)}
+                  className="sr-only"
+                />
+                <span
+                  aria-hidden
+                  className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border border-border-strong transition-colors group-has-[:checked]:border-primary-strong"
+                >
+                  <span className="h-2 w-2 rounded-full bg-transparent transition-colors group-has-[:checked]:bg-primary-strong" />
+                </span>
+                <span className="text-[14.5px] font-medium text-text">{o.label}</span>
+              </label>
+            ))}
           </div>
-          {/* 선택이 엔진 가중치를 실제로 어떻게 바꾸는지 — 실제 WEIGHT_PRESETS 합산값의
-              미세 시각화(§8 Step 2). 선택을 바꾸면 세 그룹 배분이 함께 움직인다. */}
+          {/* 선택이 엔진 가중치를 실제로 어떻게 바꾸는지 — 실제 WEIGHT_PRESETS 합산값. */}
           <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 rounded-card bg-surface-raised px-3.5 py-2.5">
             <span className="text-[11.5px] font-semibold uppercase tracking-wide text-text-tertiary">가중치 배분</span>
             {weightGroups(priorityVal).map((g) => (
@@ -692,71 +803,134 @@ export function RecommendForm({
             ))}
           </div>
         </fieldset>
+
         <fieldset className="m-0 border-0 p-0">
-          <legend className="mb-2 block text-sm font-semibold text-text">허용할 상영 방식</legend>
-          <div className="grid gap-2.5 sm:[grid-template-columns:repeat(auto-fit,minmax(230px,1fr))]">
-            <ToggleCard
-              name="allowImax"
-              defaultChecked
-              title="IMAX"
-              description="더 큰 화면과 확장 화면비"
-              visual={<ScreenGlyph ratio={1.43} />}
-            />
-            <ToggleCard
-              name="allowDolby"
-              defaultChecked
-              title="Dolby Cinema"
-              description="돌비 비전·애트모스 사운드"
-              visual={<ScreenGlyph ratio={2.2} wave />}
-            />
-            <ToggleCard
-              name="allowStandard"
-              defaultChecked
-              title="일반관"
-              description="대형관 포함 일반 상영관"
-              visual={<ScreenGlyph ratio={1.85} />}
-            />
+          <legend className="mb-2 block text-sm font-semibold text-text">두 번째로 중요한 기준 (선택)</legend>
+          <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label="두 번째로 중요한 기준">
+            {PRIORITY_SECONDARY_OPTIONS.map((o) => {
+              const disabled = o.value !== 'none' && o.value === priorityVal;
+              return (
+                <label
+                  key={o.value}
+                  className={`flex min-h-8 items-center rounded-full px-3.5 text-[12.5px] font-semibold transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary ${
+                    disabled
+                      ? 'cursor-not-allowed bg-white/[0.02] text-text-tertiary/60'
+                      : secondaryVal === o.value
+                        ? 'cursor-pointer bg-primary-strong text-white'
+                        : 'cursor-pointer bg-white/[0.04] text-text-sub hover:text-text'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="prioritySecondary"
+                    value={o.value}
+                    checked={secondaryVal === o.value}
+                    disabled={disabled}
+                    onChange={() => setSecondaryVal(o.value)}
+                    className="sr-only"
+                  />
+                  {o.label}
+                </label>
+              );
+            })}
           </div>
+        </fieldset>
+
+        <fieldset className="m-0 border-0 p-0">
+          <legend className="mb-2 block text-sm font-semibold text-text">
+            더 좋은 상영 환경이라면 추가 비용을 얼마나 낼 수 있나요?
+          </legend>
+          <div className="flex flex-col gap-2" role="radiogroup" aria-label="추가 지불 의향">
+            {PREMIUM_ALLOWANCE_OPTIONS.map((o) => (
+              <label
+                key={o.value}
+                className="group flex min-h-[48px] cursor-pointer items-center gap-3 rounded-card bg-surface-raised px-3.5 py-2 transition-colors has-[:checked]:bg-primary-soft has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary"
+              >
+                <input
+                  type="radio"
+                  name="premiumAllowance"
+                  value={o.value}
+                  defaultChecked={o.value === 'experience_first'}
+                  className="sr-only"
+                />
+                <span
+                  aria-hidden
+                  className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border border-border-strong transition-colors group-has-[:checked]:border-primary-strong"
+                >
+                  <span className="h-2 w-2 rounded-full bg-transparent transition-colors group-has-[:checked]:bg-primary-strong" />
+                </span>
+                <span className="min-w-0 flex-1 text-[14.5px] font-medium text-text">{o.label}</span>
+                <span className="shrink-0 text-[12px] tabular-nums text-text-tertiary">{o.hint}</span>
+              </label>
+            ))}
+          </div>
+          <p className="m-0 mt-2 text-[12.5px] leading-snug text-text-tertiary">
+            일반관 최저가를 기준으로 추가 지불 한도를 계산해요 — 절대 금액은 입력하지 않아도 돼요.
+          </p>
         </fieldset>
       </StepSection>
       </div>
 
       <div className={step === 2 ? 'stage-enter' : 'hidden'} data-step-last>
-      <StepSection step={3} title="피하고 싶은 조건이 있나요?" first numbered={false}>
-        <SegmentedControl
-          key={prefillKey}
-          name="motionSickness"
-          legend="4DX 멀미, 얼마나 신경 쓰이세요?"
-          options={MOTION_OPTIONS.map((o, i) => ({ ...o, intensity: i }))}
-          defaultValue={prefill?.motionSickness ?? '0'}
-        />
-        <fieldset className="m-0 border-0 p-0">
-          <legend className="mb-2 block text-sm font-semibold text-text">좌석·편의 선호</legend>
-          {/* 큰 카드 3장 대신 compact toggle row — 각 행이 추천 로직에 어떻게 반영되는지
-              한 문장으로(§8 Step 3). */}
-          <div className="flex flex-col gap-2">
-            <ToggleRow
-              key={prefillKey}
-              name="subtitleReadability"
-              defaultChecked={prefill?.subtitleReadability ?? false}
-              title="자막 가독 우선"
-              effect="켜면 자막이 잘 보이는 중앙·중간열 구역의 좌석 점수를 높여요"
-              visual={<SeatGlyph lit={(r, c) => r === 1 && c >= 2 && c <= 4} />}
-            />
-            <ToggleRow
-              name="neckComfort"
-              title="목 편한 좌석 우선"
-              effect="켜면 고개를 덜 들어도 되는 중·후방 구역을 먼저 추천해요"
-              visual={<SeatGlyph lit={(r, c) => r === 3 && c >= 2 && c <= 4} />}
-            />
-            <ToggleRow
-              name="wheelchair"
-              title="휠체어 접근 필수"
-              effect="켜면 휠체어 접근이 확인 안 된 상영관은 후보에서 제외돼요"
-              visual={<SeatGlyph lit={(r, c) => r === 3 && c <= 1} />}
-            />
-          </div>
-        </fieldset>
+      <StepSection step={3} title="관람할 때 피하고 싶은 조건이 있나요?" first numbered={false}>
+        <p className="m-0 mb-2 text-[13px] text-text-sub">복수 선택할 수 있어요.</p>
+        <div className="flex flex-col gap-2">
+          <ToggleRow
+            name="avoidFront"
+            title="앞쪽 좌석은 불편해요"
+            effect="스크린에서 떨어진 중·후방 구역을 먼저 추천해요"
+            checked={avoid.front}
+            onChange={(on) => setAvoidFlag('front', on)}
+            visual={<SeatGlyph lit={(r, c) => r === 3 && c >= 2 && c <= 4} />}
+          />
+          <ToggleRow
+            name="bigScreenSensitive"
+            title="화면이 너무 크면 멀미가 나요"
+            effect="IMAX 확장 화면 후보를 제외해요"
+            checked={avoid.bigScreen}
+            onChange={(on) => setAvoidFlag('bigScreen', on)}
+            visual={<ScreenGlyph ratio={1.43} />}
+          />
+          <ToggleRow
+            name="neckComfort"
+            title="목을 많이 들어야 하는 자리는 피하고 싶어요"
+            effect="고개를 덜 들어도 되는 구역을 먼저 추천해요"
+            checked={avoid.neck}
+            onChange={(on) => setAvoidFlag('neck', on)}
+            visual={<SeatGlyph lit={(r, c) => r === 3 && c >= 2 && c <= 4} />}
+          />
+          <ToggleRow
+            name="subtitleReadability"
+            title="자막을 편하게 읽을 수 있어야 해요"
+            effect="자막이 잘 보이는 중앙·중간열 구역의 점수를 높여요"
+            checked={avoid.subtitle}
+            onChange={(on) => setAvoidFlag('subtitle', on)}
+            visual={<SeatGlyph lit={(r, c) => r === 1 && c >= 2 && c <= 4} />}
+          />
+          <ToggleRow
+            title="강한 진동이나 움직이는 좌석은 피하고 싶어요"
+            effect="4DX 회차를 후보에서 제외해요"
+            checked={avoid.vibration}
+            onChange={(on) => setAvoidFlag('vibration', on)}
+            visual={<ScreenGlyph ratio={1.85} />}
+          />
+          <ToggleRow
+            name="wheelchair"
+            title="휠체어·엘리베이터 접근이 필요해요"
+            effect="접근이 확인되지 않은 상영관은 제외해요"
+            checked={avoid.wheelchair}
+            onChange={(on) => setAvoidFlag('wheelchair', on)}
+            visual={<SeatGlyph lit={(r, c) => r === 3 && c <= 1} />}
+          />
+          <ToggleRow
+            title="해당 없음"
+            effect="피하고 싶은 조건 없이 추천받아요"
+            checked={noneAvoided}
+            onChange={() => clearAvoid()}
+          />
+        </div>
+        {/* 진동·모션 회피 → 기존 멀미 민감도(2=4DX 하드 제외)로 전달 */}
+        <input type="hidden" name="motionSickness" value={avoid.vibration ? 2 : 0} />
       </StepSection>
       </div>
 
@@ -806,18 +980,12 @@ export function RecommendForm({
           </div>
           <div className="rounded-card-lg border border-border bg-surface p-4">
             <p className="m-0 text-[12px] font-semibold uppercase tracking-wide text-primary">현재 조건</p>
-            <dl className="m-0 mt-2.5 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-[13.5px]">
-              <dt className="text-text-tertiary">날짜</dt>
-              <dd className="m-0 text-right font-medium tabular-nums text-text">{dateVal}</dd>
-              <dt className="text-text-tertiary">출발</dt>
-              <dd className="m-0 text-right font-medium text-text">
-                {ORIGIN_PRESETS.find((o) => o.id === originVal)?.label.replace(' 인근', '') ?? '-'}
-              </dd>
-              <dt className="text-text-tertiary">이동</dt>
-              <dd className="m-0 text-right font-medium tabular-nums text-text">{travelVal}분 이내</dd>
-              <dt className="text-text-tertiary">예산</dt>
-              <dd className="m-0 text-right font-medium tabular-nums text-text">{priceVal.toLocaleString('ko-KR')}원</dd>
-            </dl>
+            {/* 표가 아니라 문장 요약(R19) — "오늘 · 저녁 / 강남역 출발 / 편도 45분 이내". */}
+            <p className="m-0 mt-2.5 flex flex-col gap-1 text-[14.5px] font-medium tabular-nums leading-snug text-text">
+              {summaryLines.map((line) => (
+                <span key={line}>{line}</span>
+              ))}
+            </p>
             <div className="mt-3.5 border-t border-border pt-3.5" role="status" aria-live="polite">
               {preview ? (
                 <>
@@ -840,7 +1008,7 @@ export function RecommendForm({
                         이동시간 적용 <span>{preview.funnel.afterTravel}개</span>
                       </li>
                       <li className="flex justify-between gap-3">
-                        예산 적용 <span>{preview.funnel.afterPrice}개</span>
+                        가격 조건 적용 <span>{preview.funnel.afterPrice}개</span>
                       </li>
                       <li className="flex justify-between gap-3 font-semibold text-text">
                         포맷·조건 반영 <span className="text-primary">{preview.funnel.final}개</span>

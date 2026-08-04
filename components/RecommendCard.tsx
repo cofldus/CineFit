@@ -373,7 +373,9 @@ export function RecommendCard({
     const gains = scored.pros.slice(0, 2);
     const tradeoffs = scored.cons.slice(0, 2);
     const travelSlack = request.maxTravelMinutes - scored.travelMinutes;
-    const priceSlack = request.maxPrice - c.priceAdult;
+    // R19: 상한은 추가 지불 의향에서 파생 — experience_first면 사실상 무한이라 delta를 숨긴다.
+    const capFinite = request.maxPrice < Number.MAX_SAFE_INTEGER / 2;
+    const priceSlack = capFinite ? request.maxPrice - c.priceAdult : 0;
 
     return (
       <article
@@ -505,7 +507,13 @@ export function RecommendCard({
               <DeltaStat
                 label="가격"
                 value={`${c.priceAdult.toLocaleString('ko-KR')}원`}
-                delta={priceSlack > 0 ? `예산보다 ${priceSlack.toLocaleString('ko-KR')}원 낮음` : '예산과 같음'}
+                delta={
+                  capFinite
+                    ? priceSlack > 0
+                      ? `한도보다 ${priceSlack.toLocaleString('ko-KR')}원 낮음`
+                      : '추가 지불 한도와 같음'
+                    : '상한 없이 탐색한 조건'
+                }
               />
               <TrustDots scored={scored} />
             </div>

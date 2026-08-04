@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { DetailedCompare, DifferenceSummary } from '../../components/CompareTable';
 import { ShareLinkButton } from '../../components/ShareLinkButton';
+import { PREMIUM_ALLOWANCE_OPTIONS } from '../../src/data/constants';
 import { INFO_STATUS_LABELS } from '../../src/domain/recommendation/presets';
 import { pickPersonality } from '../../src/lib/display';
 import { FeedbackWidget } from '../../components/FeedbackWidget';
@@ -104,9 +105,16 @@ export default async function ResultsPage({
           <span aria-hidden className="h-3 w-px bg-border-strong" />
           <span className="text-text-sub">{origin.label ?? '지정 위치'} 출발</span>
           <span aria-hidden className="h-3 w-px bg-border-strong" />
-          <span className="text-text-sub">이동 {result.request.maxTravelMinutes}분 이내</span>
+          <span className="text-text-sub">
+            {result.request.maxTravelMinutes >= 240 ? '거리 제한 없음' : `편도 ${result.request.maxTravelMinutes}분 이내`}
+          </span>
           <span aria-hidden className="h-3 w-px bg-border-strong" />
-          <span className="text-text-sub">{result.request.maxPrice.toLocaleString('ko-KR')}원 이하</span>
+          {/* R19: 절대 예산 대신 추가 지불 의향 라벨(구 URL은 절대 상한 표기 유지). */}
+          <span className="text-text-sub">
+            {result.request.premiumAllowance
+              ? (PREMIUM_ALLOWANCE_OPTIONS.find((o) => o.value === result.request.premiumAllowance)?.label ?? '')
+              : `${result.request.maxPrice.toLocaleString('ko-KR')}원 이하`}
+          </span>
           <span className="text-text-tertiary">
             · 조건에 맞는 회차 {result.scored.length}개 / 전체 {result.totalCandidates}개
           </span>

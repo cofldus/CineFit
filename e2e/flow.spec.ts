@@ -13,7 +13,7 @@ test('홈 → 영화 선택 → 조건 입력 → 추천 3종 → 상세 확인'
 
   // 기본값 그대로 제출해도 추천을 받을 수 있어야 한다 — 3단계 flow, 단계별 CTA 문구(R15).
   await page.getByRole('button', { name: /우선순위 정하기/ }).click();
-  await page.getByRole('button', { name: /불편 조건 설정하기/ }).click();
+  await page.getByRole('button', { name: /피하고 싶은 조건/ }).click();
   await page.getByRole('button', { name: /결과 확인하기/ }).click();
   await expect(page).toHaveURL(/\/results\?/);
 

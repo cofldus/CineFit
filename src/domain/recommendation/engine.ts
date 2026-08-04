@@ -38,6 +38,61 @@ export function hardFilter(
   request: RecommendationRequest,
 ): { passed: CandidateShowtime[]; excluded: ExcludedCandidate[] } {
   const excluded: ExcludedCandidate[] = [];
+  return hardFilterInner(candidates, request, excluded);
+}
+
+// R19 시간대 필터 보조 — 시작 시각을 Asia/Seoul 기준 "그날의 분(minute-of-day)"으로 환산.
+const seoulHourFmt = new Intl.DateTimeFormat('en-GB', {
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+  timeZone: 'Asia/Seoul',
+});
+
+function seoulMinutesOfDay(iso: string): number {
+  const [h, m] = seoulHourFmt.format(new Date(iso)).split(':').map(Number);
+  return h * 60 + m;
+}
+
+const WINDOW_RANGES: Record<string, [number, number]> = {
+  morning: [5 * 60, 12 * 60],
+  afternoon: [12 * 60, 17 * 60],
+  evening: [17 * 60, 22 * 60],
+  late: [22 * 60, 29 * 60], // 22:00~다음날 05:00 (아래에서 05시 미만은 +24h로 정규화)
+};
+
+function inTimeWindow(startMin: number, request: RecommendationRequest): boolean {
+  if (request.timeWindow === 'custom') {
+    const toMin = (t?: string) => {
+      const [h, m] = (t ?? '').split(':').map(Number);
+      return Number.isFinite(h) && Number.isFinite(m) ? h * 60 + m : null;
+    };
+    const from = toMin(request.timeFrom);
+    const to = toMin(request.timeTo);
+    if (from === null || to === null) return true; // 범위 미완성 입력은 필터하지 않는다
+    return startMin >= from && startMin <= to;
+  }
+  const range = WINDOW_RANGES[request.timeWindow ?? 'any'];
+  if (!range) return true;
+  const normalized = request.timeWindow === 'late' && startMin < 5 * 60 ? startMin + 24 * 60 : startMin;
+  return normalized >= range[0] && normalized < range[1];
+}
+
+function formatMinutes(min: number): string {
+  return `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
+}
+
+function timeWindowLabel(request: RecommendationRequest): string {
+  if (request.timeWindow === 'custom') return `${request.timeFrom ?? ''}~${request.timeTo ?? ''}`;
+  const labels: Record<string, string> = { morning: '오전', afternoon: '오후', evening: '저녁', late: '심야' };
+  return labels[request.timeWindow ?? 'any'] ?? '전체';
+}
+
+function hardFilterInner(
+  candidates: CandidateShowtime[],
+  request: RecommendationRequest,
+  excluded: ExcludedCandidate[],
+): { passed: CandidateShowtime[]; excluded: ExcludedCandidate[] } {
   const passed = candidates.filter((c) => {
     const reject = (reason: string) => {
       excluded.push({ candidate: c, reason });
@@ -53,6 +108,12 @@ export function hardFilter(
     if (!allowed) return reject(`${FORMAT_LABELS[c.format]} — 허용하지 않은 포맷`);
     if (request.motionSickness === 2 && c.format === '4dx')
       return reject('멀미 민감(높음) — 4DX 제외');
+    // R19: 희망 상영 시작 시간대 — 회차 "시작 시각"(Asia/Seoul) 기준 하드 필터.
+    if (request.timeWindow && request.timeWindow !== 'any') {
+      const startMin = seoulMinutesOfDay(c.startsAt);
+      if (!inTimeWindow(startMin, request))
+        return reject(`시작 ${formatMinutes(startMin)} — 희망 시간대(${timeWindowLabel(request)}) 밖`);
+    }
     const travel = estimateTravelMinutes(request.origin, c.location);
     if (travel > request.maxTravelMinutes)
       return reject(`이동 약 ${travel}분 — 최대 이동 시간 ${request.maxTravelMinutes}분 초과`);

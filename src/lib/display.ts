@@ -113,6 +113,9 @@ export function keySpecEntries(movie: MovieWithSpecs): { key: MovieSpecKey; spec
 const PRIORITY_PHRASE: Record<RecommendationRequest['priority'], string> = {
   balance: '균형을 우선한',
   quality: '화면·음향을 우선한',
+  seat: '좌석을 우선한',
+  distance: '이동 거리를 우선한',
+  price: '가격을 우선한',
   logistics: '이동·가격을 우선한',
 };
 
@@ -125,10 +128,13 @@ export function winnerVerdict(scored: ScoredCandidate, request: RecommendationRe
   ];
   const strongest = axes.reduce((a, b) => (b[1] > a[1] ? b : a));
   const first = `${PRIORITY_PHRASE[request.priority]} 조건에서 ${strongest[0]}이 특히 좋고, 종합 적합도가 가장 높습니다.`;
-  const priceSlack = request.maxPrice - scored.candidate.priceAdult;
   const travelSlack = request.maxTravelMinutes - scored.travelMinutes;
-  const pricePart = priceSlack > 0 ? `예산보다 ${priceSlack.toLocaleString('ko-KR')}원 낮고` : '예산에 맞고';
   const travelPart = travelSlack > 0 ? `이동시간도 기준보다 ${travelSlack}분 여유가 있습니다` : '이동시간도 기준 안에 들어옵니다';
+  // R19: 상한은 추가 지불 의향에서 파생 — 상한이 없으면(experience_first) 가격 절은 생략.
+  if (request.maxPrice >= Number.MAX_SAFE_INTEGER / 2) return `${first} ${travelPart}.`;
+  const priceSlack = request.maxPrice - scored.candidate.priceAdult;
+  const pricePart =
+    priceSlack > 0 ? `추가 지불 한도보다 ${priceSlack.toLocaleString('ko-KR')}원 낮고` : '추가 지불 한도에 맞고';
   return `${first} ${pricePart}, ${travelPart}.`;
 }
 

@@ -1,7 +1,6 @@
 import packageJson from '../../package.json';
 import { recommend } from '../domain/recommendation/engine';
-import { blendWeights } from '../domain/recommendation/presets';
-import { ACTIVE_POLICY } from '../domain/recommendation/policies/activePolicy';
+import { AXIS_POLICY_VERSION, axisWeights, toEngineWeights } from '../domain/recommendation/axisWeights';
 import type { RecommendationRequest, RecommendationResult } from '../domain/recommendation/types';
 import { getAppClock } from '../lib/clock';
 import type { RecommendationInput } from '../lib/validation';
@@ -37,13 +36,16 @@ export function toDomainRequest(input: RecommendationInput): RecommendationReque
     timeFrom: input.timeFrom,
     timeTo: input.timeTo,
     maxTravelMinutes: input.maxTravelMinutes,
-    // 실효 가격 상한은 getRecommendations가 후보의 일반관 최저가 + 추가 지불 의향으로
-    // 파생시켜 덮어쓴다. 구 URL이 절대 상한(maxPrice)을 보냈다면 그 값을 존중한다.
+    // R20: 가격은 soft preference. 하드 상한(maxPrice)은 구 URL이 절대 상한을 보냈을
+    // 때만 유효하고, 새 플로우의 추가 지불 의향은 priceRef(감점 기준)로만 반영된다 —
+    // getRecommendations가 후보의 일반관 최저가 + 의향으로 파생시켜 채운다.
     maxPrice: input.maxPrice ?? Number.MAX_SAFE_INTEGER,
     premiumAllowance: input.premiumAllowance,
     priority: normalizePriority(input.priority),
     prioritySecondary: input.prioritySecondary,
-    allowImax: input.allowImax && !input.bigScreenSensitive, // 큰 화면 멀미 → IMAX 확장 화면 제외
+    // R20: 큰 화면 멀미는 IMAX 하드 제외가 아니라 화면 축 감점(avoidBigScreen).
+    allowImax: input.allowImax,
+    avoidBigScreen: input.bigScreenSensitive,
     allowDolby: input.allowDolby,
     allowStandard: input.allowStandard,
     motionSickness: input.motionSickness as 0 | 1 | 2,
@@ -54,13 +56,15 @@ export function toDomainRequest(input: RecommendationInput): RecommendationReque
   };
 }
 
-// R19: 추가 지불 의향 → 실효 가격 상한. 기준선은 이 조건에서 실제로 고를 수 있는
-// 일반관(standard·superplex) 최저가 — 일반관 후보가 없으면 전체 최저가.
-export function derivePriceCap(
+// R20: 추가 지불 의향 → 가격 soft 기준(priceRef). 기준선은 이 조건에서 실제로 고를 수
+// 있는 일반관(standard·superplex) 최저가 — 일반관 후보가 없으면 전체 최저가.
+// '가격 차이를 크게 고려하지 않음'(experience_first)은 기준 자체가 없어 null.
+// 이 값은 하드 상한이 아니라 초과분 감점의 기준일 뿐이다(엔진 scoreCandidate).
+export function derivePriceRef(
   candidates: { priceAdult: number; format: string }[],
   allowance: NonNullable<RecommendationRequest['premiumAllowance']>,
-): number {
-  if (allowance === 'experience_first' || candidates.length === 0) return Number.MAX_SAFE_INTEGER;
+): number | null {
+  if (allowance === 'experience_first' || candidates.length === 0) return null;
   const standard = candidates.filter((c) => c.format === 'standard' || c.format === 'superplex');
   const pool = standard.length > 0 ? standard : candidates;
   const baseline = Math.min(...pool.map((c) => c.priceAdult));
@@ -85,16 +89,15 @@ export async function getRecommendations(
   const allowSynthetic = process.env.CINEFIT_ALLOW_SYNTHETIC === 'true';
   const candidates = verified.length > 0 && !allowSynthetic ? verified : all;
 
-  // R19: 실효 가격 상한 파생(추가 지불 의향 기반) — 구 URL이 절대 상한을 보냈으면 유지.
+  // R20: 가격 soft 기준 파생(추가 지불 의향 기반) — 하드 상한이 아니라 감점 기준.
+  // 구 URL이 절대 상한(maxPrice)을 보냈으면 그 하드 필터는 toDomainRequest에서 이미
+  // 반영돼 있고, soft 기준은 중복 적용하지 않는다.
   if (input.maxPrice === undefined && request.premiumAllowance) {
-    request.maxPrice = derivePriceCap(candidates, request.premiumAllowance);
+    request.priceRef = derivePriceRef(candidates, request.premiumAllowance);
   }
-  // R19: 1순위 80% + 2순위 20% 가중치 블렌드.
-  const primaryWeights = ACTIVE_POLICY.weights[request.priority];
-  const secondaryWeights =
-    request.prioritySecondary && request.prioritySecondary !== 'none'
-      ? ACTIVE_POLICY.weights[request.prioritySecondary]
-      : null;
+  // R20: 4축 정수 가중치(합 100) — 1·2순위 선택을 largest remainder로 정규화한 뒤
+  // 엔진 요인 가중치로 변환한다. 사용자 화면(가중치 배분)과 완전히 같은 값을 쓴다.
+  const weights = toEngineWeights(axisWeights(request.priority, request.prioritySecondary ?? 'none'));
 
   const started = performance.now();
   const result = recommend({
@@ -102,7 +105,7 @@ export async function getRecommendations(
     candidates,
     request,
     now,
-    weightsOverride: blendWeights(primaryWeights, secondaryWeights),
+    weightsOverride: weights,
   });
   result.dataMode = {
     usedSynthetic: candidates.some((c) => c.isSynthetic),
@@ -113,7 +116,7 @@ export async function getRecommendations(
   // recommendation_runs가 쌓여 퍼널 집계가 오염되는 것을 막는다.
   if (!ctx.preview) {
     result.runId = await recommendationRepository.saveRun(result, result.latencyMs, now.toISOString(), {
-      policyVersion: ACTIVE_POLICY.version,
+      policyVersion: AXIS_POLICY_VERSION,
       codeVersion: CODE_VERSION,
       sessionId: ctx.sessionId,
     });

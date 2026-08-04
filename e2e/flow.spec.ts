@@ -40,11 +40,14 @@ test('추천 카드에서 상영관 상세로 이동해 사양·좌석 구역·�
   await expect(page.getByText(/확인|제보|추정/).first()).toBeVisible();
 });
 
-test('모든 후보 제외 시 이유와 완화 제안을 보여준다', async ({ page }) => {
+test('모든 후보 제외 시 이유와 실측 완화 제안을 보여준다', async ({ page }) => {
   await page.goto('/results?movieId=1&maxTravelMinutes=5');
   await expect(page.getByTestId('empty-state')).toBeVisible();
   await expect(page.getByTestId('empty-state')).toContainText('제외');
-  await expect(page.getByTestId('empty-state')).toContainText('다시 시도');
+  // R20 §9: 어떤 조건을 완화하면 몇 개가 추가되는지 실측 제안(+N개) — 이동 한도 5분이
+  // 원인이므로 이동 한도 완화 제안이 반드시 나온다.
+  await expect(page.getByTestId('relaxation-suggestions')).toBeVisible();
+  await expect(page.getByTestId('relaxation-suggestions')).toContainText(/\+\d+개/);
 });
 
 // 홈 재구축("The Screening Room" 콘셉트)으로 온보딩 3문항 폼을 홈 본문에서 제거했다 —

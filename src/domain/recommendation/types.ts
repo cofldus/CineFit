@@ -131,9 +131,13 @@ export interface RecommendationRequest {
   timeTo?: string;
   /** 극장까지 "편도" 이동 한도(분). */
   maxTravelMinutes: number;
-  /** 실효 가격 상한 — R19부터 사용자가 직접 입력하지 않고, 추가 지불 의향
-      (premiumAllowance)과 후보의 일반관 최저가로부터 서비스 계층이 파생시킨다. */
+  /** 절대 가격 상한(하드 필터) — 구 URL 호환 전용. 새 플로우는 항상
+      Number.MAX_SAFE_INTEGER(사실상 없음)를 넣는다. R20: 가격은 soft preference라
+      추가 지불 의향으로는 후보를 제외하지 않는다. */
   maxPrice: number;
+  /** 가격 soft 기준(R20) — 일반관 최저가 + 추가 지불 의향. 이 값을 넘는 후보는
+      제외하지 않고 가격 축 점수만 감점한다. null이면 기준 없음(가격 차이 크게 미반영). */
+  priceRef?: number | null;
   /** 더 좋은 상영 환경을 위한 추가 지불 의향(R19 Step 2) — 표시·기록용 원본 값. */
   premiumAllowance?: 'price_first' | 'plus_5000' | 'plus_10000' | 'experience_first';
   priority: Priority;
@@ -142,7 +146,9 @@ export interface RecommendationRequest {
   allowImax: boolean;
   allowDolby: boolean;
   allowStandard: boolean; // 일반관·수퍼플렉스(대형 일반) 그룹
-  motionSickness: 0 | 1 | 2; // 2면 4DX 하드 제외 (문서 05 §3)
+  /** 큰 화면 멀미(R20) — IMAX 등 대형 화면을 "제외"하지 않고 화면 축 점수만 감점한다. */
+  avoidBigScreen?: boolean;
+  motionSickness: 0 | 1 | 2; // 2면 4DX(모션 시트) 하드 제외 (문서 05 §3)
   subtitleReadability: boolean;
   neckComfort: boolean;
   wheelchair: boolean; // 하드 필터 — 미확인 관도 제외 (문서 05 §3)

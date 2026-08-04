@@ -16,7 +16,29 @@ import { serverAnalytics } from '../../src/analytics/serverAnalytics';
 import { ANALYTICS_COOKIE } from '../../src/lib/analyticsSession';
 import { getAppClock } from '../../src/lib/clock';
 import { getRecommendations } from '../../src/data/recommendationService';
+import { suggestRelaxations } from '../../src/domain/recommendation/relaxation';
+import { formatCheckedAt, isStale, latestCheckedAt } from '../../src/lib/dataFreshness';
 import { parseRecommendationInput } from '../../src/lib/validation';
+
+// 극장사 공식 상영시간표 홈 — 회차 데이터가 없거나 오래됐을 때 안내하는 공식 경로.
+const OFFICIAL_SCHEDULES = [
+  { label: 'CGV 공식 상영시간표 ↗', href: 'http://www.cgv.co.kr/theaters/' },
+  { label: '롯데시네마 공식 상영시간표 ↗', href: 'https://www.lottecinema.co.kr' },
+  { label: '메가박스 공식 상영시간표 ↗', href: 'https://www.megabox.co.kr' },
+];
+
+// 현재 결과 URL에 완화 파라미터를 덮어쓴 링크 — 값이 빈 문자열이면 그 파라미터 제거.
+function relaxedHref(raw: Record<string, string | string[] | undefined>, params: Record<string, string>): string {
+  const qs = new URLSearchParams();
+  for (const [k, v] of Object.entries(raw)) {
+    if (typeof v === 'string') qs.set(k, v);
+  }
+  for (const [k, v] of Object.entries(params)) {
+    if (v === '') qs.delete(k);
+    else qs.set(k, v);
+  }
+  return `/results?${qs.toString()}`;
+}
 
 export const metadata: Metadata = { title: '추천 결과' };
 export const dynamic = 'force-dynamic';
@@ -58,6 +80,32 @@ export default async function ResultsPage({
   if (!res.ok) notFound();
   const { result } = res;
   const origin = result.request.origin;
+  const now = getAppClock().now();
+
+  // R20 §9: 데이터 신선도 — 관리자 확인 회차 기준의 마지막 확인 시각. 오래됐으면(stale)
+  // 예매 가능한 것처럼 보이지 않게 재확인 안내를 붙인다. 합성(테스트) 데이터는 별도 상태.
+  const usedSynthetic = result.dataMode?.usedSynthetic ?? false;
+  const verifiedCheckedAt = usedSynthetic
+    ? null
+    : latestCheckedAt(result.scored.map((s) => s.candidate));
+  const dataStale = !usedSynthetic && result.scored.length > 0 && isStale(verifiedCheckedAt, now);
+
+  // R20 §9 zero result: 어떤 조건을 완화하면 몇 개가 추가되는지 — 이미 조회된 후보로
+  // 엔진을 재실행해 실측한다(placeholder 숫자 없음).
+  const allCandidates = [
+    ...result.scored.map((s) => s.candidate),
+    ...result.excluded.map((e) => e.candidate),
+  ];
+  const relaxations =
+    result.picks.length === 0 && allCandidates.length > 0
+      ? suggestRelaxations({
+          movie: result.movie,
+          candidates: allCandidates,
+          request: result.request,
+          now,
+          baseCount: result.scored.length,
+        })
+      : [];
 
   // 추천 완료·빈 결과를 서버에서 직접 기록 — 클라이언트 왕복 없이 정확한 처리 시간을 남긴다.
   // app_opened 등으로 세션 쿠키가 이미 있을 때만 기록한다(없으면 session_id는 NULL로 남는다).
@@ -121,15 +169,36 @@ export default async function ResultsPage({
         </div>
       </header>
 
-      {/* 2. 데이터 안내 */}
+      {/* 2. 데이터 안내 — R20 §9: unavailable(회차 미연결·테스트 데이터)/stale(오래된
+          확인)을 명시하고, 공식 상영시간표 경로를 함께 안내한다. */}
       <div className="enter-2 mt-5 max-w-content">
-        {result.dataMode?.usedSynthetic ? (
-          <Notice detail="각 카드의 상세 보기에서 출처·확인일·상태를 확인할 수 있어요.">
-            검증용 합성 데이터입니다. 실제 예매는 지원하지 않아요.
+        {usedSynthetic ? (
+          <>
+            <Notice detail="상영관 환경(화면·좌석) 추천은 유효하지만, 실제 상영 시각·가격은 공식 페이지에서 확인해 주세요.">
+              회차 데이터 연결 전 — 등록된 테스트 후보를 기준으로 계산한 결과예요. 실제 예매는 지원하지 않아요.
+            </Notice>
+            <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1.5 text-[13px]">
+              {OFFICIAL_SCHEDULES.map((s) => (
+                <a
+                  key={s.href}
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  className="font-medium text-text hover:underline decoration-border-strong underline-offset-2"
+                >
+                  {s.label}
+                </a>
+              ))}
+            </div>
+          </>
+        ) : dataStale && verifiedCheckedAt ? (
+          <Notice detail="상영 스케줄은 수시로 바뀌어요 — 예매 전 공식 상영시간표에서 다시 확인해 주세요.">
+            마지막 확인 {formatCheckedAt(verifiedCheckedAt)} — 확인한 지 시간이 지난 회차 정보예요.
           </Notice>
         ) : (
           <Notice tone="success">
             관리자가 공식 예매 페이지에서 확인한 회차 기준입니다.
+            {verifiedCheckedAt ? ` (마지막 확인 ${formatCheckedAt(verifiedCheckedAt)})` : ''}
             {result.dataMode && result.dataMode.syntheticSuppressed > 0
               ? ` (검증용 합성 회차 ${result.dataMode.syntheticSuppressed}건은 제외됨)`
               : ''}
@@ -150,13 +219,56 @@ export default async function ResultsPage({
                   </li>
                 ))}
               </ul>
-              <p className="mt-2 flex items-start gap-1.5 text-sm text-text-sub">
-                <IconLightbulb className="mt-0.5 h-4 w-4 shrink-0" />
-                최대 이동 시간을 늘리거나, 허용 포맷·가격 상한을 넓혀서 다시 시도해 보세요.
-              </p>
+              {/* R20 §9: 어떤 조건을 완화하면 몇 개가 추가되는지 실측 — 링크 한 번으로 적용. */}
+              {relaxations.length > 0 ? (
+                <div className="mt-4" data-testid="relaxation-suggestions">
+                  <p className="m-0 flex items-start gap-1.5 text-sm font-semibold text-text">
+                    <IconLightbulb className="mt-0.5 h-4 w-4 shrink-0" />
+                    조건을 조금 완화하면 이렇게 늘어나요
+                  </p>
+                  <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                    {relaxations.map((r) => (
+                      <Link
+                        key={r.key}
+                        href={relaxedHref(raw, r.params)}
+                        className="inline-flex min-h-11 items-center gap-2 rounded-card border border-border px-4 text-[14px] font-medium text-text transition-colors hover:border-border-strong"
+                      >
+                        {r.label}
+                        <span className="font-bold tabular-nums text-primary">+{r.added}개</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p className="mt-2 flex items-start gap-1.5 text-sm text-text-sub">
+                  <IconLightbulb className="mt-0.5 h-4 w-4 shrink-0" />
+                  시간대·이동 한도를 넓혀도 이 날짜에는 추가되는 후보가 없어요 — 다른 날짜를 시도해 보세요.
+                </p>
+              )}
             </>
           ) : (
-            <p className="mt-2 text-sm text-text-sub">해당 날짜에 등록된 회차 자체가 없어요.</p>
+            <>
+              <p className="mt-2 text-sm text-text-sub">
+                이 날짜에 등록된 회차가 없어요 — 회차 데이터 연결 전이에요. 상영관 환경(화면·좌석) 정보는{' '}
+                <Link href="/" className="font-medium text-text underline decoration-border-strong underline-offset-2">
+                  홈의 최근 확인된 상영관 정보
+                </Link>
+                에서 볼 수 있어요.
+              </p>
+              <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1.5 text-[13px]">
+                {OFFICIAL_SCHEDULES.map((s) => (
+                  <a
+                    key={s.href}
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    className="font-medium text-text hover:underline decoration-border-strong underline-offset-2"
+                  >
+                    {s.label}
+                  </a>
+                ))}
+              </div>
+            </>
           )}
           <Link
             href={`/recommend/${result.movie.id}`}
@@ -192,6 +304,7 @@ export default async function ResultsPage({
                     ? (INFO_STATUS_LABELS[result.movie.specs.native_ar.infoStatus] ?? '추정')
                     : null
                 }
+                freshness={{ stale: dataStale, checkedAt: verifiedCheckedAt }}
               />
             ) : null}
 

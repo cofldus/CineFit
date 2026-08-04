@@ -47,6 +47,7 @@ export function makeCandidate(overrides: {
   format?: CandidateShowtime['format'];
   supportedAr?: string | null;
   price?: number;
+  startsAt?: string;
   lat?: number;
   lng?: number;
   specConfidence?: number;
@@ -60,7 +61,7 @@ export function makeCandidate(overrides: {
   return {
     showtimeId: id,
     movieId: 1,
-    startsAt: '2026-07-28T19:00:00+09:00',
+    startsAt: overrides.startsAt ?? '2026-07-28T19:00:00+09:00',
     endsAtEst: '2026-07-28T21:50:00+09:00',
     format: overrides.format ?? 'imax',
     language: 'sub',

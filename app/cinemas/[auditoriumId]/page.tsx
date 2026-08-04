@@ -204,7 +204,8 @@ export default async function AuditoriumDetailPage({
                   LIGHT_LABELS[current.projector?.lightSource ?? ''] ?? current.projector?.lightSource,
                   current.projector?.resolution?.toUpperCase(),
                   current.projector?.dual ? '듀얼' : null,
-                  current.projector?.imaxGrade ? `IMAX ${current.projector.imaxGrade}` : null,
+                  // 내부 코드값(gt_dual_laser 등)을 표시용 라벨로 — 원본 키는 관리자 화면에서만.
+                  current.projector?.imaxGrade ? humanizeObservationValue(current.projector.imaxGrade) : null,
                   current.projector?.dolbyVision ? '돌비 비전' : null,
                 ]
                   .filter(Boolean)
@@ -220,7 +221,10 @@ export default async function AuditoriumDetailPage({
                   .filter(Boolean)
                   .join(' · ') || '실측 정보 없음'}
               />
-              <SpecRow label="사운드" value={current.sound?.format ?? null} />
+              <SpecRow
+                label="사운드"
+                value={current.sound?.format ? humanizeObservationValue(current.sound.format) : null}
+              />
               <SpecRow
                 label="표시 가능한 최대 확장비"
                 value={current.supportedAr ? `${current.supportedAr}:1` : '확인 안 됨'}

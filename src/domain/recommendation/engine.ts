@@ -106,8 +106,10 @@ function hardFilterInner(
       ((c.format === 'standard' || c.format === 'superplex') && request.allowStandard) ||
       c.format === '4dx'; // 4DX는 멀미 민감도로만 제어 (아래)
     if (!allowed) return reject(`${FORMAT_LABELS[c.format]} — 허용하지 않은 포맷`);
+    // 움직이는 좌석 회피 — 4DX(및 MX4D류 모션 시트 포맷)는 하드 제외. 현재 데이터
+    // 모델의 모션 시트 포맷은 4dx 하나이며, MX4D가 추가되면 여기서 같이 걸러야 한다.
     if (request.motionSickness === 2 && c.format === '4dx')
-      return reject('멀미 민감(높음) — 4DX 제외');
+      return reject('움직이는 좌석(4DX) — 진동·모션 회피 조건으로 제외');
     // R19: 희망 상영 시작 시간대 — 회차 "시작 시각"(Asia/Seoul) 기준 하드 필터.
     if (request.timeWindow && request.timeWindow !== 'any') {
       const startMin = seoulMinutesOfDay(c.startsAt);
@@ -117,6 +119,8 @@ function hardFilterInner(
     const travel = estimateTravelMinutes(request.origin, c.location);
     if (travel > request.maxTravelMinutes)
       return reject(`이동 약 ${travel}분 — 최대 이동 시간 ${request.maxTravelMinutes}분 초과`);
+    // R20: 가격은 soft preference — 추가 지불 의향(priceRef)으로는 제외하지 않고 점수만
+    // 감점한다(scoreCandidate). 절대 상한 하드 필터는 구 URL(maxPrice)이 있을 때만 동작.
     if (c.priceAdult > request.maxPrice)
       return reject(`가격 ${c.priceAdult.toLocaleString('ko-KR')}원 — 상한 ${request.maxPrice.toLocaleString('ko-KR')}원 초과`);
     if (request.wheelchair)
@@ -244,6 +248,13 @@ export function scoreCandidate(
   }
   ffm = clamp01(ffm);
 
+  // R20: 큰 화면 멀미(avoidBigScreen)는 하드 제외가 아니라 화면·상영 환경 감점 —
+  // IMAX(확장 화면)와 실측 폭 28m 이상 초대형 스크린에서 화면 축 점수를 낮춘다.
+  if (request.avoidBigScreen && (c.format === 'imax' || (screen.widthM ?? 0) >= 28)) {
+    ffm = clamp01(ffm - 0.35);
+    cons.push('화면이 큰 상영관 — 큰 화면 멀미 조건으로 점수를 낮춰 반영했어요');
+  }
+
   // 4.2 AuditoriumQuality — 결측은 중립 0.5 + DataConfidence 감점 (문서 05 §4.2)
   const szScore = screen.widthM ? clamp01(screen.widthM / 32) : 0.5;
   if (!screen.widthM) uncertainties.push('스크린 실측 크기 미확인');
@@ -308,11 +319,20 @@ export function scoreCandidate(
   );
 
   // 4.8 PriceValue
-  const pv = clamp01(((ffm * 0.6 + audQ * 0.4) * 15_000) / c.priceAdult);
+  let pv = clamp01(((ffm * 0.6 + audQ * 0.4) * 15_000) / c.priceAdult);
   if (c.priceAdult - minPriceAmongCandidates >= 5_000)
     cons.push(
       `가격 ${c.priceAdult.toLocaleString('ko-KR')}원 — 최저 후보 대비 +${(c.priceAdult - minPriceAmongCandidates).toLocaleString('ko-KR')}원`,
     );
+  // R20: 추가 지불 의향은 soft preference — 기준(priceRef = 일반관 최저가 + 의향)을
+  // 넘는 후보는 제외하지 않고 가격 축 점수만 깎는다. 1만 원 초과 ≈ -0.35.
+  if (typeof request.priceRef === 'number' && c.priceAdult > request.priceRef) {
+    const over = c.priceAdult - request.priceRef;
+    pv = clamp01(pv - Math.min(0.5, (over / 10_000) * 0.35));
+    cons.push(
+      `가격 ${c.priceAdult.toLocaleString('ko-KR')}원 — 추가 지불 기준보다 ${over.toLocaleString('ko-KR')}원 높아 감점 반영(제외 아님)`,
+    );
+  }
 
   // 4.9 DataConfidence — conf = 0.5·min + 0.5·mean (문서 05 §4.9)
   used.push({ conf: 0.3, at: c.dataCheckedAt, halfLife: 1 }); // 회차 데이터 자체 (합성 시드 = estimated)

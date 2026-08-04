@@ -14,15 +14,19 @@ const STAGE_FRAMES = [
     ratio: 1.9,
     frameRatio: 1.9,
     format: 'IMAX',
+    // 1.90:1은 IMAX "디지털" 기준 예시 — GT(레이저) 상영관은 1.43:1까지 확장된다.
+    // 모든 IMAX를 대표하는 값처럼 보이지 않게 화면에 예시 맥락을 함께 표기한다(R20 §8).
+    example: 'IMAX 디지털 예시',
     seat: '중앙 블록',
     travel: '24분',
-    desc: '확장 화면비 — 화면이 위아래로 더 큽니다',
+    desc: 'IMAX 디지털(1.90:1) 예시 — 상영관에 따라 1.43:1까지 확장돼요',
     seatHighlight: { rows: [2, 3], cols: [4, 7] },
   },
   {
     ratio: 2.2,
     frameRatio: 2.2,
     format: '돌비시네마',
+    example: null,
     seat: '뒤쪽 중앙',
     travel: '18분',
     desc: '돌비 비전·애트모스 — 명암과 입체 음향 중심',
@@ -32,6 +36,7 @@ const STAGE_FRAMES = [
     ratio: 1.85,
     frameRatio: 2.39,
     format: '일반관',
+    example: null,
     seat: '가운데 열',
     travel: '12분',
     desc: '1.85:1 상영 — 좌우 마스킹이 남습니다',
@@ -193,6 +198,11 @@ export function ScreeningHero() {
                     <span className="whitespace-nowrap text-[21px] font-light tracking-[0.16em] tabular-nums text-hero-text sm:text-[25px]">
                       {current.ratio.toFixed(2)}:1
                     </span>
+                    {current.example ? (
+                      <span className="whitespace-nowrap text-[10px] font-medium text-hero-text-sub">
+                        {current.example}
+                      </span>
+                    ) : null}
                   </span>
                   <span
                     aria-hidden

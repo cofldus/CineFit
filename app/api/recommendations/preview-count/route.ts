@@ -3,6 +3,12 @@
 // 어긋날 수 있어 일부러 같은 경로를 탄다). preview 모드는 run 기록을 남기지 않는다.
 import { NextResponse, type NextRequest } from 'next/server';
 import { getRecommendations } from '../../../../src/data/recommendationService';
+import {
+  deriveCandidateDataState,
+  isStale,
+  latestCheckedAt,
+} from '../../../../src/lib/dataFreshness';
+import { getAppClock } from '../../../../src/lib/clock';
 import { parseRecommendationInput } from '../../../../src/lib/validation';
 
 export const dynamic = 'force-dynamic';
@@ -17,20 +23,34 @@ export async function GET(req: NextRequest) {
   if (!res.ok) {
     return NextResponse.json({ ok: false, error: res.error }, { status: 404 });
   }
-  // 후보 변화 내역(R15 §5) — 제외 사유 문구에서 이동/가격 단계를 집계해 "전체 → 이동시간
-  // 적용 → 예산 적용 → 최종" 퍼널을 만든다(엔진의 실제 제외 결과 그대로, 새 계산 없음).
+  // 후보 변화 내역(R15 §5) — 제외 사유 문구에서 시간대/이동 단계를 집계해 "전체 →
+  // 희망 시간대 → 이동시간 → 최종" 퍼널을 만든다(엔진의 실제 제외 결과 그대로,
+  // 새 계산 없음). R20: 가격은 soft preference라 퍼널 단계가 아니다.
   const excluded = res.result.excluded;
+  const timeCut = excluded.filter((e) => /희망 시간대.*밖/.test(e.reason)).length;
   const travelCut = excluded.filter((e) => /최대 이동 시간 .*초과/.test(e.reason)).length;
-  const priceCut = excluded.filter((e) => /상한 .*초과/.test(e.reason)).length;
   const total = res.result.totalCandidates;
+
+  // R20 §1: 후보 수를 "정확한 값처럼" 보여도 되는 상태인지 명시한다 — 관리자 확인 회차가
+  // 없으면(합성·미등록) 화면은 개수 대신 '회차 데이터 연결 전' 안내를 보여야 한다.
+  const dataState = deriveCandidateDataState({
+    total,
+    usedSynthetic: res.result.dataMode?.usedSynthetic ?? false,
+  });
+  const checkedAt = latestCheckedAt(res.result.scored.map((s) => s.candidate));
+  const stale = dataState === 'verified' && isStale(checkedAt, getAppClock().now());
+
   return NextResponse.json({
     ok: true,
     candidates: res.result.scored.length,
     total,
+    dataState,
+    checkedAt,
+    stale,
     funnel: {
       total,
-      afterTravel: total - travelCut,
-      afterPrice: total - travelCut - priceCut,
+      afterTime: total - timeCut,
+      afterTravel: total - timeCut - travelCut,
       final: res.result.scored.length,
     },
   });

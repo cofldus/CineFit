@@ -34,10 +34,16 @@ export function citationsTrustSummary(citations: Citation[]): string {
 // 통과 여부만 판정한다. 이동·가격은 애초에 하드 필터를 통과한 후보만 여기 오므로 항상
 // 충족이지만, 그 자체로도 실제 사실이다(허수가 아니다).
 export function coreConditionsSummary(scored: ScoredCandidate, request: RecommendationRequest): string {
+  // R20: 가격은 soft 기준(priceRef) — 기준이 있으면 그 기준으로, 없으면(가격 차이 크게
+  // 미반영) 가격 조건은 항상 충족으로 본다. 구 URL의 절대 상한은 하드 필터라 항상 충족.
+  const priceOk =
+    typeof request.priceRef === 'number'
+      ? scored.candidate.priceAdult <= request.priceRef
+      : scored.candidate.priceAdult <= request.maxPrice;
   const checks = [
     scored.axes.ffm >= 0.6,
     scored.travelMinutes <= request.maxTravelMinutes,
-    scored.candidate.priceAdult <= request.maxPrice,
+    priceOk,
     scored.axes.audQ >= 0.6,
     scored.axes.dc >= 0.5,
   ];
@@ -130,11 +136,20 @@ export function winnerVerdict(scored: ScoredCandidate, request: RecommendationRe
   const first = `${PRIORITY_PHRASE[request.priority]} 조건에서 ${strongest[0]}이 특히 좋고, 종합 적합도가 가장 높습니다.`;
   const travelSlack = request.maxTravelMinutes - scored.travelMinutes;
   const travelPart = travelSlack > 0 ? `이동시간도 기준보다 ${travelSlack}분 여유가 있습니다` : '이동시간도 기준 안에 들어옵니다';
-  // R19: 상한은 추가 지불 의향에서 파생 — 상한이 없으면(experience_first) 가격 절은 생략.
-  if (request.maxPrice >= Number.MAX_SAFE_INTEGER / 2) return `${first} ${travelPart}.`;
-  const priceSlack = request.maxPrice - scored.candidate.priceAdult;
+  // R20: 가격은 soft 기준(priceRef) — 기준이 없으면(가격 차이 크게 미반영) 가격 절은
+  // 생략하고, 기준이 있으면 기준 대비 관계를 문장으로 만든다(하드 상한 아님).
+  const ref =
+    typeof request.priceRef === 'number'
+      ? request.priceRef
+      : request.maxPrice < Number.MAX_SAFE_INTEGER / 2
+        ? request.maxPrice
+        : null;
+  if (ref === null) return `${first} ${travelPart}.`;
+  const priceSlack = ref - scored.candidate.priceAdult;
   const pricePart =
-    priceSlack > 0 ? `추가 지불 한도보다 ${priceSlack.toLocaleString('ko-KR')}원 낮고` : '추가 지불 한도에 맞고';
+    priceSlack >= 0
+      ? `가격도 추가 지불 기준 안에 들고`
+      : `가격은 기준보다 ${Math.abs(priceSlack).toLocaleString('ko-KR')}원 높아 감점을 반영했고`;
   return `${first} ${pricePart}, ${travelPart}.`;
 }
 

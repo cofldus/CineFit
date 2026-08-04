@@ -587,10 +587,12 @@ export function RecommendCard({
       ]
     : [];
 
+  // R17: 모바일 밀도 — 가로 스와이프 레일에서 카드 한 장이 화면을 덜 차지하도록 모바일
+  // 한정으로 패딩·행간·타이포를 반 단계씩 조인다(sm 이상은 기존 유지).
   return (
     <article
       id={`pick-rank-${rank}`}
-      className="edge-sweep flex w-full flex-col rounded-card-lg border border-border bg-surface p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-float"
+      className="edge-sweep flex w-full flex-col rounded-card-lg border border-border bg-surface p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-float sm:p-5"
       aria-labelledby={`pick-${rank}-title`}
       data-testid={`pick-${label}`}
     >
@@ -604,18 +606,18 @@ export function RecommendCard({
         </div>
         <span className="shrink-0 text-[12px] font-medium text-text-tertiary">{rank}순위</span>
       </div>
-      <h3 id={`pick-${rank}-title`} className="m-0 mt-1.5 text-balance text-[17.5px] font-bold text-text">
+      <h3 id={`pick-${rank}-title`} className="m-0 mt-1 text-balance text-[16px] font-bold text-text sm:mt-1.5 sm:text-[17.5px]">
         {c.location.name} {c.auditorium.no} · {timeFmt.format(new Date(c.startsAt))}
       </h3>
       {/* 1위 대비 한 문장 판단 — 카드의 결론이 먼저 온다. */}
-      <p className="m-0 mt-1.5 text-[14.5px] font-semibold leading-snug text-primary">
+      <p className="m-0 mt-1 text-[13.5px] font-semibold leading-snug text-primary sm:mt-1.5 sm:text-[14.5px]">
         {sentence ?? PICK_SCENARIO[label]}
       </p>
 
       {rows.length > 0 ? (
-        <div className="mt-3.5 divide-y divide-border border-t border-border">
+        <div className="mt-3 divide-y divide-border border-t border-border sm:mt-3.5">
           {rows.map((row) => (
-            <div key={row.name} className="flex items-baseline justify-between gap-3 py-1.5 text-[13.5px]">
+            <div key={row.name} className="flex items-baseline justify-between gap-3 py-1 text-[13px] sm:py-1.5 sm:text-[13.5px]">
               <span className="shrink-0 font-medium text-text-tertiary">{row.name}</span>
               <span className="flex min-w-0 items-baseline gap-2 text-right">
                 <span className="font-semibold tabular-nums text-text">{row.value}</span>
@@ -632,7 +634,7 @@ export function RecommendCard({
 
       <Link
         href={`/cinemas/${c.auditorium.id}`}
-        className="mt-3.5 inline-flex min-h-11 items-center text-sm font-semibold text-primary decoration-primary hover:underline underline-offset-2"
+        className="mt-2.5 inline-flex min-h-9 items-center text-sm font-semibold text-primary decoration-primary hover:underline underline-offset-2 sm:mt-3.5 sm:min-h-11"
       >
         상세 보기 →
       </Link>

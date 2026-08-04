@@ -6,7 +6,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ORIGIN_PRESETS,
   PREMIUM_ALLOWANCE_OPTIONS,
-  PRIORITY_OPTIONS,
   PRIORITY_SECONDARY_OPTIONS,
   TIME_WINDOW_OPTIONS,
   TRAVEL_LIMIT_OPTIONS,
@@ -17,6 +16,7 @@ import type { MovieWithSpecs, Priority, TimeWindow } from '../src/domain/recomme
 import { formatSpecValue, keySpecEntries, SPEC_KEY_LABELS } from '../src/lib/display';
 import { TrustBadge } from './TrustBadge';
 import { StepSection } from './StepSection';
+import { RadioCard } from './ToggleCard';
 
 // 채움형 필드 — 검은 배경 위 테두리 박스 대신, 아이콘 타일 + 라벨이 안에 들어간 raised
 // 서피스. 포커스 시 얇은 와인 인셋 라인이 켜지고 아이콘 타일도 로즈로 점등된다(선택
@@ -73,6 +73,26 @@ function ClockGlyph() {
       <circle cx="10" cy="10" r="7" />
       <path d="M10 6.2V10l2.6 1.8" />
     </svg>
+  );
+}
+
+// 우선순위 카드용 글리프(R19 복원) — 화면(스크린)·좌석(그리드)·이동(핀)·가격(₩)·균형(막대).
+function WonGlyph() {
+  return (
+    <svg {...glyphProps} className="h-[18px] w-[18px]">
+      <path d="M3 6.5l2.4 7 2.3-7 2.3 7 2.3-7 2.3 7 2.4-7" />
+      <path d="M2.5 10.5h15" />
+    </svg>
+  );
+}
+
+function BalanceGlyph() {
+  return (
+    <span aria-hidden className="flex items-end gap-[4px] text-primary/80">
+      {[0, 1, 2].map((i) => (
+        <span key={i} className="w-[6px] rounded-[2px] bg-current" style={{ height: '16px' }} />
+      ))}
+    </span>
   );
 }
 
@@ -762,29 +782,66 @@ export function RecommendForm({
       <StepSection step={2} title="이번 관람에서 무엇이 가장 중요한가요?" first numbered={false}>
         <fieldset className="m-0 border-0 p-0" key={prefillKey}>
           <legend className="mb-2 block text-sm font-semibold text-text">가장 중요한 기준</legend>
-          <div className="flex flex-col gap-2" role="radiogroup" aria-label="가장 중요한 기준">
-            {PRIORITY_OPTIONS.map((o) => (
-              <label
-                key={o.value}
-                className="group flex min-h-[48px] cursor-pointer items-center gap-3 rounded-card bg-surface-raised px-3.5 py-2 transition-colors has-[:checked]:bg-primary-soft has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary"
-              >
-                <input
-                  type="radio"
-                  name="priority"
-                  value={o.value}
-                  checked={priorityVal === o.value}
-                  onChange={() => setPriorityVal(o.value)}
-                  className="sr-only"
-                />
-                <span
-                  aria-hidden
-                  className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border border-border-strong transition-colors group-has-[:checked]:border-primary-strong"
-                >
-                  <span className="h-2 w-2 rounded-full bg-transparent transition-colors group-has-[:checked]:bg-primary-strong" />
+          {/* 시그니처 비주얼 카드(R19 복원) — 옵션의 의미를 미니 일러스트로 보여주는
+              RadioCard 그리드. 5축 질문 구조는 그대로, 시각 언어만 카드로. */}
+          <div
+            className="grid gap-2.5 sm:[grid-template-columns:repeat(auto-fit,minmax(210px,1fr))]"
+            role="radiogroup"
+            aria-label="가장 중요한 기준"
+          >
+            <RadioCard
+              name="priority"
+              value="quality"
+              checked={priorityVal === 'quality'}
+              onChange={() => setPriorityVal('quality')}
+              title="가장 좋은 화면과 사운드"
+              description="화면·사운드 가중치를 최상위로"
+              visual={<ScreenGlyph ratio={2.2} wave />}
+            />
+            <RadioCard
+              name="priority"
+              value="seat"
+              checked={priorityVal === 'seat'}
+              onChange={() => setPriorityVal('seat')}
+              title="편안하고 보기 좋은 좌석"
+              description="좌석 적합 가중치를 최상위로"
+              visual={<SeatGlyph lit={(r, c) => r >= 1 && r <= 2 && c >= 2 && c <= 4} />}
+            />
+            <RadioCard
+              name="priority"
+              value="distance"
+              checked={priorityVal === 'distance'}
+              onChange={() => setPriorityVal('distance')}
+              title="가까운 영화관"
+              description="이동 시간 가중치를 최상위로"
+              visual={
+                <span aria-hidden className="text-primary/80">
+                  <PinGlyph />
                 </span>
-                <span className="text-[14.5px] font-medium text-text">{o.label}</span>
-              </label>
-            ))}
+              }
+            />
+            <RadioCard
+              name="priority"
+              value="price"
+              checked={priorityVal === 'price'}
+              onChange={() => setPriorityVal('price')}
+              title="합리적인 가격"
+              description="가격 가중치를 최상위로"
+              visual={
+                <span aria-hidden className="text-primary/80">
+                  <WonGlyph />
+                </span>
+              }
+            />
+            <RadioCard
+              name="priority"
+              value="balance"
+              checked={priorityVal === 'balance'}
+              onChange={() => setPriorityVal('balance')}
+              title="전체적인 균형"
+              description="모든 축을 고르게 반영"
+              visual={<BalanceGlyph />}
+            />
           </div>
           {/* 선택이 엔진 가중치를 실제로 어떻게 바꾸는지 — 실제 WEIGHT_PRESETS 합산값. */}
           <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 rounded-card bg-surface-raised px-3.5 py-2.5">

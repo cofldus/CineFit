@@ -43,6 +43,16 @@ test.describe('시각 회귀', () => {
     await expect(page).toHaveScreenshot('recommend-form.png', { fullPage: true, ...SCREENSHOT_OPTS });
   });
 
+  test('추천 조건 — 우선순위 카드(2단계)', async ({ page }) => {
+    // R19 복원된 시그니처 비주얼 카드(화면비 스크린·좌석 그리드·핀·₩·균형 막대)가 담긴
+    // 2단계를 데스크톱 폭으로 고정 촬영한다.
+    await page.setViewportSize(VIEWPORTS.desktop);
+    await page.goto('/recommend/1');
+    await page.getByRole('button', { name: /관람 우선순위 정하기/ }).click();
+    await expect(page.getByText('가장 중요한 기준')).toBeVisible();
+    await expect(page).toHaveScreenshot('recommend-step2.png', { fullPage: true, ...SCREENSHOT_OPTS });
+  });
+
   test('추천 결과', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
     await page.goto('/results?movieId=1&date=2026-07-28');

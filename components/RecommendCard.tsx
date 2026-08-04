@@ -13,6 +13,40 @@ const timeFmt = new Intl.DateTimeFormat('ko-KR', {
   timeZone: 'Asia/Seoul',
 });
 
+const dayFmt = new Intl.DateTimeFormat('ko-KR', { month: 'numeric', day: 'numeric', timeZone: 'Asia/Seoul' });
+
+// R20 §6: 정보 상태는 색이 아니라 아이콘 + 문구 + 확인일로 전달한다. 결과 카드의 각
+// 정보 그룹·행에 붙는 소형 상태 칩.
+function FactChip({
+  kind,
+  checkedAt,
+}: {
+  kind: 'verified' | 'estimated' | 'stale' | 'user_reported';
+  checkedAt?: string | null;
+}) {
+  const map = {
+    verified: { icon: '✓', label: '확인' },
+    user_reported: { icon: '◑', label: '사용자 제보' },
+    estimated: { icon: '≈', label: '추정' },
+    stale: { icon: '⏳', label: '오래된 확인' },
+  } as const;
+  const t = map[kind];
+  return (
+    <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-hero-border px-2 py-px text-[10.5px] font-medium text-hero-text-sub">
+      <span aria-hidden>{t.icon}</span>
+      {t.label}
+      {checkedAt ? <span className="opacity-80">· {dayFmt.format(new Date(checkedAt))}</span> : null}
+    </span>
+  );
+}
+
+// 그룹 kicker — 확인된 사실 / CineFit 계산 / 추정 정보.
+function GroupKicker({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="m-0 text-[11px] font-bold uppercase tracking-[0.08em] text-hero-text-sub">{children}</p>
+  );
+}
+
 // 카드 제목만 보고도 대안이 어떤 상황에 맞는 선택인지 구분되도록 — PickLabel(데이터 값)은
 // 그대로 두고 화면 표시 문구만 상황 서술형으로 바꿨다. 1위와의 실제 차이를 계산할 수 없거나
 // 차이가 없을 때의 대체 문구로도 쓴다.
@@ -347,6 +381,7 @@ export function RecommendCard({
   nativeAr,
   nativeArStatus,
   personality,
+  freshness,
 }: {
   rank: number;
   label: PickLabel;
@@ -361,6 +396,8 @@ export function RecommendCard({
   nativeArStatus?: string | null;
   /** 전체 픽 중 단독 최댓값/최솟값일 때만 부여되는 성격 배지("가장 저렴" 등) */
   personality?: string | null;
+  /** 회차 데이터 신선도(R20 §6·§9) — 결과 페이지가 계산해서 전달(stale이면 재확인 안내) */
+  freshness?: { stale: boolean; checkedAt: string | null };
 }) {
   const { candidate: c } = scored;
   const isTop = rank === 1;
@@ -373,9 +410,23 @@ export function RecommendCard({
     const gains = scored.pros.slice(0, 2);
     const tradeoffs = scored.cons.slice(0, 2);
     const travelSlack = request.maxTravelMinutes - scored.travelMinutes;
-    // R19: 상한은 추가 지불 의향에서 파생 — experience_first면 사실상 무한이라 delta를 숨긴다.
+    // R20: 가격은 soft 기준(priceRef) — 하드 상한(구 URL maxPrice)이 있으면 그 기준으로,
+    // 아니면 추가 지불 기준 대비 관계를 문장으로. 기준이 없으면 "크게 반영 안 함" 명시.
     const capFinite = request.maxPrice < Number.MAX_SAFE_INTEGER / 2;
-    const priceSlack = capFinite ? request.maxPrice - c.priceAdult : 0;
+    const priceRef = typeof request.priceRef === 'number' ? request.priceRef : capFinite ? request.maxPrice : null;
+    const priceDelta =
+      priceRef === null
+        ? '가격 차이는 추천 순위에 크게 반영하지 않아요'
+        : c.priceAdult <= priceRef
+          ? `추가 지불 기준(${priceRef.toLocaleString('ko-KR')}원) 안`
+          : `기준보다 ${(c.priceAdult - priceRef).toLocaleString('ko-KR')}원 높음 · 감점 반영`;
+    // 확인된 사실 상태 — 관리자 확인(verifiedAt) 회차만 "확인"으로, 합성은 추정으로.
+    const factKind: 'verified' | 'estimated' | 'stale' = c.isSynthetic
+      ? 'estimated'
+      : freshness?.stale
+        ? 'stale'
+        : 'verified';
+    const factCheckedAt = c.isSynthetic ? null : (c.verifiedAt ?? c.dataCheckedAt);
 
     return (
       <article
@@ -412,8 +463,43 @@ export function RecommendCard({
         <div aria-hidden className="mt-auto" />
         {/* 좌: 화면비·좌석 시각화 / 우: 얻는 것·포기하는 것·핵심 수치·신뢰도. 컨테이너 쿼리로
             카드 자신의 너비 기준 2열(@3xl≈768px) ↔ 1열 전환. */}
+        {/* R20 §6 그룹 1 — 확인된 사실: 극장·시작 시각·포맷·확인된 가격. 상태는 색이
+            아니라 아이콘·문구·확인일 칩으로 구분한다. */}
+        <div className="mt-5 border-t border-hero-border pt-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <GroupKicker>확인된 사실</GroupKicker>
+            <FactChip kind={factKind} checkedAt={factCheckedAt} />
+          </div>
+          <dl className="m-0 mt-2.5 grid grid-cols-1 gap-x-8 gap-y-1.5 @xl:grid-cols-2">
+            {(
+              [
+                ['극장', `${c.location.name} ${c.auditorium.no}`],
+                ['상영 시작', timeFmt.format(new Date(c.startsAt))],
+                ['포맷', formatLabel],
+                [c.isSynthetic ? '가격(추정)' : '확인된 가격', `${c.priceAdult.toLocaleString('ko-KR')}원`],
+              ] as const
+            ).map(([k, v]) => (
+              <div key={k} className="flex items-baseline justify-between gap-3 text-[13.5px]">
+                <dt className="m-0 shrink-0 font-medium text-hero-text-sub">{k}</dt>
+                <dd className="m-0 text-right font-semibold tabular-nums text-hero-text">{v}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="m-0 mt-1.5 text-right text-[12px] text-hero-text-sub">{priceDelta}</p>
+          {factKind === 'stale' && factCheckedAt ? (
+            <p className="m-0 mt-1.5 text-[12px] leading-snug text-hero-text-sub">
+              마지막 확인이 오래됐어요 — 예매 전 공식 상영시간표에서 다시 확인해 주세요.
+            </p>
+          ) : null}
+        </div>
+
         <div className="mt-5 grid gap-6 border-t border-hero-border pt-5 @3xl:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] @3xl:gap-10">
           <div className="mx-auto flex w-full max-w-[300px] flex-col items-center @3xl:mx-0">
+            {/* R20 §6 그룹 3 — 추정 정보: 화면 여백·좌석 추천 구역은 실측이 아니라 추정. */}
+            <div className="mb-2 flex w-full items-center gap-2">
+              <GroupKicker>추정 정보</GroupKicker>
+              <FactChip kind="estimated" />
+            </div>
             {nativeAr ? (
               <>
                 {/* 화면비 구분 표시(R15 §6): 영화 비율 / 스크린 기준 비율을 함께 라벨링. */}
@@ -464,6 +550,9 @@ export function RecommendCard({
           </div>
 
           <div className="flex flex-col gap-4">
+            {/* R20 §6 그룹 2 — CineFit 계산: 적합도·이동시간·추천 이유는 CineFit이 계산한
+                값이다(사실·추정과 구분). */}
+            <GroupKicker>CineFit 계산</GroupKicker>
             {/* 얻는 것 / 포기하는 것 — 엔진이 이미 계산한 pros/cons에서 그대로. */}
             <div className="grid gap-3 @xl:grid-cols-2">
               {gains.length > 0 ? (
@@ -497,23 +586,12 @@ export function RecommendCard({
             </div>
 
             <div className="flex flex-col gap-2.5 border-t border-hero-border pt-3.5">
-              <SegMeter label="화면·음향 품질" value={scored.axes.audQ} />
-              <SegMeter label="좌석 적합" value={scored.axes.seatQ} />
+              <SegMeter label="화면·음향 적합도" value={scored.axes.audQ} />
+              <SegMeter label="좌석 적합도" value={scored.axes.seatQ} />
               <DeltaStat
-                label="이동"
+                label="이동(근사)"
                 value={`${scored.travelMinutes}분`}
-                delta={travelSlack > 0 ? `기준보다 ${travelSlack}분 여유` : '기준과 같음'}
-              />
-              <DeltaStat
-                label="가격"
-                value={`${c.priceAdult.toLocaleString('ko-KR')}원`}
-                delta={
-                  capFinite
-                    ? priceSlack > 0
-                      ? `한도보다 ${priceSlack.toLocaleString('ko-KR')}원 낮음`
-                      : '추가 지불 한도와 같음'
-                    : '상한 없이 탐색한 조건'
-                }
+                delta={travelSlack > 0 ? `직선거리 추정 · 기준보다 ${travelSlack}분 여유` : '직선거리 추정 · 기준 안'}
               />
               <TrustDots scored={scored} />
             </div>
@@ -563,7 +641,7 @@ export function RecommendCard({
         (() => {
           const d = scored.travelMinutes - top.travelMinutes;
           return {
-            name: '이동',
+            name: '이동(근사)',
             value: `${scored.travelMinutes}분`,
             delta: d === 0 ? '1위와 같음' : d < 0 ? `${Math.abs(d)}분 짧음` : `${d}분 더`,
             gain: d < 0,

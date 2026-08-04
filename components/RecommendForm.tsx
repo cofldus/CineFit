@@ -6,12 +6,14 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ORIGIN_PRESETS,
   PREMIUM_ALLOWANCE_OPTIONS,
+  PRIORITY_OPTIONS,
   PRIORITY_SECONDARY_OPTIONS,
   TIME_WINDOW_OPTIONS,
   TRAVEL_LIMIT_OPTIONS,
 } from '../src/data/constants';
-import { WEIGHT_PRESETS } from '../src/domain/recommendation/presets';
+import { AXIS_LABELS, AXIS_ORDER, axisWeights } from '../src/domain/recommendation/axisWeights';
 import { readOnboardingState, type OnboardingAnswers } from '../src/lib/onboarding';
+import { formatCheckedAt, type CandidateDataState } from '../src/lib/dataFreshness';
 import type { MovieWithSpecs, Priority, TimeWindow } from '../src/domain/recommendation/types';
 import { formatSpecValue, keySpecEntries, SPEC_KEY_LABELS } from '../src/lib/display';
 import { TrustBadge } from './TrustBadge';
@@ -114,16 +116,70 @@ const STEP_TITLES = ['언제, 어디서 볼까요?', '이번 관람에서 무엇
 const STEP_SHORT = ['위치와 시간', '우선순위', '피하고 싶은 조건'] as const;
 const NEXT_LABELS = ['관람 우선순위 정하기 →', '피하고 싶은 조건 →'] as const;
 
-// 우선순위 선택이 엔진 가중치를 실제로 어떻게 바꾸는지 — WEIGHT_PRESETS(실제 엔진 값)를
-// 사용자용 3그룹으로 합산해 보여준다(새 숫자를 만들지 않음). 화면·음향 = 포맷 매칭 W1 +
-// 상영관 품질 W2, 좌석·시간대 = 시간대 W3 + 좌석 W4, 이동·가격 = W7 + W8.
-function weightGroups(priority: Priority): { label: string; value: number }[] {
-  const w = WEIGHT_PRESETS[priority];
-  return [
-    { label: '화면·음향', value: w.W1 + w.W2 },
-    { label: '좌석·시간대', value: w.W3 + w.W4 },
-    { label: '이동·가격', value: w.W7 + w.W8 },
-  ];
+// R20: 후보 계산 상태 머신 — "정확한 후보 수처럼 보이는 값"을 아무 때나 보여주지 않기
+// 위해 상태를 명시적으로 관리한다. unavailable(실제 회차 미연결)에서는 개수 대신 안내
+// 문구만 보여준다.
+type CalcStatus = 'idle' | 'calculating' | 'ready' | 'zero_results' | 'unavailable' | 'stale';
+
+type Preview = {
+  candidates: number;
+  total: number;
+  dataState: CandidateDataState;
+  checkedAt: string | null;
+  stale: boolean;
+  funnel?: { total: number; afterTime: number; afterTravel: number; final: number };
+};
+
+function statusOf(p: Preview): CalcStatus {
+  if (p.dataState !== 'verified') return 'unavailable';
+  if (p.candidates === 0) return 'zero_results';
+  return p.stale ? 'stale' : 'ready';
+}
+
+// 후보 상태 한 줄 표시 — 데스크톱 요약 패널과 모바일 하단 안내가 같은 문구를 쓴다.
+function CandidateStatusLine({
+  status,
+  preview,
+  prevCount,
+}: {
+  status: CalcStatus;
+  preview: Preview | null;
+  prevCount: number | null;
+}) {
+  if (status === 'idle' || status === 'calculating' || !preview)
+    return <p className="m-0 text-[13px] text-text-tertiary">후보 계산 중…</p>;
+  if (status === 'unavailable')
+    return (
+      <p className="m-0 text-[13px] leading-snug text-text-sub">
+        {preview.dataState === 'none'
+          ? '회차 데이터 연결 전 — 이 날짜에 등록된 회차가 없어요'
+          : '회차 데이터 연결 전 — 현재 등록된 테스트 후보를 기준으로 계산합니다'}
+      </p>
+    );
+  if (status === 'zero_results')
+    return (
+      <p className="m-0 text-[13px] leading-snug text-text-sub">
+        조건에 맞는 후보가 없어요 — 시간대나 이동 한도를 넓혀 보세요
+      </p>
+    );
+  return (
+    <>
+      <p className="m-0 text-[14px] font-bold tabular-nums text-text">
+        조건에 맞는 후보{' '}
+        {prevCount !== null ? (
+          <span className="text-text-tertiary">
+            {prevCount}개 <span aria-hidden>→</span>{' '}
+          </span>
+        ) : null}
+        <span className="text-primary">{preview.candidates}개</span>
+      </p>
+      {status === 'stale' && preview.checkedAt ? (
+        <p className="m-0 mt-1 text-[12px] leading-snug text-text-tertiary">
+          마지막 확인 {formatCheckedAt(preview.checkedAt)} — 예매 전 공식 페이지에서 다시 확인해 주세요
+        </p>
+      ) : null}
+    </>
+  );
 }
 
 // 회피 조건(step 3)의 compact toggle row — R19: 부모가 상태를 소유하는 controlled 체크
@@ -325,14 +381,17 @@ export function RecommendForm({
   const formRef = useRef<HTMLFormElement>(null);
   const [submitting, setSubmitting] = useState(false);
   const [step, setStep] = useState(0);
+  // 지금까지 도달한 최대 단계 — 요약 패널은 "완료한 단계"의 조건만 보여준다(R20 §1).
+  // 뒤로 돌아가도 이미 완료한 단계의 조건은 요약에 남는다.
+  const [maxStep, setMaxStep] = useState(0);
+  const goStep = (n: number) => {
+    setStep(n);
+    setMaxStep((m) => Math.max(m, n));
+  };
   // 조건을 바꿀 때마다 "현재 조건에 맞는 후보 N개"를 실시간 조회(디바운스) — 결과 페이지와
   // 같은 파서·서비스의 preview 모드를 쓰므로 실제 결과 개수와 항상 일치한다.
-  type Preview = {
-    candidates: number;
-    total: number;
-    funnel?: { total: number; afterTravel: number; afterPrice: number; final: number };
-  };
   const [preview, setPreview] = useState<Preview | null>(null);
+  const [calcStatus, setCalcStatus] = useState<CalcStatus>('idle');
   // 직전 후보 수 — 조건이 바뀌어 개수가 달라졌을 때 "7개 → 4개"로 변화를 보여준다(§8).
   const [prevCount, setPrevCount] = useState<number | null>(null);
   const previewRef = useRef<Preview | null>(null);
@@ -340,6 +399,13 @@ export function RecommendForm({
   const [originVal, setOriginVal] = useState('cityhall');
   const [priorityVal, setPriorityVal] = useState<Priority>('balance');
   const [secondaryVal, setSecondaryVal] = useState('none');
+  // 추가 지불 의향 — 요약 게이팅에서 라벨을 읽기 위해 controlled(R20).
+  const [allowanceVal, setAllowanceVal] = useState('experience_first');
+  // 4축 정수 가중치(합 100) — 화면 표시와 서버 계산이 같은 함수를 쓴다(R20).
+  const axisDist = useMemo(
+    () => axisWeights(priorityVal, secondaryVal as 'none' | 'quality' | 'seat' | 'distance' | 'price'),
+    [priorityVal, secondaryVal],
+  );
   // 날짜·시간대는 퀵 칩 선택 상태 표시를 위해 controlled — 값 자체는 name 입력으로 제출된다.
   const [dateVal, setDateVal] = useState(defaultDate);
   const [timeWindowVal, setTimeWindowVal] = useState<TimeWindow>('any');
@@ -424,6 +490,9 @@ export function RecommendForm({
   const prefillKey = prefill ? 'prefilled' : 'initial';
 
   // 입력 조건을 사람이 읽는 문장으로 실시간 요약(R19) — 모바일 top sheet와 우측 패널 공용.
+  // R20 §1: 아직 완료하지 않은 단계의 조건(우선순위·가격·회피)은 요약에 넣지 않는다 —
+  // Step 1에서는 날짜·시간·출발 위치·이동 한도만, 우선순위·가격은 Step 2를 마친 뒤,
+  // 회피 조건은 Step 3에서 실제로 선택한 것만 표시한다.
   const summaryLines = useMemo(() => {
     const dateLabel = quickDates.find((q) => q.value === dateVal)?.label ?? dateVal;
     const tw =
@@ -435,14 +504,31 @@ export function RecommendForm({
         ? '현재 위치'
         : (ORIGIN_PRESETS.find((o) => o.id === originVal)?.label.replace(' 인근', '') ?? '-');
     const travelLabel = travelVal >= 240 ? '거리 상관없음' : `편도 ${travelVal}분 이내`;
-    return [`${dateLabel} · ${tw}`, `${originLabel} 출발`, travelLabel];
-  }, [quickDates, dateVal, timeWindowVal, timeFromVal, timeToVal, originVal, travelVal]);
+    const lines = [`${dateLabel} · ${tw}`, `${originLabel} 출발`, travelLabel];
+    if (maxStep >= 2) {
+      const priorityLabel = PRIORITY_OPTIONS.find((o) => o.value === priorityVal)?.label ?? '';
+      const secondaryLabel =
+        secondaryVal !== 'none'
+          ? PRIORITY_SECONDARY_OPTIONS.find((o) => o.value === secondaryVal)?.label
+          : null;
+      lines.push(secondaryLabel ? `${priorityLabel} 우선 · 2순위 ${secondaryLabel}` : `${priorityLabel} 우선`);
+      lines.push(
+        PREMIUM_ALLOWANCE_OPTIONS.find((o) => o.value === allowanceVal)?.label ?? '가격 차이를 크게 고려하지 않음',
+      );
+      const avoidCount = Object.values(avoid).filter(Boolean).length;
+      if (avoidCount > 0) lines.push(`피하고 싶은 조건 ${avoidCount}개`);
+    }
+    return lines;
+  }, [quickDates, dateVal, timeWindowVal, timeFromVal, timeToVal, originVal, travelVal, maxStep, priorityVal, secondaryVal, allowanceVal, avoid]);
 
   // 실시간 후보 수 — 400ms 디바운스, 폼 데이터 그대로 조회(제출과 같은 buildQuery).
+  // R20: 조회 시작 시 calculating, 응답의 dataState·stale·개수로 상태를 확정한다.
   useEffect(() => {
+    setCalcStatus((s) => (s === 'idle' ? 'idle' : 'calculating'));
     const t = setTimeout(async () => {
       const el = formRef.current;
       if (!el) return;
+      setCalcStatus('calculating');
       try {
         const qs = buildQuery(movieId, new FormData(el));
         const r = await fetch(`/api/recommendations/preview-count?${qs.toString()}`);
@@ -451,12 +537,24 @@ export function RecommendForm({
           if (j.ok) {
             const prev = previewRef.current;
             setPrevCount(prev && prev.candidates !== j.candidates ? prev.candidates : null);
-            previewRef.current = { candidates: j.candidates, total: j.total, funnel: j.funnel };
+            previewRef.current = {
+              candidates: j.candidates,
+              total: j.total,
+              dataState: j.dataState,
+              checkedAt: j.checkedAt,
+              stale: j.stale,
+              funnel: j.funnel,
+            };
             setPreview(previewRef.current);
+            setCalcStatus(statusOf(previewRef.current));
+            return;
           }
         }
+        // 파싱·검증 실패 응답 — 마지막 확정 상태로 복귀(없으면 idle).
+        setCalcStatus(previewRef.current ? statusOf(previewRef.current) : 'idle');
       } catch {
         /* 네트워크 실패 시 마지막 값 유지 — 카운트는 보조 정보라 조용히 넘어간다 */
+        setCalcStatus(previewRef.current ? statusOf(previewRef.current) : 'idle');
       }
     }, 400);
     return () => clearTimeout(t);
@@ -466,7 +564,7 @@ export function RecommendForm({
     e.preventDefault();
     // 마지막 단계 전의 Enter/제출은 다음 단계로만 이동
     if (step < 2) {
-      setStep((s) => s + 1);
+      goStep(step + 1);
       return;
     }
     setSubmitting(true);
@@ -489,7 +587,9 @@ export function RecommendForm({
       onChange={() => setFormTick((t) => t + 1)}
       onSubmit={onSubmit}
       aria-label="추천 조건 입력"
-      className="pb-36 lg:pb-4"
+      // R20 §2: 모바일 콘텐츠 하단 여백 = sticky CTA 높이(~78px) + 32px 이상 + safe area —
+      // 마지막 입력·후보 안내가 CTA 바에 가려지지 않는다(e2e/mobile-cta.spec.ts로 고정).
+      className="pb-[calc(120px+env(safe-area-inset-bottom))] lg:pb-4"
     >
       {/* R14 §8: 데스크톱 65/35 작업 공간 — 좌측 입력, 우측 라이브 조건 패널. */}
       <div className="lg:grid lg:grid-cols-[minmax(0,13fr)_minmax(0,7fr)] lg:items-start lg:gap-10">
@@ -843,26 +943,33 @@ export function RecommendForm({
               visual={<BalanceGlyph />}
             />
           </div>
-          {/* 선택이 엔진 가중치를 실제로 어떻게 바꾸는지 — 실제 WEIGHT_PRESETS 합산값. */}
+          {/* R20: 실제 엔진이 쓰는 4축 정수 가중치(합 100) 그대로 — 1·2순위 선택이 반영된
+              값이며 네 축을 모두 표시한다. 시간대는 Step 1 하드 필터라 축이 아니다. */}
           <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 rounded-card bg-surface-raised px-3.5 py-2.5">
-            <span className="text-[11.5px] font-semibold uppercase tracking-wide text-text-tertiary">가중치 배분</span>
-            {weightGroups(priorityVal).map((g) => (
-              <span key={g.label} className="flex items-center gap-1.5 text-[12px] text-text-sub">
-                {g.label}
+            <span className="text-[11.5px] font-semibold uppercase tracking-wide text-text-tertiary">
+              가중치 배분 <span className="font-normal normal-case">(합 100)</span>
+            </span>
+            {AXIS_ORDER.map((axis) => (
+              <span key={axis} className="flex items-center gap-1.5 text-[12px] text-text-sub">
+                {AXIS_LABELS[axis]}
                 <span aria-hidden className="h-[5px] w-14 overflow-hidden rounded-full bg-hero-soft">
                   <span
                     className="block h-full rounded-full bg-primary transition-[width] duration-300"
-                    style={{ width: `${Math.round(g.value * 100)}%` }}
+                    style={{ width: `${axisDist[axis]}%` }}
                   />
                 </span>
-                <span className="tabular-nums text-text">{Math.round(g.value * 100)}%</span>
+                <span className="tabular-nums text-text">{axisDist[axis]}</span>
               </span>
             ))}
           </div>
         </fieldset>
 
         <fieldset className="m-0 border-0 p-0">
-          <legend className="mb-2 block text-sm font-semibold text-text">두 번째로 중요한 기준 (선택)</legend>
+          <legend className="mb-2 block text-sm font-semibold text-text">
+            {priorityVal === 'balance'
+              ? '균형을 유지하면서 조금 더 중요하게 볼 기준이 있나요?'
+              : '두 번째로 중요한 기준 (선택)'}
+          </legend>
           <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label="두 번째로 중요한 기준">
             {PRIORITY_SECONDARY_OPTIONS.map((o) => {
               const disabled = o.value !== 'none' && o.value === priorityVal;
@@ -907,7 +1014,8 @@ export function RecommendForm({
                   type="radio"
                   name="premiumAllowance"
                   value={o.value}
-                  defaultChecked={o.value === 'experience_first'}
+                  checked={allowanceVal === o.value}
+                  onChange={() => setAllowanceVal(o.value)}
                   className="sr-only"
                 />
                 <span
@@ -922,7 +1030,8 @@ export function RecommendForm({
             ))}
           </div>
           <p className="m-0 mt-2 text-[12.5px] leading-snug text-text-tertiary">
-            일반관 최저가를 기준으로 추가 지불 한도를 계산해요 — 절대 금액은 입력하지 않아도 돼요.
+            가격 조건으로 후보를 제외하지 않아요 — 일반관 최저가를 기준으로 넘는 만큼 추천 순위에서
+            감점만 해요. ‘가격 차이를 크게 고려하지 않음’이면 가격 차이는 추천 순위에 크게 반영하지 않아요.
           </p>
         </fieldset>
       </StepSection>
@@ -943,7 +1052,7 @@ export function RecommendForm({
           <ToggleRow
             name="bigScreenSensitive"
             title="화면이 너무 크면 멀미가 나요"
-            effect="IMAX 확장 화면 후보를 제외해요"
+            effect="IMAX 등 대형 화면의 점수를 낮춰 반영해요 (제외하지 않아요)"
             checked={avoid.bigScreen}
             onChange={(on) => setAvoidFlag('bigScreen', on)}
             visual={<ScreenGlyph ratio={1.43} />}
@@ -991,6 +1100,17 @@ export function RecommendForm({
       </StepSection>
       </div>
 
+      {/* 모바일 후보 안내(R20 §2) — sticky CTA 바 안이 아니라 콘텐츠 흐름에 둔다.
+          바 높이가 안내 문구 길이에 따라 자라며 입력을 가리던 문제의 근본 수정. */}
+      <div
+        data-testid="candidate-status"
+        className="mt-5 rounded-card bg-surface-raised px-3.5 py-2.5 lg:hidden"
+        role="status"
+        aria-live="polite"
+      >
+        <CandidateStatusLine status={calcStatus} preview={preview} prevCount={prevCount} />
+      </div>
+
       {/* 데스크톱 인라인 CTA(R15 §5) — 전체 폭 고정 바 대신 입력 영역 안에서 240px 버튼.
           모바일 sticky 바는 lg 미만 전용. */}
       <div className="mt-8 hidden items-center gap-3 border-t border-border pt-6 lg:flex">
@@ -1007,7 +1127,7 @@ export function RecommendForm({
           <button
             key="next-desktop"
             type="button"
-            onClick={() => setStep((s) => s + 1)}
+            onClick={() => goStep(step + 1)}
             className="btn-cta flex min-h-12 w-[240px] items-center justify-center rounded-card bg-primary-strong text-[15px] font-semibold text-white hover:bg-primary-strong-hover"
           >
             {NEXT_LABELS[step]}
@@ -1044,40 +1164,26 @@ export function RecommendForm({
               ))}
             </p>
             <div className="mt-3.5 border-t border-border pt-3.5" role="status" aria-live="polite">
-              {preview ? (
-                <>
-                  <p className="m-0 text-[14px] font-bold tabular-nums text-text">
-                    조건에 맞는 후보{' '}
-                    {prevCount !== null ? (
-                      <span className="text-text-tertiary">
-                        {prevCount}개 <span aria-hidden>→</span>{' '}
-                      </span>
-                    ) : null}
-                    <span className="text-primary">{preview.candidates}개</span>
-                  </p>
-                  {/* 후보 변화 내역(R15 §5) — 조건이 후보를 어떻게 좁히는지 단계별로. */}
-                  {preview.funnel ? (
-                    <ol className="m-0 mt-2 flex list-none flex-col gap-1 p-0 text-[12.5px] tabular-nums text-text-sub">
-                      <li className="flex justify-between gap-3">
-                        전체 후보 <span>{preview.funnel.total}개</span>
-                      </li>
-                      <li className="flex justify-between gap-3">
-                        이동시간 적용 <span>{preview.funnel.afterTravel}개</span>
-                      </li>
-                      <li className="flex justify-between gap-3">
-                        가격 조건 적용 <span>{preview.funnel.afterPrice}개</span>
-                      </li>
-                      <li className="flex justify-between gap-3 font-semibold text-text">
-                        포맷·조건 반영 <span className="text-primary">{preview.funnel.final}개</span>
-                      </li>
-                    </ol>
-                  ) : (
-                    <p className="m-0 mt-0.5 text-[12px] tabular-nums text-text-tertiary">전체 {preview.total}개 회차 중</p>
-                  )}
-                </>
-              ) : (
-                <p className="m-0 text-[13px] text-text-tertiary">후보 계산 중…</p>
-              )}
+              <CandidateStatusLine status={calcStatus} preview={preview} prevCount={prevCount} />
+              {/* 후보 변화 내역(R15 §5) — 조건이 후보를 어떻게 좁히는지 단계별로. R20:
+                  가격은 soft 감점이라 퍼널 단계가 아니고, 확정 후보 수를 보여줘도 되는
+                  상태(ready·stale)에서만 표시한다. */}
+              {(calcStatus === 'ready' || calcStatus === 'stale') && preview?.funnel ? (
+                <ol className="m-0 mt-2 flex list-none flex-col gap-1 p-0 text-[12.5px] tabular-nums text-text-sub">
+                  <li className="flex justify-between gap-3">
+                    전체 후보 <span>{preview.funnel.total}개</span>
+                  </li>
+                  <li className="flex justify-between gap-3">
+                    희망 시간대 적용 <span>{preview.funnel.afterTime}개</span>
+                  </li>
+                  <li className="flex justify-between gap-3">
+                    이동시간 적용 <span>{preview.funnel.afterTravel}개</span>
+                  </li>
+                  <li className="flex justify-between gap-3 font-semibold text-text">
+                    포맷·회피 조건 반영 <span className="text-primary">{preview.funnel.final}개</span>
+                  </li>
+                </ol>
+              ) : null}
             </div>
             {/* 탐색 반경 그래픽(R15 §5) — 최대 이동 시간을 동심원의 활성 링으로 표현. */}
             <div aria-hidden className="mt-3.5 flex items-center gap-3 border-t border-border pt-3.5">
@@ -1104,24 +1210,14 @@ export function RecommendForm({
       </aside>
       </div>
 
-      {/* 모바일 sticky CTA(R15 §5) — 반투명 다크 표면 + blur, 버튼 54px + 상단 edge
-          highlight + press state. 단계별 문구로 다음에 무엇이 오는지 알려준다. 데스크톱은
-          아래 인라인 CTA가 담당(lg:hidden). */}
+      {/* 모바일 sticky CTA(R15 §5 → R20 §2 재구성) — 바 전체 높이 72~80px 고정(버튼
+          54px + 상하 12px), 좌우 16px, surface 90% + blur + 상단 1px divider. 후보 안내는
+          바 밖(위 candidate-status)으로 옮겨 바가 콘텐츠를 가리지 않는다. */}
       <div
+        data-testid="mobile-cta-bar"
         className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/90 px-4 py-3 backdrop-blur-md lg:hidden"
         style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }}
       >
-        {preview ? (
-          <p className="m-0 mb-2 text-center text-[12px] tabular-nums text-text-sub" role="status">
-            현재 조건에 맞는 후보{' '}
-            {prevCount !== null ? (
-              <span className="text-text-tertiary">
-                {prevCount}개 <span aria-hidden>→</span>{' '}
-              </span>
-            ) : null}
-            <strong className="font-bold text-primary">{preview.candidates}개</strong>
-          </p>
-        ) : null}
         <div className="mx-auto flex max-w-content items-center gap-3">
           {step > 0 ? (
             <button
@@ -1139,7 +1235,7 @@ export function RecommendForm({
             <button
               key="next"
               type="button"
-              onClick={() => setStep((s) => s + 1)}
+              onClick={() => goStep(step + 1)}
               className="btn-cta flex min-h-[54px] flex-1 items-center justify-center rounded-card bg-primary-strong text-base font-semibold text-white hover:bg-primary-strong-hover"
             >
               {NEXT_LABELS[step]}

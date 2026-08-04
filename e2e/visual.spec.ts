@@ -40,6 +40,9 @@ test.describe('시각 회귀', () => {
     await page.setViewportSize(VIEWPORTS.mobile);
     await page.goto('/recommend/1');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    // R20: 실시간 후보 상태(디바운스 fetch)가 확정된 뒤에 찍는다 — '계산 중' 상태로 찍히면
+    // 타이밍에 따라 스냅샷이 흔들린다. e2e 시드는 합성 회차라 '회차 데이터 연결 전'이 정답.
+    await expect(page.getByText(/회차 데이터 연결 전|조건에 맞는 후보/).first()).toBeVisible();
     await expect(page).toHaveScreenshot('recommend-form.png', { fullPage: true, ...SCREENSHOT_OPTS });
   });
 
@@ -50,6 +53,11 @@ test.describe('시각 회귀', () => {
     await page.goto('/recommend/1');
     await page.getByRole('button', { name: /관람 우선순위 정하기/ }).click();
     await expect(page.getByText('가장 중요한 기준')).toBeVisible();
+    // 실시간 후보 상태가 확정된 뒤 촬영(위 '추천 조건 입력'과 같은 이유). 데스크톱에선
+    // 모바일용 상태 요소가 숨김(lg:hidden)이라 우측 요약 패널(aside) 스코프로 잡는다.
+    await expect(
+      page.getByRole('complementary', { name: '현재 조건 요약' }).getByText(/회차 데이터 연결 전|조건에 맞는 후보/),
+    ).toBeVisible();
     await expect(page).toHaveScreenshot('recommend-step2.png', { fullPage: true, ...SCREENSHOT_OPTS });
   });
 

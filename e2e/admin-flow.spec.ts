@@ -52,8 +52,10 @@ test('관리자 로그인 → 실제형 회차 등록 → 사용자 추천에 �
   await expect(booking).toHaveAttribute('href', 'https://ticket.cgv.co.kr/e2e-demo');
 });
 
-test('합성 회차만 있는 날짜는 합성 데이터임을 명시한다', async ({ page }) => {
+test('합성 회차만 있는 날짜는 회차 데이터 연결 전(테스트 후보 기준)임을 명시한다', async ({ page }) => {
   await page.goto('/results?movieId=1&date=2026-07-28');
-  await expect(page.getByText('검증용 합성 데이터')).toBeVisible();
+  // R20 §9 unavailable: 정확한 실데이터처럼 보이지 않게 상태를 명시하고 공식 경로를 안내한다.
+  await expect(page.getByText(/회차 데이터 연결 전/)).toBeVisible();
+  await expect(page.getByRole('link', { name: /CGV 공식 상영시간표/ })).toBeVisible();
   await expect(page.getByTestId('pick-균형')).toBeVisible();
 });

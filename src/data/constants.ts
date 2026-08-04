@@ -53,12 +53,17 @@ export const TRAVEL_LIMIT_OPTIONS = [
 ] as const;
 
 // R19 Step 2: 절대 예산 대신 "더 좋은 상영 환경을 위한 추가 지불 의향".
-// 실효 가격 상한은 서비스가 (일반관 최저가 + 의향)으로 파생시킨다.
+// R20: 이 선택은 하드 상한이 아니라 soft preference — 기준(일반관 최저가 + 의향)을
+// 넘는 후보는 제외하지 않고 가격 점수만 감점한다. '상한 없음' 표현 금지.
 export const PREMIUM_ALLOWANCE_OPTIONS = [
-  { value: 'price_first', label: '가격이 가장 중요해요', hint: '일반관 수준까지만' },
+  { value: 'price_first', label: '가격 최우선', hint: '일반관 수준 기준' },
   { value: 'plus_5000', label: '일반관보다 5천 원까지', hint: '+5,000원' },
-  { value: 'plus_10000', label: '1만 원까지 더 낼 수 있어요', hint: '+10,000원' },
-  { value: 'experience_first', label: '가격보다 관람 환경이 중요해요', hint: '상한 없음' },
+  { value: 'plus_10000', label: '일반관보다 1만 원까지', hint: '+10,000원' },
+  {
+    value: 'experience_first',
+    label: '가격 차이를 크게 고려하지 않음',
+    hint: '순위에 크게 반영 안 함',
+  },
 ] as const;
 
 export const MOTION_OPTIONS = [

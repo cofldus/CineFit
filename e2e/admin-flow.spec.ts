@@ -36,7 +36,7 @@ test('관리자 로그인 → 실제형 회차 등록 → 사용자 추천에 �
   await page.getByLabel('관람 날짜').fill('2026-08-02');
   // 3단계 flow — 날짜는 1단계에 있으므로 채운 뒤 단계별 CTA로 진행(R15 문구).
   await page.getByRole('button', { name: /우선순위 정하기/ }).click();
-  await page.getByRole('button', { name: /불편 조건 설정하기/ }).click();
+  await page.getByRole('button', { name: /피하고 싶은 조건/ }).click();
   await page.getByRole('button', { name: /결과 확인하기/ }).click();
   await expect(page).toHaveURL(/\/results\?/);
 

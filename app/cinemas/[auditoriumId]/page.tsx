@@ -194,8 +194,9 @@ export default async function AuditoriumDetailPage({
         <h2 className="m-0 text-lg font-bold text-text">상영관 사양</h2>
 
         {current ? (
-          <div className="mt-3 max-w-content rounded-card-lg bg-surface-raised p-4">
-            <div className="flex flex-col gap-1.5">
+          <div className="mt-3 max-w-3xl rounded-card-lg bg-surface-raised p-4 sm:p-5">
+            {/* R17: 한 줄 나열 대신 2열 정의 그리드 — 데스크톱에서 표처럼 스캔된다. */}
+            <div className="grid gap-x-10 gap-y-1.5 sm:grid-cols-2">
               <SpecRow label="좌석 수" value={detail.seatCount ? `${detail.seatCount}석` : null} />
               <SpecRow
                 label="영사기"
@@ -236,7 +237,8 @@ export default async function AuditoriumDetailPage({
                 <IconNote className="mt-0.5 h-4 w-4 shrink-0" /> {current.notes}
               </p>
             ) : null}
-            <p className="mb-0 mt-2.5 flex flex-wrap items-center gap-1.5 text-sm text-text-sub">
+            <p className="mb-0 mt-3 flex flex-wrap items-center gap-1.5 border-t border-border pt-3 text-sm text-text-sub">
+              <span className="font-medium text-text-tertiary">데이터 상태</span>
               <TrustBadge status={current.infoStatus} observedAt={current.observedAt} />
               {current.sourceUrl ? (
                 <a

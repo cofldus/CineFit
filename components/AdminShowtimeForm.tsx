@@ -274,7 +274,7 @@ export function AdminShowtimeForm({
       </label>
 
       <label className="field">
-        <span>만료 시각 (선택 — 비우면 시작 시각 기준 자동 만료)</span>
+        <span>만료 시각 (선택 — 비우면 상영 시작 기준 자동 만료)</span>
         <input type="datetime-local" name="expiresAt" defaultValue={initial.expiresAt} />
       </label>
 

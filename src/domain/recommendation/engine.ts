@@ -1,6 +1,7 @@
 // 추천 엔진 — 문서 05 파이프라인의 순수 함수 구현 (DB·UI 비의존, now 주입으로 결정적)
 // 하드 필터 → 축 점수 → 신뢰도·최신성 보정 → 브랜드 가산 차단 → 다양성 선택 → 설명 생성
 import { estimateTravelMinutes } from '../../lib/geo';
+import { hasExtendedAspect, hasMotionSeat } from './formatCapabilities';
 import { FORMAT_LABELS, INFO_STATUS_LABELS, VERIFIED_STATUSES, WEIGHT_PRESETS } from './presets';
 import { desiredPurposes, matchZones, suggestSeatZone } from './seatZone';
 import type {
@@ -104,12 +105,12 @@ function hardFilterInner(
       (c.format === 'imax' && request.allowImax) ||
       (c.format === 'dolby_cinema' && request.allowDolby) ||
       ((c.format === 'standard' || c.format === 'superplex') && request.allowStandard) ||
-      c.format === '4dx'; // 4DX는 멀미 민감도로만 제어 (아래)
+      hasMotionSeat(c.format); // 모션 시트 포맷(4DX·MX4D)은 멀미 민감도로만 제어 (아래)
     if (!allowed) return reject(`${FORMAT_LABELS[c.format]} — 허용하지 않은 포맷`);
-    // 움직이는 좌석 회피 — 4DX(및 MX4D류 모션 시트 포맷)는 하드 제외. 현재 데이터
-    // 모델의 모션 시트 포맷은 4dx 하나이며, MX4D가 추가되면 여기서 같이 걸러야 한다.
-    if (request.motionSickness === 2 && c.format === '4dx')
-      return reject('움직이는 좌석(4DX) — 진동·모션 회피 조건으로 제외');
+    // 움직이는 좌석 회피 — 포맷명이 아니라 capability(motionSeat) 기준 하드 제외(R21).
+    // MX4D 등 새 모션 시트 포맷은 formatCapabilities 등록만으로 자동 반영된다.
+    if (request.motionSickness === 2 && hasMotionSeat(c.format))
+      return reject(`움직이는 좌석(${FORMAT_LABELS[c.format] ?? c.format}) — 진동·모션 회피 조건으로 제외`);
     // R19: 희망 상영 시작 시간대 — 회차 "시작 시각"(Asia/Seoul) 기준 하드 필터.
     if (request.timeWindow && request.timeWindow !== 'any') {
       const startMin = seoulMinutesOfDay(c.startsAt);
@@ -221,11 +222,13 @@ export function scoreCandidate(
     }
     const dark = spec.dark_scene_ratio && cite('어두운 장면 비중', spec.dark_scene_ratio);
     if (dark) ffm += clamp01(Number(dark.value)) * 0.25;
-  } else if (c.format === '4dx') {
+  } else if (hasMotionSeat(c.format)) {
+    // 모션 시트 포맷(4DX·MX4D) 공통 — 효과-서사 궁합 기반.
+    const fmtLabel = FORMAT_LABELS[c.format] ?? c.format;
     const spectacle = spec.genre_spectacle && cite('시각 스펙터클 장르', spec.genre_spectacle);
     ffm = spectacle?.value ? 0.6 : 0.25;
-    if (!spectacle?.value) cons.push('대사 중심 작품 — 4DX 효과 궁합 낮음');
-    uncertainties.push('4DX 효과-서사 궁합은 추정');
+    if (!spectacle?.value) cons.push(`대사 중심 작품 — ${fmtLabel} 효과 궁합 낮음`);
+    uncertainties.push(`${fmtLabel} 효과-서사 궁합은 추정`);
   } else {
     // superplex·standard — 일반 대형관 경로 (문서 05 §4.1 마지막 규칙)
     ffm = 0.35;
@@ -249,8 +252,8 @@ export function scoreCandidate(
   ffm = clamp01(ffm);
 
   // R20: 큰 화면 멀미(avoidBigScreen)는 하드 제외가 아니라 화면·상영 환경 감점 —
-  // IMAX(확장 화면)와 실측 폭 28m 이상 초대형 스크린에서 화면 축 점수를 낮춘다.
-  if (request.avoidBigScreen && (c.format === 'imax' || (screen.widthM ?? 0) >= 28)) {
+  // 확장 화면비 capability 포맷과 실측 폭 28m 이상 초대형 스크린에서 화면 축 점수를 낮춘다.
+  if (request.avoidBigScreen && (hasExtendedAspect(c.format) || (screen.widthM ?? 0) >= 28)) {
     ffm = clamp01(ffm - 0.35);
     cons.push('화면이 큰 상영관 — 큰 화면 멀미 조건으로 점수를 낮춰 반영했어요');
   }

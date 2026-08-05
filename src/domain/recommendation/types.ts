@@ -9,7 +9,9 @@ export type InfoStatus =
   | 'outdated'
   | 'conflict';
 
-export type FormatId = 'imax' | 'dolby_cinema' | '4dx' | 'superplex' | 'standard';
+// R21: 'mx4d'는 아직 운영 데이터에 없지만, 모션 시트 capability 확장 경로를 검증하기
+// 위해 타입·capability registry에 미리 등록한다(formatCapabilities.ts).
+export type FormatId = 'imax' | 'dolby_cinema' | '4dx' | 'mx4d' | 'superplex' | 'standard';
 // R19: 우선순위 5축 — seat(좌석)·distance(이동)·price(가격)가 1급으로 승격됐다.
 // 'logistics'는 과거 실행 기록·저장된 URL 재현을 위해 값으로는 계속 허용한다.
 export type Priority = 'balance' | 'quality' | 'seat' | 'distance' | 'price' | 'logistics';

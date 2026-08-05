@@ -37,6 +37,7 @@ export const FORMAT_LABELS: Record<string, string> = {
   imax: 'IMAX',
   dolby_cinema: '돌비시네마',
   '4dx': '4DX',
+  mx4d: 'MX4D',
   superplex: '수퍼플렉스',
   standard: '일반',
   // KOBIS 배급 포맷 버전에 등장하는 값 — CineFit이 추천하는 상영관 브랜드는 아니지만

@@ -19,10 +19,40 @@ export interface ConsentStats {
   consentRatePercent: number;
 }
 
+// R21 §8 — 알파 품질 지표: 완료율·공식 링크 클릭률·도움됨 비율·zero result 조건·정책별 결과.
+export interface ZeroResultCondition {
+  movieId: number;
+  timeWindow: string;
+  maxTravelMinutes: number;
+  priority: string;
+  count: number;
+}
+
+export interface PolicyBreakdownRow {
+  policyVersion: string;
+  runCount: number;
+  zeroCount: number;
+}
+
+export interface AlphaQualityStats {
+  /** recommendation_generated에 도달한 고유 세션 수 */
+  generatedSessions: number;
+  /** 공식 링크(official_link_clicked ∪ booking_link_clicked) 클릭 고유 세션 수 */
+  officialClickSessions: number;
+  officialLinkCtrPercent: number;
+  helpfulCount: number;
+  unhelpfulCount: number;
+  helpfulRatePercent: number;
+  zeroResultCount: number;
+  zeroResultConditions: ZeroResultCondition[];
+  policyBreakdown: PolicyBreakdownRow[];
+}
+
 export interface AlphaOpsSummary {
   inviteCodes: InviteCodeStats;
   consent: ConsentStats;
   funnel: FunnelStageResult[];
+  quality: AlphaQualityStats;
 }
 
 async function countOne(db: DbClient, sql: string, params: unknown[] = []): Promise<number> {
@@ -55,6 +85,60 @@ export function createAlphaOpsRepository(getDb: () => DbClient) {
         })),
       );
 
+      // R21 §8 품질 지표 — 전부 화이트리스트 이벤트·runs 테이블만 사용(비민감).
+      const [generatedSessions, officialClickSessions, helpfulCount, unhelpfulCount, zeroResultCount] =
+        await Promise.all([
+          countOne(
+            db,
+            `SELECT COUNT(DISTINCT session_id) AS n FROM analytics_events WHERE event_name = 'recommendation_generated'`,
+          ),
+          countOne(
+            db,
+            `SELECT COUNT(DISTINCT session_id) AS n FROM analytics_events
+             WHERE event_name IN ('official_link_clicked','booking_link_clicked')`,
+          ),
+          countOne(db, `SELECT COUNT(*) AS n FROM analytics_events WHERE event_name = 'recommendation_helpful'`),
+          countOne(db, `SELECT COUNT(*) AS n FROM analytics_events WHERE event_name = 'recommendation_unhelpful'`),
+          countOne(db, `SELECT COUNT(*) AS n FROM analytics_events WHERE event_name = 'zero_results_shown'`),
+        ]);
+
+      // zero result 발생 조건 — 최근 100건의 속성(비민감 요약)을 조건 조합별로 집계.
+      const zeroRows = await db.query<{ properties: string }>(
+        `SELECT properties FROM analytics_events WHERE event_name = 'zero_results_shown' ORDER BY id DESC LIMIT 100`,
+      );
+      const zeroMap = new Map<string, ZeroResultCondition>();
+      for (const row of zeroRows) {
+        try {
+          const p = JSON.parse(row.properties) as {
+            movieId?: number;
+            timeWindow?: string;
+            maxTravelMinutes?: number;
+            priority?: string;
+          };
+          const key = `${p.movieId}|${p.timeWindow}|${p.maxTravelMinutes}|${p.priority}`;
+          const cur = zeroMap.get(key);
+          if (cur) cur.count += 1;
+          else
+            zeroMap.set(key, {
+              movieId: p.movieId ?? 0,
+              timeWindow: p.timeWindow ?? 'any',
+              maxTravelMinutes: p.maxTravelMinutes ?? 0,
+              priority: p.priority ?? '-',
+              count: 1,
+            });
+        } catch {
+          /* 손상 행 무시 */
+        }
+      }
+      const zeroResultConditions = [...zeroMap.values()].sort((a, b) => b.count - a.count).slice(0, 10);
+
+      // 정책 버전별 실행·zero 비율 — recommendation_runs 기준.
+      const policyRows = await db.query<{ policy_version: string | null; n: number; zero: number }>(
+        `SELECT policy_version, COUNT(*) AS n,
+                SUM(CASE WHEN results = '[]' THEN 1 ELSE 0 END) AS zero
+         FROM recommendation_runs GROUP BY policy_version ORDER BY n DESC`,
+      );
+
       return {
         inviteCodes: { totalCodes, activeCodes, totalRedemptions, distinctRedeemedSessions },
         consent: {
@@ -63,6 +147,25 @@ export function createAlphaOpsRepository(getDb: () => DbClient) {
           consentRatePercent: totalSessions > 0 ? Math.round((consentedSessions / totalSessions) * 1000) / 10 : 0,
         },
         funnel: computeFunnelPercentages(funnelCounts),
+        quality: {
+          generatedSessions,
+          officialClickSessions,
+          officialLinkCtrPercent:
+            generatedSessions > 0 ? Math.round((officialClickSessions / generatedSessions) * 1000) / 10 : 0,
+          helpfulCount,
+          unhelpfulCount,
+          helpfulRatePercent:
+            helpfulCount + unhelpfulCount > 0
+              ? Math.round((helpfulCount / (helpfulCount + unhelpfulCount)) * 1000) / 10
+              : 0,
+          zeroResultCount,
+          zeroResultConditions,
+          policyBreakdown: policyRows.map((r) => ({
+            policyVersion: r.policy_version ?? '(없음)',
+            runCount: Number(r.n),
+            zeroCount: Number(r.zero ?? 0),
+          })),
+        },
       };
     },
   };

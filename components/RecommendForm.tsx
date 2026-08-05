@@ -11,6 +11,7 @@ import {
   TIME_WINDOW_OPTIONS,
   TRAVEL_LIMIT_OPTIONS,
 } from '../src/data/constants';
+import { trackOnce } from '../src/analytics/trackOnce';
 import { AXIS_LABELS, AXIS_ORDER, axisWeights } from '../src/domain/recommendation/axisWeights';
 import { readOnboardingState, type OnboardingAnswers } from '../src/lib/onboarding';
 import { formatCheckedAt, type CandidateDataState } from '../src/lib/dataFreshness';
@@ -387,6 +388,9 @@ export function RecommendForm({
   const goStep = (n: number) => {
     setStep(n);
     setMaxStep((m) => Math.max(m, n));
+    // R21 계측 — 단계 "완료"는 다음 단계로 처음 넘어갈 때 1회만(trackOnce가 중복 차단).
+    if (n === 1) trackOnce(`step1_completed_${movieId}`, 'recommend_step1_completed', { movieId });
+    if (n === 2) trackOnce(`step2_completed_${movieId}`, 'recommend_step2_completed', { movieId });
   };
   // 조건을 바꿀 때마다 "현재 조건에 맞는 후보 N개"를 실시간 조회(디바운스) — 결과 페이지와
   // 같은 파서·서비스의 preview 모드를 쓰므로 실제 결과 개수와 항상 일치한다.
@@ -471,6 +475,11 @@ export function RecommendForm({
   }, [defaultDate]);
   // 온보딩 답변은 localStorage에만 있어 서버 렌더링 시점엔 알 수 없다 — 마운트 후 읽어와서
   // 적용한다. 최근 출발 위치도 같은 시점에 읽는다.
+  // R21 계측 — 설문 1단계 진입(폼 마운트) 1회.
+  useEffect(() => {
+    trackOnce(`step1_started_${movieId}`, 'recommend_step1_started', { movieId });
+  }, [movieId]);
+
   const [prefill, setPrefill] = useState<OnboardingAnswers | null>(null);
   useEffect(() => {
     const answers = readOnboardingState()?.answers ?? null;
@@ -568,6 +577,7 @@ export function RecommendForm({
       return;
     }
     setSubmitting(true);
+    trackOnce(`step3_completed_${movieId}`, 'recommend_step3_completed', { movieId });
     // 최근 출발 위치 저장(프리셋만) — 다음 방문의 "최근:" 칩.
     if (originVal !== 'custom') {
       try {

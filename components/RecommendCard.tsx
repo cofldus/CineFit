@@ -3,6 +3,7 @@ import type { FormatId, PickLabel, RecommendationRequest, ScoredCandidate } from
 import { FORMAT_LABELS, VERIFIED_STATUSES } from '../src/domain/recommendation/presets';
 import { categorizeReason, citationsTrustSummary, coreConditionsSummary, pct, REASON_CATEGORY_LABEL, winnerVerdict } from '../src/lib/display';
 import { IconArrowRight, IconCheckCircle, IconNote, IconQuestion, IconThumbsDown, IconWrench } from './Icon';
+import { TrackedDetails } from './TrackedDetails';
 import { TrackedExternalLink } from './TrackedLink';
 import { TrustBadge } from './TrustBadge';
 
@@ -246,10 +247,15 @@ function DetailPanel({
   scored,
   restPros,
   tone,
+  runId,
+  rank,
 }: {
   scored: ScoredCandidate;
   restPros: string[];
   tone: 'hero' | 'plain';
+  /** R21 계측 — candidate_detail_opened 이벤트에 실을 실행 id·순위 */
+  runId?: number;
+  rank?: number;
 }) {
   const hasMore = restPros.length > 0 || scored.cons.length > 0 || scored.uncertainties.length > 0;
   const sub = tone === 'hero' ? 'text-hero-text-sub' : 'text-text-sub';
@@ -258,7 +264,11 @@ function DetailPanel({
   const linkCls = tone === 'hero' ? 'text-hero-text decoration-hero-border' : 'text-text decoration-border-strong';
 
   return (
-    <details className={`mt-5 border-t pt-4 ${border}`}>
+    <TrackedDetails
+      event="candidate_detail_opened"
+      eventProperties={{ ...(runId ? { recommendationRunId: runId } : {}), ...(rank ? { rank } : {}) }}
+      className={`mt-5 border-t pt-4 ${border}`}
+    >
       <summary className={`flex min-h-11 cursor-pointer items-center text-[13.5px] font-medium hover:underline ${linkCls} underline-offset-2`}>
         {hasMore ? '더 자세히 보기 (이유·고려할 점·점수 계산·출처)' : '점수는 어떻게 계산되나요?'}
       </summary>
@@ -357,7 +367,7 @@ function DetailPanel({
           </li>
         ))}
       </ul>
-    </details>
+    </TrackedDetails>
   );
 }
 
@@ -382,6 +392,7 @@ export function RecommendCard({
   nativeArStatus,
   personality,
   freshness,
+  runId,
 }: {
   rank: number;
   label: PickLabel;
@@ -398,6 +409,8 @@ export function RecommendCard({
   personality?: string | null;
   /** 회차 데이터 신선도(R20 §6·§9) — 결과 페이지가 계산해서 전달(stale이면 재확인 안내) */
   freshness?: { stale: boolean; checkedAt: string | null };
+  /** R21 계측 — candidate_detail_opened 이벤트용 실행 id */
+  runId?: number;
 }) {
   const { candidate: c } = scored;
   const isTop = rank === 1;
@@ -627,7 +640,7 @@ export function RecommendCard({
           ) : null}
         </div>
 
-        <DetailPanel scored={scored} restPros={restPros} tone="hero" />
+        <DetailPanel scored={scored} restPros={restPros} tone="hero" runId={runId} rank={rank} />
       </article>
     );
   }
@@ -727,7 +740,7 @@ export function RecommendCard({
 
       {/* 레일에서 카드 높이가 늘어나도 빈 공간이 카드 중간에 뜨지 않게 하단 밀착 */}
       <div className="mt-auto">
-        <DetailPanel scored={scored} restPros={restPros} tone="plain" />
+        <DetailPanel scored={scored} restPros={restPros} tone="plain" runId={runId} rank={rank} />
       </div>
     </article>
   );

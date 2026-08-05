@@ -7,12 +7,16 @@ export interface FunnelStageDef {
   label: string;
 }
 
-/** 첫 단계(app_opened)에 도달한 고유 세션을 100%로 두고 이후 단계 도달률을 본다. */
+/** 첫 단계(app_opened)에 도달한 고유 세션을 100%로 두고 이후 단계 도달률을 본다.
+ * R21: 설문 단계별 이탈을 보기 위해 step1~3 이벤트를 퍼널에 편입했다. */
 export const FUNNEL_STAGES: FunnelStageDef[] = [
   { key: 'app_opened', label: '앱 열림' },
   { key: 'movie_selected', label: '영화 선택' },
-  { key: 'recommendation_started', label: '추천 시작' },
-  { key: 'recommendation_completed', label: '추천 완료' },
+  { key: 'recommend_step1_started', label: '설문 1단계 진입' },
+  { key: 'recommend_step1_completed', label: '1단계 완료' },
+  { key: 'recommend_step2_completed', label: '2단계 완료' },
+  { key: 'recommend_step3_completed', label: '3단계 완료(제출)' },
+  { key: 'recommendation_generated', label: '추천 생성' },
   { key: 'feedback_submitted', label: '피드백 제출' },
 ];
 

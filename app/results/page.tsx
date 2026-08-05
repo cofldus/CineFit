@@ -13,18 +13,25 @@ import { Notice } from '../../components/Notice';
 import { RecommendCard } from '../../components/RecommendCard';
 import { SelectionWidget } from '../../components/SelectionWidget';
 import { serverAnalytics } from '../../src/analytics/serverAnalytics';
+import { TrackedExternalLink, TrackedLink } from '../../components/TrackedLink';
+import { AXIS_POLICY_VERSION } from '../../src/domain/recommendation/axisWeights';
 import { ANALYTICS_COOKIE } from '../../src/lib/analyticsSession';
 import { getAppClock } from '../../src/lib/clock';
 import { getRecommendations } from '../../src/data/recommendationService';
 import { suggestRelaxations } from '../../src/domain/recommendation/relaxation';
-import { formatCheckedAt, isStale, latestCheckedAt } from '../../src/lib/dataFreshness';
+import {
+  deriveCandidateDataState,
+  formatCheckedAt,
+  isStale,
+  latestCheckedAt,
+} from '../../src/lib/dataFreshness';
 import { parseRecommendationInput } from '../../src/lib/validation';
 
 // 극장사 공식 상영시간표 홈 — 회차 데이터가 없거나 오래됐을 때 안내하는 공식 경로.
 const OFFICIAL_SCHEDULES = [
-  { label: 'CGV 공식 상영시간표 ↗', href: 'http://www.cgv.co.kr/theaters/' },
-  { label: '롯데시네마 공식 상영시간표 ↗', href: 'https://www.lottecinema.co.kr' },
-  { label: '메가박스 공식 상영시간표 ↗', href: 'https://www.megabox.co.kr' },
+  { chain: 'cgv', label: 'CGV 공식 상영시간표 ↗', href: 'http://www.cgv.co.kr/theaters/' },
+  { chain: 'lotte', label: '롯데시네마 공식 상영시간표 ↗', href: 'https://www.lottecinema.co.kr' },
+  { chain: 'megabox', label: '메가박스 공식 상영시간표 ↗', href: 'https://www.megabox.co.kr' },
 ];
 
 // 현재 결과 URL에 완화 파라미터를 덮어쓴 링크 — 값이 빈 문자열이면 그 파라미터 제거.
@@ -132,7 +139,32 @@ export default async function ResultsPage({
         { movieId: result.movie.id, excludedCount: result.excluded.length },
         { sessionId, now: getAppClock().now() },
       );
+      // R21: zero result 발생 조건 집계용(비민감 요약만 — 좌표·주소 없음).
+      void serverAnalytics.recordEvent(
+        'zero_results_shown',
+        {
+          recommendationRunId: result.runId,
+          movieId: result.movie.id,
+          timeWindow: result.request.timeWindow ?? 'any',
+          maxTravelMinutes: result.request.maxTravelMinutes,
+          priority: result.request.priority,
+        },
+        { sessionId, now: getAppClock().now() },
+      );
     }
+    // R21: 실행 1건 = 이벤트 1건(run id가 매번 새로 발급되므로 중복 없음).
+    void serverAnalytics.recordEvent(
+      'recommendation_generated',
+      {
+        recommendationRunId: result.runId,
+        movieId: result.movie.id,
+        candidateCount: result.scored.length,
+        policyVersion: AXIS_POLICY_VERSION,
+        dataState: deriveCandidateDataState({ total: result.totalCandidates, usedSynthetic }),
+        zeroResult: result.picks.length === 0,
+      },
+      { sessionId, now: getAppClock().now() },
+    );
   }
 
   return (
@@ -179,15 +211,17 @@ export default async function ResultsPage({
             </Notice>
             <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1.5 text-[13px]">
               {OFFICIAL_SCHEDULES.map((s) => (
-                <a
+                <TrackedExternalLink
                   key={s.href}
+                  event="official_link_clicked"
+                  eventProperties={{ chain: s.chain, context: 'results' }}
                   href={s.href}
                   target="_blank"
                   rel="noopener noreferrer nofollow"
                   className="font-medium text-text hover:underline decoration-border-strong underline-offset-2"
                 >
                   {s.label}
-                </a>
+                </TrackedExternalLink>
               ))}
             </div>
           </>
@@ -228,14 +262,16 @@ export default async function ResultsPage({
                   </p>
                   <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                     {relaxations.map((r) => (
-                      <Link
+                      <TrackedLink
                         key={r.key}
+                        event="relaxation_suggestion_clicked"
+                        eventProperties={{ suggestion: r.key, added: r.added }}
                         href={relaxedHref(raw, r.params)}
                         className="inline-flex min-h-11 items-center gap-2 rounded-card border border-border px-4 text-[14px] font-medium text-text transition-colors hover:border-border-strong"
                       >
                         {r.label}
                         <span className="font-bold tabular-nums text-primary">+{r.added}개</span>
-                      </Link>
+                      </TrackedLink>
                     ))}
                   </div>
                 </div>
@@ -257,15 +293,17 @@ export default async function ResultsPage({
               </p>
               <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1.5 text-[13px]">
                 {OFFICIAL_SCHEDULES.map((s) => (
-                  <a
+                  <TrackedExternalLink
                     key={s.href}
+                    event="official_link_clicked"
+                    eventProperties={{ chain: s.chain, context: 'zero_results' }}
                     href={s.href}
                     target="_blank"
                     rel="noopener noreferrer nofollow"
                     className="font-medium text-text hover:underline decoration-border-strong underline-offset-2"
                   >
                     {s.label}
-                  </a>
+                  </TrackedExternalLink>
                 ))}
               </div>
             </>
@@ -305,6 +343,7 @@ export default async function ResultsPage({
                     : null
                 }
                 freshness={{ stale: dataStale, checkedAt: verifiedCheckedAt }}
+                runId={result.runId}
               />
             ) : null}
 
@@ -326,6 +365,7 @@ export default async function ResultsPage({
                         p.scored,
                         result.picks.map((x) => x.scored),
                       )}
+                      runId={result.runId}
                     />
                   </div>
                 ))}
@@ -371,12 +411,14 @@ export default async function ResultsPage({
                   검증용 합성 회차라 공식 예매 페이지가 없어요
                 </span>
               )}
-              <Link
+              <TrackedLink
+                event="conditions_edited"
+                eventProperties={result.runId ? { recommendationRunId: result.runId } : {}}
                 href={`/recommend/${result.movie.id}`}
                 className="flex min-h-12 items-center justify-center rounded-card border border-border px-4 text-[14.5px] font-medium text-text transition-colors hover:border-border-strong"
               >
                 조건 수정하기
-              </Link>
+              </TrackedLink>
               {result.picks.length > 1 ? (
                 <a
                   href="#compare-rail"

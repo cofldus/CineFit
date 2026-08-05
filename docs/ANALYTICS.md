@@ -20,7 +20,7 @@ analytics_sessions(id, first_seen_at, last_seen_at, app_version)
 analytics_events(id, session_id → analytics_sessions, event_name, properties JSON, created_at)
 ```
 
-## 이벤트 목록 (16종, `src/analytics/analyticsEvents.ts`)
+## 이벤트 목록 (28종, `src/analytics/analyticsEvents.ts`)
 
 | 이벤트 | 속성 | 비고 |
 |---|---|---|
@@ -40,6 +40,18 @@ analytics_events(id, session_id → analytics_sessions, event_name, properties J
 | `issue_report_started` | auditoriumId? | |
 | `issue_report_submitted` | reportId | |
 | `alpha_survey_completed` | — | |
+| `recommend_step1_started` | movieId | R21 — 설문 진입, `trackOnce`로 세션당 1회 |
+| `recommend_step1_completed` | movieId | R21 — 단계 완료 3종 모두 `trackOnce` 중복 방지 |
+| `recommend_step2_completed` | movieId | |
+| `recommend_step3_completed` | movieId | 제출 시 |
+| `recommendation_generated` | recommendationRunId, movieId, candidateCount, policyVersion, dataState, zeroResult | 서버 기록 — run당 1건(런 id가 매번 새로 발급) |
+| `zero_results_shown` | recommendationRunId?, movieId, timeWindow, maxTravelMinutes, priority | 서버 기록 — 조건 요약만(좌표·주소 금지) |
+| `relaxation_suggestion_clicked` | suggestion(time/travel/price), added | |
+| `candidate_detail_opened` | recommendationRunId?, rank? | `TrackedDetails` — 첫 펼침 1회 |
+| `official_link_clicked` | chain, context(results/zero_results) | 극장사 공식 상영시간표 링크 |
+| `conditions_edited` | recommendationRunId? | 결과에서 '조건 수정하기' |
+| `recommendation_helpful` | recommendationRunId | 도움됐어요 첫 반응, run당 1회(`trackOnce`) |
+| `recommendation_unhelpful` | recommendationRunId | 아쉬워요 첫 반응 |
 
 ## 기록 경로
 

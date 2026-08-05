@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { trackOnce } from '../src/analytics/trackOnce';
 import {
   FEEDBACK_REASONS,
   FEEDBACK_REASON_LABELS,
@@ -27,6 +28,13 @@ export function FeedbackWidget({ runId, showtimeId }: { runId: number; showtimeI
   function open(initial: Level) {
     setHelpfulness(initial);
     setPhase('sheet');
+    // R21 계측 — 도움됐어요/아쉬워요 첫 반응 자체를 기록(실행당 한 번, trackOnce가 중복 차단).
+    const positive = initial !== 'not_very_helpful' && initial !== 'not_helpful';
+    trackOnce(
+      `helpful_${runId}`,
+      positive ? 'recommendation_helpful' : 'recommendation_unhelpful',
+      { recommendationRunId: runId },
+    );
   }
 
   async function submit() {

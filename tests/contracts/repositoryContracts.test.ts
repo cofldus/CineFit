@@ -158,10 +158,12 @@ function runContracts(providerName: string, makeDb: () => Promise<DbClient>, clo
       const input = {
         movieId: fx.movieId, auditoriumId: fx.auditoriumId, date: '2026-08-02', startTime: '19:00',
         endTime: undefined, crossesMidnight: false, format: 'imax' as const, is3d: false,
-        language: 'sub' as const, price: 20000, bookingUrl: 'https://example.com/book',
+        language: 'sub' as const, price: 20000, bookingUrl: 'https://ticket.cgv.co.kr/contract-test',
         sourceNote: '계약 테스트', infoStatus: 'official' as const, isSynthetic: false,
         status: 'active' as const, adminNote: undefined, mismatchNote: undefined,
-        sourceUrl: undefined, expiresAt: undefined, verificationStatus: 'verified' as const,
+        // R21.1: 실회차는 sourceUrl 필수 + 공식 도메인만.
+        sourceUrl: 'https://ticket.cgv.co.kr/contract-test', expiresAt: undefined,
+        verificationStatus: 'verified' as const,
       };
       const created = await svc.createShowtime(input, { now });
       expect(created.ok).toBe(true);

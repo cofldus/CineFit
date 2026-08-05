@@ -5,6 +5,7 @@ import type { DbClient } from './client/types';
 import { createCinemaRepository } from './cinemaRepository';
 import { createMovieRepository } from './movieRepository';
 import { getAppClock, seoulDayUtcRange } from '../lib/clock';
+import { validateSourceUrl } from '../lib/sourceUrlValidation';
 import type { AdminShowtimeInput } from '../lib/adminValidation';
 
 export interface AdminServiceOptions {
@@ -124,6 +125,22 @@ export function createAdminShowtimeService(getDb: () => DbClient) {
     if (requiredBrand && auditorium.brand !== requiredBrand)
       errors.push(`이 상영관(${auditorium.brand})에서는 ${input.format} 포맷 상영이 불가능합니다.`);
 
+    // R21.1 §2 — 실제 회차(비합성)는 source URL 필수 + 극장사 공식 도메인만.
+    // booking_url도 같은 기준으로 검증한다(예매 딥링크가 placeholder/사설 호스트면 무의미).
+    // CSV preview/commit·수동 폼이 전부 이 validateShowtime을 지나므로 검증 경로는 하나다.
+    if (!input.isSynthetic) {
+      const src = validateSourceUrl(input.sourceUrl, {
+        requireOfficial: true,
+        fieldLabel: '확인한 공식 페이지 URL(sourceUrl)',
+      });
+      if (!src.ok) errors.push(src.error);
+      const booking = validateSourceUrl(input.bookingUrl, {
+        requireOfficial: true,
+        fieldLabel: '공식 예매 URL(bookingUrl)',
+      });
+      if (!booking.ok) errors.push(booking.error);
+    }
+
     // 동일 회차 중복 (같은 관·같은 시작 시각·활성)
     const dupParams: (string | number)[] = [input.auditoriumId, starts.toISOString()];
     if (opts.excludeShowtimeId) dupParams.push(opts.excludeShowtimeId);
@@ -190,7 +207,8 @@ export function createAdminShowtimeService(getDb: () => DbClient) {
         checkedAt,
         input.mismatchNote ?? null,
         opts.provider ?? 'admin_manual',
-        input.sourceUrl ?? input.bookingUrl, // sourceUrl 필수 — 비우면 공식 예매 URL 사용
+        // R21.1: booking_url 자동 대체 제거 — source_url은 명시 입력값만(실회차는 필수 검증 통과).
+        input.sourceUrl ?? null,
         input.expiresAt ? new Date(input.expiresAt).toISOString() : null,
         verificationStatus,
       ],
@@ -238,7 +256,7 @@ export function createAdminShowtimeService(getDb: () => DbClient) {
         input.adminNote ?? null,
         checkedAt,
         input.mismatchNote ?? null,
-        input.sourceUrl ?? input.bookingUrl,
+        input.sourceUrl ?? null,
         input.expiresAt ? new Date(input.expiresAt).toISOString() : null,
         verificationStatus,
         id,

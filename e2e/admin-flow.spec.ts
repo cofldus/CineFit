@@ -20,6 +20,8 @@ test('관리자 로그인 → 실제형 회차 등록 → 사용자 추천에 �
   await page.getByLabel('상영 포맷').selectOption('imax');
   await page.getByLabel('성인 1인 가격 (원)').fill('28000');
   await page.getByLabel('공식 예매 URL').fill('https://ticket.cgv.co.kr/e2e-demo');
+  // R21.1: 실회차는 확인한 공식 페이지 URL(sourceUrl)이 필수다(공식 도메인 allowlist).
+  await page.getByLabel(/확인한 공식 페이지 URL/).fill('https://ticket.cgv.co.kr/e2e-demo');
   await page.getByLabel('정보 출처 (어디서 확인했나)').fill('CGV 공식 예매 페이지에서 확인 (E2E)');
   await page.getByRole('button', { name: '회차 등록' }).click();
 

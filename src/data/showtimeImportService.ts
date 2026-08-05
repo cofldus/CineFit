@@ -8,6 +8,7 @@ import { getAppDbClient } from './client/index';
 import type { DbClient } from './client/types';
 import { createAdminShowtimeService, type AdminServiceOptions } from './adminShowtimeService';
 import { normalizeHeader, parseCsv } from '../lib/csv';
+import { validateSourceUrl } from '../lib/sourceUrlValidation';
 import { SHOWTIME_FORMATS, VERIFICATION_STATUSES, type AdminShowtimeInput } from '../lib/adminValidation';
 
 const REQUIRED_COLUMNS = [
@@ -51,15 +52,6 @@ export interface ImportResult {
 
 const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
 const YMD = /^\d{4}-\d{2}-\d{2}$/;
-
-function isHttpUrl(v: string): boolean {
-  try {
-    const u = new URL(v);
-    return u.protocol === 'https:' || u.protocol === 'http:';
-  } catch {
-    return false;
-  }
-}
 
 export function createShowtimeImportService(getDb: () => DbClient) {
   const adminService = createAdminShowtimeService(getDb);
@@ -156,7 +148,10 @@ export function createShowtimeImportService(getDb: () => DbClient) {
       const price = Number(raw.price);
       if (!Number.isInteger(price) || price < 0 || price > 1_000_000)
         errors.push('price는 0~1,000,000 사이의 정수여야 합니다.');
-      if (!isHttpUrl(raw.sourceurl)) errors.push('sourceUrl은 유효한 http(s) URL이어야 합니다(필수).');
+      // R21.1: preview·commit 공용 검증 — 공식 도메인 allowlist + placeholder 명확한 오류.
+      // (validateShowtime에서도 같은 함수로 재검증되므로 두 단계가 항상 같은 판정을 낸다.)
+      const srcCheck = validateSourceUrl(raw.sourceurl, { requireOfficial: true, fieldLabel: 'sourceUrl' });
+      if (!srcCheck.ok) errors.push(srcCheck.error);
       const checkedAtMs = new Date(raw.checkedat).getTime();
       if (!raw.checkedat || Number.isNaN(checkedAtMs)) errors.push('checkedAt은 ISO 날짜/시각이어야 합니다(필수).');
       if (raw.expiresat && Number.isNaN(new Date(raw.expiresat).getTime()))

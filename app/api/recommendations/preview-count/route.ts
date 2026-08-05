@@ -29,7 +29,9 @@ export async function GET(req: NextRequest) {
   const excluded = res.result.excluded;
   const timeCut = excluded.filter((e) => /희망 시간대.*밖/.test(e.reason)).length;
   const travelCut = excluded.filter((e) => /최대 이동 시간 .*초과/.test(e.reason)).length;
-  const total = res.result.totalCandidates;
+  // R21.1: 퍼널·상태의 기준은 verified-only 게이트 통과분 — 게이트 제외(합성·미검증·만료)는
+  // 사용자 퍼널 숫자에 섞지 않는다.
+  const total = res.result.eligibleCandidates ?? res.result.totalCandidates;
 
   // R20 §1: 후보 수를 "정확한 값처럼" 보여도 되는 상태인지 명시한다 — 관리자 확인 회차가
   // 없으면(합성·미등록) 화면은 개수 대신 '회차 데이터 연결 전' 안내를 보여야 한다.

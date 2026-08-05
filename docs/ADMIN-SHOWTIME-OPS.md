@@ -3,8 +3,10 @@
 ## 수동 등록 (`/admin/showtimes/new`)
 
 - 공식 예매 페이지에서 사람이 직접 확인한 회차만 등록한다.
-- 필수: 공식 예매 URL(bookingUrl), 정보 출처(sourceNote). '확인한 공식 페이지 URL'을
-  비우면 예매 URL이 source_url로 저장된다(항상 non-null — sourceUrl 필수 원칙).
+- 실제 회차(비합성) 필수: 공식 예매 URL(bookingUrl) + **확인한 공식 페이지 URL(sourceUrl)**
+  + 정보 출처(sourceNote). R21.1부터 sourceUrl은 자동 대체 없이 명시 입력이며,
+  두 URL 모두 극장사 공식 도메인(cgv.co.kr / lottecinema.co.kr / megabox.co.kr)만 허용된다.
+  placeholder(example.invalid 등)·localhost·비http(s)는 서버가 거부한다.
 - 확인 시각(checkedAt)·검증 시각(verifiedAt)은 저장 시점으로 자동 기록된다.
 - '시작 시각'에 `10:30, 14:00, 19:00`처럼 콤마로 여러 회차를 한 번에 등록할 수 있다.
 - 동일 상영관·시작 시각의 활성 회차는 중복 등록되지 않는다(서비스 검증 + DB 부분

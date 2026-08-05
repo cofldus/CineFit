@@ -48,6 +48,11 @@ export function makeCandidate(overrides: {
   supportedAr?: string | null;
   price?: number;
   startsAt?: string;
+  isSynthetic?: boolean;
+  verificationStatus?: string;
+  sourceUrl?: string | null;
+  expiresAt?: string | null;
+  verifiedAt?: string | null;
   lat?: number;
   lng?: number;
   specConfidence?: number;
@@ -69,9 +74,12 @@ export function makeCandidate(overrides: {
     entryMethod: 'manual',
     dataCheckedAt: '2026-07-27T12:00:00+09:00',
     showtimeInfoStatus: 'estimated',
-    isSynthetic: true,
+    isSynthetic: overrides.isSynthetic ?? true,
     bookingUrl: null,
-    verifiedAt: null,
+    verifiedAt: overrides.verifiedAt ?? null,
+    sourceUrl: overrides.sourceUrl ?? null,
+    expiresAt: overrides.expiresAt ?? null,
+    verificationStatus: overrides.verificationStatus ?? 'unverified',
     auditorium: {
       id,
       no: `${id}관`,

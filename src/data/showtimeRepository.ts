@@ -18,6 +18,9 @@ interface CandidateRow {
   is_synthetic: number;
   booking_url: string | null;
   verified_at: string | null;
+  source_url: string | null;
+  expires_at: string | null;
+  verification_status: string;
   aud_id: number;
   auditorium_no: string;
   brand: string;
@@ -106,6 +109,9 @@ function toCandidate(r: CandidateRow, seatZones: SeatZone[]): CandidateShowtime 
     isSynthetic: Boolean(r.is_synthetic),
     bookingUrl: r.booking_url,
     verifiedAt: r.verified_at,
+    sourceUrl: r.source_url,
+    expiresAt: r.expires_at,
+    verificationStatus: r.verification_status,
     auditorium: {
       id: r.aud_id,
       no: r.auditorium_no,
@@ -138,6 +144,7 @@ export function createShowtimeRepository(getDb: () => DbClient) {
         `SELECT st.id, st.movie_id, st.starts_at, st.ends_at_est, st.format, st.language,
                 st.price_adult, st.entry_method, st.data_checked_at, st.info_status AS st_status,
                 st.is_synthetic, st.booking_url, st.verified_at,
+                st.source_url, st.expires_at, st.verification_status,
                 a.id AS aud_id, a.auditorium_no, a.brand, a.seat_count, a.status AS aud_status,
                 l.id AS loc_id, l.chain, l.name AS loc_name, l.lat, l.lng,
                 l.status AS loc_status, l.transit_note,

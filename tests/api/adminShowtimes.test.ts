@@ -27,6 +27,8 @@ const validBody = (overrides: Record<string, unknown> = {}) => ({
   format: 'imax',
   price: 30000,
   bookingUrl: 'https://ticket.cgv.co.kr/test',
+  // R21.1: 실회차는 sourceUrl 필수 + 공식 도메인만.
+  sourceUrl: 'https://ticket.cgv.co.kr/test',
   sourceNote: '공식 예매 페이지 확인(테스트)',
   isSynthetic: false,
   ...overrides,

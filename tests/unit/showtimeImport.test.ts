@@ -60,7 +60,7 @@ const validRow = (over: Partial<Record<string, string>> = {}) => {
     startsat: '19:00',
     format: 'imax',
     price: '28000',
-    sourceurl: 'https://cgv.example/confirm',
+    sourceurl: 'https://ticket.cgv.co.kr/confirm',
     checkedat: '2026-07-27T10:00:00+09:00',
     expiresat: '',
     verificationstatus: 'verified',
@@ -118,6 +118,21 @@ describe('showtimeImportService', () => {
     expect(r.rows[1].errors.join(' ')).toContain('checkedAt');
   });
 
+  it('R21.1: 템플릿 placeholder URL·비공식 도메인은 명확한 오류가 된다 (commit 불가)', async () => {
+    const svc = createShowtimeImportService(getDb);
+    const r = await svc.importCsv(
+      `${HEADER}\n${validRow({ sourceurl: 'https://example.invalid/REPLACE-확인한-공식페이지' })}\n${validRow({
+        startsat: '20:00',
+        sourceurl: 'https://myblog.co.kr/showtime',
+      })}`,
+      { now: NOW, commit: true },
+    );
+    expect(r.summary.created).toBe(0);
+    expect(r.summary.errors).toBe(2);
+    expect(r.rows[0].errors.join(' ')).toContain('placeholder');
+    expect(r.rows[1].errors.join(' ')).toContain('공식 도메인');
+  });
+
   it('commit: 실제 회차로 저장되고 provider·sourceUrl·checkedAt·이력이 남는다', async () => {
     const svc = createShowtimeImportService(getDb);
     const r = await svc.importCsv(`${HEADER}\n${validRow()}`, { now: NOW, commit: true });
@@ -132,7 +147,7 @@ describe('showtimeImportService', () => {
       }>(`SELECT provider, source_url, data_checked_at, is_synthetic, verification_status FROM showtimes`)
     )[0];
     expect(row.provider).toBe('cgv_official');
-    expect(row.source_url).toBe('https://cgv.example/confirm');
+    expect(row.source_url).toBe('https://ticket.cgv.co.kr/confirm');
     expect(row.is_synthetic).toBe(0); // 합성과 완전 분리
     expect(row.verification_status).toBe('verified');
     expect(new Date(row.data_checked_at).toISOString()).toBe(new Date('2026-07-27T10:00:00+09:00').toISOString());

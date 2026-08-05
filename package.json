@@ -35,7 +35,8 @@
     "maintenance:stale": "tsx scripts/maintenance/markStaleData.ts",
     "maintenance:links": "tsx scripts/maintenance/validateBookingLinks.ts",
     "retention:preview": "tsx scripts/retention-preview.ts",
-    "retention:apply": "tsx scripts/retention-apply.ts"
+    "retention:apply": "tsx scripts/retention-apply.ts",
+    "privacy:scrub-locations": "tsx scripts/privacy-scrub-locations.ts"
   },
   "dependencies": {
     "next": "^16.2.12",

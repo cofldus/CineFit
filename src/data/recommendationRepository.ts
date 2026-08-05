@@ -1,5 +1,6 @@
 import type { RecommendationTrace } from '../domain/recommendation/trace';
 import type { RecommendationRequest, RecommendationResult } from '../domain/recommendation/types';
+import { coarseGridId, sanitizeOriginForStorage, LOCATION_RETENTION_DAYS } from '../lib/locationPrivacy';
 import { getAppDbClient } from './client/index';
 import type { DbClient } from './client/types';
 
@@ -32,7 +33,8 @@ export function createRecommendationRepository(getDb: () => DbClient) {
          VALUES (?,?,?,?,?,?,?,?,?,?,?) RETURNING id`,
         [
           'demo-user',
-          JSON.stringify(result.request),
+          // R21.1 §4: 좌표는 3자리 축약 + 라벨 화이트리스트 — 정확한 주소·정밀 좌표 저장 금지.
+          JSON.stringify({ ...result.request, origin: sanitizeOriginForStorage(result.request.origin) }),
           JSON.stringify(result.weights),
           JSON.stringify(
             result.scored.map((s) => ({
@@ -53,6 +55,38 @@ export function createRecommendationRepository(getDb: () => DbClient) {
         ],
       );
       return rows[0].id;
+    },
+
+    /** R21.1 §4 — 보존기간이 지난 실행의 좌표를 삭제하고 집계용 grid ID만 남긴다(멱등).
+     * maintenance:daily와 privacy:scrub-locations CLI(기존 데이터 정리)가 호출한다. */
+    async scrubOldRunLocations(now: Date, retentionDays: number = LOCATION_RETENTION_DAYS): Promise<number> {
+      const cutoff = new Date(now.getTime() - retentionDays * 86_400_000).toISOString();
+      const rows = await getDb().query<{ id: number; request: string }>(
+        `SELECT id, request FROM recommendation_runs WHERE created_at < ?`,
+        [cutoff],
+      );
+      let changed = 0;
+      for (const row of rows) {
+        let req: { origin?: { lat?: number; lng?: number; label?: string; scrubbed?: boolean } };
+        try {
+          req = JSON.parse(row.request);
+        } catch {
+          continue; // 손상 행은 건드리지 않는다
+        }
+        const origin = req.origin;
+        if (!origin || origin.scrubbed || typeof origin.lat !== 'number' || typeof origin.lng !== 'number') continue;
+        const scrubbed = {
+          label: origin.label ?? '위치 정보 삭제됨',
+          gridId: coarseGridId(origin.lat, origin.lng),
+          scrubbed: true,
+        };
+        await getDb().run(`UPDATE recommendation_runs SET request = ? WHERE id = ?`, [
+          JSON.stringify({ ...req, origin: scrubbed }),
+          row.id,
+        ]);
+        changed += 1;
+      }
+      return changed;
     },
 
     /** R21 관리자 추천 추적 — 최근 실행 목록(요약). */

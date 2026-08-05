@@ -28,7 +28,15 @@ export default defineConfig({
   // 프로젝트 도입 시 기본 템플릿은 파일명에 -visual(프로젝트명)을 붙인다 — 기존 베이스라인
   // 파일명(…-linux.png)을 유지하기 위해 프로젝트명 토큰을 뺀 템플릿으로 고정.
   snapshotPathTemplate: '{snapshotDir}/{testFileDir}/{testFileName}-snapshots/{arg}-{platform}{ext}',
-  use: { baseURL: 'http://localhost:3000' },
+  // R21.1 §6: 실패 시 원인 특정을 위한 재료 보존 — trace/screenshot/video는 실패한
+  // 테스트에서만 남긴다. 전체 잡에 무조건적 retry는 넣지 않는다(retries 기본 0 유지 —
+  // 플레이크를 가리는 대신 아티팩트로 원인을 특정한다).
+  use: {
+    baseURL: 'http://localhost:3000',
+    trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+  },
   webServer: {
     command: 'npm run start',
     url: 'http://localhost:3000',

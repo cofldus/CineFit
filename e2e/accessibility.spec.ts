@@ -17,9 +17,9 @@ interface Violation {
 
 async function scan(page: Page) {
   // 페이지 진입 애니메이션(opacity 0→1 페이드) 도중 스캔하면 중간 프레임의 낮은 불투명도가
-  // "대비 부족"으로 오탐된다 — reduced-motion을 강제해 전역 CSS(globals.css)가 모든
-  // animation/transition을 즉시 끄게 한다(실제로 모션 축소 사용자가 보는 화면과 동일).
-  await page.emulateMedia({ reducedMotion: 'reduce' });
+  // "대비 부족"으로 오탐된다. reduced-motion은 아래 test.use()로 "컨텍스트 생성 시점"에
+  // 강제된다 — 이전에는 goto 이후 emulateMedia로 적용해, 첫 로드(콜드 스타트)에서
+  // 애니메이션이 이미 시작된 중간 프레임을 스캔하는 간헐 플레이크가 있었다(R21.1에서 수정).
   return new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
 }
 
@@ -51,7 +51,8 @@ const PAGES = [
 test.describe('접근성 자동 검사 (axe)', () => {
   for (const scheme of SCHEMES) {
     test.describe(`${scheme} 모드`, () => {
-      test.use({ colorScheme: scheme });
+      // reducedMotion을 컨텍스트 옵션으로 — 네비게이션 전에 적용돼 애니메이션 레이스가 없다.
+      test.use({ colorScheme: scheme, reducedMotion: 'reduce' });
 
       for (const { name, path } of PAGES) {
         test(name, async ({ page }) => {

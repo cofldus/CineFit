@@ -3,8 +3,10 @@
 ## 수동 등록 (`/admin/showtimes/new`)
 
 - 공식 예매 페이지에서 사람이 직접 확인한 회차만 등록한다.
-- 필수: 공식 예매 URL(bookingUrl), 정보 출처(sourceNote). '확인한 공식 페이지 URL'을
-  비우면 예매 URL이 source_url로 저장된다(항상 non-null — sourceUrl 필수 원칙).
+- 실제 회차(비합성) 필수: 공식 예매 URL(bookingUrl) + **확인한 공식 페이지 URL(sourceUrl)**
+  + 정보 출처(sourceNote). R21.1부터 sourceUrl은 자동 대체 없이 명시 입력이며,
+  두 URL 모두 극장사 공식 도메인(cgv.co.kr / lottecinema.co.kr / megabox.co.kr)만 허용된다.
+  placeholder(example.invalid 등)·localhost·비http(s)는 서버가 거부한다.
 - 확인 시각(checkedAt)·검증 시각(verifiedAt)은 저장 시점으로 자동 기록된다.
 - '시작 시각'에 `10:30, 14:00, 19:00`처럼 콤마로 여러 회차를 한 번에 등록할 수 있다.
 - 동일 상영관·시작 시각의 활성 회차는 중복 등록되지 않는다(서비스 검증 + DB 부분
@@ -30,6 +32,19 @@
   1. 상영이 끝난 활성 회차를 `disabled` 전환(이력 기록),
   2. `COALESCE(expires_at, starts_at)`이 지난 회차를 `verification_status='expired'`로 표시.
 - `expiresAt`을 비우면 시작 시각이 만료 기준이 된다.
+
+## 회차 입력 체크리스트 (알파 — 매 등록 전 확인)
+
+- [ ] 극장사 **공식 예매 페이지**에서 방금 직접 확인했다(스크린샷/URL 보관).
+- [ ] sourceUrl = 확인한 공식 페이지 URL (공식 도메인, placeholder 아님).
+- [ ] bookingUrl = 해당 회차 예매 딥링크 (공식 도메인).
+- [ ] 날짜·시작 시각·포맷·가격이 공식 표기와 일치한다.
+- [ ] '검증용 합성 데이터' 체크 **해제** 상태다.
+- [ ] 알파 범위: 영화 3편 · 서울 극장 8~10곳 · 오늘부터 3일 이내만.
+- [ ] 저장 후 목록에서 `✔ 관리자 확인` 표시를 확인했다.
+- 참고: unverified/expired/placeholder-source 회차는 등록돼도 추천에 나오지 않는다
+  (verified-only 게이트, `src/domain/recommendation/verificationGate.ts`) — 하지만
+  등록 단계에서 걸러 두는 것이 원칙이다.
 
 ## 추천 추적 (`/admin/runs`)
 

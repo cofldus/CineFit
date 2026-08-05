@@ -99,9 +99,11 @@ export default async function ResultsPage({
 
   // R20 §9 zero result: 어떤 조건을 완화하면 몇 개가 추가되는지 — 이미 조회된 후보로
   // 엔진을 재실행해 실측한다(placeholder 숫자 없음).
+  // R21.1: 검증 게이트에서 떨어진 후보(합성·미검증·만료)는 완화 시뮬레이션 풀에서도
+  // 제외한다 — "+N개" 제안이 사용자에게 보여줄 수 없는 회차를 세면 안 된다.
   const allCandidates = [
     ...result.scored.map((s) => s.candidate),
-    ...result.excluded.map((e) => e.candidate),
+    ...result.excluded.filter((e) => e.stage !== 'verification').map((e) => e.candidate),
   ];
   const relaxations =
     result.picks.length === 0 && allCandidates.length > 0

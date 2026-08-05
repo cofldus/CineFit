@@ -2,6 +2,7 @@ import packageJson from '../../package.json';
 import { recommend } from '../domain/recommendation/engine';
 import { AXIS_POLICY_VERSION, axisWeights, toEngineWeights } from '../domain/recommendation/axisWeights';
 import { buildTrace } from '../domain/recommendation/trace';
+import { gateCandidates, syntheticAllowed } from '../domain/recommendation/verificationGate';
 import { deriveCandidateDataState } from '../lib/dataFreshness';
 import type { RecommendationRequest, RecommendationResult } from '../domain/recommendation/types';
 import { getAppClock } from '../lib/clock';
@@ -85,11 +86,10 @@ export async function getRecommendations(
   const now = getAppClock().now();
   const all = await showtimeRepository.listCandidates(movie.id, request.date);
 
-  // 관리자 확인(비합성) 회차가 있으면 기본 추천에서 합성 회차 제외.
-  // CINEFIT_ALLOW_SYNTHETIC=true(개발·데모)일 때만 함께 노출.
-  const verified = all.filter((c) => !c.isSynthetic);
-  const allowSynthetic = process.env.CINEFIT_ALLOW_SYNTHETIC === 'true';
-  const candidates = verified.length > 0 && !allowSynthetic ? verified : all;
+  // R21.1 §3 — verified-only 게이트(코드 강제): 비합성·verified·미만료·source URL 유효·
+  // stale 이내 회차만 추천에 포함. 합성은 프로덕션에서 절대 불가, 개발·E2E에선 verified가
+  // 전무할 때의 폴백. 게이트 제외분은 excluded(stage='verification')로 trace에 남는다.
+  const { eligible: candidates, gated } = gateCandidates(all, { now, allowSynthetic: syntheticAllowed() });
 
   // R20: 가격 soft 기준 파생(추가 지불 의향 기반) — 하드 상한이 아니라 감점 기준.
   // 구 URL이 절대 상한(maxPrice)을 보냈으면 그 하드 필터는 toDomainRequest에서 이미
@@ -109,9 +109,14 @@ export async function getRecommendations(
     now,
     weightsOverride: weights,
   });
+  // 게이트 제외를 결과에 편입 — totalCandidates는 조회된 전체(게이트 포함),
+  // eligibleCandidates는 게이트 통과분(미리보기 상태·퍼널 기준).
+  result.excluded = [...gated, ...result.excluded];
+  result.totalCandidates = all.length;
+  result.eligibleCandidates = candidates.length;
   result.dataMode = {
     usedSynthetic: candidates.some((c) => c.isSynthetic),
-    syntheticSuppressed: all.length - candidates.length,
+    syntheticSuppressed: gated.filter((g) => g.candidate.isSynthetic).length,
   };
   result.latencyMs = Math.round(performance.now() - started);
   // preview(조건 입력 중 실시간 후보 수 조회)는 run 기록을 남기지 않는다 — 키 입력마다
@@ -124,7 +129,8 @@ export async function getRecommendations(
       policyVersion: AXIS_POLICY_VERSION,
       generatedAt: now.toISOString(),
       dataState: deriveCandidateDataState({
-        total: result.totalCandidates,
+        // 게이트 통과분 기준 — 프로덕션에서 합성만 있으면 '연결 전(none)'이 맞다.
+        total: candidates.length,
         usedSynthetic: result.dataMode?.usedSynthetic ?? false,
       }),
     });

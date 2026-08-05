@@ -264,7 +264,7 @@ export function AdminShowtimeForm({
       </label>
 
       <label className="field">
-        <span>확인한 공식 페이지 URL (비우면 예매 URL 사용)</span>
+        <span>확인한 공식 페이지 URL (실제 회차 필수 — 극장사 공식 도메인만)</span>
         <input type="url" name="sourceUrl" placeholder="https://..." defaultValue={initial.sourceUrl} />
       </label>
 

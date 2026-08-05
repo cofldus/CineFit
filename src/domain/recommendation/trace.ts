@@ -7,6 +7,7 @@ import type { ExclusionStage, RecommendationResult, ScoredCandidate, SoftPenalty
 export const TRACE_VERSION = 1;
 
 export const STAGE_LABELS: Record<ExclusionStage, string> = {
+  verification: '검증 게이트(verified-only)',
   version: '배급 버전 확인',
   operating: '운영 상태',
   format_allowed: '허용 포맷',
@@ -19,6 +20,7 @@ export const STAGE_LABELS: Record<ExclusionStage, string> = {
 
 /** 하드 필터 적용 순서 — 엔진 hardFilterInner와 동일해야 한다. */
 export const STAGE_ORDER: ExclusionStage[] = [
+  'verification',
   'version',
   'operating',
   'format_allowed',

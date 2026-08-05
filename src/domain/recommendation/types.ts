@@ -102,6 +102,12 @@ export interface CandidateShowtime {
   isSynthetic: boolean; // 검증용 합성 회차 여부 — 화면에서 관리자 확인 회차와 구분 표기
   bookingUrl: string | null; // 공식 예매 딥링크
   verifiedAt: string | null; // 관리자 확인 시각
+  /** R21.1 — 확인한 공식 페이지 URL(실회차는 공식 도메인 필수) */
+  sourceUrl: string | null;
+  /** R21.1 — 만료 시각(없으면 시작 시각 기준) */
+  expiresAt: string | null;
+  /** R21.1 — verified | unverified | expired */
+  verificationStatus: string;
   auditorium: {
     id: number;
     no: string;
@@ -202,8 +208,10 @@ export interface ScoredCandidate {
   citations: Citation[];
 }
 
-/** R21 trace — 하드 필터 단계 식별자(퍼널 전후 카운트 집계용). */
+/** R21 trace — 하드 필터 단계 식별자(퍼널 전후 카운트 집계용).
+ * 'verification'은 R21.1 verified-only 게이트(합성·미검증·만료·source 무효·stale). */
 export type ExclusionStage =
+  | 'verification'
   | 'version'
   | 'operating'
   | 'format_allowed'
@@ -227,6 +235,8 @@ export interface RecommendationResult {
   request: RecommendationRequest;
   weights: Weights;
   totalCandidates: number;
+  /** R21.1 — verified-only 게이트 통과 후보 수(서비스 계층에서 설정, 엔진 단독 실행 시 없음) */
+  eligibleCandidates?: number;
   excluded: ExcludedCandidate[];
   picks: { label: PickLabel; scored: ScoredCandidate }[];
   scored: ScoredCandidate[];

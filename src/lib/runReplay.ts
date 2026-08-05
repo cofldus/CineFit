@@ -12,14 +12,23 @@ export function replayUrl(request: RecommendationRequest): string {
     if (request.timeFrom) p.set('timeFrom', request.timeFrom);
     if (request.timeTo) p.set('timeTo', request.timeTo);
   }
-  const preset = ORIGIN_PRESETS.find((o) => o.lat === request.origin.lat && o.lng === request.origin.lng);
+  // R21.1: 저장 좌표는 3자리로 축약돼 있어 프리셋은 근사 일치로 찾는다. scrub된(좌표
+  // 삭제) 실행은 기본 프리셋으로 폴백 — 정확 재현 대신 조건 재현만 가능함을 감수한다.
+  const lat = request.origin?.lat;
+  const lng = request.origin?.lng;
+  const preset =
+    typeof lat === 'number' && typeof lng === 'number'
+      ? ORIGIN_PRESETS.find((o) => Math.abs(o.lat - lat) < 0.002 && Math.abs(o.lng - lng) < 0.002)
+      : undefined;
   if (preset) {
     p.set('originId', preset.id);
-  } else {
+  } else if (typeof lat === 'number' && typeof lng === 'number') {
     p.set('originId', 'custom');
-    p.set('originLat', String(request.origin.lat));
-    p.set('originLng', String(request.origin.lng));
+    p.set('originLat', String(lat));
+    p.set('originLng', String(lng));
     p.set('originLabel', request.origin.label ?? '재현 위치');
+  } else {
+    p.set('originId', 'cityhall'); // scrub된 실행 — 좌표 없음
   }
   p.set('maxTravelMinutes', String(request.maxTravelMinutes));
   if (request.maxPrice < Number.MAX_SAFE_INTEGER / 2) p.set('maxPrice', String(request.maxPrice));

@@ -36,12 +36,15 @@ export interface AdminFormInitial {
   status?: string;
   adminNote?: string;
   mismatchNote?: string;
+  sourceUrl?: string;
+  expiresAt?: string;
 }
 
 const FORMATS = [
   ['imax', 'IMAX'],
   ['dolby_cinema', '돌비시네마'],
   ['4dx', '4DX'],
+  ['mx4d', 'MX4D'],
   ['screenx', 'SCREENX'],
   ['superplex', '수퍼플렉스(대형 일반)'],
   ['standard', '일반(2D 디지털)'],
@@ -88,6 +91,8 @@ export function AdminShowtimeForm({
       language: fd.get('language'),
       price: fd.get('price'),
       bookingUrl: fd.get('bookingUrl'),
+      sourceUrl: fd.get('sourceUrl') || undefined,
+      expiresAt: fd.get('expiresAt') || undefined,
       sourceNote: fd.get('sourceNote'),
       infoStatus: fd.get('infoStatus'),
       isSynthetic: fd.get('isSynthetic') === 'on',
@@ -259,8 +264,18 @@ export function AdminShowtimeForm({
       </label>
 
       <label className="field">
+        <span>확인한 공식 페이지 URL (비우면 예매 URL 사용)</span>
+        <input type="url" name="sourceUrl" placeholder="https://..." defaultValue={initial.sourceUrl} />
+      </label>
+
+      <label className="field">
         <span>정보 출처 (어디서 확인했나)</span>
         <input type="text" name="sourceNote" placeholder="예: CGV 공식 예매 페이지에서 직접 확인" required />
+      </label>
+
+      <label className="field">
+        <span>만료 시각 (선택 — 비우면 상영 시작 기준 자동 만료)</span>
+        <input type="datetime-local" name="expiresAt" defaultValue={initial.expiresAt} />
       </label>
 
       <div className="row">

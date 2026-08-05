@@ -33,6 +33,43 @@ export const ANALYTICS_EVENT_SCHEMAS = {
   issue_report_started: z.object({ auditoriumId: auditoriumId.optional() }),
   issue_report_submitted: z.object({ reportId: z.number().int().positive() }),
   alpha_survey_completed: z.object({}),
+
+  // ── R21 알파 계측(12종) — 정확한 위치 좌표·주소·자유 입력 원문은 절대 넣지 않는다.
+  recommend_step1_started: z.object({ movieId }),
+  recommend_step1_completed: z.object({ movieId }),
+  recommend_step2_completed: z.object({ movieId }),
+  recommend_step3_completed: z.object({ movieId }),
+  recommendation_generated: z.object({
+    recommendationRunId: runId,
+    movieId,
+    candidateCount: z.number().int().nonnegative(),
+    policyVersion: z.string().max(40),
+    dataState: z.enum(['verified', 'synthetic', 'none']),
+    zeroResult: z.boolean(),
+  }),
+  zero_results_shown: z.object({
+    recommendationRunId: runId.optional(),
+    movieId,
+    // 조건 요약(비민감) — 어떤 조건 조합에서 0건이 나는지 집계용.
+    timeWindow: z.string().max(20),
+    maxTravelMinutes: z.number().int().nonnegative(),
+    priority: z.string().max(20),
+  }),
+  relaxation_suggestion_clicked: z.object({
+    suggestion: z.enum(['time', 'travel', 'price']),
+    added: z.number().int().nonnegative(),
+  }),
+  candidate_detail_opened: z.object({
+    recommendationRunId: runId.optional(),
+    rank: z.number().int().positive().optional(),
+  }),
+  official_link_clicked: z.object({
+    chain: z.string().max(30),
+    context: z.enum(['results', 'zero_results']),
+  }),
+  conditions_edited: z.object({ recommendationRunId: runId.optional() }),
+  recommendation_helpful: z.object({ recommendationRunId: runId }),
+  recommendation_unhelpful: z.object({ recommendationRunId: runId }),
 } as const;
 
 export type AnalyticsEventName = keyof typeof ANALYTICS_EVENT_SCHEMAS;

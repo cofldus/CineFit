@@ -1,6 +1,8 @@
 import packageJson from '../../package.json';
 import { recommend } from '../domain/recommendation/engine';
 import { AXIS_POLICY_VERSION, axisWeights, toEngineWeights } from '../domain/recommendation/axisWeights';
+import { buildTrace } from '../domain/recommendation/trace';
+import { deriveCandidateDataState } from '../lib/dataFreshness';
 import type { RecommendationRequest, RecommendationResult } from '../domain/recommendation/types';
 import { getAppClock } from '../lib/clock';
 import type { RecommendationInput } from '../lib/validation';
@@ -115,10 +117,22 @@ export async function getRecommendations(
   // preview(조건 입력 중 실시간 후보 수 조회)는 run 기록을 남기지 않는다 — 키 입력마다
   // recommendation_runs가 쌓여 퍼널 집계가 오염되는 것을 막는다.
   if (!ctx.preview) {
+    // R21 §3: 실행마다 재현 가능한 trace 저장 — 퍼널 전후 카운트·후보별 제외 사유·
+    // 4축 점수·soft penalty·최종 순위·데이터 상태.
+    const trace = buildTrace({
+      result,
+      policyVersion: AXIS_POLICY_VERSION,
+      generatedAt: now.toISOString(),
+      dataState: deriveCandidateDataState({
+        total: result.totalCandidates,
+        usedSynthetic: result.dataMode?.usedSynthetic ?? false,
+      }),
+    });
     result.runId = await recommendationRepository.saveRun(result, result.latencyMs, now.toISOString(), {
       policyVersion: AXIS_POLICY_VERSION,
       codeVersion: CODE_VERSION,
       sessionId: ctx.sessionId,
+      trace,
     });
   }
 

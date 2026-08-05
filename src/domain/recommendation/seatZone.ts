@@ -1,3 +1,4 @@
+import { hasMotionSeat } from './formatCapabilities';
 import type { AuditoriumSpec, FormatId, RecommendationRequest, SeatZone, SeatZoneSuggestion } from './types';
 
 // 사용자 조건 → 원하는 좌석 존 목적 (docs/06 §3.2 purpose 어휘)
@@ -7,7 +8,7 @@ export function desiredPurposes(
 ): string[] {
   const purposes: string[] = [];
   if (format === 'superplex') purposes.push('overview');
-  else if (format === '4dx' && request.motionSickness >= 1) purposes.push('low_motion');
+  else if (hasMotionSeat(format) && request.motionSickness >= 1) purposes.push('low_motion');
   else purposes.push('immersive');
   if (request.subtitleReadability) purposes.push('subtitle');
   if (request.neckComfort) purposes.push('neck_easy');
@@ -56,6 +57,13 @@ function heuristicSuggestion(
   const rationale: string[] = ['이 관의 좌석 존 제보 없음 — 포맷 기준 일반 권장'];
   let zone: string;
 
+  // 모션 시트 포맷(4DX·MX4D)은 capability 기준으로 공통 처리 — 포맷명 분기 금지(R21).
+  if (hasMotionSeat(format)) {
+    zone = '중앙';
+    rationale.push('모션 강도가 균일한 중앙 구역');
+    return finishHeuristic(zone, rationale, spec, request);
+  }
+
   switch (format) {
     case 'imax':
       zone = '중앙 (스크린 높이 2/3 시선)';
@@ -64,10 +72,6 @@ function heuristicSuggestion(
     case 'dolby_cinema':
       zone = '중앙~중앙 후방';
       rationale.push('애트모스 스피커 배치상 중앙 후방이 균형적');
-      break;
-    case '4dx':
-      zone = '중앙';
-      rationale.push('모션 강도가 균일한 중앙 구역');
       break;
     case 'superplex':
       zone = '후방 중앙';
@@ -78,6 +82,16 @@ function heuristicSuggestion(
       rationale.push('일반관 표준 명당 구역');
   }
 
+  return finishHeuristic(zone, rationale, spec, request);
+}
+
+// 포맷별 기본 존에 사용자 조건(목 편함·자막 가독) 보정을 적용하는 공통 마무리.
+function finishHeuristic(
+  zone: string,
+  rationale: string[],
+  spec: AuditoriumSpec | null,
+  request: Pick<RecommendationRequest, 'subtitleReadability' | 'neckComfort' | 'motionSickness'>,
+): SeatZoneSuggestion {
   const isHugeScreen = (spec?.screen?.widthM ?? 0) >= 30;
   if (request.neckComfort) {
     zone = '후방 중앙';

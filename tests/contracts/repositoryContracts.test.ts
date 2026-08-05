@@ -161,6 +161,7 @@ function runContracts(providerName: string, makeDb: () => Promise<DbClient>, clo
         language: 'sub' as const, price: 20000, bookingUrl: 'https://example.com/book',
         sourceNote: '계약 테스트', infoStatus: 'official' as const, isSynthetic: false,
         status: 'active' as const, adminNote: undefined, mismatchNote: undefined,
+        sourceUrl: undefined, expiresAt: undefined, verificationStatus: 'verified' as const,
       };
       const created = await svc.createShowtime(input, { now });
       expect(created.ok).toBe(true);

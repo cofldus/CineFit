@@ -55,18 +55,42 @@ beforeAll(async () => {
     iso('2026-07-01T00:00:00+09:00'),
   ]);
 
-  const events: [string, string][] = [
+  const events: [string, string, string?][] = [
     ['sess-ops-1', 'app_opened'],
     ['sess-ops-2', 'app_opened'],
     ['sess-ops-3', 'app_opened'],
     ['sess-ops-1', 'movie_selected'],
     ['sess-ops-2', 'movie_selected'],
-    ['sess-ops-1', 'recommendation_started'],
+    // R21 설문 단계 퍼널
+    ['sess-ops-1', 'recommend_step1_started'],
+    ['sess-ops-1', 'recommend_step1_completed'],
+    ['sess-ops-1', 'recommend_step2_completed'],
+    ['sess-ops-1', 'recommend_step3_completed'],
+    [
+      'sess-ops-1',
+      'recommendation_generated',
+      '{"recommendationRunId":1,"movieId":1,"candidateCount":3,"policyVersion":"v3-axis100","dataState":"synthetic","zeroResult":false}',
+    ],
+    // R21 품질 지표
+    ['sess-ops-1', 'official_link_clicked', '{"chain":"cgv","context":"results"}'],
+    ['sess-ops-1', 'recommendation_helpful', '{"recommendationRunId":1}'],
+    ['sess-ops-2', 'recommendation_unhelpful', '{"recommendationRunId":2}'],
+    [
+      'sess-ops-2',
+      'zero_results_shown',
+      '{"movieId":1,"timeWindow":"evening","maxTravelMinutes":30,"priority":"quality"}',
+    ],
+    [
+      'sess-ops-3',
+      'zero_results_shown',
+      '{"movieId":1,"timeWindow":"evening","maxTravelMinutes":30,"priority":"quality"}',
+    ],
   ];
-  for (const [sessionId, eventName] of events) {
-    await db.run(`INSERT INTO analytics_events (session_id, event_name, created_at) VALUES (?,?,?)`, [
+  for (const [sessionId, eventName, properties] of events) {
+    await db.run(`INSERT INTO analytics_events (session_id, event_name, properties, created_at) VALUES (?,?,?,?)`, [
       sessionId,
       eventName,
+      properties ?? null,
       iso('2026-07-01T00:00:00+09:00'),
     ]);
   }
@@ -88,16 +112,37 @@ describe('alphaOpsRepository.getSummary', () => {
     expect(summary.consent.consentRatePercent).toBeCloseTo(33.3, 1);
   });
 
-  it('사용 퍼널을 이벤트 이름별 고유 세션 수로 집계한다', async () => {
+  it('사용 퍼널(R21 설문 단계 포함)을 이벤트 이름별 고유 세션 수로 집계한다', async () => {
     const summary = await alphaOpsRepository.getSummary();
     const byKey = Object.fromEntries(summary.funnel.map((f) => [f.key, f.sessionCount]));
     expect(byKey.app_opened).toBe(3);
     expect(byKey.movie_selected).toBe(2);
-    expect(byKey.recommendation_started).toBe(1);
-    expect(byKey.recommendation_completed).toBe(0);
+    expect(byKey.recommend_step1_started).toBe(1);
+    expect(byKey.recommend_step1_completed).toBe(1);
+    expect(byKey.recommend_step2_completed).toBe(1);
+    expect(byKey.recommend_step3_completed).toBe(1);
+    expect(byKey.recommendation_generated).toBe(1);
     expect(byKey.feedback_submitted).toBe(0);
 
     const movieSelected = summary.funnel.find((f) => f.key === 'movie_selected')!;
     expect(movieSelected.percentOfFirst).toBeCloseTo(66.7, 1);
+  });
+
+  it('R21 품질 지표 — 공식 링크 CTR·도움됨 비율·zero result 조건을 집계한다', async () => {
+    const summary = await alphaOpsRepository.getSummary();
+    expect(summary.quality.generatedSessions).toBe(1);
+    expect(summary.quality.officialClickSessions).toBe(1);
+    expect(summary.quality.officialLinkCtrPercent).toBe(100);
+    expect(summary.quality.helpfulCount).toBe(1);
+    expect(summary.quality.unhelpfulCount).toBe(1);
+    expect(summary.quality.helpfulRatePercent).toBe(50);
+    expect(summary.quality.zeroResultCount).toBe(2);
+    expect(summary.quality.zeroResultConditions[0]).toMatchObject({
+      movieId: 1,
+      timeWindow: 'evening',
+      maxTravelMinutes: 30,
+      priority: 'quality',
+      count: 2,
+    });
   });
 });

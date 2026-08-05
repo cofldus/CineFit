@@ -1,6 +1,7 @@
 // 추천 엔진 — 문서 05 파이프라인의 순수 함수 구현 (DB·UI 비의존, now 주입으로 결정적)
 // 하드 필터 → 축 점수 → 신뢰도·최신성 보정 → 브랜드 가산 차단 → 다양성 선택 → 설명 생성
 import { estimateTravelMinutes } from '../../lib/geo';
+import { hasExtendedAspect, hasMotionSeat } from './formatCapabilities';
 import { FORMAT_LABELS, INFO_STATUS_LABELS, VERIFIED_STATUSES, WEIGHT_PRESETS } from './presets';
 import { desiredPurposes, matchZones, suggestSeatZone } from './seatZone';
 import type {
@@ -12,6 +13,7 @@ import type {
   RecommendationRequest,
   RecommendationResult,
   ScoredCandidate,
+  SoftPenalty,
   SpecValue,
   Weights,
 } from './types';
@@ -94,37 +96,38 @@ function hardFilterInner(
   excluded: ExcludedCandidate[],
 ): { passed: CandidateShowtime[]; excluded: ExcludedCandidate[] } {
   const passed = candidates.filter((c) => {
-    const reject = (reason: string) => {
-      excluded.push({ candidate: c, reason });
+    // R21 trace: 제외에 단계(stage) 태그를 붙여 하드 필터 전후 후보 수를 재구성한다.
+    const reject = (stage: NonNullable<ExcludedCandidate['stage']>, reason: string) => {
+      excluded.push({ candidate: c, reason, stage });
       return false;
     };
     if (c.location.status !== 'operating' || c.auditorium.status !== 'operating')
-      return reject('운영 상태 미확정·중단 상영관');
+      return reject('operating', '운영 상태 미확정·중단 상영관');
     const allowed =
       (c.format === 'imax' && request.allowImax) ||
       (c.format === 'dolby_cinema' && request.allowDolby) ||
       ((c.format === 'standard' || c.format === 'superplex') && request.allowStandard) ||
-      c.format === '4dx'; // 4DX는 멀미 민감도로만 제어 (아래)
-    if (!allowed) return reject(`${FORMAT_LABELS[c.format]} — 허용하지 않은 포맷`);
-    // 움직이는 좌석 회피 — 4DX(및 MX4D류 모션 시트 포맷)는 하드 제외. 현재 데이터
-    // 모델의 모션 시트 포맷은 4dx 하나이며, MX4D가 추가되면 여기서 같이 걸러야 한다.
-    if (request.motionSickness === 2 && c.format === '4dx')
-      return reject('움직이는 좌석(4DX) — 진동·모션 회피 조건으로 제외');
+      hasMotionSeat(c.format); // 모션 시트 포맷(4DX·MX4D)은 멀미 민감도로만 제어 (아래)
+    if (!allowed) return reject('format_allowed', `${FORMAT_LABELS[c.format]} — 허용하지 않은 포맷`);
+    // 움직이는 좌석 회피 — 포맷명이 아니라 capability(motionSeat) 기준 하드 제외(R21).
+    // MX4D 등 새 모션 시트 포맷은 formatCapabilities 등록만으로 자동 반영된다.
+    if (request.motionSickness === 2 && hasMotionSeat(c.format))
+      return reject('motion_seat', `움직이는 좌석(${FORMAT_LABELS[c.format] ?? c.format}) — 진동·모션 회피 조건으로 제외`);
     // R19: 희망 상영 시작 시간대 — 회차 "시작 시각"(Asia/Seoul) 기준 하드 필터.
     if (request.timeWindow && request.timeWindow !== 'any') {
       const startMin = seoulMinutesOfDay(c.startsAt);
       if (!inTimeWindow(startMin, request))
-        return reject(`시작 ${formatMinutes(startMin)} — 희망 시간대(${timeWindowLabel(request)}) 밖`);
+        return reject('time_window', `시작 ${formatMinutes(startMin)} — 희망 시간대(${timeWindowLabel(request)}) 밖`);
     }
     const travel = estimateTravelMinutes(request.origin, c.location);
     if (travel > request.maxTravelMinutes)
-      return reject(`이동 약 ${travel}분 — 최대 이동 시간 ${request.maxTravelMinutes}분 초과`);
+      return reject('travel', `이동 약 ${travel}분 — 최대 이동 시간 ${request.maxTravelMinutes}분 초과`);
     // R20: 가격은 soft preference — 추가 지불 의향(priceRef)으로는 제외하지 않고 점수만
     // 감점한다(scoreCandidate). 절대 상한 하드 필터는 구 URL(maxPrice)이 있을 때만 동작.
     if (c.priceAdult > request.maxPrice)
-      return reject(`가격 ${c.priceAdult.toLocaleString('ko-KR')}원 — 상한 ${request.maxPrice.toLocaleString('ko-KR')}원 초과`);
+      return reject('price_cap', `가격 ${c.priceAdult.toLocaleString('ko-KR')}원 — 상한 ${request.maxPrice.toLocaleString('ko-KR')}원 초과`);
     if (request.wheelchair)
-      return reject('휠체어 접근 정보 미확인 — 확인된 상영관만 추천 가능 (점수 보상 없이 제외)');
+      return reject('wheelchair', '휠체어 접근 정보 미확인 — 확인된 상영관만 추천 가능 (점수 보상 없이 제외)');
     return true;
   });
   return { passed, excluded };
@@ -150,6 +153,7 @@ export function scoreCandidate(
   const pros: string[] = [];
   const cons: string[] = [];
   const uncertainties: string[] = [];
+  const softPenalties: SoftPenalty[] = []; // R21 trace — soft 감점 기록
   const citations: Citation[] = [];
   const used: { conf: number; at: string; halfLife: number }[] = [];
 
@@ -221,11 +225,13 @@ export function scoreCandidate(
     }
     const dark = spec.dark_scene_ratio && cite('어두운 장면 비중', spec.dark_scene_ratio);
     if (dark) ffm += clamp01(Number(dark.value)) * 0.25;
-  } else if (c.format === '4dx') {
+  } else if (hasMotionSeat(c.format)) {
+    // 모션 시트 포맷(4DX·MX4D) 공통 — 효과-서사 궁합 기반.
+    const fmtLabel = FORMAT_LABELS[c.format] ?? c.format;
     const spectacle = spec.genre_spectacle && cite('시각 스펙터클 장르', spec.genre_spectacle);
     ffm = spectacle?.value ? 0.6 : 0.25;
-    if (!spectacle?.value) cons.push('대사 중심 작품 — 4DX 효과 궁합 낮음');
-    uncertainties.push('4DX 효과-서사 궁합은 추정');
+    if (!spectacle?.value) cons.push(`대사 중심 작품 — ${fmtLabel} 효과 궁합 낮음`);
+    uncertainties.push(`${fmtLabel} 효과-서사 궁합은 추정`);
   } else {
     // superplex·standard — 일반 대형관 경로 (문서 05 §4.1 마지막 규칙)
     ffm = 0.35;
@@ -249,10 +255,11 @@ export function scoreCandidate(
   ffm = clamp01(ffm);
 
   // R20: 큰 화면 멀미(avoidBigScreen)는 하드 제외가 아니라 화면·상영 환경 감점 —
-  // IMAX(확장 화면)와 실측 폭 28m 이상 초대형 스크린에서 화면 축 점수를 낮춘다.
-  if (request.avoidBigScreen && (c.format === 'imax' || (screen.widthM ?? 0) >= 28)) {
+  // 확장 화면비 capability 포맷과 실측 폭 28m 이상 초대형 스크린에서 화면 축 점수를 낮춘다.
+  if (request.avoidBigScreen && (hasExtendedAspect(c.format) || (screen.widthM ?? 0) >= 28)) {
     ffm = clamp01(ffm - 0.35);
     cons.push('화면이 큰 상영관 — 큰 화면 멀미 조건으로 점수를 낮춰 반영했어요');
+    softPenalties.push({ type: 'big_screen', amount: 0.35, note: '큰 화면 멀미 조건 — 화면 축 감점' });
   }
 
   // 4.2 AuditoriumQuality — 결측은 중립 0.5 + DataConfidence 감점 (문서 05 §4.2)
@@ -328,10 +335,16 @@ export function scoreCandidate(
   // 넘는 후보는 제외하지 않고 가격 축 점수만 깎는다. 1만 원 초과 ≈ -0.35.
   if (typeof request.priceRef === 'number' && c.priceAdult > request.priceRef) {
     const over = c.priceAdult - request.priceRef;
-    pv = clamp01(pv - Math.min(0.5, (over / 10_000) * 0.35));
+    const penalty = Math.min(0.5, (over / 10_000) * 0.35);
+    pv = clamp01(pv - penalty);
     cons.push(
       `가격 ${c.priceAdult.toLocaleString('ko-KR')}원 — 추가 지불 기준보다 ${over.toLocaleString('ko-KR')}원 높아 감점 반영(제외 아님)`,
     );
+    softPenalties.push({
+      type: 'price_over_ref',
+      amount: Number(penalty.toFixed(3)),
+      note: `추가 지불 기준 ${request.priceRef.toLocaleString('ko-KR')}원 대비 +${over.toLocaleString('ko-KR')}원 — 가격 축 감점`,
+    });
   }
 
   // 4.9 DataConfidence — conf = 0.5·min + 0.5·mean (문서 05 §4.9)
@@ -360,6 +373,7 @@ export function scoreCandidate(
     candidate: c,
     travelMinutes,
     axes: { ffm, audQ, pm, seatQ, conv, pv, dc, fr },
+    softPenalties,
     quality,
     logistics,
     base,
@@ -398,7 +412,7 @@ export function recommend(input: EngineInput): RecommendationResult {
   const versionExcluded: ExcludedCandidate[] = [];
   const inVersion = candidates.filter((c) => {
     if (versions.includes(requiredVersion(c.format))) return true;
-    versionExcluded.push({ candidate: c, reason: `${FORMAT_LABELS[c.format]} 버전 배급 미확인` });
+    versionExcluded.push({ candidate: c, reason: `${FORMAT_LABELS[c.format]} 버전 배급 미확인`, stage: 'version' });
     return false;
   });
 

@@ -1,0 +1,11 @@
+provider,theater,auditorium,movie,showDate,startsAt,format,price,sourceUrl,checkedAt,expiresAt,verificationStatus
+cgv_official,CGV 용산아이파크몰,IMAX관,듄: 파트 2,2026-08-08,19:30,imax,28000,https://example.invalid/REPLACE-확인한-공식페이지,2026-08-05T10:00:00+09:00,,verified
+cgv_official,CGV 용산아이파크몰,13관,듄: 파트 2,2026-08-08,20:00,standard,15000,https://example.invalid/REPLACE-확인한-공식페이지,2026-08-05T10:00:00+09:00,,verified
+cgv_official,CGV 왕십리,IMAX관,듄: 파트 2,2026-08-08,21:00,imax,26000,https://example.invalid/REPLACE-확인한-공식페이지,2026-08-05T10:00:00+09:00,,verified
+cgv_official,CGV 천호,IMAX관,오펜하이머,2026-08-09,18:40,imax,26000,https://example.invalid/REPLACE-확인한-공식페이지,2026-08-05T10:00:00+09:00,,verified
+lotte_official,롯데시네마 월드타워,수퍼플렉스G관,오펜하이머,2026-08-09,19:20,superplex,18000,https://example.invalid/REPLACE-확인한-공식페이지,2026-08-05T10:00:00+09:00,,verified
+lotte_official,롯데시네마 월드타워,7관,존 오브 인터레스트,2026-08-09,20:10,standard,15000,https://example.invalid/REPLACE-확인한-공식페이지,2026-08-05T10:00:00+09:00,,verified
+megabox_official,메가박스 코엑스,돌비시네마관,오펜하이머,2026-08-10,19:00,dolby_cinema,25000,https://example.invalid/REPLACE-확인한-공식페이지,2026-08-05T10:00:00+09:00,,verified
+megabox_official,메가박스 코엑스,M관,존 오브 인터레스트,2026-08-10,20:30,standard,15000,https://example.invalid/REPLACE-확인한-공식페이지,2026-08-05T10:00:00+09:00,,verified
+megabox_official,메가박스 남양주현대아울렛 스페이스원,돌비시네마관,듄: 파트 2,2026-08-10,18:30,dolby_cinema,25000,https://example.invalid/REPLACE-확인한-공식페이지,2026-08-05T10:00:00+09:00,,verified
+cgv_official,CGV 여의도,4DX관,듄: 파트 2,2026-08-10,19:40,4dx,24000,https://example.invalid/REPLACE-확인한-공식페이지,2026-08-05T10:00:00+09:00,,verified

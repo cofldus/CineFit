@@ -71,6 +71,82 @@ export default async function AdminAlphaOpsPage() {
           </table>
         </div>
       </div>
+
+      {/* R21 §8 — 알파 품질 지표: 완료율·공식 링크 CTR·도움됨 비율·zero result·정책별 결과. */}
+      <div className="card">
+        <h2 style={{ marginTop: 0 }}>추천 품질 지표</h2>
+        <ul className="plain">
+          <li>
+            추천 생성 세션: <strong>{summary.quality.generatedSessions}</strong>개
+          </li>
+          <li>
+            공식 링크 클릭 세션: <strong>{summary.quality.officialClickSessions}</strong>개 — 추천 생성 대비{' '}
+            <strong>{summary.quality.officialLinkCtrPercent}%</strong>
+          </li>
+          <li>
+            도움됐어요 <strong>{summary.quality.helpfulCount}</strong> · 아쉬워요{' '}
+            <strong>{summary.quality.unhelpfulCount}</strong> — 도움됨 비율{' '}
+            <strong>{summary.quality.helpfulRatePercent}%</strong>
+          </li>
+          <li>
+            zero result 발생: <strong>{summary.quality.zeroResultCount}</strong>건
+          </li>
+        </ul>
+      </div>
+
+      {summary.quality.zeroResultConditions.length > 0 ? (
+        <div className="card">
+          <h2 style={{ marginTop: 0 }}>zero result 발생 조건 (상위 10)</h2>
+          <div className="table-scroll" tabIndex={0} role="region" aria-label="zero result 조건 (가로 스크롤)">
+            <table className="compare">
+              <thead>
+                <tr>
+                  <th scope="col">영화</th>
+                  <th scope="col">시간대</th>
+                  <th scope="col">이동 한도</th>
+                  <th scope="col">우선순위</th>
+                  <th scope="col">건수</th>
+                </tr>
+              </thead>
+              <tbody>
+                {summary.quality.zeroResultConditions.map((c) => (
+                  <tr key={`${c.movieId}-${c.timeWindow}-${c.maxTravelMinutes}-${c.priority}`}>
+                    <td>#{c.movieId}</td>
+                    <td>{c.timeWindow}</td>
+                    <td>{c.maxTravelMinutes}분</td>
+                    <td>{c.priority}</td>
+                    <td>{c.count}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="card">
+        <h2 style={{ marginTop: 0 }}>정책 버전별 결과</h2>
+        <div className="table-scroll" tabIndex={0} role="region" aria-label="정책 버전별 결과 (가로 스크롤)">
+          <table className="compare">
+            <thead>
+              <tr>
+                <th scope="col">정책</th>
+                <th scope="col">실행 수</th>
+                <th scope="col">zero result</th>
+              </tr>
+            </thead>
+            <tbody>
+              {summary.quality.policyBreakdown.map((p) => (
+                <tr key={p.policyVersion}>
+                  <td>{p.policyVersion}</td>
+                  <td>{p.runCount}</td>
+                  <td>{p.zeroCount}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </main>
   );
 }

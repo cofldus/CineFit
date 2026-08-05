@@ -33,6 +33,19 @@
   2. `COALESCE(expires_at, starts_at)`이 지난 회차를 `verification_status='expired'`로 표시.
 - `expiresAt`을 비우면 시작 시각이 만료 기준이 된다.
 
+## 회차 입력 체크리스트 (알파 — 매 등록 전 확인)
+
+- [ ] 극장사 **공식 예매 페이지**에서 방금 직접 확인했다(스크린샷/URL 보관).
+- [ ] sourceUrl = 확인한 공식 페이지 URL (공식 도메인, placeholder 아님).
+- [ ] bookingUrl = 해당 회차 예매 딥링크 (공식 도메인).
+- [ ] 날짜·시작 시각·포맷·가격이 공식 표기와 일치한다.
+- [ ] '검증용 합성 데이터' 체크 **해제** 상태다.
+- [ ] 알파 범위: 영화 3편 · 서울 극장 8~10곳 · 오늘부터 3일 이내만.
+- [ ] 저장 후 목록에서 `✔ 관리자 확인` 표시를 확인했다.
+- 참고: unverified/expired/placeholder-source 회차는 등록돼도 추천에 나오지 않는다
+  (verified-only 게이트, `src/domain/recommendation/verificationGate.ts`) — 하지만
+  등록 단계에서 걸러 두는 것이 원칙이다.
+
 ## 추천 추적 (`/admin/runs`)
 
 - 최근 실행 50건 목록 → 상세에서 입력 조건·4축 가중치(합 100)·하드 필터 퍼널(단계별

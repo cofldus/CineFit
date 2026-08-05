@@ -2,6 +2,7 @@
 // 수동 폼과 같은 검증·이력 경로(adminShowtimeService)를 재사용한다.
 import { NextResponse, type NextRequest } from 'next/server';
 import { importShowtimeCsv } from '../../../../../src/data/showtimeImportService';
+import { adminActorVia } from '../../../../../src/lib/adminActor';
 import { isAdminRequest } from '../../../../../src/lib/adminAuth';
 import { DbNotSeededError } from '../../../../../src/data/client/index';
 import { logger } from '../../../../../src/lib/logger';
@@ -25,7 +26,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'CSV가 너무 큽니다(500KB 초과).' }, { status: 400 });
   }
   try {
-    const result = await importShowtimeCsv(body.csv, { commit: body.commit === true, actor: 'admin(csv)' });
+    // actor는 인증된 관리자 identity에서 파생(adminActor) — isAdminRequest 통과 후에만 도달.
+    const result = await importShowtimeCsv(body.csv, { commit: body.commit === true, actor: adminActorVia('csv') });
     return NextResponse.json(result, { status: result.ok ? 200 : 400 });
   } catch (e) {
     if (e instanceof DbNotSeededError) {

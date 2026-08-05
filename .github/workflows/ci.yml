@@ -52,9 +52,18 @@ jobs:
       # DB는 global-setup이 test-results/e2e.db로 격리 생성. e2e/visual.spec.ts는 이 컨테이너에서
       # 만든 -linux.png 베이스라인과 비교한다(docs/TESTING.md).
       - run: npx playwright test
+      # R21.1 §6: 실패 시 원인 특정 재료 보존 — HTML report + trace/screenshot/video가 담긴
+      # test-results/. (동일 테스트가 반복 실패하면 이 아티팩트의 trace를 playwright show-trace로
+      # 연다. 전체 잡 retry는 의도적으로 없다 — 플레이크를 가리지 않는다.)
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: playwright-report
           path: playwright-report/
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-test-results
+          path: test-results/
           retention-days: 7

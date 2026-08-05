@@ -52,7 +52,9 @@ test.describe('접근성 자동 검사 (axe)', () => {
   for (const scheme of SCHEMES) {
     test.describe(`${scheme} 모드`, () => {
       // reducedMotion을 컨텍스트 옵션으로 — 네비게이션 전에 적용돼 애니메이션 레이스가 없다.
-      test.use({ colorScheme: scheme, reducedMotion: 'reduce' });
+      // (주의: reducedMotion은 TestOptions 최상위 속성이 아니라 contextOptions 소속 —
+      // 최상위에 두면 타입 오류일 뿐 아니라 런타임에서도 조용히 무시된다.)
+      test.use({ colorScheme: scheme, contextOptions: { reducedMotion: 'reduce' } });
 
       for (const { name, path } of PAGES) {
         test(name, async ({ page }) => {

@@ -10,6 +10,10 @@ import type { AdminShowtimeInput } from '../lib/adminValidation';
 export interface AdminServiceOptions {
   now?: () => Date;
   actor?: string;
+  /** 회차 공급원 식별자 — 'admin_manual'(폼) | 'csv_import' 등 (R21) */
+  provider?: string;
+  /** 확인 시각 덮어쓰기(CSV import의 checkedAt) — 없으면 now */
+  checkedAt?: string;
 }
 
 export interface AdminShowtimeRow {
@@ -34,6 +38,10 @@ export interface AdminShowtimeRow {
   admin_note: string | null;
   verified_at: string | null;
   format_mismatch_note: string | null;
+  provider: string | null;
+  source_url: string | null;
+  expires_at: string | null;
+  verification_status: string;
 }
 
 export type AdminResult =
@@ -45,6 +53,7 @@ const BRAND_REQUIRED: Record<string, string | null> = {
   imax: 'imax',
   dolby_cinema: 'dolby_cinema',
   '4dx': '4dx',
+  mx4d: 'mx4d',
   screenx: 'screenx',
   superplex: 'superplex',
   standard: null,
@@ -152,12 +161,16 @@ export function createAdminShowtimeService(getDb: () => DbClient) {
 
     const db = getDb();
     const nowIso = (opts.now?.() ?? getAppClock().now()).toISOString();
+    const checkedAt = opts.checkedAt ?? nowIso;
+    // R21: 합성 회차는 verified로 저장될 수 없다 — synthetic/실제 데이터 혼동 차단.
+    const verificationStatus = input.isSynthetic ? 'unverified' : input.verificationStatus;
     const rows = await db.query<{ id: number }>(
       `INSERT INTO showtimes
          (movie_id, auditorium_id, starts_at, ends_at_est, format, is_3d, language, price_adult,
           booking_url, entry_method, data_checked_at, source_id, info_status,
-          status, is_synthetic, admin_note, verified_at, format_mismatch_note)
-       VALUES (?,?,?,?,?,?,?,?,?,'manual',?,?,?,?,?,?,?,?) RETURNING id`,
+          status, is_synthetic, admin_note, verified_at, format_mismatch_note,
+          provider, source_url, expires_at, verification_status)
+       VALUES (?,?,?,?,?,?,?,?,?,'manual',?,?,?,?,?,?,?,?,?,?,?,?) RETURNING id`,
       [
         input.movieId,
         input.auditoriumId,
@@ -168,14 +181,18 @@ export function createAdminShowtimeService(getDb: () => DbClient) {
         input.language,
         input.price,
         input.bookingUrl,
-        nowIso,
+        checkedAt,
         await getOrCreateAdminSource(),
         input.infoStatus,
         input.status,
         input.isSynthetic ? 1 : 0,
         input.adminNote ?? null,
-        nowIso,
+        checkedAt,
         input.mismatchNote ?? null,
+        opts.provider ?? 'admin_manual',
+        input.sourceUrl ?? input.bookingUrl, // sourceUrl 필수 — 비우면 공식 예매 URL 사용
+        input.expiresAt ? new Date(input.expiresAt).toISOString() : null,
+        verificationStatus,
       ],
     );
     const id = rows[0].id;
@@ -197,10 +214,13 @@ export function createAdminShowtimeService(getDb: () => DbClient) {
     if (v.errors.length) return { ok: false, errors: v.errors, needsMismatchNote: v.needsMismatchNote };
 
     const nowIso = (opts.now?.() ?? getAppClock().now()).toISOString();
+    const checkedAt = opts.checkedAt ?? nowIso;
+    const verificationStatus = input.isSynthetic ? 'unverified' : input.verificationStatus;
     await db.run(
       `UPDATE showtimes SET movie_id=?, auditorium_id=?, starts_at=?, ends_at_est=?, format=?, is_3d=?,
          language=?, price_adult=?, booking_url=?, data_checked_at=?, info_status=?, status=?,
-         is_synthetic=?, admin_note=?, verified_at=?, format_mismatch_note=? WHERE id=?`,
+         is_synthetic=?, admin_note=?, verified_at=?, format_mismatch_note=?,
+         source_url=?, expires_at=?, verification_status=? WHERE id=?`,
       [
         input.movieId,
         input.auditoriumId,
@@ -211,13 +231,16 @@ export function createAdminShowtimeService(getDb: () => DbClient) {
         input.language,
         input.price,
         input.bookingUrl,
-        nowIso,
+        checkedAt,
         input.infoStatus,
         input.status,
         input.isSynthetic ? 1 : 0,
         input.adminNote ?? null,
-        nowIso,
+        checkedAt,
         input.mismatchNote ?? null,
+        input.sourceUrl ?? input.bookingUrl,
+        input.expiresAt ? new Date(input.expiresAt).toISOString() : null,
+        verificationStatus,
         id,
       ],
     );
@@ -276,7 +299,8 @@ export function createAdminShowtimeService(getDb: () => DbClient) {
               l.name || ' ' || a.auditorium_no AS auditorium_label, a.brand,
               st.starts_at, st.ends_at_est, st.format, st.is_3d, st.language, st.price_adult,
               st.booking_url, st.entry_method, st.data_checked_at, st.info_status,
-              st.status, st.is_synthetic, st.admin_note, st.verified_at, st.format_mismatch_note
+              st.status, st.is_synthetic, st.admin_note, st.verified_at, st.format_mismatch_note,
+              st.provider, st.source_url, st.expires_at, st.verification_status
        FROM showtimes st
        JOIN movies m ON m.id = st.movie_id
        JOIN auditoriums a ON a.id = st.auditorium_id
@@ -287,12 +311,26 @@ export function createAdminShowtimeService(getDb: () => DbClient) {
     );
   }
 
+  // R21: 과거 회차 자동 만료 — 만료 시각(없으면 시작 시각)이 지난 활성 회차를
+  // verification_status='expired'로 표시한다. maintenance:daily가 매일 호출.
+  async function expirePastShowtimes(opts: AdminServiceOptions = {}): Promise<number> {
+    const nowIso = (opts.now?.() ?? getAppClock().now()).toISOString();
+    const r = await getDb().run(
+      `UPDATE showtimes SET verification_status='expired'
+       WHERE verification_status != 'expired'
+         AND COALESCE(expires_at, starts_at) < ?`,
+      [nowIso],
+    );
+    return r.changes;
+  }
+
   return {
     validateShowtime,
     createShowtime,
     updateShowtime,
     setShowtimeStatus,
     listShowtimes,
+    expirePastShowtimes,
 
     async getShowtime(id: number): Promise<AdminShowtimeRow | null> {
       const rows = await listShowtimes({});
@@ -326,3 +364,4 @@ export const listShowtimes = defaultService.listShowtimes;
 export const getShowtime = defaultService.getShowtime;
 export const listChanges = defaultService.listChanges;
 export const validateShowtime = defaultService.validateShowtime;
+export const expirePastShowtimes = defaultService.expirePastShowtimes;

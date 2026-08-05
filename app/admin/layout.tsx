@@ -39,6 +39,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/admin">대시보드</Link>
           <Link href="/admin/showtimes">회차 관리</Link>
           <Link href="/admin/showtimes/new">새 회차</Link>
+          <Link href="/admin/showtimes/import">CSV 등록</Link>
+          <Link href="/admin/runs">추천 추적</Link>
           <Link href="/admin/reports">제보 검토</Link>
           <Link href="/admin/quality">데이터 품질</Link>
           <Link href="/admin/booking-links">예매 링크</Link>

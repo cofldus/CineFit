@@ -5,7 +5,22 @@ const zBool = (defaultValue: boolean) =>
     .union([z.boolean(), z.enum(['true', 'false']).transform((v) => v === 'true')])
     .default(defaultValue);
 
-export const SHOWTIME_FORMATS = ['imax', 'dolby_cinema', '4dx', 'screenx', 'superplex', 'standard'] as const;
+export const SHOWTIME_FORMATS = ['imax', 'dolby_cinema', '4dx', 'mx4d', 'screenx', 'superplex', 'standard'] as const;
+
+export const VERIFICATION_STATUSES = ['verified', 'unverified', 'expired'] as const;
+
+const httpUrl = (message: string) =>
+  z
+    .string()
+    .min(1, message)
+    .refine((u) => {
+      try {
+        const parsed = new URL(u);
+        return parsed.protocol === 'https:' || parsed.protocol === 'http:';
+      } catch {
+        return false;
+      }
+    }, '유효한 http(s) URL이 아닙니다.');
 
 export const adminShowtimeSchema = z.object({
   movieId: z.coerce.number().int().positive({ message: '영화를 선택하세요.' }),
@@ -22,17 +37,19 @@ export const adminShowtimeSchema = z.object({
   is3d: zBool(false),
   language: z.enum(['sub', 'dub', 'none']).default('sub'),
   price: z.coerce.number().int().min(0, '가격은 0 이상이어야 합니다.').max(1_000_000),
-  bookingUrl: z
+  bookingUrl: httpUrl('공식 예매 URL을 입력하세요.'),
+  // R21: 확인한 공식 페이지 URL(sourceUrl)은 필수 값 — 비우면 bookingUrl(공식 예매
+  // 페이지, 필수)을 그대로 쓴다. 서비스 계층이 source_url 컬럼에 항상 non-null로 저장.
+  sourceUrl: httpUrl('확인한 공식 페이지 URL을 입력하세요.')
+    .optional()
+    .or(z.literal('').transform(() => undefined)),
+  // R21: 만료 시각(선택) — 비우면 시작 시각을 만료 기준으로 삼는다(과거 회차 자동 만료).
+  expiresAt: z
     .string()
-    .min(1, '공식 예매 URL을 입력하세요.')
-    .refine((u) => {
-      try {
-        const parsed = new URL(u);
-        return parsed.protocol === 'https:' || parsed.protocol === 'http:';
-      } catch {
-        return false;
-      }
-    }, '유효한 http(s) URL이 아닙니다.'),
+    .refine((v) => !Number.isNaN(new Date(v).getTime()), '만료 시각은 ISO 날짜/시각이어야 합니다.')
+    .optional()
+    .or(z.literal('').transform(() => undefined)),
+  verificationStatus: z.enum(VERIFICATION_STATUSES).default('verified'),
   sourceNote: z.string().min(1, '정보 출처를 입력하세요 (예: CGV 공식 예매 페이지).'),
   infoStatus: z.enum(['official', 'multi_source', 'user_report', 'single_unverified']).default('official'),
   isSynthetic: zBool(false),

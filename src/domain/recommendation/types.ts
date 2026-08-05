@@ -175,10 +175,20 @@ export interface SeatZoneSuggestion {
   label: '추정'; // 좌석 존 데이터 미수집 — 항상 추정 (문서 05 §4.4)
 }
 
+/** R21 trace — soft preference 감점 기록(제외가 아니라 점수 차감). */
+export interface SoftPenalty {
+  type: 'price_over_ref' | 'big_screen';
+  /** 차감된 점수량(해당 축 0~1 스케일) */
+  amount: number;
+  note: string;
+}
+
 export interface ScoredCandidate {
   candidate: CandidateShowtime;
   travelMinutes: number;
   axes: { ffm: number; audQ: number; pm: number; seatQ: number; conv: number; pv: number; dc: number; fr: number };
+  /** R21 trace — 이 후보에 적용된 soft 감점 목록 */
+  softPenalties: SoftPenalty[];
   quality: number;
   logistics: number;
   base: number;
@@ -192,9 +202,22 @@ export interface ScoredCandidate {
   citations: Citation[];
 }
 
+/** R21 trace — 하드 필터 단계 식별자(퍼널 전후 카운트 집계용). */
+export type ExclusionStage =
+  | 'version'
+  | 'operating'
+  | 'format_allowed'
+  | 'motion_seat'
+  | 'time_window'
+  | 'travel'
+  | 'price_cap'
+  | 'wheelchair';
+
 export interface ExcludedCandidate {
   candidate: CandidateShowtime;
   reason: string;
+  /** 어떤 하드 필터에서 제외됐는지 — trace 퍼널 집계용(R21) */
+  stage?: ExclusionStage;
 }
 
 export type PickLabel = '균형' | '품질' | '근접·가성비';
